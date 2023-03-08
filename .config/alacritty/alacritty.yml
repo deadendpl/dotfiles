@@ -28,4 +28,5 @@ font:
   size: 8
 
 key_bindings:
+# spawns new instance with the same folder as the previous one
   - { key: T,   mods: Control|Shift, action: SpawnNewInstance}
