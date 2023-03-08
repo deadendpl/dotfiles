@@ -1,5 +1,5 @@
 import:
-  - /wspulne/alacritty/dracula.yml
+  - ~/.config/alacritty/dracula.yml
 
 window:
   opacity: 0.85
