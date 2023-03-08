@@ -96,7 +96,9 @@ super + {p,b,comma,period}
 alt + Tab
 	bspc node -f next.local.!hidden.window
 
-
+# move focused window to the next workspace and then switch to that workspace
+super + shift + {Left,Right}
+    id=$(bspc query --nodes --node); bspc node --to-desktop {prev,next}; bspc desktop --focus next; bspc node --focus ${id}
 
 # focus the next/previous desktop in the current monitor
 super + bracket{left,right}
