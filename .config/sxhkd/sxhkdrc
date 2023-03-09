@@ -52,7 +52,7 @@ super + shift + q
 
 # close and kill
 super + q
-	bspc node -{c,k}
+	bspc node -c
 
 # alternate between the tiled and monocle layout
 super + m
@@ -95,6 +95,10 @@ super + {p,b,comma,period}
 #	bspc node -f {next,prev}.local.!hidden.window
 alt + Tab
 	bspc node -f next.local.!hidden.window
+
+# shows all windows opened
+super + alt + Tab
+	$launcher -show window -show-icons -icon-theme Papirus-Dark
 
 # move focused window to the next workspace and then switch to that workspace
 super + shift + {Left,Right}
