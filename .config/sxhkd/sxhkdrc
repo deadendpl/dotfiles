@@ -36,7 +36,7 @@ XF86MonBrightness{Up,Down}
 
 # opening display configuration
 Super_L p
-     xfce4-display-settings
+     arandr
 
 # make sxhkd reload its configuration files:
 super + Escape
