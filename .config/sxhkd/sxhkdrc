@@ -31,11 +31,15 @@ XF86AudioMute
     amixer set Master toggle
 
 # brightness control
+#XF86MonBrightness{Up,Down}
+#     ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
+
 XF86MonBrightness{Up,Down}
-     ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
+      xbacklight -{inc,dec} 5
+
 
 # opening display configuration
-Super_L p
+super + F10
      arandr
 
 # make sxhkd reload its configuration files:
