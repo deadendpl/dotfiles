@@ -34,6 +34,10 @@ XF86AudioMute
 XF86MonBrightness{Up,Down}
      ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
 
+# opening display configuration
+Super_L p
+     xfce4-display-settings
+
 # make sxhkd reload its configuration files:
 super + Escape
 	pkill -USR1 -x sxhkd
