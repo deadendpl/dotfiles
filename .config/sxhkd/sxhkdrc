@@ -35,8 +35,7 @@ XF86AudioMute
 #     ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
 
 XF86MonBrightness{Up,Down}
-      xbacklight -{inc,dec} 5
-
+      xbacklight -{inc,dec} 3
 
 # opening display configuration
 super + F10
