@@ -34,8 +34,9 @@ XF86AudioMute
     #amixer set Master toggle
 
 # brightness control
-#XF86MonBrightness{Up,Down}
+XF86MonBrightness{Up,Down}
 #     ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
+     enlighten {+,-}5%
 
 XF86MonBrightness{Up,Down}
       xbacklight -{inc,dec} 3
