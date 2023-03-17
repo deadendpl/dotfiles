@@ -35,7 +35,6 @@ XF86AudioMute
 
 # brightness control
 XF86MonBrightness{Up,Down}
-#    ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
 #    xbacklight -{inc,dec} 3
     enlighten {+,-}5%
 
