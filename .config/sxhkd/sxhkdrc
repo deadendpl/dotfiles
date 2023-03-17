@@ -110,8 +110,8 @@ super + alt + Tab
 
 # move focused window to the next workspace and then switch to that workspace
 super + shift + {Left,Right}
-        set id$(bspc query --nodes --node); bspc node --to-desktop {prev,next}; bspc desktop --focus next; bspc node --focus ${id}
-# this is for fish shell
+        set id$(bspc query --nodes --node); bspc node --to-desktop {prev,next}; bspc desktop --focus {prev,next}; bspc node --focus ${id}
+# command above is for fish shell
         #this is for bash shell - id=$(bspc query --nodes --node); bspc node --to-desktop {prev,next}; bspc desktop --focus next; bspc node --focus ${id}
 
 # focus the next/previous desktop in the current monitor
