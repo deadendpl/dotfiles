@@ -14,7 +14,7 @@ alias upg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
 
 
-alias ll='ls -la'
+alias ll='exa --all --long --header --icons --git'
 alias clr='clear'
 
 end
