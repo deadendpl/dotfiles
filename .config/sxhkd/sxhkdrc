@@ -22,7 +22,7 @@ super + w
 
 # file manager
 super + f
-        $file_manager
+    $file_manager
 
 # volume control
 XF86Audio{Raise,Lower}Volume
@@ -35,17 +35,17 @@ XF86AudioMute
 
 # brightness control
 XF86MonBrightness{Up,Down}
-#     ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
-#     xbacklight -{inc,dec} 3
+#    ~/.config/sxhkd/{brightness_up.sh,brightness_down.sh}
+#    xbacklight -{inc,dec} 3
     enlighten {+,-}5%
 
 # opening display configuration
 super + F10
-     arandr
+    arandr
 
 # make sxhkd reload its configuration files:
 super + Escape
-     pkill -USR1 -x sxhkd
+    pkill -USR1 -x sxhkd
 
 #
 # bspwm hotkeys
