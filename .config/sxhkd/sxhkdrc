@@ -35,12 +35,16 @@ XF86AudioMute
 
 # brightness control
 XF86MonBrightness{Up,Down}
-#    xbacklight -{inc,dec} 3
+    #xbacklight -{inc,dec} 3
     enlighten {+,-}5%
 
 # opening display configuration
 super + F10
     arandr
+
+# screenshot
+Print
+    shutter
 
 # make sxhkd reload its configuration files:
 super + Escape
