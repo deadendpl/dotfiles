@@ -19,6 +19,9 @@ nitrogen --restore
 # compositor
 compton &
 
+# notifications
+dunst &
+
 # you can add as many workspaces as you want
 bspc monitor -d 1 2 3 4 5 6
 
