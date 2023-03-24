@@ -17,7 +17,7 @@ sxhkd &
 nitrogen --restore
 
 # compositor
-compton &
+picom &
 
 # notifications
 dunst &
