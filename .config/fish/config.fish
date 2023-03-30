@@ -18,5 +18,6 @@ alias ainstalled='apt list --installed'
 
 alias ll='exa --all --long --header --icons --git'
 alias clr='clear'
+alias vllt='clear && ll'
 
 end
