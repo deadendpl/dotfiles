@@ -14,7 +14,7 @@ super + Return
 
 # web search
 super + slash
-	~/.config/rofi/web-search.sh
+	~/.config/scripts/web-search.sh
 
 # adding copied url to bookmarks
 super + alt + slash
@@ -69,7 +69,7 @@ super + alt + {q,r}
 
 # power options
 super + shift + q
-        ~/.config/rofi/power.sh
+    ~/.config/scripts/power.sh
 
 # close and kill
 super + q

@@ -11,7 +11,7 @@ export file_manager="thunar"
 sxhkd &
 
 # script starting polybar
-~/.config/polybar/start.sh
+~/.config/scripts/polybar-start.sh
 
 # restoring wallpaper
 nitrogen --restore
