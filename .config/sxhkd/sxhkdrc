@@ -16,6 +16,15 @@ super + Return
 super + slash
 	~/.config/rofi/web-search.sh
 
+# adding copied url to bookmarks
+super + alt + slash
+    ~/.config/scripts/bookmarking.sh
+
+# bookmarks script
+super + shift + slash
+    ~/.config/scripts/bookmarks.sh
+
+
 # web browser
 super + w
 	$web_browser
