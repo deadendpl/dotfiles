@@ -1,0 +1,6 @@
+polybar
+dunst
+alacritty
+fish
+rofi
+starship
