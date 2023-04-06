@@ -4,3 +4,5 @@ alacritty
 fish
 rofi
 starship
+xclip
+rofi
