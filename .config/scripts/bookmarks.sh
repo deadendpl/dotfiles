@@ -2,7 +2,7 @@
 
 file="$HOME/Documents/bookmarks"
 
-launcher="dmenu -l 10"
+launcher="rofi -dmenu"
 
 QUERY=$(cat $file | $launcher -p "Bookmarks")
 
