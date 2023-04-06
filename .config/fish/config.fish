@@ -4,6 +4,8 @@ if status is-interactive
 
 set PATH ~/.config/emacs/bin $PATH
 
+set fish_greeting
+
 # aliases
 
 # apt
