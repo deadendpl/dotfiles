@@ -51,6 +51,10 @@ XF86MonBrightness{Up,Down}
 super + F10
     arandr
 
+# mounting drives
+super + F9
+    udiskie-dmenu
+
 # screenshot
 Print
     shutter

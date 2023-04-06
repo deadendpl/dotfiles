@@ -8,6 +8,7 @@ export launcher="rofi"
 export web_browser="firefox"
 export file_manager="thunar"
 
+# hotkey daemon
 sxhkd &
 
 # script starting polybar
@@ -21,6 +22,9 @@ picom &
 
 # notifications
 dunst &
+
+# mounting daemon
+udiskie &
 
 # you can add as many workspaces as you want
 bspc monitor -d 1 2 3 4 5 6

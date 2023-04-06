@@ -6,3 +6,5 @@ rofi
 starship
 xclip
 rofi
+screenkey
+shutter
