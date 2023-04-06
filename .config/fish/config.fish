@@ -15,7 +15,7 @@ alias upd='sudo apt update'
 alias upg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
 
-
+# other
 alias ll='exa --all --long --header --icons --git'
 alias clr='clear'
 alias cllr='clear && ll'

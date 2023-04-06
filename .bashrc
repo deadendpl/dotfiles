@@ -7,8 +7,19 @@
 
 export PATH=/home/oliwier/.config/emacs/bin:$PATH
 
+# apt
+alias inst='sudo apt install'
+alias pu='sudo apt purge'
+alias autopu='sudo apt autopurge'
+alias up='sudo apt update && sudo apt upgrade'
+alias upd='sudo apt update'
+alias upg='sudo apt upgrade'
+alias ainstalled='apt list --installed'
+
+# other
 alias clr='clear'
-alias ll='ls -la --color=auto'
+alias cllr='clear && ll'
+alias ll='exa --all --long --header --icons --git'
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$'
 
