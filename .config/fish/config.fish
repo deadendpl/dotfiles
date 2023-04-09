@@ -23,4 +23,8 @@ alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
 
+# random fun
+$HOME/.config/scripts/start-fun.sh
+
+
 end
