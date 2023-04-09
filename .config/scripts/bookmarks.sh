@@ -2,7 +2,9 @@
 
 file="$HOME/Documents/bookmarks"
 
-QUERY=$(cat $file | $launcher -dmenu -p "Bookmarks")
+sort $file -o $file
+
+QUERY=$(cat $file | $launcher -dmenu -l 10 -p "Bookmarks")
 
 if [ -n "$QUERY" ]; then
   xdg-open "${QUERY}" 2> /dev/null
