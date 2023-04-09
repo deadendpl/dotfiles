@@ -4,4 +4,6 @@
 //@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
 //@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
 //@theme "/home/oliwier/.local/share/rofi/themes/dracula-list.rasi"
+//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
+//@theme "/home/oliwier/.local/share/rofi/themes/dracula-dmenu.rasi"
 @theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
