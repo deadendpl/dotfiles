@@ -6,7 +6,7 @@ pgrep -x sxhkd > /dev/null
 export terminal="alacritty"
 export launcher="rofi"
 export web_browser="firefox"
-export file_manager="thunar"
+export file_manager="pcmanfm"
 
 # hotkey daemon
 sxhkd &
@@ -23,7 +23,7 @@ picom &
 # notifications
 dunst &
 
-# mounting daemon
+# drive mounting daemon
 udiskie &
 
 # you can add as many workspaces as you want
