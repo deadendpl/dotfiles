@@ -7,7 +7,7 @@ export EDITOR='vim'
 
 set fish_greeting
 
-# aliases
+## aliases
 
 # apt
 alias inst='sudo apt install'
