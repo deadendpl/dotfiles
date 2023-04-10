@@ -1,2 +1,3 @@
 udiskie-dmenu-git
 enlighten-git
+shell-color-scripts
