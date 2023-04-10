@@ -19,13 +19,11 @@ alias upg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
 
 # other
-alias ll='exa --all --long --header --icons --git'
+alias ll='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
 
-# random fun
-$HOME/.config/scripts/start-fun.sh
-
+colorscript random
 
 end

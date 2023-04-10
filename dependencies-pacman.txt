@@ -8,4 +8,4 @@ xclip
 rofi
 screenkey
 xfce4-screenshooter
-pcmanfm
+pcmanfm-gtk3
