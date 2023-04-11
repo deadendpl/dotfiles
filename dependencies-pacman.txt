@@ -6,6 +6,6 @@ rofi
 starship
 xclip
 rofi
-screenkey
+kazam
 xfce4-screenshooter
 pcmanfm-gtk3

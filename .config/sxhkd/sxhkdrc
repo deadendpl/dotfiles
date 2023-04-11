@@ -64,7 +64,7 @@ super + F7
 
 # screenshot
 Print
-    shutter
+    kazam
 
 # make sxhkd reload its configuration files:
 super + Escape
