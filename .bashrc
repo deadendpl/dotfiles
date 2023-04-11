@@ -1,11 +1,8 @@
-#
-# ~/.bashrc
-#
-
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-export PATH=/home/oliwier/.config/emacs/bin:$PATH
+export PATH=~/.config/emacs/bin:$PATH
+export EDITOR='vim'
 
 # apt
 alias inst='sudo apt install'
@@ -22,5 +19,7 @@ alias cllr='clear && ll'
 alias ll='exa --all --long --header --icons --git'
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$'
+
+colorscript random
 
 eval "$(starship init bash)"
