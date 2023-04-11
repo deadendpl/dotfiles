@@ -1,0 +1,135 @@
+* {
+    background-color: transparent;
+    highlight: bold #f8f8f2;
+}
+
+window {
+    background-color: #282a36;
+    border-color: #44475a;
+    border-radius: 0 15mm 15mm 0;
+    padding: 10mm;
+    height: 100%;
+    width: 150mm;
+    border: 1mm 1mm 1mm 0px;
+    text-color: #f8f8f2;
+    location: west;
+    anchor: west;
+}
+
+inputbar {
+    background-color: transparent;
+    text-color: #f8f8f2;
+    children: [prompt, entry, textbox-end];
+    spacing: 1mm;
+}
+
+prompt {
+    border-radius: 5mm 0mm 0mm 5mm;
+    width: 15mm;
+}
+
+textbox-end {
+    border-radius: 0mm 5mm 5mm 0mm;
+    width: 15mm;
+    expand: false;
+}
+
+entry {
+    background-color: #44475a;
+}
+
+prompt, entry, textbox-end, num-filtered-rows {
+    background-color: #f8f8f2;
+    text-color: inherit;
+    padding: 2mm;
+    vertical-align: 0.5;
+}
+
+element {
+    border-radius: 5mm;
+    children: [element-icon];
+}
+
+textbox-current-entry {
+    border-radius: 5mm;
+    background-color: #bd93f9;
+    text-color: #f8f8f2;
+    placeholder: "n/a";
+    padding: 2mm;
+    horizontal-align: 0.5;
+}
+
+element-icon {
+    expand: true;
+    size: 10mm;
+    vertial-align: 0.5;
+    horizontal-align: 0.5;
+    padding: 2mm;
+}
+
+mainbox {
+    expand: true;
+    background-color: transparent;
+    spacing: 5mm;
+    children: [
+        inputbar,
+        listview,
+        icon-current-entry,
+        textbox-current-entry
+    ];
+}
+
+icon-current-entry {
+    size: 100mm;
+}
+
+listview {
+    padding: 0em;
+    dynamic: false;
+    lines: 0;
+    columns: 8;
+    flow: horizontal;
+}
+
+element selected normal {
+    background-color: #bd93f9;
+    text-color: #f8f8f2;
+}
+
+element normal active {
+    text-color: #50fa7b;
+}
+
+element normal urgent {
+    text-color: #ff5555;
+}
+
+element alternate normal {
+}
+
+element alternate active {
+    text-color: #50fa7b;
+}
+
+element alternate urgent {
+    text-color: #ff79c6;
+}
+
+element selected active {
+    background-color: #50fa7b;
+    text-color: #f8f8f2;
+}
+
+element selected urgent {
+    background-color: #ff5555;
+    text-color: #f8f8f2;
+}
+
+error-message {
+    expand: true;
+    background-color: #ff5555;
+    border-color: #ff5555;
+    border: 2px;
+    padding: 1em;
+}
+

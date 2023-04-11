@@ -10,4 +10,6 @@
 //@theme "/home/oliwier/.local/share/rofi/themes/dt-dmenu.rasi"
 //@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
 //@theme "/home/oliwier/.local/share/rofi/themes/dt-center.rasi"
-@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
+//@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
+//@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
+@theme "/home/oliwier/.local/share/rofi/themes/drac-sidebar.rasi"

@@ -18,7 +18,7 @@ super + f
 
 # launcher
 super + Return
-    $launcher -show drun -show-icons -icon-theme Papirus-Dark
+    $launcher -show drun -theme ~/.config/rofi/themes/drac-list.rasi -show-icons -icon-theme Papirus-Dark
 
 # web search
 super + slash
