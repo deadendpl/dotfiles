@@ -58,6 +58,10 @@ super + F10
 super + F9
     udiskie-dmenu
 
+# wifi script
+super + F7
+    ~/.config/scripts/wifi.sh
+
 # screenshot
 Print
     shutter
