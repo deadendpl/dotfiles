@@ -7,6 +7,7 @@ export terminal="alacritty"
 export launcher="rofi"
 export web_browser="firefox"
 export file_manager="pcmanfm"
+export editor="emacs"
 
 # hotkey daemon
 sxhkd &
@@ -47,3 +48,4 @@ bspc rule -a Kupfer.py focus=on
 bspc rule -a Screenkey manage=off
 
 bspc rule -a Emacs state=tiled
+bspc rule -a Surf state=tiled

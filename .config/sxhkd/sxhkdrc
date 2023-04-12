@@ -16,6 +16,10 @@ super + w
 super + f
     $file_manager
 
+# text editor
+super + e
+    $editor
+
 # launcher
 super + Return
     $launcher -show drun -theme ~/.config/rofi/themes/drac-list.rasi -show-icons -icon-theme Papirus-Dark
