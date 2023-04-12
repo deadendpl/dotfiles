@@ -48,4 +48,3 @@ bspc rule -a Kupfer.py focus=on
 bspc rule -a Screenkey manage=off
 
 bspc rule -a Emacs state=tiled
-bspc rule -a Surf state=tiled
