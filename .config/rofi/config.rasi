@@ -13,4 +13,6 @@
 //@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
 //@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
 //@theme "/home/oliwier/.local/share/rofi/themes/drac-sidebar.rasi"
+//@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
+//@theme "/home/oliwier/.config/rofi/themes/drac-list-normfont.rasi"
 @theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
