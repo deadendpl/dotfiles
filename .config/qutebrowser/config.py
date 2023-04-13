@@ -181,9 +181,15 @@ c.url.start_pages = 'https://search.brave.com'
 # `colors.webpage.darkmode.threshold.background` to 205.  - "With
 # selective inversion of everything": Combines the two variants   above.
 # Type: Bool
+
+# dark mode
 c.colors.webpage.darkmode.enabled = True
 
+# setting thmeme to dracula
+#config.bind(',dr', 'config-cycle content.user.stylesheets ~/.config/qutebrowser/themes/dracula.css')
 
+# font for statusbar
+c.fonts.statusbar = '11pt "CodeNewRoman Nerd Font"'
 
 # custom bindings
 config.bind('<Ctrl-Shift-B>', 'spawn --userscript ~/.config/qutebrowser/userscripts/bitwarden.py')
