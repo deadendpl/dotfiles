@@ -18,7 +18,7 @@ super + f
 
 # text editor
 super + e
-    $gui_editor
+    $editor
 
 # launcher
 super + Return
