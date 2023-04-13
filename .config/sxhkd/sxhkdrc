@@ -24,6 +24,14 @@ super + e
 super + Return
     $launcher -show drun -theme ~/.config/rofi/themes/drac-list.rasi -show-icons -icon-theme Papirus-Dark
 
+# task manager
+super + m
+    $terminal -e htop
+
+# bitwarden in rofi
+super + b
+    bwmenu
+
 # web search
 super + slash
     ~/.config/scripts/web-search.sh
@@ -34,7 +42,7 @@ super + alt + slash
 
 # editing bookmarks file directly
 super + shift + alt + slash
-    $terminal -e $EDITOR ~/Documents/bookmarks
+    $terminal -e vim ~/Documents/bookmarks
 
 # bookmarks script
 super + shift + slash
@@ -91,7 +99,7 @@ super + q
     bspc node -c
 
 # alternate between the tiled and monocle layout
-super + m
+super + shift + m
     bspc desktop -l next
 
 # send the newest marked node to the newest preselected node

@@ -1,3 +1,4 @@
 udiskie-dmenu-git
 enlighten-git
 shell-color-scripts
+bitwarden-rofi-git
