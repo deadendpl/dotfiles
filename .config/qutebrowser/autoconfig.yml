@@ -6,12 +6,5 @@
 
 config_version: 2
 settings:
-  colors.webpage.darkmode.enabled:
-    global: true
-  content.notifications.enabled:
-    https://www.reddit.com: false
-  url.searchengines:
-    global:
-      DEFAULT: https://search.brave.com/search?q={}
-  url.start_pages:
-    global: https://search.brave.com
+  content.user_stylesheets:
+    global: null
