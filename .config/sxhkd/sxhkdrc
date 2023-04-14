@@ -54,7 +54,7 @@ XF86Audio{Raise,Lower}Volume
     #amixer set Master 5%{+,-}
 
 XF86AudioMute
-    pactl set-sink-mute 0 toggle
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
     #amixer set Master toggle
 
 # brightness control

@@ -165,11 +165,11 @@ config.set('content.notifications.enabled', False, 'https://www.reddit.com')
 # the search engine name to the search term, e.g. `:open google
 # qutebrowser`.
 # Type: Dict
-c.url.searchengines = {'DEFAULT': 'https://search.brave.com/search?q={}'}
+c.url.searchengines = {'DEFAULT': 'https://phind.com/search?q={}'}
 
 # Page(s) to open at the start.
 # Type: List of FuzzyUrl, or FuzzyUrl
-c.url.start_pages = 'https://search.brave.com'
+c.url.start_pages = 'https://phind.com'
 
 # Render all web contents using a dark theme. Example configurations
 # from Chromium's `chrome://flags`:  - "With simple HSL/CIELAB/RGB-based
@@ -191,9 +191,6 @@ c.fonts.statusbar = '11pt "codenewromannerdfont"'
 
 # custom bindings
 config.bind('<Ctrl-Shift-B>', 'spawn --userscript ~/.config/qutebrowser/userscripts/bitwarden.py')
-
-
-
 
 # dracula
 import dracula.draw
