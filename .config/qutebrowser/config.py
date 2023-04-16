@@ -185,7 +185,6 @@ c.url.start_pages = 'https://phind.com'
 # dark mode
 c.colors.webpage.darkmode.enabled = True
 
-
 # font for statusbar
 c.fonts.statusbar = '11pt "codenewromannerdfont"'
 
