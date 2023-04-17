@@ -1,0 +1,11 @@
+#!/bin/sh
+
+cd ~
+
+export terminal=alacritty
+export launcher=rofi
+export web_browser=qutebrowser
+export file_manager=pcmanfm
+export editor=emacs
+
+exec Hyprland

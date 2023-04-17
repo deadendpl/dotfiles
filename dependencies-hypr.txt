@@ -1,0 +1,4 @@
+hyprland-git
+waybar-hyprland-git
+qt5-wayland
+swaybg
