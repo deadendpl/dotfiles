@@ -5,3 +5,4 @@ swaybg
 wlogout
 dunst
 enlighten-git
+foot
