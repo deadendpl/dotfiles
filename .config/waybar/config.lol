@@ -2,7 +2,7 @@
   "layer": "top",
   "position": "top",
   "height": 24,
-  "spacing": 7,
+  "spacing": 4,
   "modules-left": [
     "wlr/workspaces",
     "wlr/taskbar"
@@ -15,7 +15,7 @@
     "pulseaudio",
     "backlight",
     "network",
-    "battery",
+    "battery"
     "clock"
   ],
   "wlr/taskbar": {
@@ -28,11 +28,14 @@
   "wlr/workspaces": {
     "on-click": "activate",
     "on-scroll-up": "hyprctl dispatch workspace e-1",
-    "on-scroll-down": "hyprctl dispatch workspace e+1",
-    "active": "",
+    "on-scroll-down": "hyprctl dispatch workspace e+1"
   },
   "hyprland/window": {
     "max-length": 128
+  },
+  "clock": {
+    "format": "{:%c}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
   },
   "tray": {
     "spacing": 4
@@ -46,19 +49,51 @@
   },
 
   "backlight": {
-    // "device": "acpi_video1",
+    "device": "intel_backlight",
     "format": "{percent}% {icon}",
-    "format-icons": ["", "", "", "", "", "", "", "", ""]
+    "format-icons": ["", ""]
   },
+
+
+
+
+
+
+    "keyboard-state": {
+        "numlock": true,
+        "capslock": true,
+        "format": "{name} {icon}",
+        "format-icons": {
+            "locked": "",
+            "unlocked": ""
+        }
+    },
+
+
+
+
+
+"wlr/workspaces": {
+  "format": "{icon}",
+  "on-click": "activate",
+  "format-icons": {
+    "1": "",
+    "2": "",
+    "3": "",
+    "4": "",
+    "5": "",
+    "urgent": "",
+    "active": "",
+    "default": ""
+  },
+  "sort-by-number": true
+},
+
+
 
     "tray": {
         // "icon-size": 21,
         "spacing": 10
-    },
-    "clock": {
-        // "timezone": "America/New_York",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
     },
     "cpu": {
         "format": "{usage}% ",
@@ -89,6 +124,8 @@
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
+
+
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
         "format-wifi": "{essid} ({signalStrength}%) ",
