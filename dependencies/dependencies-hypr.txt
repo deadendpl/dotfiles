@@ -6,3 +6,4 @@ wlogout
 dunst
 enlighten-git
 foot
+wdisplays-git
