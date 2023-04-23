@@ -72,7 +72,7 @@ super + F9
 
 # wifi script
 super + F7
-    ~/.config/scripts/wifi.sh
+    networkmanager_dmenu
 
 # screenshot
 Print
