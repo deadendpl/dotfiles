@@ -2,7 +2,7 @@
 
 # setting themes
 
-THEME="Emacs"
+THEME="Dracula"
 ICONS="Papirus-Dark"
 FONT="CodeNewRoman Nerd Font 11"
 CURSOR="Dracula-cursors"
