@@ -15,8 +15,9 @@ sxhkd &
 # script starting polybar
 ~/.config/scripts/polybar-start.sh
 
-# restoring wallpaper
-nitrogen --restore
+# wallpaper
+#nitrogen --restore
+variety &
 
 # compositor
 picom &
