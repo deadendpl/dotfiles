@@ -17,6 +17,7 @@ alias aup='sudo apt update && sudo apt upgrade'
 alias aupd='sudo apt update'
 alias aupg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
+alias asearch='apt search'
 
 # pacman
 alias pinst='sudo pacman -S'
@@ -25,6 +26,8 @@ alias pup='sudo pacman -Syu'
 alias pupd='sudo pacman -Sy'
 alias pupg='sudo pacman -u'
 alias pinstalled='pacman -Q'
+alias psearch='pacman -Ss'
+alias pclean='sudo pacman -Sc'
 
 # other
 alias ll='exa --all --long --header --icons --git --group-directories-first'
