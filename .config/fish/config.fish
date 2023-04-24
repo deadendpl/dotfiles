@@ -10,13 +10,21 @@ set fish_greeting
 ## aliases
 
 # apt
-alias inst='sudo apt install'
-alias pu='sudo apt purge'
-alias autopu='sudo apt autopurge'
-alias up='sudo apt update && sudo apt upgrade'
-alias upd='sudo apt update'
-alias upg='sudo apt upgrade'
+alias ainst='sudo apt install'
+alias apu='sudo apt purge'
+alias aautopu='sudo apt autopurge'
+alias aup='sudo apt update && sudo apt upgrade'
+alias aupd='sudo apt update'
+alias aupg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
+
+# pacman
+alias pinst='sudo pacman -S'
+alias ppu='sudo pacman -Rs'
+alias pup='sudo pacman -Syu'
+alias pupd='sudo pacman -Sy'
+alias pupg='sudo pacman -u'
+alias pinstalled='pacman -Q'
 
 # other
 alias ll='exa --all --long --header --icons --git --group-directories-first'
