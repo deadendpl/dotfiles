@@ -76,7 +76,7 @@ super + F7
 
 # screenshot
 Print
-    shutter
+    xfce4-screenshooter
 
 # make sxhkd reload its configuration files:
 super + Escape
@@ -85,8 +85,8 @@ super + Escape
 ## variety
 
 # changing wallpapers
-alt + {Left,Right}
-    variety -{p,n}
+#alt + {Left,Right}
+#    variety -{p,n}
 
 
 #
