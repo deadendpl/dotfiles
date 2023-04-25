@@ -100,7 +100,7 @@
         "format-linked": "{ifname} (No IP) ",
         "format-disconnected": "Disconnected ⚠",
         "format-alt": "{ifname}: {ipaddr}/{cidr}",
-        "on-click-right": "$HOME/.config/scripts/wifi.sh"
+        "on-click-right": "networkmanager_dmenu"
     },
 
     "bluetooth": {
