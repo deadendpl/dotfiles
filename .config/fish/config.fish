@@ -29,6 +29,9 @@ alias pinstalled='pacman -Q'
 alias psearch='pacman -Ss'
 alias pclean='sudo pacman -Sc'
 
+# yay
+alias yinst='yay -S'
+
 # other
 alias ll='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'
