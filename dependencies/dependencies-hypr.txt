@@ -2,6 +2,7 @@ hyprland-git
 waybar-hyprland-git
 qt5-wayland
 swaybg
+vim
 dunst
 enlighten-git
 foot

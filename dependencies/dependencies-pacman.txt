@@ -7,4 +7,5 @@ starship
 xclip
 rofi
 xfce4-screenshooter
+vim
 pcmanfm-gtk3
