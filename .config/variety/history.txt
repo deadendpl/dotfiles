@@ -1,4 +1,5 @@
-0
+1
+/home/oliwier/Pictures/drac-walls/Helpful Comment.png
 /home/oliwier/Pictures/drac-walls/Java 2.png
 /home/oliwier/Pictures/drac-walls/Java Hello World.png
 /home/oliwier/Pictures/drac-walls/Java 2.png

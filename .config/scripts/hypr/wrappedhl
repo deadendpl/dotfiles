@@ -6,7 +6,7 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 
 export terminal=foot
 export launcher=rofi
-export web_browser=qutebrowser
+export web_browser=firefox
 export file_manager=pcmanfm
 export editor=emacs
 

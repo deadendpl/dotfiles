@@ -9,7 +9,7 @@ chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | $launch
 # https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
 
 if [[ $chosen = "󰍃 Logout" ]]; then
-	bspc quit
+	pkill -KILL -u $(whoami)
 elif [[ $chosen = " Shutdown" ]]; then
 	systemctl poweroff
 elif [[ $chosen = " Reboot" ]]; then
