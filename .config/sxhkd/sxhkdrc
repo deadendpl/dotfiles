@@ -4,6 +4,7 @@
 
 # variables are in bspwmrc
 
+## basic stuff
 # terminal emulator
 super + t
     $terminal
@@ -32,6 +33,7 @@ super + m
 super + b
     bwmenu
 
+## web stuff
 # web search
 super + slash
     ~/.config/scripts/web-search.sh
@@ -48,6 +50,9 @@ super + shift + alt + slash
 super + shift + slash
     ~/.config/scripts/bookmarks.sh
 
+
+
+## laptop keys
 # volume control
 XF86Audio{Raise,Lower}Volume
     pactl set-sink-volume @DEFAULT_SINK@ {+,-}5%
@@ -61,6 +66,8 @@ XF86AudioMute
 XF86MonBrightness{Up,Down}
     enlighten {+,-}3%
     #xbacklight -{inc,dec} 3
+
+
 
 # opening display configuration
 super + F10
