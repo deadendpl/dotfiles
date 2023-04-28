@@ -1,4 +1,5 @@
 0
+/home/oliwier/Pictures/drac-walls/Go Hello World.png
 /home/oliwier/Pictures/drac-walls/Include Unixporn.png
 /home/oliwier/Pictures/drac-walls/Tree.png
 /home/oliwier/Pictures/drac-walls/Java 2.png
