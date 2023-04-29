@@ -33,6 +33,10 @@ super + m
 super + b
     bwmenu
 
+# keybinding help
+super + f1
+    ~/.config/scripts/sxhkd-help.sh
+
 ## web stuff
 # web search
 super + slash
@@ -149,8 +153,6 @@ super + {p,b,comma,period}
     bspc node -f @{parent,brother,first,second}
 
 # focus the next/previous window in the current desktop
-#super + {_,shift + }c
-#	bspc node -f {next,prev}.local.!hidden.window
 alt + Tab
     bspc node -f next.local.!hidden.window
 

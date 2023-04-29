@@ -10,7 +10,7 @@ I also have [hyprland](https://github.com//hyprwm/hyprland).
 
 ## TODO
 bspwm:
-- nothing (nothing I can think of)
+- adding convenient install script
 
 hyprland:
-- nothing (nothing I can think of)
+- adding convenient install script
