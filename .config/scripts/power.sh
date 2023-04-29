@@ -2,11 +2,8 @@
 #
 # Requirements:
 # - rofi
-# - systemd, but you can replace the commands for OpenRC or anything else
 
 chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | $launcher -dmenu -i -p Power)
-# Info about some states are available here:
-# https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
 
 if [[ $chosen = "󰍃 Logout" ]]; then
 	pkill -KILL -u $(whoami)

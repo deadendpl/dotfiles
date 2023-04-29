@@ -119,7 +119,7 @@ symbol = " "
 symbol = " "
 
 [python]
-symbol = "🐍 "
+symbol = " "
 #pyenv_version_name = true
 format = 'via [${symbol}python (${version} )(\($virtualenv\) )]($style)'
 style = "bold yellow"
