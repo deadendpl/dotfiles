@@ -60,3 +60,8 @@ window#waybar {
     background-color: @cyan;
     color: @background;
 }
+
+#network {
+    background-color: @red;
+    color: @background;
+}
