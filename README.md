@@ -1,5 +1,6 @@
 # dotfiles
-NOTE: This is meant for Arch based distros. I don't know if the dependencies will be available for other distros.
+## WARNING:
+This is meant for Arch based distros. I don't know if the dependencies will be available for other distros.
 
 My [bspwm](https://github.com/baskerville/bspwm) config.
 ![screenshot](screenshot-bspwm.png)
