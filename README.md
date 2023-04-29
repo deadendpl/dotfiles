@@ -10,4 +10,4 @@ bspwm:
 - nothing (probably)
 
 hyprland:
-- implementing a screenshot tool
+- nothing (probably)

@@ -8,3 +8,5 @@ enlighten-git
 foot
 wdisplays-git
 wl-clipboard
+grim
+slurp
