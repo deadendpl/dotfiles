@@ -1,9 +1,6 @@
 #!/bin/bash
-#
-# Requirements:
-# - rofi
 
-chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | $launcher -dmenu -i -p Power)
+chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | $launcher -dmenu -l 4 -i -b -p Power)
 
 if [[ $chosen = "󰍃 Logout" ]]; then
 	pkill -KILL -u $(whoami)
