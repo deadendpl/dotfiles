@@ -35,6 +35,7 @@ alias ll='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
+alias man='batman'
 
 colorscript random
 

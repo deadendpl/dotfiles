@@ -1,4 +1,5 @@
 polybar
+bat-extras
 dunst
 alacritty
 fish
@@ -9,3 +10,4 @@ rofi
 xfce4-screenshooter
 vim
 pcmanfm-gtk3
+dmenu

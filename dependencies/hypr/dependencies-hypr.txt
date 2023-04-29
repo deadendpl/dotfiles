@@ -4,9 +4,14 @@ qt5-wayland
 swaybg
 vim
 dunst
-enlighten-git
 foot
 wdisplays-git
 wl-clipboard
 grim
 slurp
+bat-extras
+rofi
+dmenu
+fish
+starship
+pcmanfm-gtk3
