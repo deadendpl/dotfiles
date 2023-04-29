@@ -8,6 +8,7 @@ My [bspwm](https://github.com/baskerville/bspwm) config.
 Type of program | my default choice
 ------- | --------
 Terminal Emulator | [alacritty](https://github.com/alacritty/alacritty)
+Shell | [Fish](https://github.com/fish-shell/fish-shell)
 File Manager | pcmanfm
 Web Browser | firefox
 editor (IDE or something) | [Emacs](https://www.gnu.org/software/emacs/) ([doom emacs](https://github.com/doomemacs/doomemacs))
@@ -21,6 +22,7 @@ I also have [hyprland](https://github.com//hyprwm/hyprland) (it's more WIP so th
 Type of program | my default choice
 ------- | --------
 Terminal Emulator | [foot](https://codeberg.org/dnkl/foot)
+Shell | [Fish](https://github.com/fish-shell/fish-shell)
 File Manager | pcmanfm
 Web Browser | firefox
 editor (IDE or something) | [Emacs](https://www.gnu.org/software/emacs/) ([doom emacs](https://github.com/doomemacs/doomemacs))
