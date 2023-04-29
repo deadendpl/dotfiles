@@ -34,7 +34,7 @@ super + b
     bwmenu
 
 # keybinding help
-super + f1
+super + F1
     ~/.config/scripts/sxhkd-help.sh
 
 ## web stuff
