@@ -8,6 +8,7 @@ My [bspwm](https://github.com/baskerville/bspwm) config.
 I also have [hyprland](https://github.com//hyprwm/hyprland) (it's more WIP so the screenshot may look different from actual rice).
 ![screenshot](screenshot-hypr.png)
 
+---
 
 ## TODO
 bspwm:
