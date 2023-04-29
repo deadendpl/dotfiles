@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# since I'm acively developing this I prefer to create links to files in my repo rather than copying everything over to .config 
+# since I'm acively developing this I prefer to create links to files in my repo rather than copying everything over to home or .config 
 
 # Set the source and target directory paths
 SOURCE_DIR=~/dev/dotfiles/home/.config
