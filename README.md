@@ -37,7 +37,7 @@ Compositor | [Hyprland](https://github.com/hyprwm/Hyprland)
 
 ## TODO
 bspwm:
-- adding convenient install script
+- adding good install script
 
 hyprland:
-- adding convenient install script
+- adding good install script
