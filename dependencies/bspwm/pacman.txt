@@ -9,6 +9,7 @@ starship
 xclip
 rofi
 xfce4-screenshooter
+htop
 vim
 pcmanfm-gtk3
 dmenu

@@ -1,5 +1,6 @@
 hyprland-git
 otf-codenewroman-nerd
+htop
 papirus-icon-theme
 waybar-hyprland-git
 exa
