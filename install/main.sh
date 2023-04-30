@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the question and choices
-QUESTION="What would you like to install?"
+QUESTION="What rice would you like to install?"
 CHOICES=("bspwm" "" "off" "hyprland" "" "off")
 
 # Pipe the question and choices into whiptail
