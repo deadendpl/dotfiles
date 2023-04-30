@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Define the question and choices
-QUESTION="What rice would you like to install?"
+QUESTION="What rice would you like to install?
+Note that it will delete your .config folder. Make an backup."
 CHOICES=("bspwm" "" "off" "hyprland" "" "off")
 
 # Pipe the question and choices into whiptail
