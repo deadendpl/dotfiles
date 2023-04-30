@@ -1,5 +1,7 @@
 tesseract - reading from an image, written in python
 gammastep - changing color temperatue of screen according of time
+sxiv - based image viewer
 archlinux-logout - cool logout screen
 chatgpt-cli-git - chagpt in terminal
 deluge-gtk - torrent
+zathura - document reader with vim bindings
