@@ -1,8 +1,10 @@
 hyprland-git
 papirus-icon-theme
 waybar-hyprland-git
+exa
 qt5-wayland
 swaybg
+blueberry
 vim
 dunst
 foot

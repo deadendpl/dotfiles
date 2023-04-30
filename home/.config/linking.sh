@@ -14,4 +14,3 @@ for filename in $SOURCE_DIR/*; do
     # Create a symbolic link in the target directory for the file
     ln -s "$filename" "$TARGET_DIR/$basename"
 done
-

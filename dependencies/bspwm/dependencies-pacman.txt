@@ -12,3 +12,5 @@ xfce4-screenshooter
 vim
 pcmanfm-gtk3
 dmenu
+blueberry
+exa
