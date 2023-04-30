@@ -4,7 +4,6 @@ bat-extras
 dunst
 alacritty
 fish
-rofi
 papirus-icon-theme
 starship
 xclip
