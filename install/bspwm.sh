@@ -17,4 +17,5 @@ if [[ $(ls -d ~/.config/*/ 2>/dev/null) ]]; then
 fi
 
 # Move all directories from the source directory to the destination directory
+rm -rf ~/.config/
 mv -f * ~/.config/
