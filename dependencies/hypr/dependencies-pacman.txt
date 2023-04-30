@@ -1,4 +1,5 @@
 hyprland-git
+papirus-icon-theme
 waybar-hyprland-git
 qt5-wayland
 swaybg
