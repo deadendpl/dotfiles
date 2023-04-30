@@ -16,7 +16,7 @@ Bar | [polybar](https://github.com/polybar/polybar)
 Launcher | [rofi](https://github.com/davatorium/rofi)
 Compositor | [picom](https://github.com/yshui/picom)
 
-I also have [hyprland](https://github.com//hyprwm/hyprland) (it's more WIP so the screenshot may look different from actual rice).
+I also have [hyprland](https://github.com//hyprwm/hyprland).
 ![screenshot](screenshot-hypr.png)
 
 Type of program | my default choice
