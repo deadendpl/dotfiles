@@ -30,7 +30,10 @@ Bar | [Waybar](https://github.com/Alexays/Waybar)
 Launcher | [rofi](https://github.com/davatorium/rofi)
 Compositor | [Hyprland](https://github.com/hyprwm/Hyprland)
 
+---
 
+## INSTALLING
+In folder `install` there is `main.sh`. Execute that script to choose bspwm or Hyprland. The script will delete everything in `~/.config` so make sure to make an backup.
 
 ---
 ---
