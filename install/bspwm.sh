@@ -19,4 +19,4 @@ fi
 # Move all directories from the source directory to the destination directory
 rm -rf ~/.config/
 mkdir ~/.config
-mv -f * ~/.config/
+cp -f * ~/.config/
