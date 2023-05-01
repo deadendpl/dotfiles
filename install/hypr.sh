@@ -18,6 +18,7 @@ if [[ $(ls -d ~/.config/*/ 2>/dev/null) ]]; then
 fi
 
 # Move all directories from the source directory to the destination directory
-rm -rf ~/.config/
-mkdir ~/.config
-cp -f * ~/.config/
+cp -rf * ~/.config/
+
+printf "\nIN ORDER TO USE MY RICE YOU NEED TO CREATE A WAYLAND SESSION YOURSELF.\nIn order to do that you need to create a file for example \"nano /usr/share/wayland-sessions/session_name.desktop\".\nAnd there put:\n\n[Desktop Entry]\nType=Application\nName=based hyprland\nExec=/home/<your_username>/.config/scripts/hypr/wrappedhl\n\nIf I or you didn't break anything it should work now\n"
+
