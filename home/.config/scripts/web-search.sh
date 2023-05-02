@@ -25,16 +25,16 @@ case $selected_engine in
         ;;
     "You")
         URL="https://you.com/search?q="
-	;;
+	    ;;
     "AUR (Arch User Repository)")
         URL="https://aur.archlinux.org/packages?O=0&K="
-	;;
+	    ;;
     "Arch Wiki")
         URL="https://wiki.archlinux.org/index.php?search="
-	;;
+	    ;;
     "Github")
         URL="https://github.com/search?q="
-	;;
+	    ;;
 
 
     *)
