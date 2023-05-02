@@ -15,5 +15,9 @@ if [ "$QUERY" = "Enter other URL" ]; then
 fi
 
 if [ -n "$QUERY" ]; then
-  xdg-open "${QUERY}" 2> /dev/null
+  if [[ $QUERY == http://* || $QUERY == https://* ]]; then
+    xdg-open "${QUERY}" 2> /dev/null
+  else
+    xdg-open "https://${QUERY}" 2> /dev/null
+  fi
 fi
