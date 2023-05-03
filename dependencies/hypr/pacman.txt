@@ -9,7 +9,6 @@ swaybg
 blueberry
 vim
 dunst
-foot
 wdisplays-git
 wl-clipboard
 grim
@@ -20,3 +19,4 @@ dmenu
 fish
 starship
 pcmanfm-gtk3
+wezterm

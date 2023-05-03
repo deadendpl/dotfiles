@@ -2,8 +2,8 @@ polybar
 otf-codenewroman-nerd
 bat-extras
 dunst
-alacritty
 fish
+wezterm
 papirus-icon-theme
 starship
 xclip
