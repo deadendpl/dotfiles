@@ -4,6 +4,9 @@ bat-extras
 dunst
 fish
 wezterm
+file-roller
+p7zip
+unrar
 papirus-icon-theme
 starship
 xclip
