@@ -3,7 +3,7 @@
 pgrep -x sxhkd > /dev/null
 
 # variables for sxhkdrc
-export terminal="alacritty"
+export terminal="wezterm"
 export launcher="rofi"
 export web_browser="firefox"
 export file_manager="pcmanfm"
