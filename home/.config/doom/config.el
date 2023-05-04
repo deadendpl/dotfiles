@@ -76,3 +76,6 @@
 ;; they are implemented.
 
 (beacon-mode 1)
+
+;; enable word-wrap (almost) everywhere
+(+global-word-wrap-mode +1)
