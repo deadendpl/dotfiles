@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a search_engines=( "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "AUR (Arch User Repository)" "You" "Brave Search" "Google" "DuckDuckGo" "Bing" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "Last.fm" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "AUR (Arch User Repository)" "You" "Brave Search" "Google" "DuckDuckGo" "Bing" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | $launcher -theme ~/.config/rofi/themes/drac-list.rasi -dmenu -l ${#search_engines[@]} -i -b -p "Search engine:")
 
@@ -40,6 +40,9 @@ case $selected_engine in
         ;;
     "Bitsearch (Torrents)")
         URL="https://www.bitsearch.to/search?q="
+        ;;
+    "Last.fm")
+        URL="https://www.last.fm/search?q="
         ;;
    *)
         exit 0
