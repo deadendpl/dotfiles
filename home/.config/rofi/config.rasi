@@ -1,19 +1,17 @@
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
-//@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula-list.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula-dmenu.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dt-dmenu.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dracula.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/dt-center.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
-//@theme "/usr/share/rofi/themes/sidebar-v2.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/drac-sidebar.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
-//@theme "/home/oliwier/.config/rofi/themes/drac-list-normfont.rasi"
-//@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
+configuration{
+    modi: "run,drun,window";
+    icon-theme: "Papirus-Dark";
+    show-icons: true;
+    terminal: "wezterm";
+    drun-display-format: "{icon} {name}";
+    location: 0;
+    disable-history: false;
+    hide-scrollbar: true;
+    display-drun: "   Apps ";
+    display-run: "   Run ";
+    display-window: " 﩯  Window";
+    display-Network: " 󰤨  Network";
+    sidebar-mode: true;
+}
+
 @theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"

@@ -23,7 +23,7 @@ super + e
 
 # launcher
 super + Return
-    $launcher -show drun -theme ~/.config/rofi/themes/drac-list.rasi -show-icons -icon-theme Papirus-Dark
+    $launcher -show drun
 
 # task manager
 super + m
