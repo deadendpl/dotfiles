@@ -1,10 +1,6 @@
 #!/bin/sh
 
-if [ "$XDG_SESSION_TYPE" = "x11" ]; then
-    clipboard_cmd="xclip -o"
-else
-    clipboard_cmd="wl-paste"
-fi
+clipboard_cmd="cb paste 0"
 
 bookmark="$($clipboard_cmd)"
 file="$HOME/Documents/bookmarks"
