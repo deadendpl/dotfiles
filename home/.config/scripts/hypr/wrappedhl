@@ -6,6 +6,8 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 
 export $GRIM_DEFAULT_DIR=~/Pictures
 
+export EDITOR=vim
+
 export terminal=wezterm
 export launcher=rofi
 export web_browser=firefox

@@ -1,5 +1,5 @@
 configuration{
-    modi: "run,drun,window";
+    modi: "run,drun,window,ssh,";
     icon-theme: "Papirus-Dark";
     show-icons: true;
     terminal: "wezterm";
@@ -10,7 +10,7 @@ configuration{
     display-drun: "   Apps ";
     display-run: "   Run ";
     display-window: " 﩯  Window";
-    display-Network: " 󰤨  Network";
+    display-ssh: " 󰤨  ssh";
     sidebar-mode: true;
 }
 
