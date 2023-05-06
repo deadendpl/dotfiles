@@ -4,3 +4,4 @@ bitwarden-rofi-git
 networkmanager-dmenu-git
 udiskie-dmenu-git
 clipboard
+grimblast-git
