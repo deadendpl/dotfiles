@@ -23,7 +23,7 @@ super + e
 
 # launcher
 super + Return
-    $launcher -show drun
+    rofi -show drun
 
 # task manager
 super + m
@@ -71,8 +71,6 @@ XF86MonBrightness{Up,Down}
     enlighten {+,-}3%
     #xbacklight -{inc,dec} 3
 
-
-
 # opening display configuration
 super + F10
     arandr
@@ -81,7 +79,7 @@ super + F10
 super + F9
     udiskie-dmenu
 
-# wifi script
+# wifi
 super + F7
     networkmanager_dmenu
 
@@ -92,13 +90,6 @@ Print
 # make sxhkd reload its configuration files:
 super + Escape
     pkill -USR1 -x sxhkd
-
-## variety
-
-# changing wallpapers
-#alt + {Left,Right}
-#    variety -{p,n}
-
 
 #
 # bspwm hotkeys
@@ -158,7 +149,7 @@ alt + Tab
 
 # shows all windows opened
 super + alt + Tab
-    $launcher -show window -show-icons -icon-theme Papirus-Dark
+    rofi -show window
 
 # move focused window to the next workspace and switch to that workspace
 super + shift + Right

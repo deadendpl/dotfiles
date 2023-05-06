@@ -1,0 +1,3 @@
+configuration{
+    drun-display-format: "{name}";
+}
