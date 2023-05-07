@@ -19,13 +19,14 @@
     "battery",
     "clock"
   ],
+
+
   "wlr/taskbar": {
     "on-click": "activate",
     "on-click-middle": "close",
     "ignore-list": [
     ]
   },
-  
 
   "wlr/workspaces": {
     "on-click": "activate",
@@ -34,9 +35,11 @@
     "format": "{icon}",
     "active": "",
   },
+
   "hyprland/window": {
     "max-length": 128
   },
+
   "tray": {
     "spacing": 4
   },
@@ -78,13 +81,14 @@
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
+
     "network": {
         // "interface": "wlp2*", // (Optional) To force the use of this interface
         "format-wifi": " {essid} ({signalStrength}%)  ",
         "format-ethernet": " {ipaddr}/{cidr}  ",
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": " {ifname} (No IP)  ",
-        "format-disconnected": " Disconnected ⚠ ",
+        "format-disconnected": " Disconnected  ",
         "format-alt": " {ifname}: {ipaddr}/{cidr} ",
         "on-click-right": "networkmanager_dmenu"
     },

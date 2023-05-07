@@ -2,7 +2,7 @@
     background-color:            #282a36;
     border-color:                #282a36;
     text-color:                  #f8f8f2;
-    font:                        "CodeNewRoman Nerd Font Mono 9";
+    font:                        "CodeNewRoman Nerd Font 9";
     prompt-font:                 "Ubuntu Bold 9";
     prompt-background:           #bd93f9;
     prompt-foreground:           #282a36;

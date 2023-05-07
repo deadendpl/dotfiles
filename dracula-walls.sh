@@ -25,3 +25,7 @@ cd dracula-wallpapers/Art
 cp * ~/Pictures/drac-walls
 cd "../Programming Languages"
 cp * ~/Pictures/drac-walls
+
+# removing wallpaper repo
+cd ../..
+rm -rf dracula-wallpapers
