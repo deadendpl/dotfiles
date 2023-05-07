@@ -7,7 +7,7 @@ My [bspwm](https://github.com/baskerville/bspwm) config.
 
 Type of program | my default choice
 ------- | --------
-Terminal Emulator | [wezterm](https://github.com/wez/wezterm)
+Terminal Emulator | [alacritty](https://github.com/alacritty/alacritty)
 Shell | [Fish](https://github.com/fish-shell/fish-shell)
 File Manager | pcmanfm
 Web Browser | firefox
@@ -21,7 +21,7 @@ I also have [hyprland](https://github.com//hyprwm/hyprland).
 
 Type of program | my default choice
 ------- | --------
-Terminal Emulator | [wezterm](https://github.com/wez/wezterm)
+Terminal Emulator | [foot](https://codeberg.org/dnkl/foot)
 Shell | [Fish](https://github.com/fish-shell/fish-shell)
 File Manager | pcmanfm
 Web Browser | firefox
