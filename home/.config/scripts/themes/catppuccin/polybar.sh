@@ -1,6 +1,6 @@
 #!/bin/bash
 
-file_path="$HOME/.config/wezterm/wezterm.lua"
+file_path="$HOME/.config/polybar/config.ini"
 
 old_line=$(grep "include-file = ~/.config/polybar/" "$file_path")
 
