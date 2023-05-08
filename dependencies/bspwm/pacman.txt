@@ -18,3 +18,4 @@ pcmanfm-gtk3
 dmenu
 blueberry
 exa
+ttf-iosevka-nerd

@@ -1,4 +1,4 @@
-@import url("./colors.css");
+@import url("./dracula.css");
 * {
     border: none;
     border-radius: 5px;
@@ -19,16 +19,16 @@ window#waybar {
 }
 
 #workspaces button {
-    background-color: #d9e0ee;
-    color: #3A3B3C;
+    background-color: @foreground;
+    color: @background;
     /* border: 2px solid #3a3b3c; */
     margin-right: 2px;
     border-radius: 4px;
 }
 
 #workspaces button.active {
-    background-color: @yellow;
-    color: @background;
+    background-color: @selection;
+    color: @foreground;
 }
 
 

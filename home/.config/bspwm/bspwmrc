@@ -24,7 +24,7 @@ variety &
 picom &
 
 # notifications
-dunst &
+dunst -config ~/.config/catpuccin &
 
 # drive mounting daemon
 udiskie &

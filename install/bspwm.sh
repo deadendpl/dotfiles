@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd ../dependencies/bspwm/
-./arch.sh
+./pacman.sh
 ./aur.sh
 
 cd ../../home/.config

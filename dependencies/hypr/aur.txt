@@ -5,3 +5,5 @@ networkmanager-dmenu-git
 udiskie-dmenu-git
 clipboard
 grimblast-git
+catppuccin-gtk-theme-mocha
+dracula-gtk-theme

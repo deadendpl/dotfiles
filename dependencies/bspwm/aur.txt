@@ -4,3 +4,5 @@ shell-color-scripts
 bitwarden-rofi-git
 networkmanager-dmenu-git
 clipboard
+catppuccin-gtk-theme-mocha
+dracula-gtk-theme
