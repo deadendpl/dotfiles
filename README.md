@@ -39,8 +39,4 @@ In folder `install` there is `main.sh`. Execute that script to choose bspwm or H
 ---
 
 ## TODO
-bspwm:
-- adding good install script
-
-hyprland:
-- adding good install script
+- adding catppuccin theme
