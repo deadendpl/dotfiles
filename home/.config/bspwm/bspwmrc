@@ -16,6 +16,9 @@ sxhkd &
 # script starting polybar
 ~/.config/scripts/polybar-start.sh
 
+# script for gtk theming
+~/.config/scripts/hypr/theme.sh
+
 # wallpaper
 #nitrogen --restore
 variety &
