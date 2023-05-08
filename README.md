@@ -38,5 +38,12 @@ In folder `install` there is `main.sh`. Execute that script to choose bspwm or H
 ---
 ---
 
+## THEMES
+Available themes are: Dracula, Catppuccin Mocha
+In order to change between them you need to execute script which should be in home/.config/scripts/themes/main.sh.
+In bspwm and hyprland you can bring them up by `super+F6`.
+
+---
+---
 ## TODO
 - adding catppuccin wallpapers script

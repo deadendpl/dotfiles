@@ -37,6 +37,10 @@ super + b
 super + F1
     ~/.config/scripts/sxhkd-help.sh
 
+# changing themes
+super + F6
+    ~/.config/scripts/themes/main.sh
+
 ## web stuff
 # web search
 super + slash
