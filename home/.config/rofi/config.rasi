@@ -14,4 +14,4 @@ configuration{
     sidebar-mode: true;
 }
 
-@theme "/home/oliwier/.local/share/rofi/themes/drac-list.rasi"
+@theme "/home/oliwier/.config/rofi/themes/catppuccin-list.rasi"
