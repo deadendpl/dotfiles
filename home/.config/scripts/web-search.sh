@@ -49,7 +49,7 @@ case $selected_engine in
         ;;
 esac
 
-QUERY=$(echo '' | rofi -theme ~/.config/rofi/themes/drac-list.rasi -dmenu -l 0 -b -p "Search $selected_engine:")
+QUERY=$(echo '' | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l 0 -b -p "Search $selected_engine:")
 
 if [ -n "$QUERY" ]; then
     xdg-open "${URL}${QUERY}" 2> /dev/null
