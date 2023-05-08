@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# i'm actively developing this si I prefer to create links to my files instaed of copying them over
+# i'm actively developing this so I prefer to create links to my files instaed of copying them over
 
 # Define the directory containing the files to symlink
 SOURCE_DIR="./"
