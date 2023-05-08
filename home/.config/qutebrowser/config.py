@@ -192,15 +192,14 @@ c.fonts.statusbar = '11pt "codenewromannerdfont"'
 config.bind('<Ctrl-Shift-B>', 'spawn --userscript ~/.config/qutebrowser/userscripts/bitwarden.py')
 
 # dracula
-import catppuccin 
-catppuccin.setup(c, 'mocha', True)
+import dracula.draw
 
 # Load existing settings made via :set
 config.load_autoconfig()
 # 
-# # dracula.draw.blood(c, {
-# #     'spacing': {
-# #         'vertical': 6,
-# #         'horizontal': 8
-# #     }
-# })
+dracula.draw.blood(c, {
+    'spacing': {
+        'vertical': 6,
+        'horizontal': 8
+    }
+})

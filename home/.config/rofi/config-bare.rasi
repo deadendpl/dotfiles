@@ -2,4 +2,4 @@ configuration{
     drun-display-format: "{name}";
 }
 
-@theme "/home/oliwier/.config/rofi/themes/catppuccin-list.rasi"
+@theme "~/.config/rofi/themes/catppuccin-list.rasi"
