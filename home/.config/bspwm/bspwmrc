@@ -8,6 +8,8 @@ export web_browser="firefox"
 export file_manager="pcmanfm"
 export editor="emacs"
 
+export EDITOR="vim"
+
 # hotkey daemon
 sxhkd &
 
@@ -45,3 +47,4 @@ bspc rule -a Screenkey manage=off
 
 bspc rule -a Emacs  state=tiled
 bspc rule -a Arandr state=floating
+bspc rule -a sxiv   state=floating
