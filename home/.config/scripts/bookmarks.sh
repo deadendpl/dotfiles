@@ -6,7 +6,7 @@ sort $file -o $file
 
 options="Enter other URL\n$(cat $file)"
 
-QUERY=$(echo -e "$options" | rofi -config ~/.config/rofi/config-bare.rasi -theme ~/.config/rofi/themes/drac-list.rasi -dmenu -p Bookmarks)
+QUERY=$(echo -e "$options" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -p Bookmarks)
 
 # if you'll choose "Enter other URL" you need to put whole https link
 
