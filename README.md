@@ -39,4 +39,4 @@ In folder `install` there is `main.sh`. Execute that script to choose bspwm or H
 ---
 
 ## TODO
-- adding catppuccin theme
+- adding catppuccin wallpapers script
