@@ -14,4 +14,4 @@ configuration{
     sidebar-mode: true;
 }
 
-@theme "~/.config/rofi/themes/catppuccin-list.rasi"
+@theme "~/.config/rofi/themes/drac-list.rasi"
