@@ -11,6 +11,7 @@ cd ~/.config/scripts/themes/catppuccin
 ./gtk4.sh
 ./polybar.sh
 ./qutebrowser.sh
+./rofi.sh
 ./waybar.sh
 ./wezterm.sh
 

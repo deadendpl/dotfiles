@@ -2,7 +2,7 @@
 
 # setting themes
 
-THEME="Dracula"
+THEME="Catppuccin-Mocha-Standard-Pink-Dark"
 ICONS="Papirus-Dark"
 FONT="CodeNewRoman Nerd Font 11"
 CURSOR="Dracula-cursors"
