@@ -9,7 +9,7 @@ if [ -n "$old_line" ]; then
     escaped_old_line=$(sed 's/[\*\.&]/\\&/g' <<< "$old_line")
 
     # Escape special characters in the new line
-    escaped_new_line=$(sed 's/[\*\.&]/\\&/g' <<< "exec-once = dunst -config ~/.config/dracula &")
+    escaped_new_line=$(sed 's/[\*\.&]/\\&/g' <<< "exec-once = dunst -config ~/.config/dunst/dracula &")
 
     # Replace the line using sed
     sed -i "s|$escaped_old_line|$escaped_new_line|" "$file_path"

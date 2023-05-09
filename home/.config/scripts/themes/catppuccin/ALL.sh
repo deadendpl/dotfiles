@@ -13,6 +13,8 @@ for script in *; do
   fi
 done
 
+echo "I don't know yet how to change gtk3 theme so you need to do that yourself with lxappearance on bspwm or gnome-tweaks on hyprland."
+
 echo "It's recommended to log out or reboot your machine."
 
 read -p "Press Enter to exit"
