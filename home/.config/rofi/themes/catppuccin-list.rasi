@@ -1,16 +1,16 @@
 * {
-    background-color:            #3B3228;
-    border-color:                #3B3228;
-    text-color:                  #D0C8C6;
+    background-color:            #1C1C1C;
+    border-color:                #1C1C1C;
+    text-color:                  #D0C8B0;
     font:                        "CodeNewRoman Nerd Font 9";
     prompt-font:                 "Ubuntu Bold 9";
     prompt-background:           #C17E70;
-    prompt-foreground:           #3B3228;
+    prompt-foreground:           #1C1C1C;
     prompt-padding:              4px;
     alternate-normal-background: #504945;
     alternate-normal-foreground: @text-color;
     selected-normal-background:  #B16286;
-    selected-normal-foreground:  #3B3228;
+    selected-normal-foreground:  #1C1C1C;
     spacing:                     3;
 }
 
@@ -101,4 +101,3 @@ element-icon {
     border-radius:   0px;
     background-color: transparent;
 }
-

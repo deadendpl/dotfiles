@@ -1,4 +1,6 @@
 0
+/home/oliwier/Pictures/drac-walls/C++ Hello World.png
+/home/oliwier/Pictures/drac-walls/Import Rice Unixporn 2.png
 /home/oliwier/Pictures/drac-walls/dracula-galaxy-282a36.png
 /home/oliwier/Pictures/drac-walls/C Hello World.png
 /home/oliwier/Pictures/drac-walls/Java 1.png
