@@ -8,7 +8,7 @@ old_line=$(grep "@theme" "$file_path")
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    new_line='@theme "~/.config/rofi/themes/catppuccin-list.rasi"'
+    new_line='@theme "~/.config/rofi/themes/catppuccin-latte-list.rasi"'
     sed -i "s|$old_line|$new_line|" "$file_path"
     echo "Line replaced successfully!"
 else
@@ -25,7 +25,7 @@ old_line=$(grep "@theme" "$file_path")
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    new_line='@theme "~/.config/rofi/themes/catppuccin-list.rasi"'
+    new_line='@theme "~/.config/rofi/themes/catppuccin-latte-list.rasi"'
     sed -i "s|$old_line|$new_line|" "$file_path"
     echo "Line replaced successfully!"
 else

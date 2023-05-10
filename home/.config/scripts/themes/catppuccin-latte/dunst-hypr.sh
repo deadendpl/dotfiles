@@ -1,6 +1,6 @@
 #!/bin/bash
 
-file_path="$HOME/.config/bspwm/bspwmrc"
+file_path="$HOME/.config/hypr/hyprland.conf"
 
 old_line=$(grep "dunst" "$file_path")
 
@@ -9,7 +9,7 @@ if [ -n "$old_line" ]; then
     escaped_old_line=$(sed 's/[\*\.&]/\\&/g' <<< "$old_line")
 
     # Escape special characters in the new line
-    escaped_new_line=$(sed 's/[\*\.&]/\\&/g' <<< "dunst -config ~/.config/dunst/catppuccin &")
+    escaped_new_line=$(sed 's/[\*\.&]/\\&/g' <<< "exec-once = dunst -config ~/.config/dunst/catppuccin-latte.conf &")
 
     # Replace the line using sed
     sed -i "s|$escaped_old_line|$escaped_new_line|" "$file_path"

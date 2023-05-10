@@ -8,7 +8,7 @@ old_line=$(grep "terminal=" "$file_path")
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    new_line='$terminal=foot -c ~/.config/foot/catppuccin.ini'
+    new_line='$terminal=foot -c ~/.config/foot/catppuccin-latte.conf'
     sed -i "s|$old_line|$new_line|" "$file_path"
     echo "Line replaced successfully!"
 else

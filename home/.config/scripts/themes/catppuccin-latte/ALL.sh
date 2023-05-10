@@ -1,6 +1,6 @@
 #!/bin/bash
 
-directory=~/.config/scripts/themes/catppuccin
+directory=~/.config/scripts/themes/catppuccin-latte
 exclude_script=./ALL.sh
 
 cd "$directory"

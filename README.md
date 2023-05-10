@@ -48,4 +48,4 @@ In bspwm and hyprland you can bring them up by `super+F6`.
 ## TODO
 - adding catppuccin wallpapers script
 - adding gtk3 theme changing script
-- adding catppuccin latte because I want also a light theme
+- adding catppuccin latte because I want a light theme

@@ -1,5 +1,5 @@
 import:
-  - ~/.config/alacritty/catppuccin.yml
+  - ~/.config/alacritty/catppuccin-mocha.yml
 
 window:
   opacity: 0.85
