@@ -2,4 +2,4 @@ configuration{
     drun-display-format: "{name}";
 }
 
-@theme "~/.config/rofi/themes/drac-list.rasi"
+@theme "~/.config/rofi/themes/catppuccin-list.rasi"
