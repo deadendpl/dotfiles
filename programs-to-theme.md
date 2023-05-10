@@ -7,9 +7,9 @@
 - [] doom emacs
 - [x] foot
 - [x] alacritty
-- [] qutebrowser
+- [] qutebrowser (it seems hard to delete one line in a file :( )
 - [x] dunst
 - [x] polybar
 - [x] waybar
-- [] wezterm
+- [x] wezterm
 - [] wallpapers

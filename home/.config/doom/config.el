@@ -34,8 +34,8 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'catppuccin)
 ;; setting catppuccin flavour
-(setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
-(catppuccin-reload)
+;; (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, or 'mocha
+;; (catppuccin-reload)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)

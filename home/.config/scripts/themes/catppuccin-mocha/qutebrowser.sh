@@ -4,6 +4,8 @@ file_path="$HOME/.config/qutebrowser/config.py"
 
 old_line=$(grep "import" "$file_path")
 
+grep 'catppuccin-setup' $file_path | sed '/pattern/d'
+
 if [ -n "$old_line" ]; then
     # Replace the line using sed
     new_line="import catppuccin \ncatppuccin.setup(c, 'mocha', True)"
