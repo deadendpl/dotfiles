@@ -1,0 +1,104 @@
+* {
+    background-color:            #eff1f5;
+    border-color:                #eff1f5;
+    text-color:                  #4c4f69;
+    font:                        "CodeNewRoman Nerd Font 16";
+    prompt-font:                 "Ubuntu Bold 16";
+    prompt-background:           #fe640b;
+    prompt-foreground:           #eff1f5;
+    prompt-padding:              8px;
+    alternate-normal-background: #ccd0da;
+    alternate-normal-foreground: #4c4f69;
+    selected-normal-background:  #ea76cb;
+    selected-normal-foreground:  #eff1f5;
+    spacing:                     8;
+}
+
+#window {
+    border:  1;
+    padding: 10;
+}
+
+#mainbox {
+    border:  0;
+    padding: 0;
+}
+
+#message {
+    border:       1px dash 0px 0px;
+    padding:      4px;
+}
+
+#listview {
+    fixed-height: 0;
+    border:       2px dash 0px 0px;
+    spacing:      4px;
+    scrollbar:    true;
+    padding:      4px 0px 0px;
+}
+
+#element {
+    border:  0;
+    padding: 4px;
+}
+
+#element.selected.normal {
+    background-color: #ea76cb;
+    text-color:       #eff1f5;
+}
+
+#element.alternate.normal {
+    background-color: #ccd0da;
+    text-color:       #4c4f69;
+}
+
+#scrollbar {
+    width:        4px;
+    border:       0;
+    handle-width: 4px;
+    padding:      0;
+}
+
+#sidebar {
+    border: 1px dash 0px 0px;
+}
+
+#button.selected {
+    background-color: #ea76cb;
+    text-color:       #eff1f5;
+}
+
+#inputbar {
+    spacing:    0;
+    padding:    4px;
+}
+
+#case-indicator {
+    spacing:    0;
+}
+
+#entry {
+    padding: 4px 4px;
+    expand: false;
+    width: 10em;
+}
+
+#prompt {
+    padding:          8px;
+    background-color: #fe640b;
+    text-color:       #eff1f5;
+    font:             "Ubuntu Bold 16";
+    border-radius:    2px;
+}
+
+element-text {
+    background-color: inherit;
+    text-color:       inherit;
+}
+
+element-icon {
+    padding:         0px;
+    border-radius:   0px;
+    background-color: transparent;
+}
+

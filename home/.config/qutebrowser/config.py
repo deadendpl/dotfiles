@@ -198,9 +198,9 @@ catppuccin.setup(c, 'latte', True)
 # Load existing settings made via :set
 config.load_autoconfig()
 # # 
-# # # # # # # # dracula.draw.blood(c, {
-# # # # # # # # #     'spacing': {
-# # # # # # # # #         'vertical': 6,
-# # # # # # # # #         'horizontal': 8
-# # # # # # # # #     }
-# # # # # # # # })
+# # # # # # # dracula.draw.blood(c, {
+# # # # # # # #     'spacing': {
+# # # # # # # #         'vertical': 6,
+# # # # # # # #         'horizontal': 8
+# # # # # # # #     }
+# # # # # # # })
