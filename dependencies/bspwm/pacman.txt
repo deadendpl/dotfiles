@@ -20,3 +20,4 @@ blueberry
 exa
 ttf-iosevka-nerd
 zathura
+feh

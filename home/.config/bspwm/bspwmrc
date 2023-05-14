@@ -21,7 +21,8 @@ sxhkd &
 
 # wallpaper
 #nitrogen --restore
-variety &
+#variety &
+~/.config/scripts/wall.sh
 
 # compositor
 picom &
