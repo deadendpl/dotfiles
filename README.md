@@ -33,15 +33,16 @@ Compositor | [Hyprland](https://github.com/hyprwm/Hyprland)
 ---
 
 ## INSTALLING
-In folder `install` there is `main.sh`. Execute that script to choose bspwm or Hyprland. The script will delete everything in `~/.config` so make sure to make an backup.
+In folder `install` there is `main.sh`. Execute that script to choose bspwm or Hyprland. The script will overwrite some folders in `~/.config` so make sure to make an backup.
 
 ---
 ---
 
 ## THEMES
-Available themes are: Dracula, Catppuccin Mocha
+Available themes are: Dracula, Catppuccin Mocha, Catppuccin Latte
 In order to change between them you need to execute script which should be in home/.config/scripts/themes/main.sh.
-In bspwm and hyprland you can bring them up by `super+F6`.
+In bspwm and hyprland (if dotfiles were applied correctly) you can bring them up by `super+F6`.
+Not everything changes out of the box (like notification daemon and panel) so rebooting or logging out of your machine is recommended move after chaning theme.
 
 ---
 ---
