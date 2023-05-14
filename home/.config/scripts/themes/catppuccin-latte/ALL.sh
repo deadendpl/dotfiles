@@ -13,6 +13,8 @@ for script in *; do
   fi
 done
 
+echo "For now gtk3 theme is changing only in hyplrand. If you use bspwm then you need to set theme manually in lxappearance."
+
 echo "It's recommended to log out or reboot your machine."
 
 read -p "Press Enter to exit"

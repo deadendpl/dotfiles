@@ -47,3 +47,4 @@ In bspwm and hyprland you can bring them up by `super+F6`.
 ---
 ## TODO
 - adding catppuccin wallpapers script
+- adding gtk3 theme changing in bspwm
