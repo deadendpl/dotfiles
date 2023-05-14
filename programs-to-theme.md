@@ -7,7 +7,7 @@
 - [] doom emacs
 - [x] foot
 - [x] alacritty
-- [] qutebrowser (it seems hard to delete one line in a file :( )
+- [x] qutebrowser
 - [x] dunst
 - [x] polybar
 - [x] waybar

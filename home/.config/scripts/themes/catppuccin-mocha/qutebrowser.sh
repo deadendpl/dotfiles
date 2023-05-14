@@ -2,17 +2,24 @@
 
 file_path="$HOME/.config/qutebrowser/config.py"
 
-old_line=$(grep "import" "$file_path")
+# Check if "import" line exists
+if grep -q "import" "$file_path"; then
+    # Replace the "import" line
+    sed -i "s/^import.*/import catppuccin/" "$file_path"
+    echo "Import line replaced successfully!"
+else
+    # Add "import" line before "catppuccin.setup" line
+    sed -i "/catppuccin\.setup/i import catppuccin" "$file_path"
+    echo "Import line added successfully!"
+fi
 
-grep 'catppuccin-setup' $file_path | sed '/pattern/d'
-
-if [ -n "$old_line" ]; then
+# Check if "catppuccin.setup" line exists
+if grep -q "catppuccin\.setup" "$file_path"; then
     # Replace the line using sed
-    new_line="import catppuccin \ncatppuccin.setup(c, 'mocha', True)"
-    sed -i "s|$old_line|$new_line|" "$file_path"
+    sed -i "s/catppuccin\.setup.*/catppuccin.setup(c, 'mocha', True)/" "$file_path"
     echo "Line replaced successfully!"
 else
-    echo "Old line not found in the file."
+    echo "catppuccin.setup line not found in the file."
 fi
 
 # Comment the specific lines
