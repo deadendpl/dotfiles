@@ -192,8 +192,8 @@ c.fonts.statusbar = '11pt "codenewromannerdfont"'
 config.bind('<Ctrl-Shift-B>', 'spawn --userscript ~/.config/qutebrowser/userscripts/bitwarden.py')
 
 # theme
-import catppuccin
-catppuccin.setup(c, 'mocha', True)
+import dracula.draw
+catppuccin.setup(c, 'latte', True)
 
 # Load existing settings made via :set
 config.load_autoconfig()

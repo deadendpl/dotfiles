@@ -27,7 +27,7 @@ variety &
 picom &
 
 # notifications
-dunst -config ~/.config/dunst/catppuccin-mocha.conf &
+dunst -config ~/.config/dunst/dracula &
 
 # drive mounting daemon
 udiskie &
