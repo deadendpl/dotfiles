@@ -19,3 +19,4 @@ dmenu
 blueberry
 exa
 ttf-iosevka-nerd
+zathura

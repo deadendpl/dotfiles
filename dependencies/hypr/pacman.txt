@@ -24,3 +24,4 @@ p7zip
 unrar
 wezterm
 ttf-iosevka-nerd
+zathura
