@@ -23,7 +23,11 @@ super + e
 
 # launcher
 super + Return
-    rofi -show drun
+    rofi -show drun -config ~/.config/rofi/config.rasi
+
+# scripts hub
+super + shift + Return
+    ~/.config/scripts/hub.sh
 
 # task manager
 super + m
