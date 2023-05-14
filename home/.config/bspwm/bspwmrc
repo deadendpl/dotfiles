@@ -51,3 +51,4 @@ bspc rule -a Screenkey manage=off
 bspc rule -a Emacs  state=tiled
 bspc rule -a Arandr state=floating
 bspc rule -a sxiv   state=floating
+bspc rule -a Zathura  state=tiled
