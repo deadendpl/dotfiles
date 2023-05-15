@@ -7,4 +7,4 @@ cd $dir
 
 book=$(ls | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -p Books)
 
-xdg-open $book
+zathura "$book"
