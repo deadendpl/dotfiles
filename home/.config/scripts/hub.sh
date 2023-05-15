@@ -2,7 +2,7 @@
 
 dir="$HOME/.config/scripts"
 
-cd $dir
+cd "$dir"
 
 declare -a scripts=( "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
 
