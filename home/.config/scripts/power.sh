@@ -1,6 +1,6 @@
 #!/bin/bash
 
-chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | rofi -config ~/.config/rofi/config-bare.rasi -theme ~/.config/rofi/themes/catppuccin-latte-small.rasi -theme-str 'window {width: 12%;}' -dmenu -l 4 -i -p Power)
+chosen=$(echo -e "󰍃 Logout\n Shutdown\n Reboot\n󰤄 Suspend" | rofi -config ~/.config/rofi/config-bare.rasi -theme ~/.config/rofi/themes/drac-small.rasi -theme-str 'window {width: 12%;}' -dmenu -l 4 -i -p Power)
 
 if [[ $chosen = "󰍃 Logout" ]]; then
 	pkill -KILL -u $(whoami)

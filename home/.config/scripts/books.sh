@@ -1,10 +1,13 @@
 #!/bin/bash
 
-# this is for reading books that are put in one folder
-
 dir="$HOME/Documents/books"
 cd "$dir"
 
-book=$(ls | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -p Books)
+files=(*)
+file_count=${#files[@]}
 
-zathura "$book"
+book=$(printf '%s\n' "${files[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l "$file_count" -b -p "Books")
+
+if [[ -n "$book" ]]; then
+  zathura "$book"
+fi

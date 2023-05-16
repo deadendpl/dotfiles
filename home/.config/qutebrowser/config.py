@@ -193,14 +193,13 @@ config.bind('<Ctrl-Shift-B>', 'spawn --userscript ~/.config/qutebrowser/userscri
 
 # theme
 import dracula.draw
-catppuccin.setup(c, 'latte', True)
 
 # Load existing settings made via :set
 config.load_autoconfig()
 # # 
 # # # # # # # dracula.draw.blood(c, {
-# # # # # # # #     'spacing': {
-# # # # # # # #         'vertical': 6,
-# # # # # # # #         'horizontal': 8
-# # # # # # # #     }
-# # # # # # # })
+# # # # # # # # # #     'spacing': {
+# # # # # # # # # #         'vertical': 6,
+# # # # # # # # # #         'horizontal': 8
+# # # # # # # # # #     }
+# # # # # # # # # })

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-theme=$(printf "Dracula
-Catppuccin Mocha
-Catppuccin Latte" | rofi -config ~/.config/rofi/config-bare.rasi -l 3 -dmenu -p "Themes")
+declare -a themes=( "Dracula" "Catppuccin Latte" "Catppuccin Mocha" )
+
+theme=$(printf '%s\n' "${themes[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#themes[@]} -i -b -p "Themes:")
 
 if [ "$theme" == "Dracula" ]; then
    $terminal -e ~/.config/scripts/themes/dracula/ALL.sh
