@@ -21,3 +21,4 @@ exa
 ttf-iosevka-nerd
 zathura
 feh
+neovim

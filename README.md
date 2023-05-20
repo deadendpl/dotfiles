@@ -47,5 +47,6 @@ Not everything changes out of the box (like notification daemon and panel) so re
 ---
 ---
 ## TODO
+- neovim config
 - adding catppuccin wallpapers script
 - adding gtk3 theme changing in bspwm

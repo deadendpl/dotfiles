@@ -25,3 +25,4 @@ unrar
 wezterm
 ttf-iosevka-nerd
 zathura
+neovim

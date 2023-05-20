@@ -17,9 +17,13 @@ super + w
 super + f
     $file_manager
 
-# text editor
+# editor
 super + e
     $editor
+
+# another editor
+super + shift + e
+    $terminal -e nvim
 
 # launcher
 super + Return
