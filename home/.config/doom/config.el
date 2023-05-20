@@ -80,3 +80,11 @@
 
 ;; enable word-wrap (almost) everywhere
 (+global-word-wrap-mode +1)
+
+(setq initial-buffer-choice "~/.config/doom/start.org")
+
+(add-hook 'start-mode-hook 'read-only-mode)
+
+;; Enable image support in org mode
+(after! org
+  (setq org-startup-with-inline-images t))
