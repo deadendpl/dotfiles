@@ -4,11 +4,14 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
+declare -a scripts=( "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
-if [[ $choice == "Bookmarks" ]]; then
+if [[ $choice == "(hypr) Screen orientation" ]] ; then
+  ~/.config/scripts/hypr/screen-orientation.sh
+
+elif [[ $choice == "Bookmarks" ]]; then
   ./bookmarks.sh
 
 elif [[ $choice == "Books" ]]; then
