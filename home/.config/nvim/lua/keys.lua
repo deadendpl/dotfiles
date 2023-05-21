@@ -24,3 +24,6 @@ map('n', '<Leader><Leader>', [[:Telescope find_files hidden=true<CR>]], {})
 
 -- ':Explore' in a new split
 map('n', '<leader>.', ':split <bar> wincmd J <bar> Explore<CR>', {noremap = true, silent = true})
+
+-- neogit
+map('n', '<leader>gg', [[:Neogit<CR>]], {})
