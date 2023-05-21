@@ -42,6 +42,7 @@
 
   "tray": {
     "spacing": 4
+     // "icon-size": 21,
   },
 
   "backlight": {
@@ -50,10 +51,6 @@
     "format-icons": ["", "", "", "", "", "", "", "", ""]
   },
 
-    "tray": {
-        // "icon-size": 21,
-        "spacing": 10
-    },
     "clock": {
         // "timezone": "America/New_York",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
