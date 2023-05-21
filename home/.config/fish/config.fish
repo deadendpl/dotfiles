@@ -35,6 +35,7 @@ alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
 alias man='batman'
+alias vim='nvim'
 
 colorscript random
 

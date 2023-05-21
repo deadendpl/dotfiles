@@ -12,12 +12,21 @@ require('opts')      -- Options
 require('keys')      -- Keymaps
 require('plug')      -- Plugins
 
--- PLUGINS: Add this section
+-- using system's clipboard
+vim.o.clipboard = "unnamedplus"
+
+-- nvim-tree
 require('nvim-tree').setup{}
 
-require('lualine').setup {
-  options = {
-    theme = 'dracula-nvim'
+require('nvim-autopairs').setup{} -- Add this line
+
+-- neogit (like magit)
+local neogit = require('neogit')
+
+neogit.setup {}
+
+require('telescope').setup{
+  defaults = {
+    file_previewer = require'telescope.previewers'.vim_buffer_cat.new,
   }
 }
-require('nvim-autopairs').setup{} -- Add this line

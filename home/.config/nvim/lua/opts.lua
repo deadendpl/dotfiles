@@ -33,9 +33,14 @@ opt.expandtab = true             -- bool: Use spaces instead of tabs
 opt.splitright = true            -- bool: Place new window to right of current one
 opt.splitbelow = true            -- bool: Place new window below the current one
 
--- Snip...
+-- theming
+local latte = require("catppuccin.palettes").get_palette "latte"
+local frappe = require("catppuccin.palettes").get_palette "frappe"
+local macchiato = require("catppuccin.palettes").get_palette "macchiato"
+local mocha = require("catppuccin.palettes").get_palette "mocha"
 
--- [[ Theme ]]
-opt.syntax = "ON"                -- str:  Allow syntax highlighting
-opt.termguicolors = true         -- bool: If term supports ui color then enable
-cmd('colorscheme dracula')       -- cmd:  Set the colorscheme
+require('lualine').setup {
+  options = {
+    theme = 'dracula'
+  }
+}

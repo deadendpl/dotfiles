@@ -7,15 +7,31 @@ return require('packer').startup(function(use)
     requires = 'kyazdani42/nvim-web-devicons'  -- filesystem icons
   }
 
--- [[ Theme ]]
-  use { 'mhinz/vim-startify' }                       -- start screen
-  use { 'DanilaMihailov/beacon.nvim' }               -- cursor jump
+
+-- cursor jump
+  use { 'DanilaMihailov/beacon.nvim' }               
+
+-- statusline
   use {
-    'nvim-lualine/lualine.nvim',                     -- statusline
+    'nvim-lualine/lualine.nvim',
     requires = {'kyazdani42/nvim-web-devicons',
                 opt = true}
   }
-  use { 'Mofiqul/dracula.nvim' }
+
+
+-- themes
+  use { 'Mofiqul/dracula.nvim', as = "dracula"}
+  use { "catppuccin/nvim", as = "catppuccin" }
+
+-- dashboard
+  use {
+      'goolord/alpha-nvim',
+      config = function ()
+          require'alpha'.setup(require'alpha.themes.dashboard'.config)
+      end
+  }
+
+
 
 -- [[ Dev ]]
   use {
@@ -27,6 +43,9 @@ return require('packer').startup(function(use)
   use { 'tpope/vim-fugitive' }                       -- git integration
   use { 'junegunn/gv.vim' }                          -- commit history
   use { 'windwp/nvim-autopairs' }
+
+  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' } -- git
+
 
 end, {
   config = {
