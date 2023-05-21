@@ -23,7 +23,7 @@ super + e
 
 # another editor
 super + shift + e
-    $terminal -e nvim
+    $editor2
 
 # launcher
 super + Return

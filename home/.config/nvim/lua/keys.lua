@@ -1,11 +1,17 @@
 --[[ keys.lua ]]
 local map = vim.api.nvim_set_keymap
 
+vim.g.mapleader = " "
+vim.g.localleader = "\\"
+
 -- 'jk' in insert mode to leave insert mode
 map('i', 'jk', '<ESC>', {})
 
 -- nvim-tree
 map('n', '<Leader>n', [[:NvimTreeToggle<CR>]], {})
+
+-- MRU
+map('n', '<Leader>fr', [[:MRU<CR>]], {})
 
 -- indenting lines
 map('n', '<Leader>l', [[:IndentLinesToggle<CR>]], {})

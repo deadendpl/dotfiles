@@ -7,6 +7,8 @@ return require('packer').startup(function(use)
     requires = 'kyazdani42/nvim-web-devicons'  -- filesystem icons
   }
 
+-- MRU
+use { 'vim-scripts/mru.vim' }
 
 -- cursor jump
   use { 'DanilaMihailov/beacon.nvim' }               
