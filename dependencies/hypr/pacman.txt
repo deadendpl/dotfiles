@@ -27,3 +27,4 @@ ttf-iosevka-nerd
 zathura
 neovim
 gammastep
+lolcat

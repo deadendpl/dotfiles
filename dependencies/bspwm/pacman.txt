@@ -22,3 +22,4 @@ ttf-iosevka-nerd
 zathura
 feh
 neovim
+lolcat

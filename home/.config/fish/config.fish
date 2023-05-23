@@ -40,6 +40,7 @@ alias grep='grep --color=auto'
 alias man='batman'
 alias vim='nvim'
 alias myeyes='gammastep -O 2200 2>/dev/null'
+alias RGB='ls -laR / | lolcat'
 
 colorscript random
 
