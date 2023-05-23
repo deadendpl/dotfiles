@@ -14,6 +14,7 @@
     "tray",
     "pulseaudio",
     "backlight",
+    "custom/gammastep",
     "network",
     "bluetooth",
     "battery",
@@ -123,4 +124,10 @@
         "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
         "on-click-right": "pavucontrol"
     },
+
+    "custom/gammastep": {
+      "format": " 󰛐 ",
+      "tooltip-format": "Turn on eye protection!",
+      "on-click": "~/.config/scripts/hypr/gammastep.sh"
+    }
 }

@@ -27,6 +27,8 @@ alias pinstalled='pacman -Q'
 alias psearch='pacman -Ss'
 alias pclean='sudo pacman -Sc'
 
+alias listaur="pacman -Qqem"
+
 # yay
 alias yinst='yay -S'
 
@@ -37,6 +39,7 @@ alias cllr='clear && ll'
 alias grep='grep --color=auto'
 alias man='batman'
 alias vim='nvim'
+alias myeyes='gammastep -O 2200 2>/dev/null'
 
 colorscript random
 

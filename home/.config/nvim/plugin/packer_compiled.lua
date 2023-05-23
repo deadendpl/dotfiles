@@ -90,6 +90,11 @@ _G.packer_plugins = {
     path = "/home/oliwier/.local/share/nvim/site/pack/packer/start/catppuccin",
     url = "https://github.com/catppuccin/nvim"
   },
+  dracula = {
+    loaded = true,
+    path = "/home/oliwier/.local/share/nvim/site/pack/packer/start/dracula",
+    url = "https://github.com/Mofiqul/dracula.nvim"
+  },
   ["gv.vim"] = {
     loaded = true,
     path = "/home/oliwier/.local/share/nvim/site/pack/packer/start/gv.vim",
@@ -104,6 +109,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/oliwier/.local/share/nvim/site/pack/packer/start/lualine.nvim",
     url = "https://github.com/nvim-lualine/lualine.nvim"
+  },
+  ["mru.vim"] = {
+    loaded = true,
+    path = "/home/oliwier/.local/share/nvim/site/pack/packer/start/mru.vim",
+    url = "https://github.com/vim-scripts/mru.vim"
   },
   neogit = {
     loaded = true,

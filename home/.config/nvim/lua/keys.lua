@@ -4,6 +4,16 @@ local map = vim.api.nvim_set_keymap
 vim.g.mapleader = " "
 vim.g.localleader = "\\"
 
+-- Unset arrow keys because why not? :)
+map('n', '<Up>', '<NOP>', { noremap = true, silent = true })
+map('n', '<Down>', '<NOP>', { noremap = true, silent = true })
+map('n', '<Left>', '<NOP>', { noremap = true, silent = true })
+map('n', '<Right>', '<NOP>', { noremap = true, silent = true })
+map('i', '<Up>', '<NOP>', { noremap = true, silent = true })
+map('i', '<Down>', '<NOP>', { noremap = true, silent = true })
+map('i', '<Left>', '<NOP>', { noremap = true, silent = true })
+map('i', '<Right>', '<NOP>', { noremap = true, silent = true })
+
 -- 'jk' in insert mode to leave insert mode
 map('i', 'jk', '<ESC>', {})
 

@@ -4,6 +4,13 @@ cd ../dependencies/hypr/
 ./pacman.sh
 ./aur.sh
 
+# doom emacs
+read -rp "Do you want to install Doom Emacs? [y/N] " emacs
+
+if [[ ! "$emacs" =~ [Yy] ]]; then
+  echo "Operation aborted by user." >&2
+  exit 1
+fi
 
 cd ../../home/.config
 

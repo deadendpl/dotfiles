@@ -33,8 +33,6 @@ use { 'vim-scripts/mru.vim' }
       end
   }
 
-
-
 -- [[ Dev ]]
   use {
     'nvim-telescope/telescope.nvim',                 -- fuzzy finder
