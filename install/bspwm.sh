@@ -4,6 +4,15 @@ cd ../dependencies/bspwm/
 ./pacman.sh
 ./aur.sh
 
+# doom emacs
+read -rp "Do you want to install Doom Emacs? [y/n] " emacs
+
+if [[ "$emacs" == "y" ]]; then
+  ../../install/software/doom-emacs.sh
+else
+  echo "Doom Emacs will not be installed (you will have default emacs config)"
+fi
+
 cd ../../home/.config
 
 # Check if there are any directories present in ~/.config
