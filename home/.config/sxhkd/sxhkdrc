@@ -43,7 +43,7 @@ super + b
 
 # keybinding help
 super + F1
-    ~/.config/scripts/sxhkd-help.sh
+    ~/.config/scripts/bspwm/sxhkd-help.sh
 
 # changing themes
 super + F6

@@ -14,10 +14,7 @@ export EDITOR="vim"
 sxhkd &
 
 # script starting polybar
-~/.config/scripts/polybar-start.sh
-
-# script for gtk theming
-~/.config/scripts/hypr/theme.sh
+~/.config/scripts/bspwm/polybar-start.sh
 
 # wallpaper
 #nitrogen --restore
