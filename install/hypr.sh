@@ -5,12 +5,13 @@ cd ../dependencies/hypr/
 ./aur.sh
 
 # doom emacs
-#read -rp "Do you want to install Doom Emacs? [y/N] " emacs
+read -rp "Do you want to install Doom Emacs? [y/n] " emacs
 
-#if [[ ! "$emacs" =~ [Yy] ]]; then
-#  echo "Operation aborted by user." >&2
-#  exit 1
-#fi
+if [[ ! "$emacs" == [y] ]]; then
+  ../../install/software/doom-emacs.sh
+else
+  echo "Doom Emacs will not be installed (you will have default emacs config)"
+fi
 
 cd ../../home/.config
 
@@ -27,5 +28,4 @@ fi
 # Move all directories from the source directory to the destination directory
 cp -rf * ~/.config/
 
-printf "\nIN ORDER TO USE MY RICE YOU NEED TO CREATE A WAYLAND SESSION YOURSELF.\nIn order to do that you need to create a file for example \"nano /usr/share/wayland-sessions/session_name.desktop\".\nAnd there put:\n\n[Desktop Entry]\nType=Application\nName=based hyprland\nExec=/home/<your_username>/.config/scripts/hypr/wrappedhl\n\nIf I or you didn't break anything it should work now\n"
-
+printf "\nIN ORDER TO USE THE RICE YOU NEED TO CREATE A HYPRLAND SESSION YOURSELF.\nIn order to do that you need to create a wayland session file for example \"sudo nano /usr/share/wayland-sessions/session_name.desktop\".\nAnd there put:\n\n[Desktop Entry]\nType=Application\nName=based hyprland\nExec=/home/<your_username>/.config/scripts/hypr/wrappedhl\n\nIf I or you didn't break anything it should work now\n"
