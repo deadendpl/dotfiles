@@ -4,7 +4,7 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
+declare -a scripts=( "Changing root shell" "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
@@ -28,6 +28,9 @@ elif [[ $choice == "Themes" ]]; then
 
 elif [[ $choice == "Web search" ]]; then
   ./web-search.sh
+
+elif [[ $choice == "Changing root shell" ]]; then
+  cd tweaks && $terminal -e ./the-same-shell-as-root.sh
 
 else
   exit
