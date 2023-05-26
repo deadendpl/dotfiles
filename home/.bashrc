@@ -19,8 +19,13 @@ alias pinst='sudo pacman -S'
 alias ppu='sudo pacman -Rs'
 alias pup='sudo pacman -Syu'
 alias pinstalled='pacman -Q'
+pinsearch() {
+  pacman -Q | grep "$@"
+}
 alias psearch='pacman -Ss'
 alias pclean='sudo pacman -Sc'
+alias listaur="pacman -Qqem"
+
 
 # yay
 alias yinst='yay -S'
@@ -30,7 +35,9 @@ alias ll='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
+alias man='batman'
 alias vim='nvim'
+alias RGB='ls -laR / | lolcat'
 PS1='[\u@\h \W]\$'
 
 colorscript random

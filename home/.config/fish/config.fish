@@ -24,9 +24,11 @@ alias pinst='sudo pacman -S'
 alias ppu='sudo pacman -Rs'
 alias pup='sudo pacman -Syu'
 alias pinstalled='pacman -Q'
+function pinsearch
+    pacman -Q | grep $argv
+end
 alias psearch='pacman -Ss'
 alias pclean='sudo pacman -Sc'
-
 alias listaur="pacman -Qqem"
 
 # yay
@@ -39,7 +41,6 @@ alias cllr='clear && ll'
 alias grep='grep --color=auto'
 alias man='batman'
 alias vim='nvim'
-alias myeyes='gammastep -O 2200 2>/dev/null'
 alias RGB='ls -laR / | lolcat'
 
 colorscript random
