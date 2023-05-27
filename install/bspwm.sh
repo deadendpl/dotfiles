@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# arcolinux repo
+read -rp "Are you on ArcoLinux? [y/n]" arco
+
+if [[ "$arco" == "n" ]]; then
+  software/arcolinux-repo.sh
+fi
+
 cd ../dependencies/bspwm/
 ./pacman.sh
 ./aur.sh
@@ -8,7 +15,7 @@ cd ../dependencies/bspwm/
 read -rp "Do you want to install Doom Emacs? [y/n] " emacs
 
 if [[ "$emacs" == "y" ]]; then
-  ../../install/software/doom-emacs.sh
+  software/doom-emacs.sh
 else
   echo "Doom Emacs will not be installed (you will have default emacs config)"
 fi

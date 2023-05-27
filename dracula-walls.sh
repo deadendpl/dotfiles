@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# the script will download some dracula wallpapers
+
 # making wallpapers directory
 mkdir -p ~/Pictures/drac-walls
 

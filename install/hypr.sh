@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# arcolinux repo
+read -rp "Are you on ArcoLinux? [y/n]" arco
+
+if [[ "$arco" == "n" ]]; then
+  ../../install/software/arcolinux-repo.sh
+fi
+
 cd ../dependencies/hypr/
 ./pacman.sh
 ./aur.sh
