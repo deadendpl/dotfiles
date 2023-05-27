@@ -34,3 +34,5 @@ fi
 
 # Move all directories from the source directory to the destination directory
 cp -rf * ~/.config/
+
+echo "Now you need to log out of your machine or reboot"
