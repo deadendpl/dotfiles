@@ -39,7 +39,10 @@ Go into `install` folder and execute `main.sh`. The script will overwrite some f
 ---
 
 # THEMES
-Available themes are: Dracula, Catppuccin Mocha, Catppuccin Latte.
+Available themes are:
+- [Dracula](https://draculatheme.com)
+- Catppuccin Mocha
+- Catppuccin Latte
 
 In order to change between them you need to execute script which should be in `home/.config/scripts/themes/main.sh`.
 In bspwm and hyprland (if dotfiles were applied correctly) you can bring them up by `super+F6`.
