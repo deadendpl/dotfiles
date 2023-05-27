@@ -24,3 +24,4 @@ feh
 neovim
 lolcat
 redshift
+shell-color-scripts

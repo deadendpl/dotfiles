@@ -1,5 +1,4 @@
 enlighten-git
-shell-color-scripts
 bitwarden-rofi-git
 networkmanager-dmenu-git
 udiskie-dmenu-git
