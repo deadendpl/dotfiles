@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # arcolinux repo
-read -rp "Are you on ArcoLinux? [y/n]" arco
+read -rp "Are you on ArcoLinux? [y/n] " arco
 
 if [[ "$arco" == "n" ]]; then
-  ../../install/software/arcolinux-repo.sh
+  other/arcolinux-repo.sh
 fi
 
-cd ../dependencies/bspwm/
+cd other/dependencies/bspwm
 ./pacman.sh
 ./aur.sh
 
@@ -15,12 +15,12 @@ cd ../dependencies/bspwm/
 read -rp "Do you want to install Doom Emacs? [y/n] " emacs
 
 if [[ "$emacs" == "y" ]]; then
-  ../../install/software/doom-emacs.sh
+  ../../doom-emacs.sh
 else
   echo "Doom Emacs will not be installed (you will have default emacs config)"
 fi
 
-cd ../../home/.config
+cd ../../../../home/.config
 
 # Check if there are any directories present in ~/.config
 if [[ $(ls -d ~/.config/*/ 2>/dev/null) ]]; then
