@@ -11,7 +11,7 @@ QUERY=$(echo -e "$options" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu
 # if you'll choose "Enter other URL" you need to put whole https link
 
 if [ "$QUERY" = "Enter other URL" ]; then
-  QUERY=$(echo "" | $launcher -dmenu -p "Enter URL")
+  QUERY=$(echo "" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l 1 -p "Enter URL")
 fi
 
 if [ -n "$QUERY" ]; then
