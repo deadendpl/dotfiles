@@ -87,6 +87,7 @@
         "tooltip-format": "{ifname} via {gwaddr} ",
         "format-linked": " {ifname} (No IP)  ",
         "format-disconnected": " Disconnected  ",
+        "format-disabled": "",
         "format-alt": " {ifname}: {ipaddr}/{cidr} ",
         "on-click-right": "networkmanager_dmenu"
     },
@@ -114,8 +115,8 @@
         "format-source-muted": "  ",
         "format-icons": {
             "headphone": "",
-            "hands-free": "",
-            "headset": "",
+            "hands-free": "",
+            "headset": "",
             "phone": "",
             "portable": "",
             "car": "",

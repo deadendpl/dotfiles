@@ -23,9 +23,9 @@ file-roller
 p7zip
 unrar
 wezterm
-ttf-iosevka-nerd
 zathura
 neovim
 gammastep
 lolcat
 shell-color-scripts
+ttf-ubuntu-nerd

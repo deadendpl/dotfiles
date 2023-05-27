@@ -18,10 +18,10 @@ pcmanfm-gtk3
 dmenu
 blueberry
 exa
-ttf-iosevka-nerd
 zathura
 feh
 neovim
 lolcat
 redshift
 shell-color-scripts
+ttf-ubuntu-nerd
