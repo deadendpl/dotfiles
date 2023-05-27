@@ -2,6 +2,10 @@
 
 file="$HOME/Documents/bookmarks"
 
+if [[ -n $file ]]; then
+  touch $file
+fi
+
 sort $file -o $file
 
 options="Enter other URL\n$(cat $file)"
