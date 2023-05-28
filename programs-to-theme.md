@@ -12,4 +12,4 @@
 - [x] polybar
 - [x] waybar
 - [x] wezterm
-- [] wallpapers
+- [x] wallpapers

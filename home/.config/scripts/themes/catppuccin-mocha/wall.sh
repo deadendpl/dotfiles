@@ -13,6 +13,8 @@ else
     echo "Old line not found in the file."
 fi
 
+chmod +x $file_path
+
 file_path="$HOME/.config/scripts/bspwm/wall.sh"
 
 old_line=$(grep "walls_dir=" "$file_path")
@@ -26,3 +28,4 @@ else
     echo "Old line not found in the file."
 fi
 
+chmod +x $file_path
