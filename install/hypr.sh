@@ -23,13 +23,6 @@ if [[ "$cat" == "n" ]]; then
 fi
 
 
-# dracula walls
-read -rp "Do you want to download some Dracula wallpapers? [y/n] " drac
-
-if [[ "$drac" == "n" ]]; then
-  ../../walls/drac-walls.sh
-fi
-
 cd other/dependencies/hypr
 ./pacman.sh
 ./aur.sh
