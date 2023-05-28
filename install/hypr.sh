@@ -10,7 +10,6 @@ if [[ "$arco" == "n" ]]; then
   cd $pwd
 fi
 
-
 # dracula walls
 read -rp "Do you want to download some Dracula wallpapers? [y/n] " drac
 
@@ -27,6 +26,7 @@ if [[ "$cat" == "y" ]]; then
   cd $pwd
 fi
 
+echo "Now dependencies will be installed."
 
 cd other/dependencies/hypr
 ./pacman.sh

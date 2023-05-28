@@ -26,6 +26,8 @@ if [[ "$cat" == "y" ]]; then
   cd $pwd
 fi
 
+echo "Now dependencies will be installed."
+
 cd other/dependencies/bspwm
 ./pacman.sh
 ./aur.sh
