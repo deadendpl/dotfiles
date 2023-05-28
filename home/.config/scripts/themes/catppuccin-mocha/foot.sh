@@ -25,7 +25,7 @@ old_line=$(grep "terminal=" "$file_path")
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    new_line='export terminal="foot -c $HOME/.config/foot/catppuccin-mocha.ini"'
+    new_line='export terminal="foot -c $HOME/.config/foot/catppuccin-mocha.conf"'
     sed -i "s|$old_line|$new_line|" "$file_path"
     echo "Line replaced successfully!"
 else
