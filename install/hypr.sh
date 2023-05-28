@@ -11,14 +11,14 @@ fi
 # dracula walls
 read -rp "Do you want to download some Dracula wallpapers? [y/n] " drac
 
-if [[ "$drac" == "n" ]]; then
+if [[ "$drac" == "y" ]]; then
   other/walls/drac-walls.sh
 fi
 
 # catppuccin walls
 read -rp "Do you want to download some Catppuccin wallpapers? [y/n] " cat
 
-if [[ "$cat" == "n" ]]; then
+if [[ "$cat" == "y" ]]; then
   other/walls/cat-walls.sh
 fi
 
