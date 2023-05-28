@@ -1,10 +1,13 @@
 #!/bin/bash
 
+pwd=$(pwd)
+
 # arcolinux repo
 read -rp "Are you on ArcoLinux? [y/n] " arco
 
 if [[ "$arco" == "n" ]]; then
   other/arcolinux-repo.sh
+  cd $pwd
 fi
 
 
@@ -13,6 +16,7 @@ read -rp "Do you want to download some Dracula wallpapers? [y/n] " drac
 
 if [[ "$drac" == "y" ]]; then
   other/walls/dracula-walls.sh
+  cd $pwd
 fi
 
 # catppuccin walls
@@ -20,6 +24,7 @@ read -rp "Do you want to download some Catppuccin wallpapers? [y/n] " cat
 
 if [[ "$cat" == "y" ]]; then
   other/walls/catppuccin-walls.sh
+  cd $pwd
 fi
 
 
