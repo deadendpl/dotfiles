@@ -14,6 +14,12 @@ require('nvim-tree').setup{}
 
 require('nvim-autopairs').setup{} -- Add this line
 
+-- which key
+require('which-key').setup{}
+
+-- cool split resizer
+require('focus').setup{}
+
 -- neogit (like magit)
 local neogit = require('neogit')
 

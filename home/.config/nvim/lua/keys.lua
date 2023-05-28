@@ -20,6 +20,12 @@ map('i', 'jk', '<ESC>', {})
 -- nvim-tree
 map('n', '<Leader>n', [[:NvimTreeToggle<CR>]], {})
 
+-- next buffer
+map('n', '<Leader>bn', [[:bn<CR>]], {})
+
+-- previous buffer
+map('n', '<Leader>bp', [[:bp<CR>]], {})
+
 -- MRU
 map('n', '<Leader>fr', [[:MRU<CR>]], {})
 

@@ -20,6 +20,23 @@ use { 'vim-scripts/mru.vim' }
                 opt = true}
   }
 
+-- cool split resizing
+use { "beauwilliams/focus.nvim", config = function() require("focus").setup() end }
+
+-- which key
+use {
+  "folke/which-key.nvim",
+  config = function()
+    vim.o.timeout = true
+    vim.o.timeoutlen = 150
+    require("which-key").setup {
+      -- your configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    }
+  end
+}
+
 
 -- themes
   use { 'Mofiqul/dracula.nvim', as = "dracula"}
