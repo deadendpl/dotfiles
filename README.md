@@ -3,7 +3,14 @@
 This is meant for Arch based distros. Dependencies might not be available for other distros.
 
 ## [bspwm](https://github.com/baskerville/bspwm)
-![screenshot](screenshot-bspwm.png)
+Dracula
+![screenshot](screenshots/bspwm/dracula.png)
+
+Catppuccin Latte
+![screenshot](screenshots/bspwm/catppuccin-latte.png)
+
+Catppuccin Mocha
+![screenshot](screenshots/bspwm/catppuccin-mocha.png)
 
 Type of program | my default choice
 ------- | --------
@@ -17,7 +24,14 @@ Launcher | [rofi](https://github.com/davatorium/rofi)
 Compositor | [picom](https://github.com/yshui/picom)
 
 ## [hyprland](https://github.com//hyprwm/hyprland)
-![screenshot](screenshot-hypr.png)
+Dracula
+![screenshot](screenshots/hypr/dracula.png)
+
+Catppuccin Latte
+![screenshot](screenshots/hypr/catppuccin-latte.png)
+
+Catppuccin Mocha
+![screenshot](screenshots/hypr/catppuccin-mocha.png)
 
 Type of program | my default choice
 ------- | --------
@@ -39,15 +53,10 @@ Go into `install` folder and execute `main.sh`. The script will overwrite some f
 ---
 
 # THEMES
-Available themes are:
-- [Dracula](https://draculatheme.com)
-- Catppuccin Mocha
-- Catppuccin Latte
+In order to change between themes you need to execute script which should be in `home/.config/scripts/themes/main.sh`.
+In bspwm and hyprland (if dotfiles were applied correctly) you can bring it up by `super+F6`.
 
-In order to change between them you need to execute script which should be in `home/.config/scripts/themes/main.sh`.
-In bspwm and hyprland (if dotfiles were applied correctly) you can bring them up by `super+F6`.
-
-Not everything changes out of the box (like notification daemon and panel) so rebooting or logging out of your machine is recommended after chaning theme.
+Not everything changes out of the box (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
 
 ---
 ---
