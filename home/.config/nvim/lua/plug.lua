@@ -37,6 +37,12 @@ use {
   end
 }
 
+-- org mode :)
+use {'nvim-treesitter/nvim-treesitter'}
+use {'nvim-orgmode/orgmode', config = function()
+  require('orgmode').setup{}
+end
+}
 
 -- themes
   use { 'Mofiqul/dracula.nvim', as = "dracula"}
