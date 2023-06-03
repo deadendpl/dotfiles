@@ -29,3 +29,4 @@ gammastep
 lolcat
 shell-color-scripts
 ttf-ubuntu-nerd
+pavucontrol

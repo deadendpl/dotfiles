@@ -78,11 +78,16 @@
 
 (beacon-mode 1)
 
+
 ;; enable word-wrap (almost) everywhere
 (+global-word-wrap-mode +1)
 
 (setq initial-buffer-choice "~/.config/doom/start.org")
 
+;; ORG MODE
+
+;; putting bullets instead of stars in headings
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 ;; enable image support in org mode
 (after! org

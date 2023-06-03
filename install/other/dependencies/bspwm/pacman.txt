@@ -25,3 +25,4 @@ lolcat
 redshift
 shell-color-scripts
 ttf-ubuntu-nerd
+pavucontrol

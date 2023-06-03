@@ -2,7 +2,7 @@
 # WARNING:
 This is meant for Arch based distros. Dependencies might not be available for other distros.
 
-## [bspwm](https://github.com/baskerville/bspwm)
+# [bspwm](https://github.com/baskerville/bspwm)
 Dracula
 ![screenshot](screenshots/bspwm/dracula.png)
 
@@ -23,7 +23,7 @@ Bar | [polybar](https://github.com/polybar/polybar)
 Launcher | [rofi](https://github.com/davatorium/rofi)
 Compositor | [picom](https://github.com/yshui/picom)
 
-## [hyprland](https://github.com//hyprwm/hyprland)
+# [hyprland](https://github.com//hyprwm/hyprland)
 Dracula
 ![screenshot](screenshots/hypr/dracula.png)
 

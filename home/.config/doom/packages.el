@@ -52,3 +52,4 @@
 (package! evil-tutor)
 (package! beacon)
 (package! imenu-list)
+(package! org-bullets)
