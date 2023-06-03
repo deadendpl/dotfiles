@@ -3,11 +3,11 @@
 This is meant for Arch based distros. Dependencies might not be available for other distros.
 
 * [[https://github.com/baskerville/bspwm][bspwm]]
-Dracula [[file:screenshots/bspwm/dracula.png]]
+- Dracula [[file:screenshots/bspwm/dracula.png]]
 
-Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
+- Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
 
-Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
+- Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
 
 | Type of program           | my default choice  |
 |---------------------------+--------------------|
@@ -21,11 +21,11 @@ Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
 | Compositor                | [[https://github.com/yshui/picom][picom]]              |
 
 * [[https://github.com//hyprwm/hyprland][hyprland]]
-Dracula [[file:screenshots/hypr/dracula.png]]
+- Dracula [[file:screenshots/hypr/dracula.png]]
 
-Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]
+- Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]
 
-Catppuccin Mocha [[file:screenshots/hypr/catppuccin-mocha.png]]
+- Catppuccin Mocha [[file:screenshots/hypr/catppuccin-mocha.png]]
 
 | Type of program           | my default choice  |
 |---------------------------+--------------------|
