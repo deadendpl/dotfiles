@@ -1,0 +1,49 @@
+* dotfiles
+* WARNING:
+This is meant for Arch based distros. Dependencies might not be available for other distros.
+
+* [[https://github.com/baskerville/bspwm][bspwm]]
+Dracula [[file:screenshots/bspwm/dracula.png]]
+
+Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
+
+| Type of program           | my default choice  |
+|---------------------------+--------------------|
+| Terminal Emulator         | [[https://github.com/alacritty/alacritty][alacritty]]          |
+| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]               |
+| File Manager              | pcmanfm            |
+| Web Browser               | firefox            |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]] ([[https://github.com/doomemacs/doomemacs][doom emacs]]) |
+| Bar                       | [[https://github.com/polybar/polybar][polybar]]            |
+| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]               |
+| Compositor                | [[https://github.com/yshui/picom][picom]]              |
+
+* [[https://github.com//hyprwm/hyprland][hyprland]]
+Dracula [[file:screenshots/hypr/dracula.png]]
+
+Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]
+
+Catppuccin Mocha [[file:screenshots/hypr/catppuccin-mocha.png]]
+
+| Type of program           | my default choice  |
+|---------------------------+--------------------|
+| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]               |
+| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]               |
+| File Manager              | pcmanfm            |
+| Web Browser               | firefox            |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]] ([[https://github.com/doomemacs/doomemacs][doom emacs]]) |
+| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]             |
+| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]               |
+| Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]           |
+
+* INSTALLING
+Go into =install= folder and execute =main.sh=. The script will overwrite some folders in =~/.config= so make sure to make an backup.
+
+* THEMES
+In order to change between themes you need to execute script which should be in =home/.config/scripts/themes/main.sh=. In bspwm and hyprland (if dotfiles were applied correctly) you can bring it up by =super+F6=.
+
+Not everything changes out of the box (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
+
+* TODO
+- good (for me) neovim config
+- adding gtk3 theme changing in bspwm
