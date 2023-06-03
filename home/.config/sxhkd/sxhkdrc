@@ -37,6 +37,10 @@ super + shift + Return
 super + m
     $terminal -e htop
 
+# task manager with sudo permissions
+super + shift + m
+    $terminal -e sudo htop
+
 # bitwarden in rofi
 super + b
     bwmenu

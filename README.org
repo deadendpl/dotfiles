@@ -1,4 +1,6 @@
-* dotfiles
+#+TITLE: dotfiles
+#+STARTUP: noinlineimages
+
 * WARNING:
 This is meant for Arch based distros. Dependencies might not be available for other distros.
 
@@ -44,7 +46,7 @@ Go into =install= folder and execute =main.sh=. The script will overwrite some f
 * THEMES
 In order to change between themes you need to execute script which should be in =home/.config/scripts/themes/main.sh=. In bspwm and hyprland (if dotfiles were applied correctly) you can bring it up by =super+F6=.
 
-Not everything changes out of the box (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
+Not everything changes instantly (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
 
 * TODO
 - good (for me) neovim config
