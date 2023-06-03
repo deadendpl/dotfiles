@@ -5,6 +5,8 @@ This is meant for Arch based distros. Dependencies might not be available for ot
 * [[https://github.com/baskerville/bspwm][bspwm]]
 Dracula [[file:screenshots/bspwm/dracula.png]]
 
+Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
+
 Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
 
 | Type of program           | my default choice  |
