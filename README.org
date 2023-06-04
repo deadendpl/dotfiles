@@ -48,6 +48,6 @@ In order to change between themes you need to execute script which should be in 
 
 Not everything changes instantly (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
 
-* TODO
-- good (for me) neovim config
-- adding gtk3 theme changing in bspwm
+* TODO TODO [1/2]
+- [ ] good (for me) neovim config
+- [X] adding gtk3 theme changing in bspwm
