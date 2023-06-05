@@ -39,7 +39,7 @@ Now we load essential programs
 - =sxhkd= - hotkey daemon. it manages all keyboard shortcuts
 - =polybar-start.sh= - wrapper script for polybar (the panel/bar)
 - =wall.sh= - script that sets random wallpaper from set directory
-- =picom= - a compositor. With that you can have transparency in programs (like terminal)
+- =picom= - a compositor. With that you can have some effects and transparency in programs (like terminal)
 - =dunst= - notification daemon
 - =udiskie= is disk drive mouning daemon
 
