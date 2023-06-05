@@ -1,6 +1,11 @@
 #!/bin/bash
 
 dir="$HOME/Documents/books"
+
+if [ ! -d "$dir" ]; then
+  mkdir -p "$dir"
+fi
+
 cd "$dir"
 
 files=(*)

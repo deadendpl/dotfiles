@@ -2,7 +2,7 @@
 
 file_path="$HOME/.config/gtk-4.0/"
 
-if [ -d "$file_path" ]; then
+if [ ! -d "$file_path" ]; then
     mkdir -p "$file_path"
 fi
 
