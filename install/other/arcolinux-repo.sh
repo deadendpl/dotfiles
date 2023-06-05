@@ -1,7 +1,7 @@
 #!/bin/bash
 
 repo_lines="[arcolinux_repo_3party]
-SigLevel = Required DatabaseOptional
+SigLevel = Required TrustAll
 Server = https://arcolinux.github.io/arcolinux_repo_3party/\$arch"
 
 # Backup the original pacman.conf file
