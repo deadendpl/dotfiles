@@ -84,14 +84,13 @@
 
 (setq initial-buffer-choice "~/.config/doom/start.org")
 
+
 ;; ORG MODE
 
-;; putting bullets instead of stars in headings
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-
-;; enable image support in org mode
 (after! org
-  (setq org-startup-with-inline-images t))
+  (setq org-startup-with-inline-images t)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
 
 ;; imenu
 (setq imenu-list-focus-after-activation t)
