@@ -32,3 +32,5 @@ ttf-ubuntu-nerd
 pavucontrol
 qt5ct
 foot
+networkmanager
+gksu

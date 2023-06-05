@@ -29,3 +29,5 @@ pavucontrol
 qt5ct
 bspwm
 lxappearance
+networkmanager
+gksu
