@@ -31,3 +31,4 @@ bspwm
 lxappearance
 networkmanager
 gksu
+firefox

@@ -34,3 +34,4 @@ qt5ct
 foot
 networkmanager
 gksu
+firefox
