@@ -51,4 +51,4 @@ Not everything changes instantly (like notification daemon and panel) so rebooti
 * TODO TODO [1/3]
 - [ ] good (for me) neovim config
 - [X] adding gtk3 theme changing in bspwm
-- [ ] (maybe) makingg main configs as org documents (🗿)
+- [ ] (maybe) making main configs as org documents (🗿)
