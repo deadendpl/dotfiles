@@ -53,3 +53,4 @@
 (package! beacon)
 (package! imenu-list)
 (package! org-bullets)
+(package! org-auto-tangle)

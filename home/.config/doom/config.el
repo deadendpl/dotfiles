@@ -88,6 +88,11 @@
 ;; ORG MODE
 
 (after! org
+  (use-package! org-auto-tangle
+    :defer t
+    :hook (org-mode . org-auto-tangle-mode)
+    :config
+    (setq org-auto-tangle-default t))
   (setq org-startup-with-inline-images t)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 

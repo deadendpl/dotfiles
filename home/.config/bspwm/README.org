@@ -1,0 +1,102 @@
+#+TITLE: Bspwm config
+#+PROPERTY: header-args :tangle bspwmrc
+#+auto_tangle: t
+
+* bspwmrc
+bspwrc is a shell script that gets read by bspwm on its startup.
+You can load programs and settings with this.
+The default path of bspwmrc is in =$HOME/.config/bspwm/bspwmrc=.
+
+* code
+
+** variables
+The first thing is setting my variables.
+These will be used for [[../sxhkd/sxhkdrc][sxhkdrc]].
+
+- =terminal= - default terminal emulator
+- =web_browser= - default web browser
+- =file_manager= - default file manager
+- =editor= - default IDE
+- =editor2= - 2nd IDE (neovim doesn't work properly so don't use it)
+- =EDITOR= - default editor in terminal
+
+#+BEGIN_SRC shell :shebang "#!/bin/bash"
+
+# variables for sxhkdrc
+export terminal="alacritty"
+export web_browser="firefox"
+export file_manager="pcmanfm"
+export editor="emacs"
+export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
+export EDITOR="vim"
+
+#+END_SRC
+
+
+** essential startups
+Now we load essential programs
+
+- =sxhkd= - hotkey daemon. it manages all keyboard shortcuts
+- =polybar-start.sh= - wrapper script for polybar (the panel/bar)
+- =wall.sh= - script that sets random wallpaper from set directory
+- =picom= - a compositor. With that you can have transparency in programs (like terminal)
+- =dunst= - notification daemon
+- =udiskie= is disk drive mouning daemon
+
+#+BEGIN_SRC shell
+# hotkey daemon
+sxhkd &
+
+# script starting polybar
+~/.config/scripts/bspwm/polybar-start.sh
+
+# wallpaper
+~/.config/scripts/bspwm/wall.sh
+
+# compositor
+picom &
+
+# notifications
+dunst -config ~/.config/dunst/dracula &
+
+# drive mounting daemon
+udiskie &
+
+#+END_SRC
+
+** bspc rules
+These are rules and options for bspwm.
+
+With =bspc monitor= you can set amount of workspaces you have
+
+Then we have few mouse settings, window border and gap settings and 3 other things (idk what they do)
+
+Then we have rules.
+
+- idk what =Screenkey= rule does but I was using it at the start of the configuration to see code for keyboard keys
+- =emacs= doesn't tile by default so I set it to tile
+- =arandr= is little gui for xrandr(setting up displays) so I keep it as floating
+- =zathura= (cool pdf and books reader) as emacs doesn't tile
+#+BEGIN_SRC shell
+bspc monitor -d 1 2 3 4 5 6 7 8 9
+
+bspc config focus_follows_pointer true
+bspc config pointer_action1       move
+bspc config pointer_action2       resize_side
+bspc config pointer_action3       resize_corner
+
+bspc config border_width          3
+bspc config window_gap            7
+
+bspc config split_ratio           0.0
+bspc config borderless_monocle    true
+bspc config gapless_monocle       true
+
+bspc rule -a Screenkey manage=off
+
+bspc rule -a Emacs    state=tiled
+bspc rule -a Arandr   state=floating
+bspc rule -a Zathura  state=tiled
+#+END_SRC
+
+* and that's it.
