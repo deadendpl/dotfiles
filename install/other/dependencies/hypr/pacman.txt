@@ -31,3 +31,4 @@ shell-color-scripts
 ttf-ubuntu-nerd
 pavucontrol
 qt5ct
+foot
