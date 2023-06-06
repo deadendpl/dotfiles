@@ -1,3 +1,18 @@
+#+title: Hyprland configuration
+#+PROPERTY: header-args :tangle hyprland.conf
+#+auto_tangle: t
+
+* beginning
+=hyprland.conf= is a configuration file for hyprland.
+The default path is =$HOME/.config/hypr/hyprland.conf=.
+
+* code
+
+** monitor
+*WARNING*:
+This is meant and tested for one display.
+
+#+BEGIN_SRC conf
 # See https://wiki.hyprland.org/Configuring/Monitors/
 monitor=,preferred,auto,auto
 
@@ -12,12 +27,32 @@ monitor=,preferred,auto,auto
 #flipped + 270 degrees -> 7
 #monitor=,preferred,auto,auto,transform,1
 
+#+END_SRC
+
+** startup programs
+Here are started:
+- waybar (panel/bar)
+- dunst (notification daemon)
+- script for setting wallpaper
+- script for setting gtk themes
+#+BEGIN_SRC conf
 # boot stuff
 exec-once = ~/.config/scripts/hypr/waybar-start.sh
 exec-once = dunst -config ~/.config/dunst/dracula &
 exec-once = ~/.config/scripts/hypr/wall.sh
 exec-once = ~/.config/scripts/hypr/theme.sh
 
+#+END_SRC
+
+** variables
+Here are few variables set:
+- terminal
+- web browser
+- file manager
+- first IDE
+- second IDE
+
+#+BEGIN_SRC conf
 # Source a file (multi-file configs)
 # source = ~/.config/hypr/myColors.conf
 
@@ -36,6 +71,11 @@ $editor2=$terminal -e nvim
 
 # For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 
+#+END_SRC
+
+** input stuff
+I'm polish so I use polish keyboard layout.
+#+BEGIN_SRC conf
 input {
     kb_layout = pl
     kb_variant =
@@ -57,6 +97,12 @@ gestures {
     workspace_swipe = on
 }
 
+#+END_SRC
+
+** animations and decorations
+There are also some widow layout options.
+
+#+BEGIN_SRC conf
 general {
     # See https://wiki.hyprland.org/Configuring/Variables/ for more
 
@@ -110,6 +156,18 @@ master {
     new_is_master = true
 }
 
+#+END_SRC
+
+** window rules
+Before window rules there is some mouse config but idk if it does anything (it's probably default)
+
+Then we have window rules
+- wdisplays is a program for managing displays on wayland
+- feh is a image viewer
+- waydroid is an android container so it's better to have it in fullscreen
+- picture in picture mode in firefox
+- border color for floating windows
+#+BEGIN_SRC conf
 # Example per-device config
 # See https://wiki.hyprland.org/Configuring/Keywords/#executing for more
 device:epic-mouse-v1 {
@@ -128,6 +186,55 @@ windowrule = fullscreen, Waydroid
 windowrulev2 = float,class:^(firefox)$,title:^(Picture-in-Picture)$
 windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 
+#+END_SRC
+
+** keybindings
+Probably the most important thing in here
+
+| Keybinding              | command                                                                     |
+|-------------------------+-----------------------------------------------------------------------------|
+| SUPER + T               | launches terminal                                                           |
+| SUPER + W               | lunches web browser                                                         |
+| SUPER + E               | launches first IDE                                                          |
+| SUPER + Shift + E       | launches second IDE                                                         |
+| SUPER + F               | launches file manager                                                       |
+| SUPER + Enter           | launches rofi (app launcher)                                                |
+| SUPER + Shift + Enter   | launches script hub                                                         |
+| SUPER + B               | launches bitwarden menu                                                     |
+| SUPER + M               | launches task manager                                                       |
+| SUPER + Shift + M       | launches task manager with admin permissions                                |
+| SUPER + /               | launches web search                                                         |
+| SUPER + Shift + /       | launches bookmarks menu                                                     |
+| SUPER + Alt + /         | puts item in clipboard into bookmarks file                                  |
+| SUPER + Shift + Alt + / | edits bookmarks file directly                                               |
+| Raise Volume key        | self explenatory                                                            |
+| Lower Volume key        | self explanatory                                                            |
+| Audio Mute key          | self explanatory                                                            |
+| Brightness Up key       | self explanatory                                                            |
+| Brightness Down key     | self explanatory                                                            |
+| PrintScreen             | launches screenshot script                                                  |
+| SUPER + F7              | launches network menu                                                       |
+| SUPER + F10             | launches display menu                                                       |
+| SUPER + F9              | launches drive management menu                                              |
+| SUPER + F6              | launches theme changing menu                                                |
+| SUPER + Q               | closes the window                                                           |
+| SUPER + Shift + Q       | launches power menu                                                         |
+| SUPER + P               | turns peudo tiling                                                          |
+| SUPER + J               | (from left/right turns window positions to up/down)                         |
+| SUPER + V               | makes the current window floating                                           |
+| SUPER + Shift + F       | makes the current window fullscreen                                         |
+| SUPER + ←/↓/→/↑         | changes window focus according to arrow key                                 |
+| SUPER + 1-9             | changes to workspace 1-9                                                    |
+| SUPER + Shift + 1-9     | moves current window to worskpace 1-9                                       |
+| SUPER + Ctrl + ←/→      | moves to left or right workspace                                            |
+| SUPER + Shift + ←/→     | moves current window to left or right workspace and moves to that workspace |
+| SUPER + LMB             | lets you drag and move windows to different positions                       |
+| SUPER + RMB             | lets you resize windows                                                     |
+| SUPER + Scroll          | lets you scroll between workspaces                                          |
+
+=$mainMod= is a variable to super(windows) key
+
+#+BEGIN_SRC conf
 # See https://wiki.hyprland.org/Configuring/Keywords/ for more
 $mainMod = SUPER
 
@@ -230,3 +337,6 @@ bindm = $mainMod, mouse:273, resizewindow
 # Scroll through existing workspaces with mainMod + scroll
 bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
+#+END_SRC
+
+* and that's it
