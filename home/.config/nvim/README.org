@@ -3,7 +3,7 @@
 
 * beginning
 All of neovim configuration is in =init.lua=.
-I decided to make it this way because with org mode it's still well organized 🗿
+I decided to make it this way because with org mode it's well organized 🗿
 
 * code
 

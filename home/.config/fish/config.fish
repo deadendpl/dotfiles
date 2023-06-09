@@ -41,7 +41,7 @@ alias clr='clear'
 alias cllr='clear && ll'
 alias grep='grep --color=auto'
 alias man='batman'
-#alias vim='nvim'
+alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 
 colorscript random
