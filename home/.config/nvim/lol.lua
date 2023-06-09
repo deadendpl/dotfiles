@@ -1,8 +1,20 @@
--- [[ plug.lua ]]
+local ensure_packer = function()
+  local fn = vim.fn
+  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    vim.cmd [[packadd packer.nvim]]
+    return true
+  end
+  return false
+end
+
+local packer_bootstrap = ensure_packer()
 
 return require('packer').startup(function(use)
-  -- [[ Plugins Go Here ]]
-  use {
+  use 'wbthomason/packer.nvim'
+  -- My plugins here
+   use {
     'kyazdani42/nvim-tree.lua',                -- filesystem navigation
     requires = 'kyazdani42/nvim-web-devicons'  -- filesystem icons
   }
@@ -11,7 +23,7 @@ return require('packer').startup(function(use)
 use { 'vim-scripts/mru.vim' }
 
 -- cursor jump
-  use { 'DanilaMihailov/beacon.nvim' }               
+  use { 'DanilaMihailov/beacon.nvim' }
 
 -- statusline
   use {
@@ -70,8 +82,9 @@ end
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' } -- git
 
 
-end, {
-  config = {
-    package_root = vim.fn.stdpath('config') .. 'packages'
-  }
-})
+  -- Automatically set up your configuration after cloning packer.nvim
+  -- Put this at the end after all plugins
+  if packer_bootstrap then
+    require('packer').sync()
+  end
+end)

@@ -1,4 +1,4 @@
-hyprland-git
+hyprland
 otf-codenewroman-nerd
 htop
 papirus-icon-theme

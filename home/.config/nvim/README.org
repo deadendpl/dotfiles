@@ -1,3 +1,16 @@
+#+title: NeoVim configuration
+#+PROPERTY: header-args :tangle init.lua
+
+* beginning
+All of neovim configuration is in =init.lua=.
+I decided to make it this way because with org mode it's still well organized 🗿
+
+* code
+
+** installing plugins
+The task during first boot will be installing packer(package manager) and installing plugins.
+
+#+BEGIN_SRC lua
 local ensure_packer = function()
   local fn = vim.fn
   local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
@@ -80,12 +93,25 @@ use {
     require('packer').sync()
   end
 
+
+#+END_SRC
+
+** variables
+Just setting few basic variables
+
+#+BEGIN_SRC lua
 -- variables
 
 local g = vim.g
 g.t_co = 256
 g.background = "dark"
 
+#+END_SRC
+
+** options
+Setting few options
+
+#+BEGIN_SRC lua
 -- options
 local opt = vim.opt
 local cmd = vim.api.nvim_command
@@ -133,6 +159,13 @@ require('lualine').setup {
   }
 }
 
+
+#+END_SRC
+
+** keybindings
+Setting keybindings.
+
+#+BEGIN_SRC lua
 -- keybindings
 local map = vim.api.nvim_set_keymap
 
@@ -179,6 +212,13 @@ map('n', '<leader>.', ':split <bar> wincmd J <bar> Explore<CR>', {noremap = true
 -- neogit
 map('n', '<leader>gg', [[:Neogit<CR>]], {})
 
+
+#+END_SRC
+
+** startup
+Some options that will be set on neovim's startup
+
+#+BEGIN_SRC lua
 -- startup
 
 -- using system's clipboard
@@ -207,3 +247,4 @@ require('telescope').setup{
 }
 
 end)
+#+END_SRC
