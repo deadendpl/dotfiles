@@ -1,6 +1,15 @@
 #+title: NeoVim configuration
 #+PROPERTY: header-args :tangle init.lua
 
+* Table of Contents :toc:
+- [[#beginning][beginning]]
+- [[#code][code]]
+  - [[#installing-plugins][installing plugins]]
+  - [[#variables][variables]]
+  - [[#options][options]]
+  - [[#keybindings][keybindings]]
+  - [[#startup][startup]]
+
 * beginning
 All of neovim configuration is in =init.lua=.
 I decided to make it this way because with org mode it's well organized 🗿

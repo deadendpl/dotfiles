@@ -2,10 +2,17 @@
 #+PROPERTY: header-args :tangle bspwmrc
 #+auto_tangle: t
 
+* Table of contents :toc:
+- [[#bspwmrc][bspwmrc]]
+- [[#code][code]]
+  - [[#variables][variables]]
+  - [[#essential-startups][essential startups]]
+  - [[#bspc-rules][bspc rules]]
+
 * bspwmrc
 bspwrc is a shell script that gets read by bspwm on its startup.
 You can load programs and settings with this.
-The default path of bspwmrc is in =$HOME/.config/bspwm/bspwmrc=.
+The default path of bspwmrc is =$HOME/.config/bspwm/bspwmrc=.
 
 * code
 
@@ -98,5 +105,3 @@ bspc rule -a Emacs                state=tiled
 bspc rule -a Arandr               state=floating
 bspc rule -a Zathura              state=tiled
 #+END_SRC
-
-* and that's it.

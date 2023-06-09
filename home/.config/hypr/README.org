@@ -2,6 +2,17 @@
 #+PROPERTY: header-args :tangle hyprland.conf
 #+auto_tangle: t
 
+* Table of Contents :toc:
+- [[#beginning][beginning]]
+- [[#code][code]]
+  - [[#monitor][monitor]]
+  - [[#startup-programs][startup programs]]
+  - [[#variables][variables]]
+  - [[#input-stuff][input stuff]]
+  - [[#animations-and-decorations][animations and decorations]]
+  - [[#window-rules][window rules]]
+  - [[#keybindings][keybindings]]
+
 * beginning
 =hyprland.conf= is a configuration file for hyprland.
 The default path is =$HOME/.config/hypr/hyprland.conf=.
@@ -338,5 +349,3 @@ bindm = $mainMod, mouse:273, resizewindow
 bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
 #+END_SRC
-
-* and that's it
