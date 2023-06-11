@@ -225,6 +225,7 @@ Probably the most important thing in here
 | Brightness Down key     | self explanatory                                                            |
 | PrintScreen             | launches screenshot script                                                  |
 | SUPER + F7              | launches network menu                                                       |
+| SUPER + Shift + F7      | launches bluetooth menu                                                     |
 | SUPER + F10             | launches display menu                                                       |
 | SUPER + F9              | launches drive management menu                                              |
 | SUPER + F6              | launches theme changing menu                                                |
@@ -273,7 +274,7 @@ bind = $mainMod SHIFT, M,          exec, $terminal -e sudo htop
 bind = $mainMod, 61,               exec, ~/.config/scripts/web-search.sh
 bind = $mainMod SHIFT, 61,         exec, ~/.config/scripts/bookmarks.sh
 bind = $mainMod ALT, 61,           exec, ~/.config/scripts/bookmarking.sh
-bind = $mainMod ALT SHIFT, 61,     exec, $terminal -e vim ~/Documents/bookmarks
+bind = $mainMod ALT SHIFT, 61,     exec, $terminal -e nvim ~/Documents/bookmarks
 
 # laptop keys
 bind = ,XF86AudioRaiseVolume,      exec, pactl set-sink-volume @DEFAULT_SINK@ +5%
@@ -286,6 +287,7 @@ bind = ,XF86MonBrightnessDown,     exec, enlighten -3%
 bind = ,Print,                     exec, ~/.config/scripts/hypr/screenshot.sh
 
 bind = $mainMod, F7,               exec, networkmanager_dmenu
+bind = $mainMod SHIFT, F7,         exec, rofi-bluetooth
 bind = $mainMod, F10,              exec, wdisplays
 bind = $mainMod, F9,               exec, udiskie-dmenu
 

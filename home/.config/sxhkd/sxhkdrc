@@ -64,7 +64,7 @@ super + alt + slash
 
 # editing bookmarks file directly
 super + shift + alt + slash
-    $terminal -e vim ~/Documents/bookmarks
+    $terminal -e nvim ~/Documents/bookmarks
 
 # bookmarks script
 super + shift + slash

@@ -16,6 +16,7 @@ I decided to make it this way because with org mode it's well organized 🗿
 
 * code
 ** installing plugins
+
 The task during first boot will be installing packer(package manager) and installing plugins.
 If you will later add plugins you need to enter neovim and type =:PackerInstall= to install them.
 
