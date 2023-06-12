@@ -36,3 +36,4 @@ networkmanager
 gksu
 firefox
 mpv
+grimblast
