@@ -35,3 +35,4 @@ foot
 networkmanager
 gksu
 firefox
+mpv

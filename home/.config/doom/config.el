@@ -22,7 +22,7 @@
 ;; accept. For example:
 ;;
 (setq doom-font (font-spec :family "CodeNewRoman Nerd Font Mono" :size 13))
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+(setq doom-variable-pitch-font (font-spec :family "Ubuntu Nerd Font" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -107,3 +107,8 @@
 (map! :leader
       (:prefix ("t" . "Toggle")
        :desc "Toggle imenu shown in a sidebar" "i" #'imenu-list-smart-toggle))
+
+;; opening mp4 files with mpv
+(require 'openwith)
+(openwith-mode t)
+(setq openwith-associations '(("\\.mp4\\'" "mpv" (file))))

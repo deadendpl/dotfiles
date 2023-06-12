@@ -54,3 +54,4 @@
 (package! imenu-list)
 (package! org-bullets)
 (package! org-auto-tangle)
+(package! openwith)
