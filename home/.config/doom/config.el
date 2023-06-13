@@ -94,6 +94,7 @@
     :config
     (setq org-auto-tangle-default t))
   (setq org-startup-with-inline-images t)
+  (setq org-hide-emphasis-markers t)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 
