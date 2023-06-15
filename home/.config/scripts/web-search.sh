@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a search_engines=( "Gutenberg" "Last.fm" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "AUR (Arch User Repository)" "You" "Brave Search" "Google" "DuckDuckGo" "Bing" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "Nix Packages" "Gutenberg" "Last.fm" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "AUR (Arch User Repository)" "You" "Brave Search" "Google" "DuckDuckGo" "Bing" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -b -p "Search engine:")
 
@@ -46,6 +46,9 @@ case $selected_engine in
         ;;
     "Gutenberg")
         URL="https://www.gutenberg.org/ebooks/search/?query="
+        ;;
+    "Nix Packages")
+        URL="https://search.nixos.org/packages?query="
         ;;
   *)
         exit 0

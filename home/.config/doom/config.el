@@ -95,6 +95,7 @@
     (setq org-auto-tangle-default t))
   (setq org-startup-with-inline-images t)
   (setq org-hide-emphasis-markers t)
+  (setq org-insert-heading-respect-content nil)
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 
