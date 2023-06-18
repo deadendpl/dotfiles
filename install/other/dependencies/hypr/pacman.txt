@@ -2,7 +2,7 @@ hyprland
 otf-codenewroman-nerd
 htop
 papirus-icon-theme
-waybar-hyprland-git
+waybar
 exa
 qt5-wayland
 swaybg
