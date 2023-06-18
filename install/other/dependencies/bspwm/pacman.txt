@@ -37,3 +37,4 @@ polkit-gnome
 sxhkd
 alacritty
 picom
+arandr

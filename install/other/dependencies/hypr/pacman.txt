@@ -37,3 +37,4 @@ gksu
 firefox
 mpv
 polkit-gnome
+grimshot
