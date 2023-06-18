@@ -34,3 +34,6 @@ gksu
 firefox
 mpv
 polkit-gnome
+sxhkd
+alacritty
+picom

@@ -7,3 +7,5 @@ grimblast-git
 catppuccin-gtk-theme-mocha
 dracula-gtk-theme
 catppuccin-gtk-theme-latte
+rofi-bluetooth-git
+grimblast-git
