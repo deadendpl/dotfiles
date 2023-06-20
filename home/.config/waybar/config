@@ -95,6 +95,7 @@
     "bluetooth": {
     "format-on": "  ",
         "format-disabled": " 󰂲 ",
+        "format-off": " 󰂲 ",
         "format-connected": "  {device_alias} ",
     "format-connected-battery": "  {device_alias} {device_battery_percentage}%",
     // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
