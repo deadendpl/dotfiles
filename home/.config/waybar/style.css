@@ -66,6 +66,11 @@ window#waybar {
     color: @cyan;
 }
 
+#bluetooth.off {
+    background-color: @background;
+    color: @cyan;
+}
+
 #network {
     background-color: @red;
     color: @background;

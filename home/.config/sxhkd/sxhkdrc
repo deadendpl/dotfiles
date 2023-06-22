@@ -49,6 +49,10 @@ super + b
 super + F1
     ~/.config/scripts/bspwm/sxhkd-help.sh
 
+# launching sound volume changing menu
+super + F2
+    ~/.config/scripts/volume.sh
+
 # changing themes
 super + F6
     ~/.config/scripts/themes/main.sh

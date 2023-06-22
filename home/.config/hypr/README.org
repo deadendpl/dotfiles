@@ -119,7 +119,7 @@ There are also some widow layout options.
 general {
     # See https://wiki.hyprland.org/Configuring/Variables/ for more
 
-    gaps_in = 5
+    gaps_in = 3
     gaps_out = 10
     border_size = 2
     col.active_border = rgba(33ccffee) rgba(00ff99ee) 45deg
@@ -226,6 +226,7 @@ Probably the most important thing in here
 | Brightness Up key       | self explanatory                                                            |
 | Brightness Down key     | self explanatory                                                            |
 | PrintScreen             | launches screenshot script                                                  |
+| SUPER + F2              | launches sound volume changing menu(if you're not on laptop)                |
 | SUPER + F7              | launches network menu                                                       |
 | SUPER + Shift + F7      | launches bluetooth menu                                                     |
 | SUPER + F10             | launches display menu                                                       |
@@ -288,6 +289,7 @@ bind = ,XF86MonBrightnessDown,     exec, enlighten -3%
 
 bind = ,Print,                     exec, ~/.config/scripts/hypr/screenshot.sh
 
+bind = $mainMod, F2,               exec, ~/.config/scripts/volume.sh
 bind = $mainMod, F7,               exec, networkmanager_dmenu
 bind = $mainMod SHIFT, F7,         exec, rofi-bluetooth
 bind = $mainMod, F10,              exec, wdisplays
