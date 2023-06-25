@@ -8,7 +8,7 @@ export $GRIM_DEFAULT_DIR=~/Pictures
 
 export EDITOR=vim
 
-export terminal="foot -c $HOME/.config/foot/dracula.ini"
+export terminal=foot
 export web_browser=firefox
 export file_manager=pcmanfm
 export editor=emacs

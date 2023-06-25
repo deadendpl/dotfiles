@@ -1,49 +1,16 @@
 #!/bin/bash
 
-file_path="$HOME/.config/hypr/hyprland.conf"
+file_path="$HOME/.config/foot/foot.ini"
 
 # Get the line containing "@import"
-old_line=$(grep "terminal=" "$file_path")
+old_line=$(grep "include" $file_path)
 
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    new_line='$terminal=foot -c ~/.config/foot/catppuccin-mocha.conf'
+    new_line='include = ~/.config/foot/catppuccin-mocha.ini'
     sed -i "s|$old_line|$new_line|" "$file_path"
     echo "Line replaced successfully!"
 else
     echo "Old line not found in the file."
 fi
-
-file_path="$HOME/.config/hypr/README.org"
-
-# Get the line containing "@import"
-old_line=$(grep "terminal=" "$file_path")
-
-# Check if the old line exists in the file
-if [ -n "$old_line" ]; then
-    # Replace the line using sed
-    new_line='$terminal=foot -c ~/.config/foot/catppuccin-mocha.conf'
-    sed -i "s|$old_line|$new_line|" "$file_path"
-    echo "Line replaced successfully!"
-else
-    echo "Old line not found in the file."
-fi
-
-unset $file_path
-
-file_path="$HOME/.config/scripts/hypr/wrappedhl"
-
-# Get the line containing "@import"
-old_line=$(grep "terminal=" "$file_path")
-
-# Check if the old line exists in the file
-if [ -n "$old_line" ]; then
-    # Replace the line using sed
-    new_line='export terminal="foot -c $HOME/.config/foot/catppuccin-mocha.conf"'
-    sed -i "s|$old_line|$new_line|" "$file_path"
-    echo "Line replaced successfully!"
-else
-    echo "Old line not found in the file."
-fi
-

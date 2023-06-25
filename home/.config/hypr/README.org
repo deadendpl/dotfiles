@@ -76,7 +76,7 @@ env = XCURSOR_SIZE,24
 # other env vars
 $_JAVA_AWT_WM_NONREPARENTING=1
 
-$terminal=foot -c ~/.config/foot/dracula.ini
+$terminal=foot
 $web_browser=firefox
 $file_manager=pcmanfm
 $editor=emacs
