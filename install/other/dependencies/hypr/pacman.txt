@@ -38,3 +38,4 @@ firefox
 mpv
 polkit-gnome
 grimshot
+dracula-cursors-git

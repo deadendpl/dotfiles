@@ -38,3 +38,4 @@ sxhkd
 alacritty
 picom
 arandr
+dracula-cursors-git
