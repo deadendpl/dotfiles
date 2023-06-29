@@ -32,7 +32,9 @@
     "on-scroll-up": "hyprctl dispatch workspace e-1",
     "on-scroll-down": "hyprctl dispatch workspace e+1",
     "format": "{icon}",
+    "format-icons": {
     "active": "",
+    },
   },
 
   "hyprland/window": {
@@ -74,7 +76,7 @@
         "format": " {capacity}% {icon} ",
         "format-charging": " {capacity}% 󰂄 ",
         "format-plugged": " {capacity}%  ",
-        "format-alt": "{time} {icon} ",
+        "format-alt": " {time} {icon} ",
         // "format-good": "", // An empty format will hide the module
         "format-full": " {capacity}% 󱈑 ",
         "format-icons": [" ", " ", " ", " ", " "]

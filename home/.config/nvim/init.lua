@@ -97,6 +97,8 @@ local g = vim.g
 g.t_co = 256
 g.background = "dark"
 
+vim.g.MRU_File = vim.fn.expand('$HOME/.cache/nvim/mru_history.txt')
+
 -- options
 local opt = vim.opt
 local cmd = vim.api.nvim_command
@@ -171,6 +173,9 @@ map('n', '<Leader>bn', [[:bn<CR>]], {})
 
 -- previous buffer
 map('n', '<Leader>bp', [[:bp<CR>]], {})
+
+-- killing buffer
+map('n', '<Leader>bk', [[:bdelete<CR>]], {})
 
 -- MRU
 map('n', '<Leader>fr', [[:MRU<CR>]], {})
