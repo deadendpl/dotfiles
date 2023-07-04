@@ -4,12 +4,15 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Changing root shell" "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
+declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
 if [[ $choice == "(hypr) Screen orientation" ]]; then
   ~/.config/scripts/hypr/screen-orientation.sh
+
+elif [[ $choice == "NVIM config as root" ]]; then
+  cd tweaks && $terminal -e ./nvim-as-root.sh
 
 elif [[ $choice == "Bookmarks" ]]; then
   ./bookmarks.sh

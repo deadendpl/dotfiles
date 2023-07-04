@@ -3,7 +3,6 @@ bitwarden-rofi-git
 networkmanager-dmenu-git
 udiskie-dmenu-git
 clipboard
-grimblast-git
 catppuccin-gtk-theme-mocha
 dracula-gtk-theme
 catppuccin-gtk-theme-latte
