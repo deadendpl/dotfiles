@@ -3,27 +3,23 @@
 export terminal="alacritty"
 export web_browser="firefox"
 export file_manager="pcmanfm"
-export editor="emacs"
+export editor="emacsclient -c -a emacs"
 export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
 export EDITOR="vim"
 
-# hotkey daemon
 sxhkd &
 
-# script starting polybar
 ~/.config/scripts/bspwm/polybar-start.sh
 
-# wallpaper
 ~/.config/scripts/bspwm/wall.sh
 
-# compositor
 picom &
 
-# notifications
 dunst -config ~/.config/dunst/dracula &
 
-# drive mounting daemon
 udiskie &
+
+emacs --daemon
 
 bspc monitor -d 1 2 3 4 5 6 7 8 9
 

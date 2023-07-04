@@ -33,7 +33,7 @@ These will be used for [[../sxhkd/sxhkdrc][sxhkdrc]].
 export terminal="alacritty"
 export web_browser="firefox"
 export file_manager="pcmanfm"
-export editor="emacs"
+export editor="emacsclient -c -a emacs"
 export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
 export EDITOR="vim"
 
@@ -49,25 +49,22 @@ Now we load essential programs
 - =picom= - a compositor. With that you can have some effects and transparency in programs (like terminal)
 - =dunst= - notification daemon
 - =udiskie= is disk drive mouning daemon
+- =emacs= daemon is for quicker emacs loading
 
 #+BEGIN_SRC shell
-# hotkey daemon
 sxhkd &
 
-# script starting polybar
 ~/.config/scripts/bspwm/polybar-start.sh
 
-# wallpaper
 ~/.config/scripts/bspwm/wall.sh
 
-# compositor
 picom &
 
-# notifications
 dunst -config ~/.config/dunst/dracula &
 
-# drive mounting daemon
 udiskie &
+
+emacs --daemon
 
 #+END_SRC
 

@@ -101,7 +101,7 @@ use {'seandewar/nvimesweeper'}
   use { 'junegunn/gv.vim' }                          -- commit history
   use { 'windwp/nvim-autopairs' }
 
-  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' } -- git
+  use { 'NeogitOrg/neogit', requires = 'nvim-lua/plenary.nvim' } -- git
 
 
   -- Automatically set up your configuration after cloning packer.nvim

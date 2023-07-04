@@ -19,7 +19,7 @@ super + f
 
 # editor
 super + e
-    $editor
+    eval $editor
 
 # another editor
 super + shift + e
