@@ -4,6 +4,9 @@
 export PATH=~/.config/emacs/bin:$PATH
 export EDITOR='vim'
 
+# setting tty colors
+source ~/.config/tty-colors/bash/dracula
+
 # apt
 alias ainst='sudo apt install'
 alias apu='sudo apt purge'
@@ -39,6 +42,7 @@ alias ip='ip -color=auto'
 alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
+alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 PS1='[\u@\h \W]\$'
 
 colorscript random

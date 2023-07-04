@@ -8,6 +8,9 @@ export EDITOR='vim'
 set fish_greeting
 fish_vi_key_bindings
 
+# importing tty colors
+source ~/.config/tty-colors/fish/dracula
+
 ## aliases
 
 # apt
@@ -44,6 +47,7 @@ alias ip='ip -color=auto'
 alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
+alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 
 colorscript random
 
