@@ -16,7 +16,6 @@ I decided to make it this way because with org mode it's well organized 🗿
 
 * code
 ** installing plugins
-
 The task during first boot will be installing packer(package manager) and installing plugins.
 If you will later add plugins you need to enter neovim and type =:PackerInstall= to install them.
 
@@ -41,9 +40,6 @@ return require('packer').startup(function(use)
     'kyazdani42/nvim-tree.lua',                -- filesystem navigation
     requires = 'kyazdani42/nvim-web-devicons'  -- filesystem icons
   }
-
--- MRU
-use { 'vim-scripts/mru.vim' }
 
 -- cursor jump
   use { 'DanilaMihailov/beacon.nvim' }
@@ -127,8 +123,6 @@ local g = vim.g
 g.t_co = 256
 g.background = "dark"
 
-vim.g.MRU_File = vim.fn.expand('$HOME/.cache/nvim/mru_history.txt')
-
 
 #+END_SRC
 
@@ -188,6 +182,7 @@ require('lualine').setup {
 
 ** keybindings
 Setting keybindings.
+Most of them are set in a way that will allow to show their description in =which-key=.
 
 #+BEGIN_SRC lua
 -- keybindings
@@ -195,6 +190,37 @@ local map = vim.api.nvim_set_keymap
 
 vim.g.mapleader = " "
 vim.g.localleader = "\\"
+
+local wk = require("which-key")
+wk.register({
+  ["<leader>o"] = { name = "+orgmode" },
+  ["<leader>f"] = { name = "+file" },
+  ["<leader><leader>"] = { "<cmd>Telescope find_files hidden=true<cr>", "Find File" },
+  ["<leader>ff"] = { "<cmd>Telescope find_files hidden=true<cr>", "Find File" },
+  ["<leader>fr"] = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
+  ["<leader>fn"] = { "<cmd>enew<cr>", "New File" },
+
+  ["<leader>b"] = { name = "+buffer" },
+  ["<leader>bn"] = { [[:bn<CR>]], "Next buffer" },
+  ["<leader>bp"] = { [[:bp<CR>]], "Previous buffer" },
+  ["<leader>bk"] = { [[:bdelete<CR>]], "Kill buffer" },
+
+  ["<leader>w"] = { name = "+split" },
+  ["<leader>ws"] = { [[:sp<CR>]], "Horizontal split" },
+  ["<leader>wv"] = { [[:vsp<CR>]], "Verical split" },
+  ["<leader>ww"] = { [[<C-w>w]], "Next split" },
+  ["<leader>wh"] = { [[<C-w>h]], "Right split" },
+  ["<leader>wj"] = { [[<C-w>j]], "Lower split" },
+  ["<leader>wk"] = { [[<C-w>k]], "Upper split" },
+  ["<leader>wl"] = { [[<C-w>l]], "Left split" },
+  ["<leader>wc"] = { [[:close<CR>]], "Kill split" },
+
+  ["<leader>n"] = { [[:NvimTreeToggle<CR>]], "Nvim Tree" },
+  ["<leader>l"] = { [[:IndentLinesToggle<CR>]], "Indenting lines" },
+  ["<leader>t"] = { [[:TagbarToggle<CR>]], "Tagbar" },
+  ["<leader>gg"] = { [[:Neogit<CR>]], "Neogit" },
+  ["<leader>."] = { ":split <bar> wincmd J <bar> Explore<CR>", "File browser" },
+})
 
 -- Unset arrow keys because why not? :)
 map('n', '<Up>', '<NOP>', { noremap = true, silent = true })
@@ -208,36 +234,6 @@ map('i', '<Right>', '<NOP>', { noremap = true, silent = true })
 
 -- 'jk' in insert mode to leave insert mode
 map('i', 'jk', '<ESC>', {})
-
--- nvim-tree
-map('n', '<Leader>n', [[:NvimTreeToggle<CR>]], {})
-
--- next buffer
-map('n', '<Leader>bn', [[:bn<CR>]], {})
-
--- previous buffer
-map('n', '<Leader>bp', [[:bp<CR>]], {})
-
--- killing buffer
-map('n', '<Leader>bk', [[:bdelete<CR>]], {})
-
--- MRU
-map('n', '<Leader>fr', [[:MRU<CR>]], {})
-
--- indenting lines
-map('n', '<Leader>l', [[:IndentLinesToggle<CR>]], {})
-
--- tagbar
-map('n', '<Leader>t', [[:TagbarToggle<CR>]], {})
-
--- telescope (finding files)
-map('n', '<Leader><Leader>', [[:Telescope find_files hidden=true<CR>]], {})
-
--- ':Explore' in a new split
-map('n', '<leader>.', ':split <bar> wincmd J <bar> Explore<CR>', {noremap = true, silent = true})
-
--- neogit
-map('n', '<leader>gg', [[:Neogit<CR>]], {})
 
 
 #+END_SRC
@@ -292,8 +288,8 @@ require('nvim-treesitter.configs').setup {
 }
 
 require('orgmode').setup({
-  org_agenda_files = {'~/Dropbox/org/*', '~/my-orgs/**/*'},
-  org_default_notes_file = '~/Dropbox/org/refile.org',
+--  org_agenda_files = {'~/Dropbox/org/*', '~/my-orgs/**/*'},
+--  org_default_notes_file = '~/Dropbox/org/refile.org',
 })
 
 end)
