@@ -1,4 +1,3 @@
-enlighten-git
 bitwarden-rofi-git
 networkmanager-dmenu-git
 udiskie-dmenu-git

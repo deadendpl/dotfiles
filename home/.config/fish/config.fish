@@ -38,6 +38,9 @@ alias listaur="pacman -Qqem"
 # yay
 alias yinst='yay -S'
 
+# nix
+alias nup='sudo nixos-rebuild switch'
+alias nclean='sudo nix-collect-garbage -d'
 # other
 alias ll='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'

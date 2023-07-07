@@ -1,5 +1,4 @@
 udiskie-dmenu-git
-enlighten-git
 bitwarden-rofi-git
 networkmanager-dmenu-git
 clipboard

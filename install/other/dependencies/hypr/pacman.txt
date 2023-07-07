@@ -40,3 +40,4 @@ polkit-gnome
 grimshot
 dracula-cursors-git
 ttf-go-nerd
+light

@@ -40,3 +40,4 @@ picom
 arandr
 dracula-cursors-git
 ttf-go-nerd
+light

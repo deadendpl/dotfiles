@@ -80,16 +80,13 @@ super + shift + slash
 # volume control
 XF86Audio{Raise,Lower}Volume
     pactl set-sink-volume @DEFAULT_SINK@ {+,-}5%
-    #amixer set Master 5%{+,-}
 
 XF86AudioMute
     pactl set-sink-mute @DEFAULT_SINK@ toggle
-    #amixer set Master toggle
 
 # brightness control
 XF86MonBrightness{Up,Down}
-    enlighten {+,-}3%
-    #xbacklight -{inc,dec} 3
+    light {A,U}3
 
 # opening display configuration
 super + F10
