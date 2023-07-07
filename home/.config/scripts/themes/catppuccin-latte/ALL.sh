@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 directory=~/.config/scripts/themes/catppuccin-latte
 exclude_script=./ALL.sh

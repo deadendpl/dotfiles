@@ -1,8 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 filename=$(date +"%Y-%m-%d_%H-%M-%S".png)
 
 CHOICE=$(printf "Full Screen\nSelect Area" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -i -l 2 -b -p "Screenshot Type:")
+
+mkdir -p ~/Pictures
 
 if [ "$CHOICE" = "Full Screen" ]; then
   sleep 0.4s && grimshot --notify save screen ~/Pictures/$filename

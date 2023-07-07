@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 file_path="$HOME/.config/scripts/hypr/wall.sh"
 

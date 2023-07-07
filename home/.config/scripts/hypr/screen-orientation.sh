@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Define the configuration file path
 config_file="$HOME/.config/hypr/hyprland.conf"

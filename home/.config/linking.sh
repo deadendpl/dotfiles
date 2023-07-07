@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # i'm actively developing this so I prefer to create links to my files instaed of copying them over
 

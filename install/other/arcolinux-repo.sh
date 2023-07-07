@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 repo_lines="[arcolinux_repo_3party]
 SigLevel = Required TrustAll

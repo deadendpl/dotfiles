@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 directory=~/.config/scripts/themes/catppuccin-mocha
 exclude_script=./ALL.sh

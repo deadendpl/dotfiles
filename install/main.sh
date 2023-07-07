@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Define the question and choices
 QUESTION="What rice would you like to install?

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 gtk_theme="Dracula"
 icon_theme="Papirus-Dark"

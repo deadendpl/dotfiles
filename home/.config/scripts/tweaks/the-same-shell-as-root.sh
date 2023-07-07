@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 read -rp "Which shell do you choose? [bash/fish] " choice
 

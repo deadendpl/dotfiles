@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 file="$HOME/Documents/bookmarks"
 

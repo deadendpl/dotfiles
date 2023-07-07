@@ -132,7 +132,7 @@ detect_extensions = ["py"]
 version_format = "v${raw}"
 
 [ruby]
-symbol = " "
+symbol = "  "
 
 [rust]
 symbol = " "

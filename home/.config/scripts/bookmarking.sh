@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 clipboard_cmd="cb paste 0"
 

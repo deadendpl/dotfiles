@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 walls_dir="$HOME/Pictures/drac-walls"
 

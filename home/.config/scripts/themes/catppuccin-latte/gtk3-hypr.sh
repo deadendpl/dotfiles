@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 gtk_theme="Catppuccin-Latte-Standard-Pink-Light"
 icon_theme="Papirus-Light"
