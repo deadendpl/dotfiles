@@ -33,7 +33,7 @@ These will be used for [[../sxhkd/sxhkdrc][sxhkdrc]].
 export terminal="alacritty"
 export web_browser="firefox"
 export file_manager="pcmanfm"
-export editor="emacsclient -c -a emacs"
+export editor="emacs"
 export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
 export EDITOR="vim"
 
@@ -49,7 +49,7 @@ Now we load essential programs
 - =picom= - a compositor. With that you can have some effects and transparency in programs (like terminal)
 - =dunst= - notification daemon
 - =udiskie= is disk drive mouning daemon
-- =emacs= daemon is for quicker emacs loading
+- =polkit-gnome= is a daemon for managing authentication stuff
 
 #+BEGIN_SRC shell
 sxhkd &
@@ -64,7 +64,7 @@ dunst -config ~/.config/dunst/dracula &
 
 udiskie &
 
-emacs --daemon
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 #+END_SRC
 
@@ -79,8 +79,8 @@ Then we have rules.
 
 - idk what =Screenkey= rule does but I was using it at the start of configuring bspwm to see code for keyboard keys
 - =emacs= doesn't tile by default so I set it to tile
-- =arandr= is little gui for xrandr(setting up displays in xorg) so I keep it as floating
 - =zathura= (cool pdf and books reader) as emacs doesn't tile
+- =arandr= is little gui for xrandr(setting up displays in xorg) so I keep it as floating
 #+BEGIN_SRC shell
 bspc monitor -d 1 2 3 4 5 6 7 8 9
 
@@ -99,6 +99,6 @@ bspc config gapless_monocle       true
 bspc rule -a Screenkey            manage=off
 
 bspc rule -a Emacs                state=tiled
-bspc rule -a Arandr               state=floating
 bspc rule -a Zathura              state=tiled
+bspc rule -a Arandr               state=floating
 #+END_SRC

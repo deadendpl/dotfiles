@@ -3,7 +3,7 @@
 export terminal="alacritty"
 export web_browser="firefox"
 export file_manager="pcmanfm"
-export editor="emacsclient -c -a emacs"
+export editor="emacs"
 export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
 export EDITOR="vim"
 
@@ -19,7 +19,7 @@ dunst -config ~/.config/dunst/dracula &
 
 udiskie &
 
-emacs --daemon
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 bspc monitor -d 1 2 3 4 5 6 7 8 9
 
@@ -38,5 +38,5 @@ bspc config gapless_monocle       true
 bspc rule -a Screenkey            manage=off
 
 bspc rule -a Emacs                state=tiled
-bspc rule -a Arandr               state=floating
 bspc rule -a Zathura              state=tiled
+bspc rule -a Arandr               state=floating

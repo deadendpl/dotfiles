@@ -39,3 +39,4 @@ alacritty
 picom
 arandr
 dracula-cursors-git
+ttf-go-nerd

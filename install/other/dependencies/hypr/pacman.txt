@@ -39,3 +39,4 @@ mpv
 polkit-gnome
 grimshot
 dracula-cursors-git
+ttf-go-nerd
