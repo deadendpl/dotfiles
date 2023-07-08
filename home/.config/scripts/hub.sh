@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
+  terminal=foot
+else
+  terminal=alacritty
+fi
+
 dir="$HOME/.config/scripts"
 
 cd "$dir"
