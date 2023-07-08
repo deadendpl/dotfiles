@@ -31,7 +31,10 @@
   # };
 
   # Enable the X11 windowing system.
-  # services.xserver.enable = true;
+  services.xserver.enable = true;
+
+  # for 32-bit stuff (like wine)
+  # hardware.opengl.driSupport32Bit = true;
 
   # Configure keymap in X11
   services.xserver.layout = "pl";
@@ -124,6 +127,7 @@
     pavucontrol
     papirus-icon-theme
     killall
+    clipboard-jh
     (retroarch.override {
       cores = with libretro; [
         ppsspp
