@@ -12,6 +12,9 @@
   boot.loader.grub.device = "nodev";
   boot.loader.grub.efiSupport = true;
 
+
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+
   networking.hostName = "lenovo-nixos";
   networking.networkmanager.enable = true;
 
@@ -74,7 +77,7 @@
 
   programs.hyprland.enable = true;
 
-  services.flatpak.enable = true;
+  services.flatpak.enable = false;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -114,6 +117,13 @@
     github-desktop
     polkit_gnome
     blueberry
+    pulseaudio
+    dracula-theme
+    networkmanager_dmenu
+    gammastep
+    pavucontrol
+    papirus-icon-theme
+    killall
     (retroarch.override {
       cores = with libretro; [
         ppsspp
@@ -124,7 +134,7 @@
       # Use gtk2
       withGTK2 = true;
       withGTK3 = false;
-     })
+    })
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -136,7 +146,7 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   fonts.fonts = with pkgs; [
-    (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" ]; })
+    (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
