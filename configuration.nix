@@ -15,6 +15,8 @@
   networking.hostName = "lenovo-nixos";
   networking.networkmanager.enable = true;
 
+  hardware.bluetooth.enable = true;
+
   time.timeZone = "Europe/Warsaw";
 
   # Select internationalisation properties.
@@ -36,9 +38,21 @@
   # services.printing.enable = true;
 
   # Enable sound.
-  sound.enable = true;
-  services.pipewire.enable = true;
   # hardware.pulseaudio.enable = true;
+
+  # Remove sound.enable or turn it off if you had it set previously, it seems to cause conflicts with pipewire
+  #sound.enable = false;
+
+  # rtkit is optional but recommended
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
+  };
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
@@ -81,7 +95,6 @@
     waybar
     rofi
     firefox
-    emacs
     wl-clipboard
     sway-contrib.grimshot
     feh
@@ -100,12 +113,18 @@
     cmake
     github-desktop
     polkit_gnome
+    blueberry
     (retroarch.override {
       cores = with libretro; [
         ppsspp
         parallel-n64
       ];
     })
+    (emacs.override {
+      # Use gtk2
+      withGTK2 = true;
+      withGTK3 = false;
+     })
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
