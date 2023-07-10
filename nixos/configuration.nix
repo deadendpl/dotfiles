@@ -12,6 +12,8 @@
   boot.loader.grub.device = "nodev";
   boot.loader.grub.efiSupport = true;
 
+  boot.supportedFilesystems = [ "ntfs" ];
+
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
 
   networking.hostName = "lenovo-nixos";
@@ -84,6 +86,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    udisks
     vim
     wget
     htop
@@ -104,14 +107,6 @@
     sway-contrib.grimshot
     feh
     dunst
-    pcmanfm
-    light
-    dwt1-shell-color-scripts
-    bat-extras.batman
-    bat-extras.prettybat
-    bat-extras.batgrep
-    ripgrep
-    syncthing
     xdg-utils
     gnome.gnome-tweaks
     gnumake
@@ -129,6 +124,14 @@
     clipboard-jh
     ranger
     swaybg
+    pcmanfm
+    light
+    dwt1-shell-color-scripts
+    bat-extras.batman
+    bat-extras.prettybat
+    bat-extras.batgrep
+    ripgrep
+    syncthing
     (retroarch.override {
       cores = with libretro; [
         ppsspp
@@ -140,6 +143,10 @@
       withGTK2 = true;
       withGTK3 = false;
     })
+  ];
+
+  nixpkgs.config.allowUnfreePredicate = pkg: [
+    "unrar"
   ];
 
   nixpkgs.config.permittedInsecurePackages = [

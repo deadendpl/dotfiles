@@ -39,6 +39,12 @@ Then we have bootloader configuration. I use GRUB since systemd-boot didn't work
 
 #+end_src
 
+I set ntfs as supported filesystem because without this you can't mount ntfs drives.
+#+begin_src nix
+  boot.supportedFilesystems = [ "ntfs" ];
+
+#+end_src
+
 The default kernel is latest lts kernel. I change that to zen kernel.
 
 #+begin_src nix
@@ -131,8 +137,6 @@ I set up pipewire as my sound thing.
 
 * Users
 I don't have anything set up yet but in the future I plan on adding user that will belong to =wheel= to use sudo commands, =video= to use =light= and =networkmanager= to use networkmanager without sudo permissions.
-
-Then the default shell I set up is fish and I enable it so tab completion works for nix commands.
 #+begin_src nix
   # Define a user account. Don't forget to set a password with ‘passwd’.
   # users.users.oliwier = {
@@ -142,8 +146,13 @@ Then the default shell I set up is fish and I enable it so tab completion works 
   #   ];
   # };
 
+#+end_src
+
+The default shell I set up is fish and I enable it so tab completion works for nix commands.
+#+begin_src nix
   users.defaultUserShell = pkgs.fish;
   programs.fish.enable = true;
+
 #+end_src
 
 * Packages
@@ -154,6 +163,7 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    udisks
     vim
     wget
     htop
@@ -174,14 +184,6 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     sway-contrib.grimshot
     feh
     dunst
-    pcmanfm
-    light
-    dwt1-shell-color-scripts
-    bat-extras.batman
-    bat-extras.prettybat
-    bat-extras.batgrep
-    ripgrep
-    syncthing
     xdg-utils
     gnome.gnome-tweaks
     gnumake
@@ -199,6 +201,14 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     clipboard-jh
     ranger
     swaybg
+    pcmanfm
+    light
+    dwt1-shell-color-scripts
+    bat-extras.batman
+    bat-extras.prettybat
+    bat-extras.batgrep
+    ripgrep
+    syncthing
     (retroarch.override {
       cores = with libretro; [
         ppsspp
@@ -210,6 +220,10 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
       withGTK2 = true;
       withGTK3 = false;
     })
+  ];
+
+  nixpkgs.config.allowUnfreePredicate = pkg: [
+    "unrar"
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
