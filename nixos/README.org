@@ -1,0 +1,292 @@
+#+title: NixOS Configuration
+#+PROPERTY: header-args :tangle configuration.nix
+
+* Table of Contents :toc:
+- [[#booting][Booting]]
+- [[#networking][Networking]]
+- [[#locales][Locales]]
+- [[#graphical-environment][Graphical environment]]
+- [[#sound][Sound]]
+- [[#users][Users]]
+- [[#packages][Packages]]
+- [[#fonts][Fonts]]
+- [[#xdg-desktop-portal][XDG Desktop Portal]]
+- [[#polkit][Polkit]]
+- [[#os-version][OS Version]]
+
+* Booting
+=hardware-configuration.nix= is setting the drives by their ID on which the OS will run.
+You should use =hardware-configuration.nix= of your own.
+
+#+begin_src nix
+{ config, pkgs, ... }:
+
+{
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+    ];
+
+#+end_src
+Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
+
+#+begin_src nix
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.loader.grub.enable = true;
+  boot.loader.grub.device = "nodev";
+  boot.loader.grub.efiSupport = true;
+
+#+end_src
+
+The default kernel is latest lts kernel. I change that to zen kernel.
+
+#+begin_src nix
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+
+#+end_src
+
+* Networking
+I set my hostname, enable networkmanager and disable firewall.
+Just in case I also enable bluetooth.
+#+begin_src nix
+  networking.hostName = "lenovo-nixos";
+  networking.networkmanager.enable = true;
+  networking.firewall.enable = false;
+
+  hardware.bluetooth.enable = true;
+
+#+end_src
+
+I also set up =gnupg= and enable =gnome-keyring=
+#+begin_src nix
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  programs.mtr.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
+
+  services.gnome.gnome-keyring.enable = true;
+
+#+end_src
+
+* Locales
+Locales are weird to set up. I set my timezone and keyboard layout for xorg (even though I have hyprland set up on this)
+#+begin_src nix
+  time.timeZone = "Europe/Warsaw";
+
+  # Select internationalisation properties.
+  # i18n.defaultLocale = "en_US.UTF-8";
+  # console = {
+  #   font = "Lat2-Terminus16";
+  #   keyMap = "us";
+  #   useXkbConfig = true; # use xkbOptions in tty.
+  # };
+
+  # Configure keymap in X11
+  services.xserver.layout = "pl";
+  # services.xserver.xkbOptions = "eurosign:e,caps:escape";
+
+#+end_src
+
+* Graphical environment
+I enable xorg since that installs display(login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
+
+I enable hyprland which install necessary packages and sets up desktop entry in display manager.
+
+I also enable =light= which lets me change screen brightness.
+#+begin_src nix
+  # Enable the X11 windowing system.
+  services.xserver.enable = true;
+
+  # for 32-bit stuff (like wine)
+  # hardware.opengl.driSupport32Bit = true;
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.xserver.libinput.enable = true;
+
+  programs.hyprland.enable = true;
+
+  programs.light.enable = true;
+#+end_src
+
+* Sound
+I set up pipewire as my sound thing.
+=pulse.enable= lets me use it with pulseaudio intended software like =pavucontrol=.
+#+begin_src nix
+  # rtkit is optional but recommended
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
+  };
+
+#+end_src
+
+* Users
+I don't have anything set up yet but in the future I plan on adding user that will belong to =wheel= to use sudo commands, =video= to use =light= and =networkmanager= to use networkmanager without sudo permissions.
+
+Then the default shell I set up is fish and I enable it so tab completion works for nix commands.
+#+begin_src nix
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # users.users.oliwier = {
+  #   isNormalUser = true;
+  #   extraGroups = [ "wheel" "video" "networkmanager" ];
+  #   packages = with pkgs; [
+  #   ];
+  # };
+
+  users.defaultUserShell = pkgs.fish;
+  programs.fish.enable = true;
+#+end_src
+
+* Packages
+I disable flatpak since I don't want it. Then I install a lot of nix packages.
+#+begin_src nix
+  services.flatpak.enable = false;
+
+  # List packages installed in system profile. To search, run:
+  # $ nix search wget
+  environment.systemPackages = with pkgs; [
+    vim
+    wget
+    htop
+    lynx
+    neofetch
+    fish
+    bash
+    git
+    exa
+    starship
+    hyprland
+    foot
+    neovim
+    waybar
+    rofi
+    firefox
+    wl-clipboard
+    sway-contrib.grimshot
+    feh
+    dunst
+    pcmanfm
+    light
+    dwt1-shell-color-scripts
+    bat-extras.batman
+    bat-extras.prettybat
+    bat-extras.batgrep
+    ripgrep
+    syncthing
+    xdg-utils
+    gnome.gnome-tweaks
+    gnumake
+    cmake
+    github-desktop
+    polkit_gnome
+    blueberry
+    pulseaudio
+    dracula-theme
+    networkmanager_dmenu
+    gammastep
+    pavucontrol
+    papirus-icon-theme
+    killall
+    clipboard-jh
+    ranger
+    swaybg
+    (retroarch.override {
+      cores = with libretro; [
+        ppsspp
+        parallel-n64
+      ];
+    })
+    (emacs.override {
+      # Use gtk2
+      withGTK2 = true;
+      withGTK3 = false;
+    })
+  ];
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "openssl-1.1.1u"
+  ];
+
+#+end_src
+
+=openssl= that =github-desktop= uses will soon be unsupported and that's why it's considered an insecure package.
+
+I also enable flakes even though I don't use them
+#+begin_src nix
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+#+end_src
+* Fonts
+I use nerd fonts.
+#+begin_src nix
+  fonts.fonts = with pkgs; [
+    (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
+  ];
+
+#+end_src
+
+* XDG Desktop Portal
+I set it up so it will work with hyprland
+#+begin_src nix
+  # setting up xdg desktop portal
+  services.dbus.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    # gtk portal needed to make gtk apps happy
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
+
+#+end_src
+
+* Polkit
+I set up =gnome-polkit=.
+#+begin_src nix
+  # gnome polkit
+  systemd = {
+   user.services.polkit-gnome-authentication-agent-1 = {
+     description = "polkit-gnome-authentication-agent-1";
+     wantedBy = [ "graphical-session.target" ];
+     wants = [ "graphical-session.target" ];
+     after = [ "graphical-session.target" ];
+     serviceConfig = {
+         Type = "simple";
+         ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+         Restart = "on-failure";
+         RestartSec = 1;
+         TimeoutStopSec = 10;
+       };
+   };
+    extraConfig = ''
+      DefaultTimeoutStopSec=10s
+    '';
+ };
+
+#+end_src
+
+* OS Version
+I set it up on 23.05
+#+begin_src nix
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  system.copySystemConfiguration = true;
+
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It's perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  system.stateVersion = "23.05"; # Did you read the comment?
+}
+#+end_src

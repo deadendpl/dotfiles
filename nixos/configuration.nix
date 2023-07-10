@@ -12,13 +12,23 @@
   boot.loader.grub.device = "nodev";
   boot.loader.grub.efiSupport = true;
 
-
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
 
   networking.hostName = "lenovo-nixos";
   networking.networkmanager.enable = true;
+  networking.firewall.enable = false;
 
   hardware.bluetooth.enable = true;
+
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  programs.mtr.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
+
+  services.gnome.gnome-keyring.enable = true;
 
   time.timeZone = "Europe/Warsaw";
 
@@ -30,24 +40,22 @@
   #   useXkbConfig = true; # use xkbOptions in tty.
   # };
 
+  # Configure keymap in X11
+  services.xserver.layout = "pl";
+  # services.xserver.xkbOptions = "eurosign:e,caps:escape";
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
   # for 32-bit stuff (like wine)
   # hardware.opengl.driSupport32Bit = true;
 
-  # Configure keymap in X11
-  services.xserver.layout = "pl";
-  # services.xserver.xkbOptions = "eurosign:e,caps:escape";
+  # Enable touchpad support (enabled default in most desktopManager).
+  services.xserver.libinput.enable = true;
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  programs.hyprland.enable = true;
 
-  # Enable sound.
-  # hardware.pulseaudio.enable = true;
-
-  # Remove sound.enable or turn it off if you had it set previously, it seems to cause conflicts with pipewire
-  #sound.enable = false;
+  programs.light.enable = true;
 
   # rtkit is optional but recommended
   security.rtkit.enable = true;
@@ -60,25 +68,16 @@
     #jack.enable = true;
   };
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.alice = {
+  # users.users.oliwier = {
   #   isNormalUser = true;
-  #   extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+  #   extraGroups = [ "wheel" "video" "networkmanager" ];
   #   packages = with pkgs; [
-  #     firefox
-  #     tree
   #   ];
   # };
 
-# users.users.oliwier.extraGroups = [ "video" ];
-
   users.defaultUserShell = pkgs.fish;
   programs.fish.enable = true;
-
-  programs.hyprland.enable = true;
 
   services.flatpak.enable = false;
 
@@ -88,8 +87,8 @@
     vim
     wget
     htop
+    lynx
     neofetch
-    w3m
     fish
     bash
     git
@@ -147,7 +146,20 @@
     "openssl-1.1.1u"
   ];
 
-  services.gnome.gnome-keyring.enable = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  fonts.fonts = with pkgs; [
+    (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
+  ];
+
+  # setting up xdg desktop portal
+  services.dbus.enable = true;
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    # gtk portal needed to make gtk apps happy
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  };
 
   # gnome polkit
   systemd = {
@@ -167,34 +179,7 @@
     extraConfig = ''
       DefaultTimeoutStopSec=10s
     '';
- }; 
-
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  fonts.fonts = with pkgs; [
-    (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
-  ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
-
-  # setting up xdg desktop portal
-  services.dbus.enable = true;
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    # gtk portal needed to make gtk apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
-
-  programs.light.enable = true;
-
-  networking.firewall.enable = false;
+ };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
@@ -208,5 +193,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.05"; # Did you read the comment?
-
 }
