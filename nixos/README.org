@@ -46,7 +46,6 @@ I set ntfs as supported filesystem because without this you can't mount ntfs dri
 #+end_src
 
 The default kernel is latest lts kernel. I change that to zen kernel.
-
 #+begin_src nix
   boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
 
@@ -166,6 +165,7 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     udisks
     vim
     wget
+    lolcat
     htop
     lynx
     neofetch
@@ -239,6 +239,7 @@ I also enable flakes even though I don't use them
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 #+end_src
+
 * Fonts
 I use nerd fonts.
 #+begin_src nix
@@ -283,7 +284,7 @@ I set up =gnome-polkit=.
     extraConfig = ''
       DefaultTimeoutStopSec=10s
     '';
- };
+  };
 
 #+end_src
 
