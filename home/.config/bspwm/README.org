@@ -27,7 +27,7 @@ These will be used for [[../sxhkd/sxhkdrc][sxhkdrc]].
 - =editor2= - 2nd IDE (neovim doesn't work properly so don't use it)
 - =EDITOR= - default editor in terminal
 
-#+BEGIN_SRC shell :shebang "#!/bin/bash"
+#+BEGIN_SRC shell :shebang "#!/usr/bin/env bash"
 
 # variables for sxhkdrc
 export terminal="alacritty"

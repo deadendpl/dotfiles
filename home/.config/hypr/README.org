@@ -2,8 +2,10 @@
 #+PROPERTY: header-args :tangle hyprland.conf
 #+auto_tangle: t
 
+=hyprland.conf= is a configuration file for hyprland.
+The default path is =$HOME/.config/hypr/hyprland.conf=.
+
 * Table of Contents :toc:
-- [[#beginning][beginning]]
 - [[#code][code]]
   - [[#monitor][monitor]]
   - [[#startup-programs][startup programs]]
@@ -13,12 +15,7 @@
   - [[#window-rules][window rules]]
   - [[#keybindings][keybindings]]
 
-* beginning
-=hyprland.conf= is a configuration file for hyprland.
-The default path is =$HOME/.config/hypr/hyprland.conf=.
-
 * code
-
 ** monitor
 *WARNING*:
 This is meant and tested for one display.
@@ -39,7 +36,6 @@ monitor=,preferred,auto,auto
 #monitor=,preferred,auto,auto,transform,1
 
 #+END_SRC
-
 ** startup programs
 Here are started:
 - waybar (panel/bar)
@@ -56,7 +52,6 @@ exec-once = dunst -config ~/.config/dunst/dracula &
 exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 #+END_SRC
-
 ** variables
 Here are few variables set:
 - terminal
@@ -64,7 +59,6 @@ Here are few variables set:
 - file manager
 - first IDE
 - second IDE
-
 #+BEGIN_SRC conf
 # Source a file (multi-file configs)
 # source = ~/.config/hypr/myColors.conf
@@ -85,7 +79,6 @@ $editor2=$terminal -e nvim
 # For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 
 #+END_SRC
-
 ** input stuff
 I'm polish so I use polish keyboard layout.
 #+BEGIN_SRC conf
@@ -111,10 +104,8 @@ gestures {
 }
 
 #+END_SRC
-
 ** animations and decorations
 There are also some widow layout options.
-
 #+BEGIN_SRC conf
 general {
     # See https://wiki.hyprland.org/Configuring/Variables/ for more
@@ -170,7 +161,6 @@ master {
 }
 
 #+END_SRC
-
 ** window rules
 Before window rules there is some mouse config but idk if it does anything (it's probably default)
 

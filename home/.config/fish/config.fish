@@ -41,10 +41,11 @@ alias yinst='yay -S'
 # nix
 alias nup='sudo nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
+
 # other
-alias ll='exa --all --long --header --icons --git --group-directories-first'
+alias l='exa --all --long --header --icons --git --group-directories-first'
 alias clr='clear'
-alias cllr='clear && ll'
+alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'

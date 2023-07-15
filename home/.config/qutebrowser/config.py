@@ -169,7 +169,7 @@ c.url.searchengines = {'DEFAULT': 'https://phind.com/search?q={}'}
 
 # Page(s) to open at the start.
 # Type: List of FuzzyUrl, or FuzzyUrl
-c.url.start_pages = 'https://phind.com'
+c.url.start_pages = 'https://searx.mha.fi'
 
 # Render all web contents using a dark theme. Example configurations
 # from Chromium's `chrome://flags`:  - "With simple HSL/CIELAB/RGB-based

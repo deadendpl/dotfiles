@@ -115,6 +115,7 @@ I also enable =light= which lets me change screen brightness.
   programs.hyprland.enable = true;
 
   programs.light.enable = true;
+
 #+end_src
 
 * Sound
@@ -160,6 +161,7 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
   services.flatpak.enable = false;
 
   # List packages installed in system profile. To search, run:
+
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     udisks
@@ -209,10 +211,17 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     bat-extras.batgrep
     ripgrep
     syncthing
+    libnotify
+    unrar
+    gnome.file-roller
+    qutebrowser
+    alacritty
     (retroarch.override {
       cores = with libretro; [
         ppsspp
         parallel-n64
+        snes9x
+        swanstation
       ];
     })
     (emacs.override {
@@ -222,13 +231,11 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     })
   ];
 
-  nixpkgs.config.allowUnfreePredicate = pkg: [
-    "unrar"
-  ];
-
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1u"
   ];
+
+  nixpkgs.config.allowUnfree = true;
 
 #+end_src
 

@@ -84,6 +84,7 @@
   services.flatpak.enable = false;
 
   # List packages installed in system profile. To search, run:
+
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     udisks
@@ -133,10 +134,17 @@
     bat-extras.batgrep
     ripgrep
     syncthing
+    libnotify
+    unrar
+    gnome.file-roller
+    qutebrowser
+    alacritty
     (retroarch.override {
       cores = with libretro; [
         ppsspp
         parallel-n64
+        snes9x
+        swanstation
       ];
     })
     (emacs.override {
@@ -146,13 +154,11 @@
     })
   ];
 
-  nixpkgs.config.allowUnfreePredicate = pkg: [
-    "unrar"
-  ];
-
   nixpkgs.config.permittedInsecurePackages = [
     "openssl-1.1.1u"
   ];
+
+  nixpkgs.config.allowUnfree = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
