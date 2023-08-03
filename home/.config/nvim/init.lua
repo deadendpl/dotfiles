@@ -29,9 +29,6 @@ return require('packer').startup(function(use)
                 opt = true}
   }
 
--- cool split resizing
-use { "beauwilliams/focus.nvim", config = function() require("focus").setup() end }
-
 -- which key
 use {
   "folke/which-key.nvim",
@@ -203,9 +200,6 @@ require('nvim-autopairs').setup{} -- Add this line
 
 -- which key
 require('which-key').setup{}
-
--- cool split resizer
-require('focus').setup{}
 
 -- neogit (like magit)
 local neogit = require('neogit')

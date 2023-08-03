@@ -136,15 +136,35 @@ I set up pipewire as my sound thing.
 #+end_src
 
 * Users
-I don't have anything set up yet but in the future I plan on adding user that will belong to =wheel= to use sudo commands, =video= to use =light= and =networkmanager= to use networkmanager without sudo permissions.
+There is a user called =oliwier= which belongs to groups:
+=- =wheel= to use sudo commands
+- =video= to use =light=
+- =networkmanager= to use networkmanager without sudo permissions.
 #+begin_src nix
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  # users.users.oliwier = {
-  #   isNormalUser = true;
-  #   extraGroups = [ "wheel" "video" "networkmanager" ];
-  #   packages = with pkgs; [
-  #   ];
-  # };
+  users.users.oliwier = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "video" "networkmanager" ];
+    packages = with pkgs; [
+    ];
+  };
+
+#+end_src
+
+I also set up xdg default user directories
+#+begin_src nix
+  # {
+  #   environment.etc."xdg/user-dirs.defaults".text = ''
+  #     DESKTOP=Desktop
+  #     DOWNLOAD=Downloads
+  #     TEMPLATES=Templates
+  #     PUBLICSHARE=Public
+  #     DOCUMENTS=Documents
+  #     MUSIC=Music
+  #     PICTURES=Pictures
+  #     VIDEOS=Videos
+  #   '';
+  # }
 
 #+end_src
 
@@ -156,7 +176,7 @@ The default shell I set up is fish and I enable it so tab completion works for n
 #+end_src
 
 * Packages
-I disable flatpak since I don't want it. Then I install a lot of nix packages.
+I disable flatpak since I don't want it. Then I install a lot of packages.
 #+begin_src nix
   services.flatpak.enable = false;
 
@@ -216,6 +236,7 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
     gnome.file-roller
     qutebrowser
     alacritty
+    emacs
     (retroarch.override {
       cores = with libretro; [
         ppsspp
@@ -223,11 +244,6 @@ I disable flatpak since I don't want it. Then I install a lot of nix packages.
         snes9x
         swanstation
       ];
-    })
-    (emacs.override {
-      # Use gtk2
-      withGTK2 = true;
-      withGTK3 = false;
     })
   ];
 
@@ -248,7 +264,7 @@ I also enable flakes even though I don't use them
 #+end_src
 
 * Fonts
-I use nerd fonts.
+I install nerd fonts.
 #+begin_src nix
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
