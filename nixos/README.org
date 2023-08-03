@@ -28,8 +28,8 @@ You should use =hardware-configuration.nix= of your own.
     ];
 
 #+end_src
-Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
 
+Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
 #+begin_src nix
   boot.loader.efi.canTouchEfiVariables = true;
 
@@ -97,7 +97,7 @@ Locales are weird to set up. I set my timezone and keyboard layout for xorg (eve
 #+end_src
 
 * Graphical environment
-I enable xorg since that installs display(login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
+I enable xorg since that installs display (login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
 
 I enable hyprland which install necessary packages and sets up desktop entry in display manager.
 
@@ -137,7 +137,7 @@ I set up pipewire as my sound thing.
 
 * Users
 There is a user called =oliwier= which belongs to groups:
-=- =wheel= to use sudo commands
+- =wheel= to use sudo commands
 - =video= to use =light=
 - =networkmanager= to use networkmanager without sudo permissions.
 #+begin_src nix
@@ -236,7 +236,7 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
     gnome.file-roller
     qutebrowser
     alacritty
-    emacs
+    emacs29
     (retroarch.override {
       cores = with libretro; [
         ppsspp

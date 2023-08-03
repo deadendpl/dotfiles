@@ -103,6 +103,10 @@
     "b i" '(ibuffer :wk "List all buffers"))
 
   (custom/leader-keys
+    "RET" '(bookmark-jump :wk "Go to bookmark")
+    "b m" '(bookmark-set :wk "Set bookmark"))
+
+  (custom/leader-keys
     "e" '(:ignore t :wk "Eshell/Evaluate")    
     "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
     "e d" '(eval-defun :wk "Evaluate defun containing or after point")
