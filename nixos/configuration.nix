@@ -152,7 +152,7 @@ environment.systemPackages = with pkgs; [
   gnome.file-roller
   qutebrowser
   alacritty
-  emacs
+  emacs29
   (retroarch.override {
     cores = with libretro; [
       ppsspp

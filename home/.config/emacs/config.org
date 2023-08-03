@@ -215,7 +215,7 @@
     "w j" '(evil-window-down :wk "Window down")
     "w k" '(evil-window-up :wk "Window up")
     "w l" '(evil-window-right :wk "Window right")
-    "w w" '(evil-window-next :wk "Goto next window")
+    "w w" '(evil-window-next :wk "Go to next window")
     ;; Move Windows
     "w H" '(buf-move-left :wk "Buffer move left")
     "w J" '(buf-move-down :wk "Buffer move down")

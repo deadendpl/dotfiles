@@ -87,7 +87,7 @@
     :global-prefix "M-SPC") ;; access leader in insert mode
 
   (custom/leader-keys
-    "SPC" '(counsel-M-x :wk "Counsel M-x")
+    "SPC" '(projectile-find-file :wk "Counsel M-x")
     "." '(find-file :wk "Find file")
     "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
     "f r" '(counsel-recentf :wk "Find recent files")
