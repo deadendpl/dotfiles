@@ -58,13 +58,6 @@
         "format": "{:%H:%M}",
         "format-alt": "{:%a %d %b}"
     },
-    "cpu": {
-        "format": "{usage}% ",
-        "tooltip": false
-    },
-    "memory": {
-        "format": "{}% "
-    },
 
     "battery": {
         "states": {
