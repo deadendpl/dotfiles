@@ -3,13 +3,29 @@ if status is-interactive
     starship init fish | source
 
 set PATH ~/.config/emacs/bin $PATH
-export EDITOR='vim'
+export EDITOR='nvim'
 
 set fish_greeting
 fish_vi_key_bindings
 
 # importing tty colors
 source ~/.config/tty-colors/fish/dracula
+
+# going to las directory from lf
+function lfcd
+    set tmp (mktemp)
+    # `command` is needed in case `lfcd` is aliased to `lf`
+    command lf -last-dir-path=$tmp $argv
+    if test -f "$tmp"
+        set dir (cat $tmp)
+        rm -f $tmp
+        if test -d "$dir"
+            if test "$dir" != (pwd)
+                cd $dir
+            end
+        end
+    end
+end
 
 ## aliases
 
@@ -44,6 +60,7 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias l='exa --all --long --header --icons --git --group-directories-first'
+alias lf='lfcd'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'

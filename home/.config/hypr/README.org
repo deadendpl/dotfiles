@@ -6,17 +6,15 @@
 The default path is =$HOME/.config/hypr/hyprland.conf=.
 
 * Table of Contents :toc:
-- [[#code][code]]
-  - [[#monitor][monitor]]
-  - [[#startup-programs][startup programs]]
-  - [[#variables][variables]]
-  - [[#input-stuff][input stuff]]
-  - [[#animations-and-decorations][animations and decorations]]
+- [[#monitor][monitor]]
+- [[#startup-programs][startup programs]]
+- [[#variables][variables]]
+- [[#input-stuff][input stuff]]
+- [[#animations-and-decorations][animations and decorations]]
   - [[#window-rules][window rules]]
   - [[#keybindings][keybindings]]
 
-* code
-** monitor
+* monitor
 *WARNING*:
 This is meant and tested for one display.
 
@@ -36,7 +34,8 @@ monitor=,preferred,auto,auto
 #monitor=,preferred,auto,auto,transform,1
 
 #+END_SRC
-** startup programs
+
+* startup programs
 Here are started:
 - waybar (panel/bar)
 - dunst (notification daemon)
@@ -52,7 +51,8 @@ exec-once = dunst -config ~/.config/dunst/dracula &
 exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 #+END_SRC
-** variables
+
+* variables
 Here are few variables set:
 - terminal
 - web browser
@@ -66,20 +66,22 @@ Here are few variables set:
 # Some default env vars.
 env = XCURSOR_SIZE,24
 
-
 # other env vars
 $_JAVA_AWT_WM_NONREPARENTING=1
 
 $terminal=foot
 $web_browser=firefox
 $file_manager=pcmanfm
+$file_manager2=$terminal -e lf
 $editor=emacs
 $editor2=$terminal -e nvim
 
 # For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 
 #+END_SRC
-** input stuff
+
+
+* input stuff
 I'm polish so I use polish keyboard layout.
 #+BEGIN_SRC conf
 input {
@@ -104,7 +106,8 @@ gestures {
 }
 
 #+END_SRC
-** animations and decorations
+
+* animations and decorations
 There are also some widow layout options.
 #+BEGIN_SRC conf
 general {
@@ -135,7 +138,7 @@ decoration {
 }
 
 animations {
-    enabled = yes
+    enabled = no
 
     # Some default animations, see https://wiki.hyprland.org/Configuring/Animations/ for more
 
@@ -201,6 +204,7 @@ Probably the most important thing in here
 | SUPER + E               | launches first IDE                                                          |
 | SUPER + Shift + E       | launches second IDE                                                         |
 | SUPER + F               | launches file manager                                                       |
+| SUPER + Shift + F       | launches second file manager                                                |
 | SUPER + Enter           | launches rofi (app launcher)                                                |
 | SUPER + Shift + Enter   | launches script hub                                                         |
 | SUPER + B               | launches bitwarden menu                                                     |
@@ -227,7 +231,7 @@ Probably the most important thing in here
 | SUPER + P               | turns peudo tiling                                                          |
 | SUPER + J               | (from left/right turns window positions to up/down)                         |
 | SUPER + V               | makes the current window floating                                           |
-| SUPER + Shift + F       | makes the current window fullscreen                                         |
+| SUPER + Alt + F         | makes the current window fullscreen                                         |
 | SUPER + ←/↓/→/↑         | changes window focus according to arrow key                                 |
 | SUPER + 1-9             | changes to workspace 1-9                                                    |
 | SUPER + Shift + 1-9     | moves current window to worskpace 1-9                                       |
@@ -252,6 +256,7 @@ bind = $mainMod, W,                exec, $web_browser
 bind = $mainMod, E,                exec, $editor
 bind = $mainMod SHIFT, E,          exec, $editor2
 bind = $mainMod, F,                exec, $file_manager
+bind = $mainMod SHIFT, F,          exec, $file_manager2
 bind = $mainMod, Return,           exec, rofi -show drun -config ~/.config/rofi/config.rasi
 
 # script hub
@@ -295,7 +300,7 @@ bind = $mainMod SHIFT, Q,          exec, ~/.config/scripts/power.sh
 bind = $mainMod, P,                pseudo, # dwindle
 bind = $mainMod, J,                togglesplit, # dwindle
 bind = $mainMod, V,                togglefloating,
-bind = $mainMod SHIFT, f,          fullscreen
+bind = $mainMod ALT, F,            fullscreen
 
 
 # Move focus

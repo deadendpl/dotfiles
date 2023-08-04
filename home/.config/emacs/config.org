@@ -3,7 +3,7 @@
 #+options: toc:2
 
 * TABLE OF CONTENTS :toc:
-- [[#essential-software-to-load][ESSENTIAL SOFTWARE TO LOAD]]
+- [[#essentials-to-load][ESSENTIALS TO LOAD]]
   - [[#elpaca-package-manager][Elpaca Package Manager]]
   - [[#evil-mode][Evil Mode]]
   - [[#general-keybindings][General Keybindings]]
@@ -30,7 +30,7 @@
 - [[#org-mode][ORG MODE]]
   - [[#enabling-table-of-contents][Enabling Table of Contents]]
   - [[#org-superstar][Org Superstar]]
-  - [[#disable-electric-indent][Disable Electric Indent]]
+  - [[#disable-electric-indent-and-other-fixes][Disable Electric Indent and other fixes]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
   - [[#evil-keybindings][Evil keybindings]]
 - [[#projectile][PROJECTILE]]
@@ -45,7 +45,7 @@
 - [[#transparency][TRANSPARENCY]]
 - [[#which-key][WHICH-KEY]]
 
-* ESSENTIAL SOFTWARE TO LOAD
+* ESSENTIALS TO LOAD
 ** Elpaca Package Manager
 #+begin_src emacs-lisp
   (defvar elpaca-installer-version 0.5)
@@ -454,6 +454,8 @@ This package implements hiding or abbreviation of the modeline displays (lighter
 
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
 
+(setq dired-listing-switches "-la --group-directories-first")
+
 #+end_src
 
 * FLYCHECK
@@ -475,15 +477,15 @@ Defining the various fonts that Emacs will use.
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil
     :font "CodeNewRoman Nerd Font Mono"
-    :height 80
+    :height 90
     :weight 'medium)
   (set-face-attribute 'variable-pitch nil
     :font "Ubuntu Nerd Font"
-    :height 80
+    :height 90
     :weight 'medium)
   (set-face-attribute 'fixed-pitch nil
     :font "CodeNewRoman Nerd Font Mono"
-    :height 80
+    :height 90
     :weight 'medium)
   ;; Makes commented text and keywords italics.
   ;; This is working in emacsclient but not emacs.
@@ -534,7 +536,7 @@ You can use the bindings CTRL plus + and =/- for zooming in/out. You can also us
 #+begin_src emacs-lisp
   (use-package imenu-list
      :custom
-     (setq imenu-list-focus-after-activation t)
+     (setq imenu-list-focus-after-activation 1)
      (setq imenu-list-auto-resize t))
 #+end_src
 
@@ -602,7 +604,7 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
   :config
   (setq neo-smart-open t
         neo-show-hidden-files t
-        neo-window-width 55
+        neo-window-width 35
         neo-window-fixed-size nil
         inhibit-compacting-font-caches t
         projectile-switch-project-action 'neotree-projectile-action) 
@@ -634,12 +636,15 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
   :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 #+end_src
 
-** Disable Electric Indent
+** Disable Electric Indent and other fixes
 Org mode source blocks have some really weird and annoying default indentation behavior. I think this has to do with electric-indent-mode, which is turned on by default in Emacs. So let's turn it OFF!
 
 #+begin_src emacs-lisp
 (electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
+
+(setq org-insert-heading-respect-content nil)
+(setq org-hide-emphasis-markers t)
 #+end_src
 
 ** Source Code Block Tag Expansion

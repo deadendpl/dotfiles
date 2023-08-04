@@ -354,6 +354,8 @@ one, an error is signaled."
 
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
 
+(setq dired-listing-switches "-la --group-directories-first")
+
 (use-package flycheck
   :ensure t
   :defer t
@@ -362,15 +364,15 @@ one, an error is signaled."
 
 (set-face-attribute 'default nil
   :font "CodeNewRoman Nerd Font Mono"
-  :height 80
+  :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
   :font "Ubuntu Nerd Font"
-  :height 80
+  :height 90
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
   :font "CodeNewRoman Nerd Font Mono"
-  :height 80
+  :height 90
   :weight 'medium)
 ;; Makes commented text and keywords italics.
 ;; This is working in emacsclient but not emacs.
@@ -403,7 +405,7 @@ one, an error is signaled."
 
 (use-package imenu-list
    :custom
-   (setq imenu-list-focus-after-activation t)
+   (setq imenu-list-focus-after-activation 1)
    (setq imenu-list-auto-resize t))
 
 (use-package counsel
@@ -447,7 +449,7 @@ one, an error is signaled."
   :config
   (setq neo-smart-open t
         neo-show-hidden-files t
-        neo-window-width 55
+        neo-window-width 35
         neo-window-fixed-size nil
         inhibit-compacting-font-caches t
         projectile-switch-project-action 'neotree-projectile-action) 
@@ -471,6 +473,9 @@ one, an error is signaled."
 
 (electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
+
+(setq org-insert-heading-respect-content nil)
+(setq org-hide-emphasis-markers t)
 
 (require 'org-tempo)
 

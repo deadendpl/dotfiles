@@ -41,3 +41,6 @@ arandr
 dracula-cursors-git
 ttf-go-nerd
 light
+chafa
+ripgrep
+fzf

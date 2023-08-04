@@ -6,3 +6,6 @@ catppuccin-gtk-theme-mocha
 dracula-gtk-theme
 catppuccin-gtk-theme-latte
 rofi-bluetooth-git
+lf-sixel-git
+ctpv-git
+cp-p-git

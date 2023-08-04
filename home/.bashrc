@@ -2,7 +2,7 @@
 [[ $- != *i* ]] && return
 
 export PATH=~/.config/emacs/bin:$PATH
-export EDITOR='vim'
+export EDITOR='nvim'
 
 # setting tty colors
 source ~/.config/tty-colors/bash/dracula
