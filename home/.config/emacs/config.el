@@ -352,9 +352,14 @@ one, an error is signaled."
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 )
 
+(use-package dired
+  :elpaca nil
+  :config
+    (setq dired-listing-switches "-la --group-directories-first")
+    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file)) ; use dired-find-file instead if not using dired-open package
+    
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
-
-(setq dired-listing-switches "-la --group-directories-first")
 
 (use-package flycheck
   :ensure t
@@ -498,6 +503,7 @@ one, an error is signaled."
   :hook org-mode prog-mode)
 
 (defun reload-init-file ()
+  "Loading the user-init-file twice, which is a hack because for some reason, just loading the user-init-file once does not work properly."
   (interactive)
   (load-file user-init-file)
   (load-file user-init-file))
@@ -550,12 +556,11 @@ one, an error is signaled."
       "f u" '(sudo-edit-find-file :wk "Sudo find file")
       "f U" '(sudo-edit :wk "Sudo edit file")))
 
-;;(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
-(use-package doom-themes
-  :config
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-      doom-themes-enable-italic t)) ; if nil, italics is universally disabled
-(load-theme 'doom-dracula t)
+(use-package dracula-theme)
+;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
+
+;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
+(load-theme 'dracula t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 

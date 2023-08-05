@@ -10,7 +10,7 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Themes" "Web search" )
+declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Screen orientation" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Themes" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
@@ -40,6 +40,9 @@ elif [[ $choice == "Web search" ]]; then
 
 elif [[ $choice == "Changing root shell" ]]; then
   cd tweaks && $terminal -e ./the-same-shell-as-root.sh
+
+elif [[ $choice == "Touchpad on Xorg" ]]; then
+  cd tweaks && $terminal -e ./touchpad-on-xorg.sh
 
 else
   exit

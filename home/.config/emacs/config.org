@@ -48,42 +48,42 @@
 * ESSENTIALS TO LOAD
 ** Elpaca Package Manager
 #+begin_src emacs-lisp
-  (defvar elpaca-installer-version 0.5)
-  (defvar elpaca-directory (expand-file-name "elpaca/" "~/.local/share/emacs/"))
-  (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-  (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-  (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-				:ref nil
-				:files (:defaults (:exclude "extensions"))
-				:build (:not elpaca--activate-package)))
-  (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-	 (build (expand-file-name "elpaca/" elpaca-builds-directory))
-	 (order (cdr elpaca-order))
-	 (default-directory repo))
-    (add-to-list 'load-path (if (file-exists-p build) build repo))
-    (unless (file-exists-p repo)
-      (make-directory repo t)
-      (when (< emacs-major-version 28) (require 'subr-x))
-      (condition-case-unless-debug err
-	  (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-		   ((zerop (call-process "git" nil buffer t "clone"
-					 (plist-get order :repo) repo)))
-		   ((zerop (call-process "git" nil buffer t "checkout"
-					 (or (plist-get order :ref) "--"))))
-		   (emacs (concat invocation-directory invocation-name))
-		   ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-					 "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-		   ((require 'elpaca))
-		   ((elpaca-generate-autoloads "elpaca" repo)))
-	      (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-	    (error "%s" (with-current-buffer buffer (buffer-string))))
-	((error) (warn "%s" err) (delete-directory repo 'recursive))))
-    (unless (require 'elpaca-autoloads nil t)
-      (require 'elpaca)
-      (elpaca-generate-autoloads "elpaca" repo)
-      (load "./elpaca-autoloads")))
-  (add-hook 'after-init-hook #'elpaca-process-queues)
-  (elpaca `(,@elpaca-order))
+(defvar elpaca-installer-version 0.5)
+(defvar elpaca-directory (expand-file-name "elpaca/" "~/.local/share/emacs/"))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+			      :ref nil
+			      :files (:defaults (:exclude "extensions"))
+			      :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+	(if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+		 ((zerop (call-process "git" nil buffer t "clone"
+				       (plist-get order :repo) repo)))
+		 ((zerop (call-process "git" nil buffer t "checkout"
+				       (or (plist-get order :ref) "--"))))
+		 (emacs (concat invocation-directory invocation-name))
+		 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+				       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+		 ((require 'elpaca))
+		 ((elpaca-generate-autoloads "elpaca" repo)))
+	    (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+	  (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 #+end_src
 
 ** Evil Mode
@@ -452,10 +452,14 @@ This package implements hiding or abbreviation of the modeline displays (lighter
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 )
 
+(use-package dired
+  :elpaca nil
+  :config
+    (setq dired-listing-switches "-la --group-directories-first")
+    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
+    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file)) ; use dired-find-file instead if not using dired-open package
+    
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
-
-(setq dired-listing-switches "-la --group-directories-first")
-
 #+end_src
 
 * FLYCHECK
@@ -706,6 +710,7 @@ This is just an example of how to create a simple function in Emacs. Use this fu
 
 #+begin_src emacs-lisp
 (defun reload-init-file ()
+  "Loading the user-init-file twice, which is a hack because for some reason, just loading the user-init-file once does not work properly."
   (interactive)
   (load-file user-init-file)
   (load-file user-init-file))
@@ -783,15 +788,12 @@ Vterm is a terminal emulator within Emacs. The 'shell-file-name' setting sets th
 #+end_src
 
 * THEME
-The first line adds the directory for themes if you would want to add custom theme.
-
 #+begin_src emacs-lisp
-  ;;(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
-  (use-package doom-themes
-    :config
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t)) ; if nil, italics is universally disabled
-  (load-theme 'doom-dracula t)
+(use-package dracula-theme)
+;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
+
+;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
+(load-theme 'dracula t)
 #+end_src
 
 * TRANSPARENCY
@@ -799,7 +801,6 @@ With Emacs version 29, true transparency has been added.
 
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
-
 #+end_src
 
 * WHICH-KEY
