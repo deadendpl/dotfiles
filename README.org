@@ -2,7 +2,7 @@
 #+STARTUP: noinlineimages
 
 * WARNING:
-This is meant for Arch based distros. Dependencies might not be available for other distros.
+This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies might not be available for other distros.
 
 * [[https://github.com/baskerville/bspwm][bspwm]]
 - Dracula [[file:screenshots/bspwm/dracula.png]]
@@ -17,7 +17,7 @@ This is meant for Arch based distros. Dependencies might not be available for ot
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
 | File Manager              | pcmanfm           |
 | Web Browser               | firefox           |
-| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
 | Bar                       | [[https://github.com/polybar/polybar][polybar]]           |
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/yshui/picom][picom]]             |
@@ -35,7 +35,7 @@ This is meant for Arch based distros. Dependencies might not be available for ot
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
 | File Manager              | pcmanfm           |
 | Web Browser               | firefox           |
-| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
 | Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |

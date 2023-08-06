@@ -6,12 +6,7 @@ bspwrc is a shell script that gets read by bspwm on its startup.
 You can load programs and settings with this.
 The default path of bspwmrc is =$HOME/.config/bspwm/bspwmrc=.
 
-* Table of contents :toc:
-- [[#variables][variables]]
-- [[#essential-startups][essential startups]]
-- [[#bspc-rules][bspc rules]]
-
-* variables
+* Variables
 The first thing is setting my variables.
 These will be used for [[../sxhkd/sxhkdrc][sxhkdrc]].
 
@@ -35,7 +30,7 @@ export EDITOR="vim"
 #+END_SRC
 
 
-* essential startups
+* Essential startups
 Now we load essential programs
 
 - =sxhkd= - hotkey daemon. it manages all keyboard shortcuts

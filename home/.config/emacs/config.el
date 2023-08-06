@@ -60,6 +60,7 @@
     (setq evil-vsplit-window-right t)
     (setq evil-split-window-below t)
     (evil-mode))
+
 (use-package evil-collection
   :after evil
   :config
@@ -76,107 +77,107 @@
 ;;(elpaca nil (message "deferred"))
 
 (use-package general
-    :config
-    (general-evil-setup)
+  :config
+  (general-evil-setup)
 
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer custom/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+;; set up 'SPC' as the global leader key
+(general-create-definer custom/leader-keys
+  :states '(normal insert visual emacs)
+  :keymaps 'override
+  :prefix "SPC" ;; set leader
+  :global-prefix "M-SPC") ;; access leader in insert mode
 
-  (custom/leader-keys
-    "SPC" '(projectile-find-file :wk "Counsel M-x")
-    "." '(find-file :wk "Find file")
-    "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-    "f r" '(counsel-recentf :wk "Find recent files")
-    "TAB TAB" '(comment-line :wk "Comment lines"))
+(custom/leader-keys
+  "SPC" '(projectile-find-file :wk "Counsel M-x")
+  "." '(find-file :wk "Find file")
+  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "TAB TAB" '(comment-line :wk "Comment lines"))
 
-  (custom/leader-keys
-    "b" '(:ignore t :wk "buffer")
-    "b b" '(switch-to-buffer :wk "Switch buffer")
-    "b k" '(kill-this-buffer :wk "Kill this buffer")
-    "b n" '(next-buffer :wk "Next buffer")
-    "b p" '(previous-buffer :wk "Previous buffer")
-    "b r" '(revert-buffer :wk "Reload buffer")
-    "b i" '(ibuffer :wk "List all buffers"))
+(custom/leader-keys
+  "b" '(:ignore t :wk "buffer")
+  "b b" '(switch-to-buffer :wk "Switch buffer")
+  "b k" '(kill-this-buffer :wk "Kill this buffer")
+  "b n" '(next-buffer :wk "Next buffer")
+  "b p" '(previous-buffer :wk "Previous buffer")
+  "b r" '(revert-buffer :wk "Reload buffer")
+  "b i" '(ibuffer :wk "List all buffers"))
 
-  (custom/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d d" '(dired :wk "Open dired")
-    "d j" '(dired-jump :wk "Dired jump to current")
-    "d n" '(neotree-dir :wk "Open directory in neotree")
-    "d p" '(peep-dired :wk "Peep-dired"))
+(custom/leader-keys
+  "d" '(:ignore t :wk "Dired")
+  "d d" '(dired :wk "Open dired")
+  "d j" '(dired-jump :wk "Dired jump to current")
+  "d n" '(neotree-dir :wk "Open directory in neotree")
+  "d p" '(peep-dired :wk "Peep-dired"))
 
-  (custom/leader-keys
-    "RET" '(bookmark-jump :wk "Go to bookmark")
-    "b m" '(bookmark-set :wk "Set bookmark"))
+(custom/leader-keys
+  "RET" '(bookmark-jump :wk "Go to bookmark")
+  "b m" '(bookmark-set :wk "Set bookmark"))
 
-  (custom/leader-keys
-    "e" '(:ignore t :wk "Eshell/Evaluate")    
-    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "e d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "e e" '(eval-expression :wk "Evaluate and elisp expression")
-    "e h" '(counsel-esh-history :which-key "Eshell history")
-    "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "e r" '(eval-region :wk "Evaluate elisp in region")
-    "e s" '(eshell :which-key "Eshell"))
+(custom/leader-keys
+  "e" '(:ignore t :wk "Eshell/Evaluate")    
+  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
+  "e e" '(eval-expression :wk "Evaluate and elisp expression")
+  "e h" '(counsel-esh-history :which-key "Eshell history")
+  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+  "e r" '(eval-region :wk "Evaluate elisp in region")
+  "e s" '(eshell :which-key "Eshell"))
 
-  (custom/leader-keys
-    "h" '(:ignore t :wk "Help")
-    "h f" '(describe-function :wk "Describe function")
-    "h t" '(load-theme :wk "Load theme")
-    "h v" '(describe-variable :wk "Describe variable")
-    ;;"h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config"))
-    "h r r" '(reload-init-file :wk "Reload emacs config"))
+(custom/leader-keys
+  "h" '(:ignore t :wk "Help")
+  "h f" '(describe-function :wk "Describe function")
+  "h t" '(load-theme :wk "Load theme")
+  "h v" '(describe-variable :wk "Describe variable")
+  ;;"h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config"))
+  "h r r" '(reload-init-file :wk "Reload emacs config"))
 
-  (custom/leader-keys
-    "m" '(:ignore t :wk "Org")
-    "m a" '(org-agenda :wk "Org agenda")
-    "m e" '(org-export-dispatch :wk "Org export dispatch")
-    "m i" '(org-toggle-item :wk "Org toggle item")
-    "m t" '(org-todo :wk "Org todo")
-    "m B" '(org-babel-tangle :wk "Org babel tangle")
-    "m T" '(org-todo-list :wk "Org todo list"))
+(custom/leader-keys
+  "m" '(:ignore t :wk "Org")
+  "m a" '(org-agenda :wk "Org agenda")
+  "m e" '(org-export-dispatch :wk "Org export dispatch")
+  "m i" '(org-toggle-item :wk "Org toggle item")
+  "m t" '(org-todo :wk "Org todo")
+  "m B" '(org-babel-tangle :wk "Org babel tangle")
+  "m T" '(org-todo-list :wk "Org todo list"))
 
-  (custom/leader-keys
-    "m b" '(:ignore t :wk "Tables")
-    "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
+(custom/leader-keys
+  "m b" '(:ignore t :wk "Tables")
+  "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
 
-  (custom/leader-keys
-    "m d" '(:ignore t :wk "Date/deadline")
-    "m d t" '(org-time-stamp :wk "Org time stamp"))
+(custom/leader-keys
+  "m d" '(:ignore t :wk "Date/deadline")
+  "m d t" '(org-time-stamp :wk "Org time stamp"))
 
-  (custom/leader-keys
-    "p" '(projectile-command-map :wk "Projectile"))
+(custom/leader-keys
+  "p" '(projectile-command-map :wk "Projectile"))
 
-  (custom/leader-keys
-    "t" '(:ignore t :wk "Toggle")
-    "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-    "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
-    "t t" '(visual-line-mode :wk "Toggle truncated lines")
-    "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
-    "t v" '(vterm-toggle :wk "Toggle vterm"))
+(custom/leader-keys
+  "t" '(:ignore t :wk "Toggle")
+  "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
+  "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
+  "t t" '(visual-line-mode :wk "Toggle truncated lines")
+  "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
+  "t v" '(vterm-toggle :wk "Toggle vterm"))
 
-  (custom/leader-keys
-    "w" '(:ignore t :wk "Windows")
-    ;; Window splits
-    "w c" '(evil-window-delete :wk "Close window")
-    "w n" '(evil-window-new :wk "New window")
-    "w s" '(evil-window-split :wk "Horizontal split window")
-    "w v" '(evil-window-vsplit :wk "Vertical split window")
-    ;; Window motions
-    "w h" '(evil-window-left :wk "Window left")
-    "w j" '(evil-window-down :wk "Window down")
-    "w k" '(evil-window-up :wk "Window up")
-    "w l" '(evil-window-right :wk "Window right")
-    "w w" '(evil-window-next :wk "Go to next window")
-    ;; Move Windows
-    "w H" '(buf-move-left :wk "Buffer move left")
-    "w J" '(buf-move-down :wk "Buffer move down")
-    "w K" '(buf-move-up :wk "Buffer move up")
-    "w L" '(buf-move-right :wk "Buffer move right"))
+(custom/leader-keys
+  "w" '(:ignore t :wk "Windows")
+  ;; Window splits
+  "w c" '(evil-window-delete :wk "Close window")
+  "w n" '(evil-window-new :wk "New window")
+  "w s" '(evil-window-split :wk "Horizontal split window")
+  "w v" '(evil-window-vsplit :wk "Vertical split window")
+  ;; Window motions
+  "w h" '(evil-window-left :wk "Window left")
+  "w j" '(evil-window-down :wk "Window down")
+  "w k" '(evil-window-up :wk "Window up")
+  "w l" '(evil-window-right :wk "Window right")
+  "w w" '(evil-window-next :wk "Go to next window")
+  ;; Move Windows
+  "w H" '(buf-move-left :wk "Buffer move left")
+  "w J" '(buf-move-down :wk "Buffer move down")
+  "w K" '(buf-move-up :wk "Buffer move up")
+  "w L" '(buf-move-right :wk "Buffer move right"))
 )
 
 (defun emacs-counsel-launcher ()
@@ -319,8 +320,8 @@ one, an error is signaled."
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
-  ;;(setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  (setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
+  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+  ;;(setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
   (setq dashboard-center-content t) ;; set to 't' for centered content
   (setq dashboard-items '((recents . 5)
                           (agenda . 5 )
@@ -333,6 +334,8 @@ one, an error is signaled."
   (dashboard-setup-startup-hook))
 
 (use-package diminish)
+
+(setq dired-listing-switches "-la --group-directories-first")
 
 (use-package dired-open
   :config
@@ -352,14 +355,25 @@ one, an error is signaled."
     (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file)
 )
 
-(use-package dired
-  :elpaca nil
-  :config
-    (setq dired-listing-switches "-la --group-directories-first")
-    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
-    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file)) ; use dired-find-file instead if not using dired-open package
-    
+;;(use-package dired
+;;  :elpaca nil
+;;  :config
+;;    (setq dired-listing-switches "-la --group-directories-first")
+;;    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
+;;    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file)) ; use dired-find-file instead if not using dired-open package
+
+;;(use-package evil
+;;  :elpaca nil    
+;;  :config
+;;    (evil-define-key 'normal dired-mode-map
+;;      "h" 'dired-up-directory
+;;      "l" 'dired-open-file))
+
 ;;(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
 
 (use-package flycheck
   :ensure t
@@ -409,9 +423,9 @@ one, an error is signaled."
 (global-visual-line-mode t)
 
 (use-package imenu-list
-   :custom
-   (setq imenu-list-focus-after-activation 1)
-   (setq imenu-list-auto-resize t))
+ :custom
+   (imenu-list-focus-after-activation t
+    imenu-list-auto-resize t))
 
 (use-package counsel
   :after ivy
@@ -425,9 +439,9 @@ one, an error is signaled."
    ("C-x B" . ivy-switch-buffer-other-window))
   :diminish
   :custom
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
-  (setq enable-recursive-minibuffers t)
+  (ivy-use-virtual-buffers t
+   ivy-count-format "(%d/%d) "
+   enable-recursive-minibuffers t)
   :config
   (ivy-mode))
 
@@ -476,11 +490,13 @@ one, an error is signaled."
 (use-package org-superstar
   :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 
+(use-package org-auto-tangle
+  :defer t
+  :diminish
+  :hook (org-mode . org-auto-tangle-mode))
+
 (electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
-
-(setq org-insert-heading-respect-content nil)
-(setq org-hide-emphasis-markers t)
 
 (require 'org-tempo)
 
@@ -488,11 +504,22 @@ one, an error is signaled."
   :ensure t
   :diminish
   :after org
-  :init (add-hook 'org-mode-hook 'evil-org-mode t))
+  :init
+    (add-hook 'org-mode-hook 'evil-org-mode t))
+    (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h)
 ;;  :hook (org-mode . (lambda () evil-org-mode))
-  :config
+;;  :config
 ;;  (require 'evil-org-agenda)
 ;;  (evil-org-agenda-set-keys)
+
+;;(after! evil-org
+;;  (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
+
+(setq org-insert-heading-respect-content nil)
+(setq org-hide-emphasis-markers t)
+(setq org-hide-leading-stars t)
+(use-package company-org-block
+  :after org)
 
 (use-package projectile
   :config
@@ -560,7 +587,25 @@ one, an error is signaled."
 ;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
 
 ;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
-(load-theme 'dracula t)
+;;(load-theme 'dracula t)
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-dracula t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  ;;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  ;;(doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
