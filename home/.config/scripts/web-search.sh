@@ -1,19 +1,10 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Gutenberg" "Last.fm" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "AUR (Arch User Repository)" "You" "Brave Search" "Google" "DuckDuckGo" "Bing" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Gutenberg" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -b -p "Search engine:")
 
 case $selected_engine in
-    "Google")
-        URL="https://www.google.com/search?q="
-        ;;
-    "DuckDuckGo")
-        URL="https://duckduckgo.com/?q="
-        ;;
-    "Bing")
-        URL="https://www.bing.com/search?q="
-        ;;
     "Phind")
         URL="https://www.phind.com/search?q="
         ;;
@@ -32,6 +23,9 @@ case $selected_engine in
     "Arch Wiki")
         URL="https://wiki.archlinux.org/index.php?search="
         ;;
+    "Arch Packages")
+        URL="https://archlinux.org/packages/?q="
+        ;;
     "Github")
         URL="https://github.com/search?q="
         ;;
@@ -40,9 +34,6 @@ case $selected_engine in
         ;;
     "Bitsearch (Torrents)")
         URL="https://www.bitsearch.to/search?q="
-        ;;
-    "Last.fm")
-        URL="https://www.last.fm/search?q="
         ;;
     "Gutenberg")
         URL="https://www.gutenberg.org/ebooks/search/?query="

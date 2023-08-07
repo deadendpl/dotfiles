@@ -88,14 +88,19 @@
   :global-prefix "M-SPC") ;; access leader in insert mode
 
 (custom/leader-keys
-  "SPC" '(projectile-find-file :wk "Counsel M-x")
+  "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
-  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-  "f r" '(counsel-recentf :wk "Find recent files")
   "TAB TAB" '(comment-line :wk "Comment lines"))
 
 (custom/leader-keys
-  "b" '(:ignore t :wk "buffer")
+  "f" '(:ignore t :wk "Files")
+  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
+
+(custom/leader-keys
+  "b" '(:ignore t :wk "Buffer")
   "b b" '(switch-to-buffer :wk "Switch buffer")
   "b k" '(kill-this-buffer :wk "Kill this buffer")
   "b n" '(next-buffer :wk "Next buffer")
@@ -155,7 +160,7 @@
 (custom/leader-keys
   "t" '(:ignore t :wk "Toggle")
   "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-  "t n" '(neotree-toggle :wk "Toggle neotree file viewer")
+  "t n" '(neotree-toggle :wk "Toggle neotree")
   "t t" '(visual-line-mode :wk "Toggle truncated lines")
   "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
   "t v" '(vterm-toggle :wk "Toggle vterm"))
@@ -375,6 +380,11 @@ one, an error is signaled."
   :ensure t
   :init (doom-modeline-mode 1))
 
+(use-package emojify
+  :init (global-emojify-mode 1)
+  :custom
+    (emojify-emojis-dir "~/.local/share/emacs/elpaca/builds/emojify/emojis"))
+
 (use-package flycheck
   :ensure t
   :defer t
@@ -577,11 +587,7 @@ one, an error is signaled."
                   (reusable-frames . visible)
                   (window-height . 0.3))))
 
-(use-package sudo-edit
-  :config
-    (custom/leader-keys
-      "f u" '(sudo-edit-find-file :wk "Sudo find file")
-      "f U" '(sudo-edit :wk "Sudo edit file")))
+(use-package sudo-edit)
 
 (use-package dracula-theme)
 ;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")

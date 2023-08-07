@@ -86,7 +86,7 @@ XF86AudioMute
 
 # brightness control
 XF86MonBrightness{Up,Down}
-    light {A,U}3
+    light -{A,U}3
 
 # opening display configuration
 super + F10
