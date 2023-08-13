@@ -102,11 +102,12 @@
 (custom/leader-keys
   "b" '(:ignore t :wk "Buffer")
   "b b" '(switch-to-buffer :wk "Switch buffer")
+  "b i" '(ibuffer :wk "List all buffers")
   "b k" '(kill-this-buffer :wk "Kill this buffer")
   "b n" '(next-buffer :wk "Next buffer")
   "b p" '(previous-buffer :wk "Previous buffer")
   "b r" '(revert-buffer :wk "Reload buffer")
-  "b i" '(ibuffer :wk "List all buffers"))
+  "b s" '(scratch-buffer :wk "Scratch buffer"))
 
 (custom/leader-keys
   "d" '(:ignore t :wk "Dired")
@@ -233,6 +234,10 @@
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
+(use-package beacon
+  :custom
+    (beacon-mode 1))
+
 (require 'windmove)
 
 ;;;###autoload
@@ -321,22 +326,22 @@ one, an error is signaled."
 (use-package dashboard
   :ensure t 
   :init
-  (setq initial-buffer-choice 'dashboard-open)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
-  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  ;;(setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
-  (setq dashboard-center-content t) ;; set to 't' for centered content
-  (setq dashboard-items '((recents . 5)
-                          (agenda . 5 )
-                          (bookmarks . 3)
-                          (projects . 3)
-                          (registers . 3)))
+    (setq initial-buffer-choice 'dashboard-open)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
+    (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+    ;;(setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
+    (setq dashboard-center-content t) ;; set to 't' for centered content
+    (setq dashboard-items '((recents . 5)
+                            (agenda . 5 )
+                            (bookmarks . 3)
+                            (projects . 3)
+                            (registers . 3)))
   ;;(dashboard-modify-heading-icons '((recents . "file-text")
   ;;                            (bookmarks . "book")))
   :config
-  (dashboard-setup-startup-hook))
+    (dashboard-setup-startup-hook))
 
 (use-package diminish)
 
@@ -344,11 +349,11 @@ one, an error is signaled."
 
 (use-package dired-open
   :config
-  (setq dired-open-extensions '(("gif" . "feh")
-                                ("jpg" . "feh")
-                                ("png" . "feh")
-                                ("mkv" . "mpv")
-                                ("mp4" . "mpv"))))
+    (setq dired-open-extensions '(("gif" . "feh")
+                                  ("jpg" . "feh")
+                                  ("png" . "feh")
+                                  ("mkv" . "mpv")
+                                  ("mp4" . "mpv"))))
 
 (use-package peep-dired
   :after dired
@@ -396,7 +401,7 @@ one, an error is signaled."
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
-  :font "Ubuntu Nerd Font"
+  :font "GoMono Nerd Font"
   :height 90
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
@@ -473,6 +478,11 @@ one, an error is signaled."
 
 (use-package lua-mode)
 (use-package nix-mode)
+
+(use-package company-shell
+  :custom
+  (add-to-list 'company-backends 'company-shell)
+  (add-to-list 'company-backends 'company-shell-env))
 
 (use-package neotree
   :config
@@ -632,3 +642,7 @@ one, an error is signaled."
 	which-key-max-description-length 25
 	which-key-allow-imprecise-window-fit nil
 	which-key-separator " → " ))
+
+(use-package mixed-pitch)
+
+(use-package writeroom-mode)

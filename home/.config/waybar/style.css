@@ -15,7 +15,7 @@ window#waybar {
 }
 
 #workspaces button {
-    padding: 0 5px;
+    padding: 0 3px;
     background-color: @background;
     color: @foreground;
     /* border: 2px solid #3a3b3c; */
@@ -26,6 +26,11 @@ window#waybar {
 #workspaces button.active {
     background-color: @foreground;
     color: @background;
+}
+
+#workspaces button.urgent {
+    background-color: @red;
+    color: @foreground;
 }
 
 #taskbar button.active {

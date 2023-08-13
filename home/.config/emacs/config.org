@@ -1,6 +1,5 @@
 #+title: GNU Emacs Configuration
 #+startup: showeverything
-#+options: toc:2
 
 * TABLE OF CONTENTS :toc:
 - [[#essentials-to-load][ESSENTIALS TO LOAD]]
@@ -11,6 +10,7 @@
   - [[#counsel-linux-app][Counsel-Linux-App]]
   - [[#app-launcher][App-Launcher]]
 - [[#all-the-icons][ALL THE ICONS]]
+- [[#beacon][BEACON]]
 - [[#buffer-move][BUFFER-MOVE]]
 - [[#company][COMPANY]]
 - [[#dashboard][DASHBOARD]]
@@ -28,6 +28,7 @@
 - [[#imenu-list][IMENU LIST]]
 - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#language-support][LANGUAGE SUPPORT]]
+  - [[#shell][Shell]]
 - [[#neotree][NEOTREE]]
 - [[#org-mode][ORG MODE]]
   - [[#enabling-table-of-contents][Enabling Table of Contents]]
@@ -48,6 +49,7 @@
 - [[#theme][THEME]]
 - [[#transparency][TRANSPARENCY]]
 - [[#which-key][WHICH-KEY]]
+- [[#zen-mode][ZEN MODE]]
 
 * ESSENTIALS TO LOAD
 ** Elpaca Package Manager
@@ -162,11 +164,12 @@
 (custom/leader-keys
   "b" '(:ignore t :wk "Buffer")
   "b b" '(switch-to-buffer :wk "Switch buffer")
+  "b i" '(ibuffer :wk "List all buffers")
   "b k" '(kill-this-buffer :wk "Kill this buffer")
   "b n" '(next-buffer :wk "Next buffer")
   "b p" '(previous-buffer :wk "Previous buffer")
   "b r" '(revert-buffer :wk "Reload buffer")
-  "b i" '(ibuffer :wk "List all buffers"))
+  "b s" '(scratch-buffer :wk "Scratch buffer"))
 
 (custom/leader-keys
   "d" '(:ignore t :wk "Dired")
@@ -312,6 +315,15 @@ This is an icon set that can be used with dashboard, dired, ibuffer and other Em
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 #+end_src
 
+* BEACON
+[[https://github.com/Malabarba/beacon][beacon]] lights up current line after bigger navigation in a file
+
+#+begin_src emacs-lisp
+(use-package beacon
+  :custom
+    (beacon-mode 1))
+#+end_src
+
 * BUFFER-MOVE
 Creating some functions to allow us to easily move windows (splits) around. The following block of code was taken from buffer-move.el found on the EmacsWiki:
 https://www.emacswiki.org/emacs/buffer-move.el
@@ -415,22 +427,22 @@ Emacs Dashboard is an extensible startup screen showing you recent files, bookma
 (use-package dashboard
   :ensure t 
   :init
-  (setq initial-buffer-choice 'dashboard-open)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
-  (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
-  ;;(setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
-  (setq dashboard-center-content t) ;; set to 't' for centered content
-  (setq dashboard-items '((recents . 5)
-                          (agenda . 5 )
-                          (bookmarks . 3)
-                          (projects . 3)
-                          (registers . 3)))
+    (setq initial-buffer-choice 'dashboard-open)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-banner-logo-title "Emacs Is More Than A Text Editor!")
+    (setq dashboard-startup-banner 'logo) ;; use standard emacs logo as banner
+    ;;(setq dashboard-startup-banner "~/.config/doom/ricky.jpg")  ;; use custom image as banner
+    (setq dashboard-center-content t) ;; set to 't' for centered content
+    (setq dashboard-items '((recents . 5)
+                            (agenda . 5 )
+                            (bookmarks . 3)
+                            (projects . 3)
+                            (registers . 3)))
   ;;(dashboard-modify-heading-icons '((recents . "file-text")
   ;;                            (bookmarks . "book")))
   :config
-  (dashboard-setup-startup-hook))
+    (dashboard-setup-startup-hook))
 #+end_src
 
 * DIMINISH
@@ -446,11 +458,11 @@ This package implements hiding or abbreviation of the modeline displays (lighter
 
 (use-package dired-open
   :config
-  (setq dired-open-extensions '(("gif" . "feh")
-                                ("jpg" . "feh")
-                                ("png" . "feh")
-                                ("mkv" . "mpv")
-                                ("mp4" . "mpv"))))
+    (setq dired-open-extensions '(("gif" . "feh")
+                                  ("jpg" . "feh")
+                                  ("png" . "feh")
+                                  ("mkv" . "mpv")
+                                  ("mp4" . "mpv"))))
 
 (use-package peep-dired
   :after dired
@@ -520,7 +532,7 @@ Defining the various fonts that Emacs will use.
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
-  :font "Ubuntu Nerd Font"
+  :font "GoMono Nerd Font"
   :height 90
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
@@ -628,6 +640,14 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 (use-package lua-mode)
 (use-package nix-mode)
 
+#+end_src
+
+** Shell
+#+begin_src emacs-lisp
+(use-package company-shell
+  :custom
+  (add-to-list 'company-backends 'company-shell)
+  (add-to-list 'company-backends 'company-shell-env))
 #+end_src
 
 * NEOTREE
@@ -891,6 +911,19 @@ With Emacs version 29, true transparency has been added.
 	  which-key-max-description-length 25
 	  which-key-allow-imprecise-window-fit nil
 	  which-key-separator " → " ))
+#+end_src
+
+* ZEN MODE
+[[https://gitlab.com/jabranham/mixed-pitch][mixed-pitch]] changes normal font into fixed-pitch font which makes text prettier.
+
+#+begin_src emacs-lisp
+(use-package mixed-pitch)
+#+end_src
+
+[[https://github.com/joostkremers/writeroom-mode][writeroom-mode]] expands upon that and removes a lot of ui, moves text to the center of screen and makes font bigger so gives better writing experience
+
+#+begin_src emacs-lisp
+(use-package writeroom-mode)
 #+end_src
 
 At 6th video.
