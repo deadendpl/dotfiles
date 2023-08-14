@@ -9,3 +9,4 @@ rofi-bluetooth-git
 lf-sixel-git
 ctpv-git
 cp-p-git
+rofi-lbonn-wayland-git

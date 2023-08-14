@@ -2,7 +2,7 @@
 
 filename=$(date +"%Y-%m-%d_%H-%M-%S".png)
 
-CHOICE=$(printf "Full Screen\nSelect Area" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -i -l 2 -b -p "Screenshot Type:")
+CHOICE=$(printf "Full Screen\nSelect Area\nColor Picker" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -i -l 3 -b -p "Screenshot Type:")
 
 mkdir -p ~/Pictures
 
@@ -11,6 +11,9 @@ if [ "$CHOICE" = "Full Screen" ]; then
 
 elif [ "$CHOICE" = "Select Area" ]; then
   grimshot --notify save area ~/Pictures/$filename
+
+elif [ "$CHOICE" = "Color Picker" ]; then
+  hyprpicker -a
 
 else
   exit

@@ -41,7 +41,10 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies m
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
 
 * INSTALLING
-Go into =install= folder and execute =main.sh=. The script will overwrite some folders in =~/.config= so make sure to make an backup.
+Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
+Then go to =dependencies= directory and window manager you want to use. =pacman.sh= will install standard packages with pacman while =aur.sh= will install AUR packages (it installs them with yay). 
+
+After that copy/move all files in =home= directory to your =$HOME= directory.
 
 * THEMES
 In order to change between themes you need to execute script which should be in =home/.config/scripts/themes/main.sh=. In bspwm and hyprland (if dotfiles were applied correctly) you can bring it up by =super+F6=.
