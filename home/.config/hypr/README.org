@@ -38,7 +38,7 @@ monitor=,preferred,auto,auto
 * Startup programs
 Here are started:
 - waybar (panel/bar)
-- dunst (notification daemon)
+- mako (notification daemon)
 - script for setting wallpaper
 - script for setting gtk themes
 - gnome polkit (thing for authentication)
@@ -47,7 +47,7 @@ Here are started:
 exec-once = ~/.config/scripts/hypr/waybar-start.sh
 exec-once = ~/.config/scripts/hypr/wall.sh
 exec-once = ~/.config/scripts/hypr/theme.sh
-exec-once = dunst -config ~/.config/dunst/dracula &
+exec-once = mako &
 exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec-once = emacs --daemon
 
@@ -270,8 +270,8 @@ bind = $mainMod SHIFT, Return,     exec, ~/.config/scripts/hub.sh
 
 # other
 bind = $mainMod, B,                exec, bwmenu
-bind = $mainMod, M,                exec, $terminal -e btop
-bind = $mainMod SHIFT, M,          exec, $terminal -e sudo btop
+bind = $mainMod, M,                exec, $terminal -e htop
+bind = $mainMod SHIFT, M,          exec, $terminal -e sudo htop
 
 
 # web stuff

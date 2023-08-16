@@ -8,7 +8,7 @@ qt5-wayland
 swaybg
 blueberry
 vim
-dunst
+mako
 wdisplays-git
 wl-clipboard
 grim
