@@ -76,116 +76,6 @@
 ;; Don't install anything. Defer execution of BODY
 ;;(elpaca nil (message "deferred"))
 
-(use-package general
-  :config
-  (general-evil-setup)
-
-;; set up 'SPC' as the global leader key
-(general-create-definer custom/leader-keys
-  :states '(normal insert visual emacs)
-  :keymaps 'override
-  :prefix "SPC" ;; set leader
-  :global-prefix "M-SPC") ;; access leader in insert mode
-
-(custom/leader-keys
-  "SPC" '(projectile-find-file :wk "Find file in project")
-  "." '(find-file :wk "Find file")
-  "TAB TAB" '(comment-line :wk "Comment lines"))
-
-(custom/leader-keys
-  "f" '(:ignore t :wk "Files")
-  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-  "f r" '(counsel-recentf :wk "Find recent files")
-  "f u" '(sudo-edit-find-file :wk "Sudo find file")
-  "f U" '(sudo-edit :wk "Sudo edit file"))
-
-(custom/leader-keys
-  "b" '(:ignore t :wk "Buffer")
-  "b b" '(switch-to-buffer :wk "Switch buffer")
-  "b i" '(ibuffer :wk "List all buffers")
-  "b k" '(kill-this-buffer :wk "Kill this buffer")
-  "b n" '(next-buffer :wk "Next buffer")
-  "b p" '(previous-buffer :wk "Previous buffer")
-  "b r" '(revert-buffer :wk "Reload buffer")
-  "b s" '(scratch-buffer :wk "Scratch buffer"))
-
-(custom/leader-keys
-  "d" '(:ignore t :wk "Dired")
-  "d d" '(dired :wk "Open dired")
-  "d j" '(dired-jump :wk "Dired jump to current")
-  "d n" '(neotree-dir :wk "Open directory in neotree")
-  "d p" '(peep-dired :wk "Peep-dired"))
-
-(custom/leader-keys
-  "RET" '(bookmark-jump :wk "Go to bookmark")
-  "b m" '(bookmark-set :wk "Set bookmark"))
-
-(custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")    
-  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
-  "e e" '(eval-expression :wk "Evaluate and elisp expression")
-  "e h" '(counsel-esh-history :which-key "Eshell history")
-  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-  "e r" '(eval-region :wk "Evaluate elisp in region")
-  "e s" '(eshell :which-key "Eshell"))
-
-(custom/leader-keys
-  "h" '(:ignore t :wk "Help")
-  "h f" '(describe-function :wk "Describe function")
-  "h t" '(load-theme :wk "Load theme")
-  "h v" '(describe-variable :wk "Describe variable")
-  ;;"h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config"))
-  "h r r" '(reload-init-file :wk "Reload emacs config"))
-
-(custom/leader-keys
-  "m" '(:ignore t :wk "Org")
-  "m a" '(org-agenda :wk "Org agenda")
-  "m e" '(org-export-dispatch :wk "Org export dispatch")
-  "m i" '(org-toggle-item :wk "Org toggle item")
-  "m t" '(org-todo :wk "Org todo")
-  "m B" '(org-babel-tangle :wk "Org babel tangle")
-  "m T" '(org-todo-list :wk "Org todo list"))
-
-(custom/leader-keys
-  "m b" '(:ignore t :wk "Tables")
-  "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
-
-(custom/leader-keys
-  "m d" '(:ignore t :wk "Date/deadline")
-  "m d t" '(org-time-stamp :wk "Org time stamp"))
-
-(custom/leader-keys
-  "p" '(projectile-command-map :wk "Projectile"))
-
-(custom/leader-keys
-  "t" '(:ignore t :wk "Toggle")
-  "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-  "t n" '(neotree-toggle :wk "Toggle neotree")
-  "t t" '(visual-line-mode :wk "Toggle truncated lines")
-  "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
-  "t v" '(vterm-toggle :wk "Toggle vterm"))
-
-(custom/leader-keys
-  "w" '(:ignore t :wk "Windows")
-  ;; Window splits
-  "w c" '(evil-window-delete :wk "Close window")
-  "w n" '(evil-window-new :wk "New window")
-  "w s" '(evil-window-split :wk "Horizontal split window")
-  "w v" '(evil-window-vsplit :wk "Vertical split window")
-  ;; Window motions
-  "w h" '(evil-window-left :wk "Window left")
-  "w j" '(evil-window-down :wk "Window down")
-  "w k" '(evil-window-up :wk "Window up")
-  "w l" '(evil-window-right :wk "Window right")
-  "w w" '(evil-window-next :wk "Go to next window")
-  ;; Move Windows
-  "w H" '(buf-move-left :wk "Buffer move left")
-  "w J" '(buf-move-down :wk "Buffer move down")
-  "w K" '(buf-move-up :wk "Buffer move up")
-  "w L" '(buf-move-right :wk "Buffer move right"))
-)
-
 (defun emacs-counsel-launcher ()
   "Create and select a frame called emacs-counsel-launcher which consists only of a minibuffer and has specific dimensions. Runs counsel-linux-app on that frame, which is an emacs command that prompts you to select an app and open it in a dmenu like behaviour. Delete the frame after that command has exited"
   (interactive)
@@ -234,78 +124,16 @@
 (use-package all-the-icons-dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
+(use-package all-the-icons-ibuffer
+  :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
+
+(setq backup-directory-alist '((".*" . "~/.cache/emacs/")))
+
 (use-package beacon
   :custom
     (beacon-mode 1))
 
-(require 'windmove)
-
-;;;###autoload
-(defun buf-move-up ()
-  "Swap the current buffer and the buffer above the split.
-If there is no split, ie now window above the current one, an
-error is signaled."
-;;  "Switches between the current buffer, and the buffer above the
-;;  split, if possible."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'up))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No window above this one")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-down ()
-"Swap the current buffer and the buffer under the split.
-If there is no split, ie now window under the current one, an
-error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'down))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (or (null other-win) 
-            (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
-        (error "No window under this one")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-left ()
-"Swap the current buffer and the buffer on the left of the split.
-If there is no split, ie now window on the left of the current
-one, an error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'left))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No left split")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
-
-;;;###autoload
-(defun buf-move-right ()
-"Swap the current buffer and the buffer on the right of the split.
-If there is no split, ie now window on the right of the current
-one, an error is signaled."
-  (interactive)
-  (let* ((other-win (windmove-find-other-window 'right))
-	 (buf-this-buf (window-buffer (selected-window))))
-    (if (null other-win)
-        (error "No right split")
-      ;; swap top with this one
-      (set-window-buffer (selected-window) (window-buffer other-win))
-      ;; move this one to top
-      (set-window-buffer other-win buf-this-buf)
-      (select-window other-win))))
+(use-package buffer-move)
 
 (use-package company
   :defer 2
@@ -385,6 +213,8 @@ one, an error is signaled."
   :ensure t
   :init (doom-modeline-mode 1))
 
+(use-package emacs-everywhere)
+
 (use-package emojify
   :init (global-emojify-mode 1)
   :custom
@@ -435,6 +265,7 @@ one, an error is signaled."
 (scroll-bar-mode -1)
 
 (global-display-line-numbers-mode 1)
+(setq display-line-numbers-type 'relative)
 (global-visual-line-mode t)
 
 (use-package imenu-list
@@ -475,6 +306,156 @@ one, an error is signaled."
   :config
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer))
+
+(use-package general
+  :config
+  (general-evil-setup)
+
+;; Ctrl+r (which does redo functionality) didn't work so I fixed it
+(define-key evil-normal-state-map (kbd "C-r") 'undo-redo)
+
+;; set up 'SPC' as the global leader key
+(general-create-definer custom/leader-keys
+  :states '(normal insert visual emacs)
+  :keymaps 'override
+  :prefix "SPC" ;; set leader
+  :global-prefix "M-SPC") ;; access leader in insert mode
+
+(custom/leader-keys
+  "SPC" '(projectile-find-file :wk "Find file in project")
+  "." '(find-file :wk "Find file")
+  "TAB TAB" '(comment-line :wk "Comment lines"))
+
+(custom/leader-keys
+  "f" '(:ignore t :wk "Files")
+  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
+
+(custom/leader-keys
+  "b" '(:ignore t :wk "Bookmarks/Buffers")
+  "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+  "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
+  "b d" '(bookmark-delete :wk "Delete bookmark")
+  "b i" '(ibuffer :wk "Ibuffer")
+  "b k" '(kill-this-buffer :wk "Kill this buffer")
+  "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+  "b l" '(list-bookmarks :wk "List bookmarks")
+  "b m" '(bookmark-set :wk "Set bookmark")
+  "b n" '(next-buffer :wk "Next buffer")
+  "b p" '(previous-buffer :wk "Previous buffer")
+  "b r" '(revert-buffer :wk "Reload buffer")
+  "b R" '(rename-buffer :wk "Rename buffer")
+  "b s" '(basic-save-buffer :wk "Save buffer")
+  "b S" '(save-some-buffers :wk "Save multiple buffers")
+  "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
+
+(custom/leader-keys
+  "RET" '(bookmark-jump :wk "Go to bookmark"))
+
+(custom/leader-keys
+  "d" '(:ignore t :wk "Dired")
+  "d d" '(dired :wk "Open dired")
+  "d j" '(dired-jump :wk "Dired jump to current")
+  "d n" '(neotree-dir :wk "Open directory in neotree")
+  "d p" '(peep-dired :wk "Peep-dired"))
+
+(custom/leader-keys
+  "e" '(:ignore t :wk "Eshell/Evaluate")    
+  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
+  "e e" '(eval-expression :wk "Evaluate and elisp expression")
+  "e h" '(counsel-esh-history :which-key "Eshell history")
+  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+  "e r" '(eval-region :wk "Evaluate elisp in region")
+  "e s" '(eshell :which-key "Eshell"))
+
+(custom/leader-keys
+  "h" '(:ignore t :wk "Help")
+  "h a" '(counsel-apropos :wk "Apropos")
+  "h b" '(describe-bindings :wk "Describe bindings")
+  "h c" '(describe-char :wk "Describe character under cursor")
+  "h d" '(:ignore t :wk "Emacs documentation")
+  "h d a" '(about-emacs :wk "About Emacs")
+  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+  "h d m" '(info-emacs-manual :wk "The Emacs manual")
+  "h d n" '(view-emacs-news :wk "View Emacs news")
+  "h d o" '(describe-distribution :wk "How to obtain Emacs")
+  "h d p" '(view-emacs-problems :wk "View Emacs problems")
+  "h d t" '(view-emacs-todo :wk "View Emacs todo")
+  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+  "h e" '(view-echo-area-messages :wk "View echo area messages")
+  "h f" '(describe-function :wk "Describe function")
+  "h F" '(describe-face :wk "Describe face")
+  "h g" '(describe-gnu-project :wk "Describe GNU Project")
+  "h i" '(info :wk "Info")
+  "h I" '(describe-input-method :wk "Describe input method")
+  "h k" '(describe-key :wk "Describe key")
+  "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
+  "h L" '(describe-language-environment :wk "Describe language environment")
+  "h m" '(describe-mode :wk "Describe mode")
+  "h r" '(:ignore t :wk "Reload")
+  "h r r" '((lambda () (interactive)
+              (load-file "~/.config/emacs/init.el")
+              (ignore (elpaca-process-queues)))
+            :wk "Reload emacs config")
+  "h t" '(load-theme :wk "Load theme")
+  "h v" '(describe-variable :wk "Describe variable")
+  "h w" '(where-is :wk "Prints keybinding for command if set")
+  "h x" '(describe-command :wk "Display full documentation for command"))
+
+(custom/leader-keys
+  "m" '(:ignore t :wk "Org")
+  "m a" '(org-agenda :wk "Org agenda")
+  "m e" '(org-export-dispatch :wk "Org export dispatch")
+  "m i" '(org-toggle-item :wk "Org toggle item")
+  "m t" '(org-todo :wk "Org todo")
+  "m B" '(org-babel-tangle :wk "Org babel tangle")
+  "m T" '(org-todo-list :wk "Org todo list"))
+
+(custom/leader-keys
+  "m b" '(:ignore t :wk "Tables")
+  "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
+
+(custom/leader-keys
+  "m d" '(:ignore t :wk "Date/deadline")
+  "m d t" '(org-time-stamp :wk "Org time stamp"))
+
+(custom/leader-keys
+  "p" '(projectile-command-map :wk "Projectile"))
+
+(custom/leader-keys
+  "t" '(:ignore t :wk "Toggle")
+  "t e" '(eshell-toggle :wk "Toggle eshell")
+  "t f" '(flycheck-mode :wk "Toggle flycheck")
+  "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
+  "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
+  "t n" '(neotree-toggle :wk "Toggle neotree")
+  "t r" '(rainbow-mode :wk "Toggle rainbow mode")
+  "t t" '(visual-line-mode :wk "Toggle truncated lines")
+  "t v" '(vterm-toggle :wk "Toggle vterm"))
+
+(custom/leader-keys
+  "w" '(:ignore t :wk "Windows")
+  ;; Window splits
+  "w c" '(evil-window-delete :wk "Close window")
+  "w n" '(evil-window-new :wk "New window")
+  "w s" '(evil-window-split :wk "Horizontal split window")
+  "w v" '(evil-window-vsplit :wk "Vertical split window")
+  ;; Window motions
+  "w h" '(evil-window-left :wk "Window left")
+  "w j" '(evil-window-down :wk "Window down")
+  "w k" '(evil-window-up :wk "Window up")
+  "w l" '(evil-window-right :wk "Window right")
+  "w w" '(evil-window-next :wk "Go to next window")
+  ;; Move Windows
+  "w H" '(buf-move-left :wk "Buffer move left")
+  "w J" '(buf-move-down :wk "Buffer move down")
+  "w K" '(buf-move-up :wk "Buffer move up")
+  "w L" '(buf-move-right :wk "Buffer move right"))
+)
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -549,12 +530,6 @@ one, an error is signaled."
   :diminish
   :hook org-mode prog-mode)
 
-(defun reload-init-file ()
-  "Loading the user-init-file twice, which is a hack because for some reason, just loading the user-init-file once does not work properly."
-  (interactive)
-  (load-file user-init-file)
-  (load-file user-init-file))
-
 (use-package eshell-syntax-highlighting
   :after esh-mode
   :config
@@ -599,7 +574,7 @@ one, an error is signaled."
 
 (use-package sudo-edit)
 
-(use-package dracula-theme)
+;;(use-package dracula-theme)
 ;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
 
 ;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
