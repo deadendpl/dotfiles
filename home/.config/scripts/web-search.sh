@@ -2,7 +2,7 @@
 
 declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Gutenberg" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
 
-selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -b -p "Search engine:")
+selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 
 case $selected_engine in
     "Phind")
@@ -49,7 +49,7 @@ case $selected_engine in
         ;;
 esac
 
-QUERY=$(echo '' | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l 0 -b -p "Search $selected_engine:")
+QUERY=$(echo '' | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l 0 -p "Search $selected_engine:")
 
 if [ -n "$QUERY" ]; then
     xdg-open "${URL}${QUERY}" 2> /dev/null

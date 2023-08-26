@@ -1,7 +1,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-export PATH=~/.config/emacs/bin:$PATH
+export PATH=~/.config/emacs/bin:~/.local/bin:$PATH
 export EDITOR='nvim'
 
 # setting tty colors

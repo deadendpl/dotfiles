@@ -1,5 +1,6 @@
 configuration{
     drun-display-format: "{name}";
+    location: 6;
 }
 
 @theme "~/.config/rofi/themes/drac-list.rasi"

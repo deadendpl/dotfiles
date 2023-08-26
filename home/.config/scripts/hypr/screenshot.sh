@@ -2,7 +2,7 @@
 
 filename=$(date +"%Y-%m-%d_%H-%M-%S".png)
 
-CHOICE=$(printf "Full Screen\nSelect Area\nColor Picker" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -i -l 3 -b -p "Screenshot Type:")
+CHOICE=$(printf "Full Screen\nSelect Area\nColor Picker" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -i -l 3 -p "Screenshot Type:")
 
 mkdir -p ~/Pictures
 

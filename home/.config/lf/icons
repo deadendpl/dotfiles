@@ -296,6 +296,7 @@ Vagrantfile             
 *.swm   
 *.dwm   
 *.esd   
+*.chd   
 
 # Image formats
 *.jpg   

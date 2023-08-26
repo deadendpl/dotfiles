@@ -55,10 +55,11 @@
 ;; Expands to: (elpaca evil (use-package evil :demand t))
 (use-package evil
     :init      ;; tweak evil's configuration before loading it
-    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
-    (setq evil-want-keybinding nil)
-    (setq evil-vsplit-window-right t)
-    (setq evil-split-window-below t)
+    (setq evil-want-integration t ;; This is optional since it's already set to t by default.
+          evil-want-keybinding nil
+          evil-vsplit-window-right t
+          evil-split-window-below t
+          evil-move-cursor-back nil)
     (evil-mode))
 
 (use-package evil-collection
@@ -314,6 +315,9 @@
 ;; Ctrl+r (which does redo functionality) didn't work so I fixed it
 (define-key evil-normal-state-map (kbd "C-r") 'undo-redo)
 
+;; Ctrl+u (which is page up) also didn't work
+(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+
 ;; set up 'SPC' as the global leader key
 (general-create-definer custom/leader-keys
   :states '(normal insert visual emacs)
@@ -550,8 +554,9 @@
 
 (use-package vterm
 :config
-(setq shell-file-name "/bin/sh"
+(setq shell-file-name "/bin/bash"
       vterm-max-scrollback 5000))
+(add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs)))
 
 (use-package vterm-toggle
   :after vterm
@@ -616,7 +621,8 @@
 	which-key-idle-delay 0.8
 	which-key-max-description-length 25
 	which-key-allow-imprecise-window-fit nil
-	which-key-separator " → " ))
+	which-key-separator " → "
+        which-key-idle-delay 0.5))
 
 (use-package mixed-pitch)
 

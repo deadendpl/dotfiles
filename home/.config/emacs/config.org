@@ -895,7 +895,7 @@ With Emacs version 29, true transparency has been added.
 	which-key-max-description-length 25
 	which-key-allow-imprecise-window-fit nil
 	which-key-separator " → "
-        which-key-idle-delay 0.5)
+        which-key-idle-delay 0.5))
 #+end_src
 
 * ZEN MODE

@@ -11,7 +11,7 @@ vertical_line="monitor=,preferred,auto,auto,transform,1"
 declare -a options=("Horizontal -" "Vertical |")
 
 # Show the rofi menu and get the selected option
-selected_option=$(printf '%s\n' "${options[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#options[@]} -b -p "Select display rotation")
+selected_option=$(printf '%s\n' "${options[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#options[@]} -p "Select display rotation")
 
 # Comment out the horizontal line
 sed -i "s|^$horizontal_line$|#&|" "$config_file"

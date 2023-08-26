@@ -3,6 +3,8 @@ if status is-interactive
     starship init fish | source
 
 set PATH ~/.config/emacs/bin $PATH
+set PATH ~/.local/bin $PATH
+
 export EDITOR='nvim'
 
 set fish_greeting
