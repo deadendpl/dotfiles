@@ -6,15 +6,15 @@
 The default path is =$HOME/.config/hypr/hyprland.conf=.
 
 * Table of Contents :toc:
-- [[#monitor][monitor]]
+- [[#monitor][Monitor]]
 - [[#startup-programs][Startup programs]]
-- [[#variables][variables]]
-- [[#input-stuff][input stuff]]
-- [[#animations-and-decorations][animations and decorations]]
+- [[#variables][Variables]]
+- [[#input-stuff][Input stuff]]
+- [[#animations-and-decorations][Animations and decorations]]
   - [[#window-rules][window rules]]
   - [[#keybindings][keybindings]]
 
-* monitor
+* Monitor
 *WARNING*:
 This is meant and tested for one display.
 
@@ -53,7 +53,7 @@ exec-once = emacs --daemon
 
 #+END_SRC
 
-* variables
+* Variables
 Here are few variables set:
 - terminal
 - web browser
@@ -71,7 +71,7 @@ env = XCURSOR_SIZE,24
 $_JAVA_AWT_WM_NONREPARENTING=1
 
 $terminal=foot
-$web_browser=firefox
+$web_browser=qutebrowser
 $file_manager=pcmanfm
 $file_manager2=$terminal -e lf
 $editor=emacsclient -c -a 'emacs'
@@ -82,7 +82,7 @@ $editor2=$terminal -e nvim
 #+END_SRC
 
 
-* input stuff
+* Input stuff
 I'm polish so I use polish keyboard layout.
 #+BEGIN_SRC conf
 input {
@@ -108,7 +108,7 @@ gestures {
 
 #+END_SRC
 
-* animations and decorations
+* Animations and decorations
 There are also some widow layout options.
 #+BEGIN_SRC conf
 general {
@@ -193,6 +193,7 @@ device:epic-mouse-v1 {
 windowrule = float, wdisplays
 windowrule = float, feh
 windowrule = float, imv
+windowrule = float, gcolor3
 windowrule = fullscreen, Waydroid
 windowrulev2 = float,class:^(firefox)$,title:^(Picture-in-Picture)$
 windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
@@ -202,50 +203,50 @@ windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 ** keybindings
 Probably the most important thing in here
 
-| Keybinding              | command                                                                     |
-|-------------------------+-----------------------------------------------------------------------------|
-| SUPER + T               | launches terminal                                                           |
-| SUPER + W               | lunches web browser                                                         |
-| SUPER + E               | launches first IDE                                                          |
-| SUPER + Shift + E       | launches second IDE                                                         |
-| SUPER + F               | launches file manager                                                       |
-| SUPER + Shift + F       | launches second file manager                                                |
-| SUPER + Enter           | launches rofi (app launcher)                                                |
-| SUPER + Tab             | launches rofi in window mode                                                |
-| SUPER + Shift + Enter   | launches script hub                                                         |
-| SUPER + B               | launches bitwarden menu                                                     |
-| SUPER + M               | launches task manager                                                       |
-| SUPER + Shift + M       | launches task manager with admin permissions                                |
-| SUPER + /               | launches web search                                                         |
-| SUPER + Shift + /       | launches bookmarks menu                                                     |
-| SUPER + Alt + /         | puts item in clipboard into bookmarks file                                  |
-| SUPER + Shift + Alt + / | edits bookmarks file directly                                               |
-| Raise Volume key        | self explenatory                                                            |
-| Lower Volume key        | self explanatory                                                            |
-| Audio Mute key          | self explanatory                                                            |
-| Brightness Up key       | self explanatory                                                            |
-| Brightness Down key     | self explanatory                                                            |
-| PrintScreen             | launches screenshot script                                                  |
-| SUPER + F2              | launches sound volume changing menu(if you're not on laptop)                |
-| SUPER + F7              | launches network menu                                                       |
-| SUPER + Shift + F7      | launches bluetooth menu                                                     |
-| SUPER + F10             | launches display menu                                                       |
-| SUPER + F9              | launches drive management menu                                              |
-| SUPER + F6              | launches theme changing menu                                                |
-| SUPER + Q               | closes the window                                                           |
-| SUPER + Shift + Q       | launches power menu                                                         |
-| SUPER + P               | turns peudo tiling                                                          |
-| SUPER + J               | (from left/right turns window positions to up/down)                         |
-| SUPER + V               | makes the current window floating                                           |
-| SUPER + Alt + F         | makes the current window fullscreen                                         |
-| SUPER + ←/↓/→/↑         | changes window focus according to arrow key                                 |
-| SUPER + 1-9             | changes to workspace 1-9                                                    |
-| SUPER + Shift + 1-9     | moves current window to worskpace 1-9                                       |
-| SUPER + Ctrl + ←/→      | moves to left or right workspace                                            |
-| SUPER + Shift + ←/→     | moves current window to left or right workspace and moves to that workspace |
-| SUPER + LMB             | lets you drag and move windows to different positions                       |
-| SUPER + RMB             | lets you resize windows                                                     |
-| SUPER + Scroll          | lets you scroll between workspaces                                          |
+| Keybinding              | command                                                                 |
+|------------------------+-------------------------------------------------------------------------|
+| SUPER + T              | launches terminal                                                        |
+| SUPER + W              | launches web browser                                                     |
+| SUPER + E              | launches first IDE (emacs)                                               |
+| SUPER + Shift + E       | launches second IDE (neovim)                                             |
+| SUPER + F              | launches file manager (pcmanfm)                                          |
+| SUPER + Shift + F       | launches second file manager (lf)                                        |
+| SUPER + Enter          | launches rofi (app launcher)                                             |
+| SUPER + Tab            | launches rofi in window mode                                             |
+| SUPER + Shift + Enter   | launches script hub                                                      |
+| SUPER + B              | launches bitwarden menu                                                  |
+| SUPER + M              | launches task manager                                                    |
+| SUPER + Shift + M       | launches task manager with admin permissions                             |
+| SUPER + /              | launches web search                                                      |
+| SUPER + Shift + /       | launches bookmarks menu                                                  |
+| SUPER + Alt + /         | puts item in clipboard into bookmarks file                               |
+| SUPER + Shift + Alt + / | edits bookmarks file directly                                            |
+| Raise Volume key        | self explenatory                                                         |
+| Lower Volume key        | self explanatory                                                         |
+| Audio Mute key          | self explanatory                                                         |
+| Brightness Up key       | self explanatory                                                         |
+| Brightness Down key     | self explanatory                                                         |
+| PrintScreen             | launches screenshot script                                               |
+| SUPER + F2             | launches sound volume changing menu(if you're not on laptop)             |
+| SUPER + F7             | launches network menu                                                    |
+| SUPER + Shift + F7      | launches bluetooth menu                                                  |
+| SUPER + F10            | launches display menu                                                    |
+| SUPER + F9             | launches drive management menu                                           |
+| SUPER + F6             | launches theme changing menu                                             |
+| SUPER + Q              | closes the window                                                        |
+| SUPER + Shift + Q       | launches power menu                                                      |
+| SUPER + P              | turns peudo tiling                                                       |
+| SUPER + down           | (from left/right turns window positions to up/down)                      |
+| SUPER + V              | makes the current window floating                                        |
+| SUPER + Alt + F         | makes the current window fullscreen                                      |
+| SUPER + h/j/k/l         | changes window focus left/down/right/up                                  |
+| SUPER + 1-9            | changes to workspace 1-9                                                |
+| SUPER + Shift + 1-9     | moves current window to worskpace 1-9                                    |
+| SUPER + Shift + k/j     | moves to left or right workspace                                         |
+| SUPER + Shift + h/l     | moves current window to left/right workspace and moves to that workspace |
+| SUPER + LMB            | lets you drag and move windows to different positions                    |
+| SUPER + RMB            | lets you resize windows                                                  |
+| SUPER + Scroll          | lets you scroll between workspaces                                       |
 
 =$mainMod= is a variable to super(windows) key
 
@@ -304,16 +305,16 @@ bind = $mainMod, Q,                killactive,
 bind = $mainMod SHIFT, Q,          exec, ~/.config/scripts/power.sh
 
 bind = $mainMod, P,                pseudo, # dwindle
-bind = $mainMod, J,                togglesplit, # dwindle
+bind = $mainMod, down,                togglesplit, # dwindle
 bind = $mainMod, V,                togglefloating,
 bind = $mainMod ALT, F,            fullscreen
 
 
 # Move focus
-bind = $mainMod, left, movefocus, l
-bind = $mainMod, right, movefocus, r
-bind = $mainMod, up, movefocus, u
-bind = $mainMod, down, movefocus, d
+bind = $mainMod, h, movefocus, l
+bind = $mainMod, j, movefocus, d
+bind = $mainMod, k, movefocus, u
+bind = $mainMod, l, movefocus, r
 
 # Switch workspaces with mainMod + [0-9]
 bind = $mainMod, 1, workspace, 1
@@ -341,12 +342,12 @@ bind = $mainMod SHIFT, 0, movetoworkspace, 10
 
 
 # Scroll through workspaces with mainMod + scroll
-bind = $mainMod CTRL, right, workspace, +1
-bind = $mainMod CTRL, left,  workspace, -1
+bind = $mainMod SHIFT, j, workspace, +1
+bind = $mainMod SHIFT, k,  workspace, -1
 
 # Move active window to a next or previous workspace with mainMod + SHIFT + [ ->,<- ]
-bind = $mainMod SHIFT, left,  movetoworkspace, -1
-bind = $mainMod SHIFT, right, movetoworkspace, +1
+bind = $mainMod SHIFT, h,  movetoworkspace, -1
+bind = $mainMod SHIFT, l, movetoworkspace, +1
 
 # Move/resize windows with mainMod + LMB/RMB and dragging
 bindm = $mainMod, mouse:272, movewindow

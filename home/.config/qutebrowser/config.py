@@ -84,9 +84,7 @@ config.set('content.javascript.enabled', True, 'devtools://*')
 # Type: Bool
 config.set('content.javascript.enabled', True, 'chrome://*/*')
 
-# Enable JavaScript.
-# Type: Bool
-config.set('content.javascript.can_access_clipboard', True, 'chat.openai.com')
+c.content.javascript.clipboard = "access-paste"
 
 # Allow websites to show notifications.
 # Type: BoolAsk
@@ -117,11 +115,15 @@ config.set('content.javascript.can_access_clipboard', True, 'chat.openai.com')
 # the search engine name to the search term, e.g. `:open google
 # qutebrowser`.
 # Type: Dict
-c.url.searchengines = {'DEFAULT': 'https://searx.mha.fi/search?q={}', 'ph': 'https://www.phind.com/search?q={}'}
+c.url.searchengines = {
+  'DEFAULT': 'https://searx.mha.fi/search?q={}',
+  'ph': 'https://www.phind.com/search?q={}',
+}
 
 # Page(s) to open at the start.
 # Type: List of FuzzyUrl, or FuzzyUrl
-c.url.start_pages = 'https://searx.mha.fi'
+c.url.start_pages = '~/.config/qutebrowser/start/start.html'
+c.url.default_page = '~/.config/qutebrowser/start/start.html'
 
 # Render all web contents using a dark theme. Example configurations
 # from Chromium's `chrome://flags`:  - "With simple HSL/CIELAB/RGB-based
@@ -135,18 +137,34 @@ c.url.start_pages = 'https://searx.mha.fi'
 # Type: Bool
 
 # dark mode
-c.colors.webpage.darkmode.enabled = True
-
+#c.colors.webpage.darkmode.enabled = True
+c.colors.webpage.preferred_color_scheme = "dark"
 c.colors.webpage.darkmode.policy.images = "smart"
+c.colors.webpage.darkmode.policy.page = "smart"
 
+# fonts
 c.fonts.default_family = "codenewromannerdfont"
-
 c.fonts.web.family.standard = "ubuntunerdfont"
-
+c.fonts.web.family.fixed = "codenewromannerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
 
+c.scrolling.smooth = True
+c.scrolling.bar = "overlay"
+
 # custom bindings
-config.bind('<Ctrl-Shift-l>', 'spawn --userscript bitwarden.py')
+bindings = {
+  "<Ctrl-Shift-l>": "spawn --userscript bitwarden.py",
+}
 
 # theme
 config.source('dracula.py')
+
+c.tabs.position = "left"
+
+c.auto_save.session = True
+
+c.tabs.show = "multiple"
+
+c.tabs.last_close = "close"
+
+c.content.default_encoding = "utf-8"

@@ -13,7 +13,7 @@ fish_vi_key_bindings
 # importing tty colors
 source ~/.config/tty-colors/fish/dracula
 
-# going to las directory from lf
+# going to last directory from lf
 function lfcd
     set tmp (mktemp)
     # `command` is needed in case `lfcd` is aliased to `lf`
@@ -41,28 +41,25 @@ alias aupg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
 alias asearch='apt search'
 
-# pacman
-alias pinst='sudo pacman -S'
-alias ppu='sudo pacman -Rs'
-alias pup='sudo pacman -Syu'
-alias pinstalled='pacman -Q'
+# pacman and yay
+alias pinst='yay -S'
+alias ppu='yay -Rs'
+alias pup='yay -Syu'
+alias pinstalled='yay -Q'
 function pinsearch
-    pacman -Q | grep $argv
+    yay -Q | grep $argv
 end
-alias psearch='pacman -Ss'
-alias pclean='sudo pacman -Sc'
-alias listaur="pacman -Qqem"
-
-# yay
-alias yinst='yay -S'
+alias psearch='yay -Ss'
+alias pclean='yay -Sc'
+alias listaur="yay -Qqem"
 
 # nix
 alias nup='sudo nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
 
 # other
-alias l='exa --all --long --header --icons --git --group-directories-first'
-alias lf='lfcd'
+alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
+alias lf='lfcd -single'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'

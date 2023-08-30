@@ -18,16 +18,16 @@ alias ainstalled='apt list --installed'
 alias asearch='apt search'
 
 # pacman
-alias pinst='sudo pacman -S'
-alias ppu='sudo pacman -Rs'
-alias pup='sudo pacman -Syu'
-alias pinstalled='pacman -Q'
+alias pinst='yay -S'
+alias ppu='yay -Rs'
+alias pup='yay -Syu'
+alias pinstalled='yay -Q'
 pinsearch() {
-  pacman -Q | grep "$@"
+  yay -Q | grep "$@"
 }
-alias psearch='pacman -Ss'
-alias pclean='sudo pacman -Sc'
-alias listaur="pacman -Qqem"
+alias psearch='yay -Ss'
+alias pclean='yay -Sc'
+alias listaur="yay -Qqem"
 
 # yay
 alias yinst='yay -S'
@@ -37,7 +37,7 @@ alias nup='sudo nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
 
 # other
-alias l='exa --all --long --header --icons --git --group-directories-first'
+alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'

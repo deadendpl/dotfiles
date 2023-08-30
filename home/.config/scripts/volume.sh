@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Prompt for the volume change using Rofi
-choice=$(rofi -config ~/.config/rofi/config-bare.rasi -dmenu  -b -l 0 "How much to change the volume by?")
+choice=$(rofi -config ~/.config/rofi/config-bare.rasi -dmenu  -l 0 -p "How much to change the volume by?")
 
 # Check if the choice is a valid number
 if [[ $choice =~ ^-?[0-9]+$ ]]; then

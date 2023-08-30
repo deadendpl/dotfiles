@@ -11,15 +11,15 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies m
 
 - Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
 
-| Type of program           | my default choice |
-|---------------------------+-------------------|
+| Type of program          | my default choice |
+|--------------------------+------------------|
 | Terminal Emulator         | [[https://github.com/alacritty/alacritty][alacritty]]         |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | pcmanfm           |
-| Web Browser               | firefox           |
-| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
-| Bar                       | [[https://github.com/polybar/polybar][polybar]]           |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
+| File Manager              | pcmanfm          |
+| Web Browser              | firefox           |
+| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]     |
+| Bar                      | [[https://github.com/polybar/polybar][polybar]]           |
+| Launcher                 | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/yshui/picom][picom]]             |
 
 * [[https://github.com//hyprwm/hyprland][Hyprland]]
@@ -29,20 +29,20 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies m
 
 - Catppuccin Mocha [[file:screenshots/hypr/catppuccin-mocha.png]]
 
-| Type of program           | my default choice |
-|---------------------------+-------------------|
-| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
+| Type of program          | my default choice |
+|--------------------------+------------------|
+| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]             |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | pcmanfm           |
-| Web Browser               | firefox           |
-| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
-| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
+| File Manager              | pcmanfm          |
+| Web Browser              | [[https://www.qutebrowser.org/][qutebrowser]]      |
+| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]     |
+| Bar                      | [[https://github.com/Alexays/Waybar][Waybar]]           |
+| Launcher                 | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
 
 * INSTALLING
 Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
-Then go to =dependencies= directory and window manager you want to use. =pacman.sh= will install standard packages with pacman while =aur.sh= will install AUR packages (it installs them with yay). 
+Then go to =dependencies= directory and window manager you want to use. =pacman.sh= will install standard packages with pacman while =aur.sh= will install AUR packages (it installs them with [[https://github.com/Jguer/yay][yay]]).
 
 After that copy/move all files in =home= directory to your =$HOME= directory.
 

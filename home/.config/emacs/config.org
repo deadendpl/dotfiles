@@ -23,9 +23,10 @@
 - [[#fonts][FONTS]]
   - [[#setting-the-font-face][Setting the Font Face]]
   - [[#zooming-inout][Zooming In/Out]]
-- [[#graphical-user-interface-tweaks][GRAPHICAL USER INTERFACE TWEAKS]]
+- [[#other-tweaks][OTHER TWEAKS]]
   - [[#disable-menubar-toolbars-and-scrollbars][Disable Menubar, Toolbars and Scrollbars]]
   - [[#display-line-numbers-and-truncated-lines][Display Line Numbers and Truncated Lines]]
+  - [[#electric-pair][Electric Pair]]
 - [[#imenu-list][IMENU LIST]]
 - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#keybindings][KEYBINDINGS]]
@@ -39,7 +40,7 @@
   - [[#disable-electric-indent-and-other-fixes][Disable Electric Indent and other fixes]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
   - [[#evil-keybindings][Evil keybindings]]
-  - [[#other-tweaks][Other tweaks]]
+  - [[#other-tweaks-1][Other tweaks]]
 - [[#projectile][PROJECTILE]]
 - [[#rainbow-mode][RAINBOW MODE]]
 - [[#shells-and-terminals][SHELLS AND TERMINALS]]
@@ -205,6 +206,8 @@ This is an icon set that can be used with dashboard, dired, ibuffer and other Em
 
 (use-package all-the-icons-ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
+
+(use-package nerd-icons)
 #+end_src
 
 * BACKUP 
@@ -358,7 +361,6 @@ Install =luacheck= from your Linux distro's repositories for flycheck to work co
   :defer t
   :diminish
   :init (global-flycheck-mode))
-
 #+end_src
 
 * FONTS
@@ -396,7 +398,7 @@ Defining the various fonts that Emacs will use.
 #+end_src
 
 ** Zooming In/Out
-You can use the bindings CTRL plus + and =/- for zooming in/out. You can also use CTRL plus the mouse wheel for zooming in/out.
+You can use the Ctrl plus + and =/- for zooming in/out. You can also use Ctrl plus the mouse wheel for zooming in/out.
 
 #+begin_src emacs-lisp
 (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -406,7 +408,7 @@ You can use the bindings CTRL plus + and =/- for zooming in/out. You can also us
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
 
-* GRAPHICAL USER INTERFACE TWEAKS
+* OTHER TWEAKS
 ** Disable Menubar, Toolbars and Scrollbars
 #+begin_src emacs-lisp
 (menu-bar-mode -1)
@@ -419,6 +421,12 @@ You can use the bindings CTRL plus + and =/- for zooming in/out. You can also us
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
 (global-visual-line-mode t)
+#+end_src
+
+** Electric Pair
+(automatic parenthesis, quotes etc.)
+#+begin_src emacs-lisp
+(electric-pair-mode t)
 #+end_src
 
 * IMENU LIST
@@ -635,7 +643,7 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 #+begin_src emacs-lisp
 (use-package lua-mode)
 (use-package nix-mode)
-
+(use-package markdown-mode)
 #+end_src
 
 ** Shell
@@ -649,8 +657,8 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 * NEOTREE
 Neotree is a file tree viewer. When you open neotree, it jumps to the current file thanks to neo-smart-open. The neo-window-fixed-size setting makes the neotree width be adjustable. NeoTree provides following themes: classic, ascii, arrow, icons, and nerd. Theme can be configed by setting "two" themes for neo-theme: one for the GUI and one for the terminal.
 
-| COMMAND        | DESCRIPTION                 | KEYBINDING |
-|----------------+-----------------------------+------------|
+| COMMAND        | DESCRIPTION               | KEYBINDING |
+|----------------+---------------------------+------------|
 | neotree-toggle | /Toggle neotree/            | SPC t n    |
 | neotree- dir   | /Open directory in neotree/ | SPC d n    |
 
@@ -844,11 +852,7 @@ Vterm is a terminal emulator within Emacs. The 'shell-file-name' setting sets th
 
 * THEME
 #+begin_src emacs-lisp
-;;(use-package dracula-theme)
-;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
-
-;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
-;;(load-theme 'dracula t)
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
 
 (use-package doom-themes
   :ensure t

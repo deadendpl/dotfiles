@@ -54,9 +54,6 @@ cmd open &{{
     esac
 }}
 
-# mkdir command. See wiki if you want it to select created dir
-map a :push %mkdir<space>
-
 # define a custom 'rename' command without prompt for overwrite
 # cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
 # map r push :rename<space>
@@ -142,10 +139,6 @@ cmd paste $cp-p --lf-paste $id
 
 # borders
 set drawbox
-
-# mkdir as a N keybinding
-cmd mkdir %mkdir "$@"
-map a push :mkdir<space>
 
 # link creation
 # y (select for copy) and P to paste soft-link

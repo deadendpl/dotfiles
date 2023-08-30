@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Gutenberg" "Bitsearch (Torrents)" "Piped (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Gutenberg" "Bitsearch (Torrents)" "Invidious (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 
@@ -29,8 +29,8 @@ case $selected_engine in
     "Github")
         URL="https://github.com/search?q="
         ;;
-    "Piped (YouTube)")
-        URL="https://piped.kavin.rocks/results?search_query="
+    "Invidious (YouTube)")
+        URL="https://invidious.lunar.icu/search?q="
         ;;
     "Bitsearch (Torrents)")
         URL="https://www.bitsearch.to/search?q="

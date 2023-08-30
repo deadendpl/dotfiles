@@ -128,6 +128,8 @@
 (use-package all-the-icons-ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
+(use-package nerd-icons)
+
 (setq backup-directory-alist '((".*" . "~/.cache/emacs/")))
 
 (use-package beacon
@@ -268,6 +270,8 @@
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
 (global-visual-line-mode t)
+
+(electric-pair-mode t)
 
 (use-package imenu-list
  :custom
@@ -463,6 +467,7 @@
 
 (use-package lua-mode)
 (use-package nix-mode)
+(use-package markdown-mode)
 
 (use-package company-shell
   :custom
@@ -579,11 +584,7 @@
 
 (use-package sudo-edit)
 
-;;(use-package dracula-theme)
-;;  :ensure "~/.local/share/emacs/themes/dracula-theme.el")
-
-;;(add-to-list 'custom-theme-load-path "~/.local/share/emacs/themes/")
-;;(load-theme 'dracula t)
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
 
 (use-package doom-themes
   :ensure t
