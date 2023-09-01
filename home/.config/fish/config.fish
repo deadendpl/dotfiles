@@ -1,7 +1,3 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
-    starship init fish | source
-
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
@@ -50,7 +46,8 @@ function pinsearch
     yay -Q | grep $argv
 end
 alias psearch='yay -Ss'
-alias pclean='yay -Sc'
+alias porphan='yay -Qtdq'
+alias pclean='yay -Sc && porphan'
 alias listaur="yay -Qqem"
 
 # nix
@@ -59,7 +56,7 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lfcd -single'
+alias lf='lfcd'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
@@ -71,4 +68,4 @@ alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 
 colorscript random
 
-end
+starship init fish | source

@@ -26,7 +26,8 @@ pinsearch() {
   yay -Q | grep "$@"
 }
 alias psearch='yay -Ss'
-alias pclean='yay -Sc'
+alias porphan='yay -Qtdq'
+alias pclean='yay -Sc && porphan'
 alias listaur="yay -Qqem"
 
 # yay

@@ -96,27 +96,9 @@ c.content.javascript.clipboard = "access-paste"
 
 #config.set('content.images', False, '*://example.com/')
 
-# Search engines which can be used via the address bar.  Maps a search
-# engine name (such as `DEFAULT`, or `ddg`) to a URL with a `{}`
-# placeholder. The placeholder will be replaced by the search term, use
-# `{{` and `}}` for literal `{`/`}` braces.  The following further
-# placeholds are defined to configure how special characters in the
-# search terms are replaced by safe characters (called 'quoting'):  *
-# `{}` and `{semiquoted}` quote everything except slashes; this is the
-# most   sensible choice for almost all search engines (for the search
-# term   `slash/and&amp` this placeholder expands to `slash/and%26amp`).
-# * `{quoted}` quotes all characters (for `slash/and&amp` this
-# placeholder   expands to `slash%2Fand%26amp`). * `{unquoted}` quotes
-# nothing (for `slash/and&amp` this placeholder   expands to
-# `slash/and&amp`). * `{0}` means the same as `{}`, but can be used
-# multiple times.  The search engine named `DEFAULT` is used when
-# `url.auto_search` is turned on and something else than a URL was
-# entered to be opened. Other search engines can be used by prepending
-# the search engine name to the search term, e.g. `:open google
-# qutebrowser`.
-# Type: Dict
+# search
 c.url.searchengines = {
-  'DEFAULT': 'https://searx.mha.fi/search?q={}',
+  'DEFAULT': 'https://search.garudalinux.org/search?q={}',
   'ph': 'https://www.phind.com/search?q={}',
 }
 
@@ -125,20 +107,10 @@ c.url.searchengines = {
 c.url.start_pages = '~/.config/qutebrowser/start/start.html'
 c.url.default_page = '~/.config/qutebrowser/start/start.html'
 
-# Render all web contents using a dark theme. Example configurations
-# from Chromium's `chrome://flags`:  - "With simple HSL/CIELAB/RGB-based
-# inversion": Set   `colors.webpage.darkmode.algorithm` accordingly.  -
-# "With selective image inversion": Set
-# `colors.webpage.darkmode.policy.images` to `smart`.  - "With selective
-# inversion of non-image elements": Set
-# `colors.webpage.darkmode.threshold.text` to 150 and
-# `colors.webpage.darkmode.threshold.background` to 205.  - "With
-# selective inversion of everything": Combines the two variants   above.
-# Type: Bool
-
 # dark mode
 #c.colors.webpage.darkmode.enabled = True
 c.colors.webpage.preferred_color_scheme = "dark"
+c.colors.webpage.darkmode.enabled = False
 c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 
@@ -160,11 +132,9 @@ bindings = {
 config.source('dracula.py')
 
 c.tabs.position = "left"
+c.tabs.show = "multiple"
+c.tabs.last_close = "close"
 
 c.auto_save.session = True
-
-c.tabs.show = "multiple"
-
-c.tabs.last_close = "close"
 
 c.content.default_encoding = "utf-8"
