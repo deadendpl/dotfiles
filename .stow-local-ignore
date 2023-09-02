@@ -1,0 +1,10 @@
+.git/*
+.gitignore
+.gitmodules
+programs-to-theme.org
+README.org
+useful
+screenshots/*
+nixos/*
+install/*
+.config/emacs/*
