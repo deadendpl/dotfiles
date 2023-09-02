@@ -1,13 +1,7 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-;;(setq user-full-name "John Doe"
-;;      user-mail-address "john@doe.com")
+;; (setq user-full-name "John Doe"
+;;       user-mail-address "john@doe.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -21,8 +15,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "CodeNewRoman Nerd Font Mono" :size 13))
-(setq doom-variable-pitch-font (font-spec :family "GoMono Nerd Font" :size 13))
+(setq doom-font (font-spec :family "CodeNewRoman Nerd Font" :size 12 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "GoMono Nerd Font" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -33,15 +27,14 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-dracula)
-(setq catppuccin-flavor 'latte) ;; or 'latte, 'macchiato, or 'mocha
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-;;(setq org-directory "~/org/")
+(setq org-directory "~/org/")
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -76,41 +69,80 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(beacon-mode 1)
+(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
+(use-package all-the-icons-ibuffer
+  :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
-;; enable word-wrap (almost) everywhere
-(+global-word-wrap-mode +1)
+(use-package imenu-list
+ :config
+   (setq imenu-list-focus-after-activation t
+         imenu-list-auto-resize t))
 
-(setq initial-buffer-choice "~/.config/doom/start.org")
+(use-package beacon
+  :custom
+    (beacon-mode 1))
 
+(use-package rainbow-mode
+  :hook org-mode prog-mode)
 
-;; ORG MODE
+(use-package vterm-toggle
+  :after vterm
+  :config
+  (setq vterm-toggle-fullscreen-p nil)
+  (setq vterm-toggle-scope 'project)
+  (add-to-list 'display-buffer-alist
+               '((lambda (buffer-or-name _)
+                     (let ((buffer (get-buffer buffer-or-name)))
+                       (with-current-buffer buffer
+                         (or (equal major-mode 'vterm-mode)
+                             (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+                  (display-buffer-reuse-window display-buffer-at-bottom)
+                  ;;(display-buffer-reuse-window display-buffer-in-direction)
+                  ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                  ;;(direction . bottom)
+                  ;;(dedicated . t) ;dedicated is supported in emacs27
+                  (reusable-frames . visible)
+                  (window-height . 0.3))))
 
-(after! org
-  (use-package! org-auto-tangle
-    :defer t
-    :hook (org-mode . org-auto-tangle-mode)
-    :config
-    (setq org-auto-tangle-default t))
-  (setq org-startup-with-inline-images t)
-  (setq org-hide-emphasis-markers t)
-  (setq org-insert-heading-respect-content nil)
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+(use-package org-superstar
+  :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 
+(use-package org-auto-tangle
+  :defer t
+  :diminish
+  :hook (org-mode . org-auto-tangle-mode))
 
-;; imenu
-(setq imenu-list-focus-after-activation t)
+(use-package company-org-block
+  :after org)
+
+(setq org-hide-emphasis-markers t)
+
+;;(setq fancy-splash-image "~/.config/doom/ricky.jpg")
+
+(defun doom-dashboard-draw-ascii-banner-fn ()
+  (let* ((banner
+          '("PP Poo Poo")) ;;the line that matters
+         (longest-line (apply #'max (mapcar #'length banner))))
+    (put-text-property
+     (point)
+     (dolist (line banner (point))
+       (insert (+doom-dashboard--center
+                +doom-dashboard--width
+                (concat
+                 line (make-string (max 0 (- longest-line (length line)))
+                                   32)))
+               "\n"))
+     'face 'doom-dashboard-banner)))
+
+(defun load-config
+  (interactive)
+  (load-file "~/.config/doom/config.org")
+)
 
 (map! :leader
-      (:prefix ("s" . "Search")
-       :desc "Menu to jump to places in buffer" "i" #'counsel-imenu))
-
-(map! :leader
-      (:prefix ("t" . "Toggle")
-       :desc "Toggle imenu shown in a sidebar" "i" #'imenu-list-smart-toggle))
-
-;; opening mp4 files with mpv
-(require 'openwith)
-(openwith-mode t)
-(setq openwith-associations '(("\\.mp4\\'" "mpv" (file))))
+    (:prefix ("t" . "toggle")
+      :desc "Imenu list" "i" #'imenu-list-smart-toggle
+      :desc "Vterm" "v" #'vterm-toggle)
+    (:prefix ("f" . "file")
+      :desc "Open config.org" "P" #'load-config))

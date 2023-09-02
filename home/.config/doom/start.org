@@ -1,3 +1,0 @@
-* Welcome to Church of Emacs!
-
-[[file:ricky.jpg]]
