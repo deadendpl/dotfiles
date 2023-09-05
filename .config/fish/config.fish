@@ -1,3 +1,8 @@
+if status is-interactive
+  colorscript random
+  starship init fish | source
+end
+
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
@@ -65,7 +70,3 @@ alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
-
-colorscript random
-
-starship init fish | source

@@ -75,9 +75,10 @@
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
 (use-package imenu-list
- :config
-   (setq imenu-list-focus-after-activation t
-         imenu-list-auto-resize t))
+  :defer t
+  :config
+    (setq imenu-list-focus-after-activation t
+          imenu-list-auto-resize t))
 
 (use-package beacon
   :custom
@@ -116,13 +117,14 @@
 (use-package company-org-block
   :after org)
 
-(setq org-hide-emphasis-markers t)
+(setq org-hide-emphasis-markers t
+      org-ellipsis " •")
 
 ;;(setq fancy-splash-image "~/.config/doom/ricky.jpg")
 
 (defun doom-dashboard-draw-ascii-banner-fn ()
   (let* ((banner
-          '("PP Poo Poo")) ;;the line that matters
+          '("PP Poo Poo")) ;;the important line
          (longest-line (apply #'max (mapcar #'length banner))))
     (put-text-property
      (point)
@@ -135,14 +137,19 @@
                "\n"))
      'face 'doom-dashboard-banner)))
 
-(defun load-config
+(defun load-doom-config ()
+  "Loads doom configuration file which is ~/.config/doom/config.org."
   (interactive)
-  (load-file "~/.config/doom/config.org")
-)
+  (find-file "~/.config/doom/config.org"))
 
 (map! :leader
     (:prefix ("t" . "toggle")
       :desc "Imenu list" "i" #'imenu-list-smart-toggle
       :desc "Vterm" "v" #'vterm-toggle)
     (:prefix ("f" . "file")
-      :desc "Open config.org" "P" #'load-config))
+      :desc "Open config.org" "P" #'load-doom-config)
+    (:prefix ("d" . "dired")
+      :desc "Open dired" "d" #'dired
+      :desc "Dired jump to current" "j" #'dired-jump
+      :desc "Open directory in neotree" "n" #'neotree-dir
+      :desc "Peep-dired" "n" #'peep-dired))
