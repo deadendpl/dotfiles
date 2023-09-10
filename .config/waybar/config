@@ -5,7 +5,7 @@
   "spacing": 7,
 
   "modules-left": [
-    "wlr/workspaces",
+    "hyprland/workspaces",
     "wlr/taskbar"
   ],
 
@@ -31,16 +31,12 @@
   },
 
   "hyprland/workspaces": {
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e-1",
-    "on-scroll-down": "hyprctl dispatch workspace e+1",
-    "format": "{icon}",
-    "format-icons": {
-      "urgent": "",
-//      "default": "",
-    },
+//    "on-click": "activate",
+//    "on-scroll-up": "hyprctl dispatch workspace e-1",
+//    "on-scroll-down": "hyprctl dispatch workspace e+1",
+    "format": "{name}",
     "persistent_workspaces": {
-      "1": [], // Always show a workspace with name '3', on all outputs if it does not exists
+      "1": [],
       "2": [],
       "3": [],
       "4": [],

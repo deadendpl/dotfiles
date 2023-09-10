@@ -863,8 +863,11 @@ Org-tempo is a module within org that can be enabled. It allows for '<s' followe
       org-hide-leading-stars t
       org-hide-emphasis-markers t
       org-ellipsis " •")
+
 (use-package company-org-block
   :after org)
+
+(setq org-agenda-block-separator 8411)
 #+end_src
 
 * PERSPECTIVE

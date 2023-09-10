@@ -120,6 +120,8 @@
 (setq org-hide-emphasis-markers t
       org-ellipsis " •")
 
+(setq org-agenda-block-separator 8411)
+
 ;;(setq fancy-splash-image "~/.config/doom/ricky.jpg")
 
 (defun doom-dashboard-draw-ascii-banner-fn ()
@@ -143,13 +145,13 @@
   (find-file "~/.config/doom/config.org"))
 
 (map! :leader
-    (:prefix ("t" . "toggle")
-      :desc "Imenu list" "i" #'imenu-list-smart-toggle
-      :desc "Vterm" "v" #'vterm-toggle)
-    (:prefix ("f" . "file")
-      :desc "Open config.org" "P" #'load-doom-config)
-    (:prefix ("d" . "dired")
-      :desc "Open dired" "d" #'dired
-      :desc "Dired jump to current" "j" #'dired-jump
-      :desc "Open directory in neotree" "n" #'neotree-dir
-      :desc "Peep-dired" "n" #'peep-dired))
+  (:prefix ("t" . "toggle")
+     :desc "Imenu list" "i" #'imenu-list-smart-toggle
+     :desc "Vterm" "v" #'vterm-toggle)
+  (:prefix ("f" . "file")
+    :desc "Open config.org" "P" #'load-doom-config)
+  (:prefix ("d" . "dired")
+     :desc "Open dired" "d" #'dired
+     :desc "Dired jump to current" "j" #'dired-jump
+     :desc "Open directory in neotree" "n" #'neotree-dir
+     :desc "Peep-dired" "n" #'peep-dired))
