@@ -43,3 +43,4 @@ light
 chafa
 ripgrep
 fzf
+fortune

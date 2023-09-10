@@ -10,3 +10,6 @@ lf-sixel-git
 ctpv-git
 cp-p-git
 rofi-lbonn-wayland-git
+krabby-bin
+pokemonsay-newgenerations-git
+fortune-mod-vimtips

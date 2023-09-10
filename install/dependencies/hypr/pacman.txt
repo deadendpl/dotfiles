@@ -45,3 +45,4 @@ ripgrep
 fzf
 hyprpicker-git
 swayimg
+fortune

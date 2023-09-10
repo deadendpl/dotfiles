@@ -1,7 +1,10 @@
 if status is-interactive
-  colorscript random
+  function fish_greeting
+    fortune | pokemonsay
+  end
   starship init fish | source
 end
+
 
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
@@ -16,18 +19,18 @@ source ~/.config/tty-colors/fish/dracula
 
 # going to last directory from lf
 function lfcd
-    set tmp (mktemp)
-    # `command` is needed in case `lfcd` is aliased to `lf`
-    command lf -last-dir-path=$tmp $argv
-    if test -f "$tmp"
-        set dir (cat $tmp)
-        rm -f $tmp
-        if test -d "$dir"
-            if test "$dir" != (pwd)
-                cd $dir
-            end
-        end
-    end
+  set tmp (mktemp)
+  # `command` is needed in case `lfcd` is aliased to `lf`
+  command lf -last-dir-path=$tmp $argv
+  if test -f "$tmp"
+      set dir (cat $tmp)
+      rm -f $tmp
+      if test -d "$dir"
+          if test "$dir" != (pwd)
+              cd $dir
+          end
+      end
+  end
 end
 
 ## aliases

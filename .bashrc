@@ -49,6 +49,6 @@ alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 PS1='[\u@\h \W]\$'
 
-colorscript random
+fortune | pokemonsay
 
 eval "$(starship init bash)"

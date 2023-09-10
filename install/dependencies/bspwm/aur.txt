@@ -9,3 +9,6 @@ rofi-bluetooth-git
 lf-sixel-git
 ctpv-git
 cp-p-git
+krabby-bin
+pokemonsay-newgenerations-git
+fortune-mod-vimtips
