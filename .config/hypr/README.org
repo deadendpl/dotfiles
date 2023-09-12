@@ -171,12 +171,7 @@ master {
 ** window rules
 Before window rules there is some mouse config but idk if it does anything (it's probably default)
 
-Then we have window rules
-- wdisplays is a program for managing displays on wayland
-- feh is a image viewer
-- waydroid is an android container so it's better to have it in fullscreen
-- picture in picture mode in firefox
-- border color for floating windows
+Then we have window rules and border color for floating windows
 #+BEGIN_SRC conf
 # Example per-device config
 # See https://wiki.hyprland.org/Configuring/Keywords/#executing for more

@@ -98,7 +98,7 @@ c.content.javascript.clipboard = "access-paste"
 
 # search
 c.url.searchengines = {
-  'DEFAULT': 'https://search.garudalinux.org/search?q={}',
+  'DEFAULT': 'https://farside.link/whoogle/search?q={}',
   'ph': 'https://www.phind.com/search?q={}',
 }
 
@@ -138,3 +138,5 @@ c.tabs.last_close = "close"
 c.auto_save.session = True
 
 c.content.default_encoding = "utf-8"
+
+c.editor.command = ["foot", "-e", "nvim", "{}"]

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "NixOS Wiki" "Nix Packages" "Whoogle" "GameFAQs" "Gutenberg" "Bitsearch (Torrents)" "Invidious (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "NixOS Wiki" "Nitter (Twitter/X)" "Nix Packages" "Whoogle" "GameFAQs" "Gutenberg" "Bitsearch (Torrents)" "Invidious (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 
@@ -9,7 +9,7 @@ case $selected_engine in
         URL="https://www.phind.com/search?q="
         ;;
     "SearXNG")
-        URL="https://searx.mha.fi/search?q="
+        URL="https://farside.link/searxng/search?q="
         ;;
     "Brave Search")
         URL="https://search.brave.com/search?q="
@@ -30,7 +30,7 @@ case $selected_engine in
         URL="https://github.com/search?q="
         ;;
     "Invidious (YouTube)")
-        URL="https://invidious.lunar.icu/search?q="
+        URL="https://farside.link/invidious/search?q="
         ;;
     "Bitsearch (Torrents)")
         URL="https://www.bitsearch.to/search?q="
@@ -45,10 +45,13 @@ case $selected_engine in
         URL="https://nixos.wiki/index.php?search="
         ;;
     "Whoogle")
-        URL="https://search.garudalinux.org/search?q="
+        URL="https://farside.link/whoogle/search?q="
         ;;
     "GameFAQs")
         URL="https://gamefaqs.gamespot.com/search?game="
+        ;;
+    "Nitter (Twitter/X)")
+        URL="https://farside.link/nitter/search?&q="
         ;;
   *)
         exit 0
