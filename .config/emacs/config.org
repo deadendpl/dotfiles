@@ -18,7 +18,6 @@ This config is based on [[https://invidious.lunar.icu/playlist?list=PL5--8gKSku1
 - [[#diminish][DIMINISH]]
 - [[#dired][DIRED]]
 - [[#doom-modeline][DOOM-MODELINE]]
-- [[#emacs-everywhere][EMACS EVERYWHERE]]
 - [[#emojis][EMOJIS]]
 - [[#evil][EVIL]]
 - [[#flycheck][FLYCHECK]]
@@ -298,12 +297,6 @@ This package implements hiding or abbreviation of the modeline displays (lighter
   :init (doom-modeline-mode 1))
 #+end_src
 
-* EMACS EVERYWHERE
-
-#+begin_src emacs-lisp
-(use-package emacs-everywhere)
-#+end_src
-
 * EMOJIS
 [[https://github.com/iqbalansari/emacs-emojify][emojify]] is a package that enables support for unicode characters and emojis.
 Since I don't want to have emojis dowloaded to =~/.config/emacs= I change it to place where elpaca installs the package.
@@ -501,6 +494,7 @@ Adding highlights to TODO and related words.
 
 (use-package all-the-icons-ivy-rich
   :ensure t
+  :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
 (use-package ivy-rich

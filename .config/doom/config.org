@@ -296,6 +296,11 @@ Ibuffer by default doesn't have icons, so I fix that.
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 #+end_src
 
+Fish might cause issues with emacs packages so I set it to bash
+#+begin_src emacs-lisp
+(setq shell-file-name (executable-find "bash"))
+#+end_src
+
 *** IMENU-LIST
 Imenu-list is basically toc as a buffer
 #+begin_src emacs-lisp :tangle config.el

@@ -55,8 +55,8 @@ cmd open &{{
 }}
 
 # define a custom 'rename' command without prompt for overwrite
-# cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
-# map r push :rename<space>
+cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
+map R push :rename<space>
 
 # make sure trash folder exists
 # %mkdir -p ~/.trash

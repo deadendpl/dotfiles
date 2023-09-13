@@ -188,6 +188,7 @@ device:epic-mouse-v1 {
 windowrule = float, wdisplays
 windowrule = float, feh
 windowrule = float, imv
+windowrule = float, swayimg
 windowrule = float, gcolor3
 windowrule = fullscreen, Waydroid
 windowrulev2 = float,class:^(firefox)$,title:^(Picture-in-Picture)$

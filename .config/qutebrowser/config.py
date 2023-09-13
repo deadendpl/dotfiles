@@ -120,7 +120,7 @@ c.fonts.web.family.standard = "ubuntunerdfont"
 c.fonts.web.family.fixed = "codenewromannerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
 
-c.scrolling.smooth = True
+c.scrolling.smooth = False
 c.scrolling.bar = "overlay"
 
 # custom bindings
@@ -139,4 +139,4 @@ c.auto_save.session = True
 
 c.content.default_encoding = "utf-8"
 
-c.editor.command = ["foot", "-e", "nvim", "{}"]
+c.editor.command = ["emacsclient", "-c", "-a", "''", "{}"]

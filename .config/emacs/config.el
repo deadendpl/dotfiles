@@ -35,48 +35,6 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable :elpaca use-package keyword.
-  (elpaca-use-package-mode)
-  ;; Assume :elpaca t unless otherwise specified.
-  (setq elpaca-use-package-by-default t))
-
-;; Block until current queue processed.
-(elpaca-wait)
-
-;;When installing a package which modifies a form used at the top-level
-;;(e.g. a package which adds a use-package key word),
-;;use `elpaca-wait' to block until that package has been installed/configured.
-;;For example:
-;;(use-package general :demand t)
-;;(elpaca-wait)
-
-;; Expands to: (elpaca evil (use-package evil :demand t))
-(use-package evil
-    :init      ;; tweak evil's configuration before loading it
-    (setq evil-want-integration t ;; This is optional since it's already set to t by default.
-          evil-want-keybinding nil
-          evil-vsplit-window-right t
-          evil-split-window-below t
-          evil-move-cursor-back nil)
-    (evil-mode))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
-  (evil-collection-init))
-(use-package evil-tutor)
-
-;;Turns off elpaca-use-package-mode current declartion
-;;Note this will cause the declaration to be interpreted immediately (not deferred).
-;;Useful for configuring built-in emacs features.
-(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
-
-;; Don't install anything. Defer execution of BODY
-;;(elpaca nil (message "deferred"))
-
 (defun emacs-counsel-launcher ()
   "Create and select a frame called emacs-counsel-launcher which consists only of a minibuffer and has specific dimensions. Runs counsel-linux-app on that frame, which is an emacs command that prompts you to select an app and open it in a dmenu like behaviour. Delete the frame after that command has exited"
   (interactive)
@@ -130,7 +88,7 @@
 
 (use-package nerd-icons)
 
-(setq backup-directory-alist '((".*" . "~/.cache/emacs/")))
+(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
 
 (use-package beacon
   :custom
@@ -216,12 +174,61 @@
   :ensure t
   :init (doom-modeline-mode 1))
 
-(use-package emacs-everywhere)
-
 (use-package emojify
   :init (global-emojify-mode 1)
   :custom
     (emojify-emojis-dir "~/.local/share/emacs/elpaca/builds/emojify/emojis"))
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+;; Block until current queue processed.
+(elpaca-wait)
+
+;;When installing a package which modifies a form used at the top-level
+;;(e.g. a package which adds a use-package key word),
+;;use `elpaca-wait' to block until that package has been installed/configured.
+;;For example:
+;;(use-package general :demand t)
+;;(elpaca-wait)
+
+;; Expands to: (elpaca evil (use-package evil :demand t))
+(use-package evil
+    :init      ;; tweak evil's configuration before loading it
+    (setq evil-want-integration t ;; This is optional since it's already set to t by default.
+          evil-want-keybinding nil
+          evil-vsplit-window-right t
+          evil-split-window-below t
+          evil-move-cursor-back nil)
+    (evil-mode))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (setq evil-collection-mode-list '(dashboard dired ibuffer))
+  (evil-collection-init))
+(use-package evil-tutor)
+
+;;Turns off elpaca-use-package-mode current declartion
+;;Note this will cause the declaration to be interpreted immediately (not deferred).
+;;Useful for configuring built-in emacs features.
+(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
+
+;; Don't install anything. Defer execution of BODY
+;;(elpaca nil (message "deferred"))
+
+;; Using RETURN to follow links in Org/Evil
+;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
+(with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "SPC") nil)
+  (define-key evil-motion-state-map (kbd "RET") nil)
+  (define-key evil-motion-state-map (kbd "TAB") nil))
+;; Setting RETURN key in org-mode to follow links
+  (setq org-return-follows-link  t)
 
 (use-package flycheck
   :ensure t
@@ -263,15 +270,28 @@
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
+(use-package git-timemachine
+  :after git-timemachine
+  :hook (evil-normalize-keymaps . git-timemachine-hook)
+  :config
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision)
+)
 
-(global-display-line-numbers-mode 1)
-(setq display-line-numbers-type 'relative)
-(global-visual-line-mode t)
+(use-package magit)
 
-(electric-pair-mode t)
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+         (prog-mode . hl-todo-mode))
+  :config
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(("TODO"       warning bold)
+          ("FIXME"      error bold)
+          ("HACK"       font-lock-constant-face bold)
+          ("REVIEW"     font-lock-keyword-face bold)
+          ("NOTE"       success bold)
+          ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package imenu-list
  :custom
@@ -298,6 +318,7 @@
 
 (use-package all-the-icons-ivy-rich
   :ensure t
+  :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
 (use-package ivy-rich
@@ -332,14 +353,9 @@
 (custom/leader-keys
   "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
-  "TAB TAB" '(comment-line :wk "Comment lines"))
-
-(custom/leader-keys
-  "f" '(:ignore t :wk "Files")
-  "f c" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Edit emacs config")
-  "f r" '(counsel-recentf :wk "Find recent files")
-  "f u" '(sudo-edit-find-file :wk "Sudo find file")
-  "f U" '(sudo-edit :wk "Sudo edit file"))
+  "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
+  "TAB TAB" '(comment-line :wk "Comment lines")
+  "u" '(universal-argument :wk "Universal argument"))
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
@@ -370,7 +386,7 @@
   "d p" '(peep-dired :wk "Peep-dired"))
 
 (custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")    
+  "e" '(:ignore t :wk "Eshell/Evaluate")
   "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
   "e d" '(eval-defun :wk "Evaluate defun containing or after point")
   "e e" '(eval-expression :wk "Evaluate and elisp expression")
@@ -378,6 +394,48 @@
   "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
   "e r" '(eval-region :wk "Evaluate elisp in region")
   "e s" '(eshell :which-key "Eshell"))
+
+(custom/leader-keys
+  "f" '(:ignore t :wk "Files")
+  "f c" '((lambda () (interactive)
+            (find-file "~/.config/emacs/config.org"))
+          :wk "Open emacs config.org")
+  "f e" '((lambda () (interactive)
+            (dired "~/.config/emacs/"))
+          :wk "Open user-emacs-directory in dired")
+  "f d" '(find-grep-dired :wk "Search for string in files in DIR")
+  "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
+  "f i" '((lambda () (interactive)
+            (find-file "~/.config/emacs/init.el"))
+          :wk "Open emacs init.el")
+  "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
+  "f l" '(counsel-locate :wk "Locate a file")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
+
+(custom/leader-keys
+  "g" '(:ignore t :wk "Git")
+  "g /" '(magit-displatch :wk "Magit dispatch")
+  "g ." '(magit-file-displatch :wk "Magit file dispatch")
+  "g b" '(magit-branch-checkout :wk "Switch branch")
+  "g c" '(:ignore t :wk "Create")
+  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+  "g c c" '(magit-commit-create :wk "Create commit")
+  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+  "g C" '(magit-clone :wk "Clone repo")
+  "g f" '(:ignore t :wk "Find")
+  "g f c" '(magit-show-commit :wk "Show commit")
+  "g f f" '(magit-find-file :wk "Magit find file")
+  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+  "g F" '(magit-fetch :wk "Git fetch")
+  "g g" '(magit-status :wk "Magit status")
+  "g i" '(magit-init :wk "Initialize git repo")
+  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+  "g r" '(vc-revert :wk "Git revert file")
+  "g s" '(magit-stage-file :wk "Git stage file")
+  "g t" '(git-timemachine :wk "Git time machine")
+  "g u" '(magit-stage-file :wk "Git unstage file"))
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
@@ -424,6 +482,12 @@
   "m T" '(org-todo-list :wk "Org todo list"))
 
 (custom/leader-keys
+  "o" '(:ignore t :wk "Open")
+  "o d" '(dashboard-open :wk "Dashboard")
+  "o e" '(elfeed :wk "Elfeed RSS")
+  "o f" '(make-frame :wk "Open buffer in new frame")
+  "o F" '(select-frame-by-name :wk "Select frame by name"))
+(custom/leader-keys
   "m b" '(:ignore t :wk "Tables")
   "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
 
@@ -433,6 +497,13 @@
 
 (custom/leader-keys
   "p" '(projectile-command-map :wk "Projectile"))
+
+(custom/leader-keys
+  "s" '(:ignore t :wk "Search")
+  "s d" '(dictionary-search :wk "Search dictionary")
+  "s m" '(man :wk "Man pages")
+  "s t" '(tldr :wk "Lookup TLDR docs for a command")
+  "s w" '(woman :wk "Similar to man but doesn't require man"))
 
 (custom/leader-keys
   "t" '(:ignore t :wk "Toggle")
@@ -473,6 +544,12 @@
   :custom
   (add-to-list 'company-backends 'company-shell)
   (add-to-list 'company-backends 'company-shell-env))
+
+(global-display-line-numbers-mode 1)
+(setq display-line-numbers-type 'relative)
+(global-visual-line-mode t)
+
+(global-set-key [escape] 'keyboard-escape-quit)
 
 (use-package neotree
   :config
@@ -525,19 +602,70 @@
 ;;(after! evil-org
 ;;  (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
 
-(setq org-insert-heading-respect-content nil)
-(setq org-hide-emphasis-markers t)
-(setq org-hide-leading-stars t)
+(setq org-insert-heading-respect-content nil
+      org-hide-emphasis-markers t
+      org-hide-leading-stars t
+      org-hide-emphasis-markers t
+      org-ellipsis " •")
+
 (use-package company-org-block
   :after org)
+
+(setq org-agenda-block-separator 8411)
+
+(use-package perspective
+  :custom
+  ;; NOTE! I have also set 'SCP =' to open the perspective menu.
+  ;; I'm only setting the additional binding because setting it
+  ;; helps suppress an annoying warning message.
+  (persp-mode-prefix-key (kbd "C-c M-p"))
+  :init
+  (persp-mode)
+  :config
+  ;; Sets a file to write to when we save states
+  (setq persp-state-default-file "~/.local/share/emacs/sessions"))
+
+;; This will group buffers by persp-name in ibuffer.
+(add-hook 'ibuffer-hook
+          (lambda ()
+            (persp-ibuffer-set-filter-groups)
+            (unless (eq ibuffer-sorting-mode 'alphabetic)
+              (ibuffer-do-sort-by-alphabetic))))
+
+;; Automatically save perspective states to file when Emacs exits.
+(add-hook 'kill-emacs-hook #'persp-state-save)
 
 (use-package projectile
   :config
   (projectile-mode 1))
 
+(use-package rainbow-delimiters
+  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
+         (clojure-mode . rainbow-delimiters-mode)))
+
 (use-package rainbow-mode
   :diminish
   :hook org-mode prog-mode)
+
+(delete-selection-mode 1)    ;; You can select text and delete it by typing.
+(electric-indent-mode -1)    ;; Turn off the weird indenting that Emacs does by default.
+(electric-pair-mode 1)       ;; Turns on automatic parens pairing
+;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+;; Otherwise, org-tempo is broken when you try to <s TAB...
+(add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+(global-auto-revert-mode t)  ;; Automatically show changes if the file has changed
+(global-display-line-numbers-mode 1) ;; Display line numbers
+(global-visual-line-mode t)  ;; Enable truncated lines
+(menu-bar-mode -1)           ;; Disable the menu bar
+(scroll-bar-mode -1)         ;; Disable the scroll bar
+(tool-bar-mode -1)           ;; Disable the tool bar
+(setq org-edit-src-content-indentation 0) ;; Set src block automatic indent to 0 instead of 2.
+(setq use-dialog-box nil) ;; turns off graphical dialog boxes
+(global-auto-revert-mode 1)                  ;; refreshing buffers when files have changed
+(setq global-auto-revert-non-file-buffers t) ;; refreshing buffers when files have changed
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -603,6 +731,8 @@
   ;;(doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
+
+(use-package tldr)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 

@@ -4,7 +4,7 @@
 * WARNING:
 This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies might not be available for other distros.
 
-* [[https://github.com/baskerville/bspwm][bspwm]]
+* (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
 - Dracula [[file:screenshots/bspwm/dracula.png]]
 
 - Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
