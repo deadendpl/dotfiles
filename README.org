@@ -51,7 +51,18 @@ In order to change between themes you need to execute script which should be in 
 
 Not everything changes instantly (like notification daemon and panel) so rebooting or logging out of your machine is recommended after changing theme.
 
-* TODO TODO [2/3]
-- [-] good (for me) neovim config
-- [X] adding gtk3 theme changing in bspwm
-- [X] (maybe) making main configs as org documents 🗿
+* TODO PYWAL
+I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]].
+Stuff to rice [7/10]:
+- [X] foot
+- [X] rofi (FIXME power menu need fixing)
+- [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
+- [ ] gtk4
+- [ ] emacs
+- [X] qutebrowser
+- [X] waybar
+- [X] mako
+- [X] nvim
+
+[[https://github.com/dylanaraps/pywal/wiki/Customization][Important page]]
+[[https://github.com/deviantfero/wpgtk/wiki/Configuration][current page]]

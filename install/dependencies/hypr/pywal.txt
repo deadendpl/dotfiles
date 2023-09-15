@@ -1,0 +1,6 @@
+pywal
+python-inotify-simple
+python-psutil
+python-prctl
+wpgtk
+gtk-theme-flat-color-git

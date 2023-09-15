@@ -45,6 +45,7 @@ use {
 -- themes
   use { 'Mofiqul/dracula.nvim', as = "dracula"}
   use { "catppuccin/nvim", as = "catppuccin" }
+  use { 'AlphaTechnolog/pywal.nvim', as = 'pywal' }
 
 -- dashboard
   use {
@@ -132,9 +133,10 @@ local frappe = require("catppuccin.palettes").get_palette "frappe"
 local macchiato = require("catppuccin.palettes").get_palette "macchiato"
 local mocha = require("catppuccin.palettes").get_palette "mocha"
 
+
 require('lualine').setup {
   options = {
-    theme = 'dracula'
+    theme = 'pywal',
   }
 }
 
@@ -234,5 +236,8 @@ require('orgmode').setup({
 --  org_agenda_files = {'~/Dropbox/org/*', '~/my-orgs/**/*'},
 --  org_default_notes_file = '~/Dropbox/org/refile.org',
 })
+
+local pywal = require('pywal')
+pywal.setup()
 
 end)

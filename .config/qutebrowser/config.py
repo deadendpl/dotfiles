@@ -98,7 +98,7 @@ c.content.javascript.clipboard = "access-paste"
 
 # search
 c.url.searchengines = {
-  'DEFAULT': 'https://farside.link/whoogle/search?q={}',
+  'DEFAULT': 'https://farside.link/whoogle/search?q={}&lang_interface=en',
   'ph': 'https://www.phind.com/search?q={}',
 }
 
@@ -129,7 +129,7 @@ bindings = {
 }
 
 # theme
-config.source('dracula.py')
+config.source('qutewal.py')
 
 c.tabs.position = "left"
 c.tabs.show = "multiple"

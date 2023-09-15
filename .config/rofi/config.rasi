@@ -12,6 +12,8 @@ configuration{
     display-window: "   Window";
     display-ssh: " 󰤨  ssh";
     sidebar-mode: true;
+    font: "CodeNewRoman Nerd Font Regular 12";
 }
 
-@theme "~/.config/rofi/themes/drac-list.rasi"
+/* Dark theme. */
+@import "~/.cache/wal/colors-rofi-dark"

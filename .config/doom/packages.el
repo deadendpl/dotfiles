@@ -13,3 +13,5 @@
 (package! org-auto-tangle)
 (package! company-org-block)
 (package! all-the-icons-ibuffer)
+(package! example
+  :recipe (:host github :repo "martenlienen/xresources-theme"))

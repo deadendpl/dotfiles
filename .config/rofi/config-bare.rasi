@@ -1,6 +1,10 @@
 configuration{
     drun-display-format: "{name}";
     location: 6;
+    font: "CodeNewRoman Nerd Font Regular 12";
 }
 
-@theme "~/.config/rofi/themes/drac-list.rasi"
+// @theme "~/.config/rofi/themes/drac-list.rasi"
+
+/* Dark theme. */
+@import "~/.cache/wal/colors-rofi-dark"

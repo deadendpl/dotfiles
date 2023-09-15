@@ -1,4 +1,4 @@
-@import url("colors/dracula.css");
+@import url("/home/oliwier/.cache/wal/colors-waybar.css");
 * {
     border: none;
     border-radius: 8px;
@@ -8,7 +8,7 @@
 }
 window#waybar {
     opacity: 1.0;
-    background: @background-darker;
+    background: @background;
 /*    background: transparent; */
     color: @foreground;
     border-bottom: 2px solid @background;
@@ -29,7 +29,7 @@ window#waybar {
 }
 
 #workspaces button.urgent {
-    background-color: @red;
+    background-color: @color0;
     color: @foreground;
 }
 
@@ -43,46 +43,46 @@ window#waybar {
 }
 
 #battery {
-    background-color: @pink;
+    background-color: @color1;
     color: @background;
 }
 
 #pulseaudio {
-    background-color: @orange;
+    background-color: @color2;
     color: @background;
 }
 
 #pulseaudio.muted {
     background-color: @background;
-    color: @orange;
+    color: @color2;
 }
 
 #backlight {
-    background-color: @yellow;
+    background-color: @color3;
     color: @background;
 }
 
 #bluetooth {
-    background-color: @cyan;
+    background-color: @color4;
     color: @background;
 }
 
 #bluetooth.disabled {
     background-color: @background;
-    color: @cyan;
+    color: @color4;
 }
 
 #bluetooth.off {
     background-color: @background;
-    color: @cyan;
+    color: @color4;
 }
 
 #network {
-    background-color: @red;
+    background-color: @color5;
     color: @background;
 }
 
 #custom-gammastep {
-    background-color: @purple;
+    background-color: @color6;
     color: @background;
 }

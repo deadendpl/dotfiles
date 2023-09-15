@@ -4,9 +4,6 @@
 export PATH=~/.config/emacs/bin:~/.local/bin:$PATH
 export EDITOR='nvim'
 
-# setting tty colors
-source ~/.config/tty-colors/bash/dracula
-
 # apt
 alias ainst='sudo apt install'
 alias apu='sudo apt purge'
@@ -49,6 +46,19 @@ alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 PS1='[\u@\h \W]\$'
 
-fortune | pokemonsay
 
-eval "$(starship init bash)"
+# pywal stuff for hyprland
+if [ -n "$PS1" ]; then
+  (cat ~/.cache/wal/sequences &)
+  fortune | pokemonsay
+  eval "$(starship init bash)"
+fi
+
+pyrice() {
+  wal -n -i "$@"
+  killall swaybg
+  swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
+  wpg -ns "$@"
+  $HOME/.config/scripts/hypr/waybar-start.sh
+  $HOME/.config/mako/update-theme.sh
+}

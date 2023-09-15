@@ -230,9 +230,9 @@ switch (true) {
     'lib,https://libreddit.dothq.co',
     'lib,https://libreddit.spike.codes',
     'lib,https://libredd.it',
-    'lib,https://libreddit.albony.xyz',
+    'lib,https://libreddit.albony.xyz'];
     // teddit
-    'ted,https://farside.link/teddit',
+/*    'ted,https://farside.link/teddit',
     'ted,https://teddit.zaggy.nl',
     'ted,https://teddit.totaldarkness.net',
     'ted,https://teddit.sethforprivacy.com',
@@ -245,6 +245,7 @@ switch (true) {
     'ted,https://teddit.alefvanoon.xyz',
     'ted,https://teddit.adminforge.de',
     'ted,https://incogsnoo.com'];
+*/
   break;
 
   case hostname.endsWith('twitter.com'):

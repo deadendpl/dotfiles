@@ -14,9 +14,6 @@ export EDITOR='nvim'
 set fish_greeting
 fish_vi_key_bindings
 
-# importing tty colors
-source ~/.config/tty-colors/fish/dracula
-
 # going to last directory from lf
 function lfcd
   set tmp (mktemp)
@@ -73,3 +70,6 @@ alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
+
+# pywal for hyprland
+cat ~/.cache/wal/sequences &
