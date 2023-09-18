@@ -82,7 +82,7 @@ input {
     kb_layout = pl
     kb_variant =
     kb_model =
-    kb_options =
+    kb_options = ctrl:nocaps
     kb_rules =
 
     follow_mouse = 1
@@ -104,14 +104,16 @@ gestures {
 * Animations and decorations
 There are also some widow layout options.
 #+BEGIN_SRC conf
+source = ~/.cache/wal/colors-hyprland.conf
+
 general {
     # See https://wiki.hyprland.org/Configuring/Variables/ for more
 
     gaps_in = 3
     gaps_out = 10
     border_size = 2
-    col.active_border = rgba(33ccffee) rgba(00ff99ee) 45deg
-    col.inactive_border = rgba(595959aa)
+    col.active_border = $color11 45deg
+    col.inactive_border = rgba(59595900)
 
     layout = dwindle
 }
@@ -192,21 +194,21 @@ windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 * Keybindings
 Probably the most important thing in here
 
-| Keybinding              | command                                                                 |
-|------------------------+-------------------------------------------------------------------------|
-| SUPER + T              | launches terminal                                                        |
-| SUPER + W              | launches web browser                                                     |
-| SUPER + E              | launches first IDE (emacs)                                               |
+| Keybinding              | command                                                                  |
+|-------------------------+--------------------------------------------------------------------------|
+| SUPER + T               | launches terminal                                                        |
+| SUPER + W               | launches web browser                                                     |
+| SUPER + E               | launches first IDE (emacs)                                               |
 | SUPER + Shift + E       | launches second IDE (neovim)                                             |
-| SUPER + F              | launches file manager (pcmanfm)                                          |
+| SUPER + F               | launches file manager (pcmanfm)                                          |
 | SUPER + Shift + F       | launches second file manager (lf)                                        |
-| SUPER + Enter          | launches rofi (app launcher)                                             |
-| SUPER + Tab            | launches rofi in window mode                                             |
+| SUPER + Enter           | launches rofi (app launcher)                                             |
+| SUPER + Tab             | launches rofi in window mode                                             |
 | SUPER + Shift + Enter   | launches script hub                                                      |
-| SUPER + B              | launches bitwarden menu                                                  |
-| SUPER + M              | launches task manager                                                    |
+| SUPER + B               | launches bitwarden menu                                                  |
+| SUPER + M               | launches task manager                                                    |
 | SUPER + Shift + M       | launches task manager with admin permissions                             |
-| SUPER + /              | launches web search                                                      |
+| SUPER + /               | launches web search                                                      |
 | SUPER + Shift + /       | launches bookmarks menu                                                  |
 | SUPER + Alt + /         | puts item in clipboard into bookmarks file                               |
 | SUPER + Shift + Alt + / | edits bookmarks file directly                                            |
@@ -216,25 +218,25 @@ Probably the most important thing in here
 | Brightness Up key       | self explanatory                                                         |
 | Brightness Down key     | self explanatory                                                         |
 | PrintScreen             | launches screenshot script                                               |
-| SUPER + F2             | launches sound volume changing menu(if you're not on laptop)             |
-| SUPER + F7             | launches network menu                                                    |
+| SUPER + F2              | launches sound volume changing menu(if you're not on laptop)             |
+| SUPER + F7              | launches network menu                                                    |
 | SUPER + Shift + F7      | launches bluetooth menu                                                  |
-| SUPER + F10            | launches display menu                                                    |
-| SUPER + F9             | launches drive management menu                                           |
-| SUPER + F6             | launches theme changing menu                                             |
-| SUPER + Q              | closes the window                                                        |
+| SUPER + F10             | launches display menu                                                    |
+| SUPER + F9              | launches drive management menu                                           |
+| SUPER + ALT + R         | theme reload (wallpaper change and colorscheme)                          |
+| SUPER + Q               | closes the window                                                        |
 | SUPER + Shift + Q       | launches power menu                                                      |
-| SUPER + P              | turns peudo tiling                                                       |
-| SUPER + down           | (from left/right turns window positions to up/down)                      |
-| SUPER + V              | makes the current window floating                                        |
+| SUPER + P               | turns peudo tiling                                                       |
+| SUPER + down            | (from left/right turns window positions to up/down)                      |
+| SUPER + V               | makes the current window floating                                        |
 | SUPER + Alt + F         | makes the current window fullscreen                                      |
 | SUPER + h/j/k/l         | changes window focus left/down/right/up                                  |
-| SUPER + 1-9            | changes to workspace 1-9                                                |
+| SUPER + 1-9             | changes to workspace 1-9                                                 |
 | SUPER + Shift + 1-9     | moves current window to worskpace 1-9                                    |
 | SUPER + Shift + k/j     | moves to left or right workspace                                         |
 | SUPER + Shift + h/l     | moves current window to left/right workspace and moves to that workspace |
-| SUPER + LMB            | lets you drag and move windows to different positions                    |
-| SUPER + RMB            | lets you resize windows                                                  |
+| SUPER + LMB             | lets you drag and move windows to different positions                    |
+| SUPER + RMB             | lets you resize windows                                                  |
 | SUPER + Scroll          | lets you scroll between workspaces                                       |
 
 =$mainMod= is a variable to super(windows) key
@@ -263,6 +265,8 @@ bind = $mainMod, B,                exec, bwmenu
 bind = $mainMod, M,                exec, $terminal -e htop
 bind = $mainMod SHIFT, M,          exec, $terminal -e sudo htop
 
+# theme change
+bind = $mainMod ALT, R,            exec, ~/.config/scripts/hypr/pywal.sh
 
 # web stuff
 bind = $mainMod, 61,               exec, ~/.config/scripts/web-search.sh

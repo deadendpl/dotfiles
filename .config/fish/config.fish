@@ -2,6 +2,7 @@ if status is-interactive
   function fish_greeting
     fortune | pokemonsay
   end
+  cat ~/.cache/wal/sequences &
   starship init fish | source
 end
 
@@ -70,6 +71,3 @@ alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
-
-# pywal for hyprland
-cat ~/.cache/wal/sequences &

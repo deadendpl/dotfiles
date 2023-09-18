@@ -1,7 +1,7 @@
-@import url("/home/oliwier/.cache/wal/colors-waybar.css");
+@import url('/home/oliwier/.cache/wal/colors-waybar.css');
 * {
     border: none;
-    border-radius: 8px;
+    border-radius: 0px;
     font-family: Ubuntu Nerd Font;
     font-size: 11pt;
     min-height: 0;
@@ -15,6 +15,7 @@ window#waybar {
 }
 
 #workspaces button {
+    border-radius: 8px;
     padding: 0 3px;
     background-color: @background;
     color: @foreground;
@@ -24,65 +25,83 @@ window#waybar {
 }
 
 #workspaces button.active {
+    border-radius: 8px;
     background-color: @foreground;
     color: @background;
 }
 
 #workspaces button.urgent {
+    border-radius: 8px;
     background-color: @color0;
     color: @foreground;
 }
 
+#taskbar button {
+    border-radius: 8px;
+    background-image: linear-gradient(0deg, @background, @background);
+}
+
 #taskbar button.active {
+    border-radius: 8px;
     background-image: linear-gradient(0deg, @selection, @background-darker);
 }
 
 #clock {
+    border-radius: 8px;
     padding: 0 4px;
     background: @background;
 }
 
 #battery {
+    border-radius: 8px;
     background-color: @color1;
     color: @background;
 }
 
 #pulseaudio {
+    border-radius: 8px;
     background-color: @color2;
     color: @background;
 }
 
 #pulseaudio.muted {
+    border-radius: 8px;
     background-color: @background;
     color: @color2;
 }
 
 #backlight {
+    border-radius: 8px;
     background-color: @color3;
     color: @background;
 }
 
 #bluetooth {
+    border-radius: 8px;
     background-color: @color4;
     color: @background;
 }
 
 #bluetooth.disabled {
+    border-radius: 8px;
     background-color: @background;
     color: @color4;
 }
 
 #bluetooth.off {
+    border-radius: 8px;
     background-color: @background;
     color: @color4;
 }
 
 #network {
+    border-radius: 8px;
     background-color: @color5;
     color: @background;
 }
 
 #custom-gammastep {
+    border-radius: 8px;
     background-color: @color6;
     color: @background;
 }

@@ -211,28 +211,22 @@ switch (true) {
   site = [
     // libreddit
     'lib,https://farside.link/libreddit',
-    'lib,https://de.leddit.xyz',
-    'lib,https://leddit.xyz',
     'lib,https://libreddit.bus-hit.me',
-    'lib,https://libreddit.de',
-    'lib,https://libreddit.igna.rocks',
-    'lib,https://libreddit.alefvanoon.xyz',
-    'lib,https://lr.mint.lgbt',
-    'lib,https://reddit.stuehieyr.com',
-    'lib,https://libreddit.some-things.org',
-    'lib,https://r.nf',
-    'lib,https://reddit.artemislena.eu',
-    'lib,https://libreddit.domain.glass',
-    'lib,https://libreddit.silkky.cloud',
-    'lib,https://lr.riverside.rocks',
+    'lib,https://libreddit.northboot.xyz',
+    'lib,https://libreddit.oxymagnesium.com',
+    'lib,https://libreddit.privacydev.net',
+    'lib,https://libreddit.pussthecat.org',
+    'lib,https://lr.4201337.xyz',
+    'lib,https://lr.artemislena.eu',
     'lib,https://reddit.invak.id',
-    'lib,https://libreddit.kavin.rocks',
-    'lib,https://libreddit.dothq.co',
-    'lib,https://libreddit.spike.codes',
-    'lib,https://libredd.it',
+    'lib,https://reddit.simo.sh',
+    'lib,https://reddit.smnz.de',
+    'lib,https://safereddit.com',
     'lib,https://libreddit.albony.xyz'];
-    // teddit
-/*    'ted,https://farside.link/teddit',
+
+
+    /* teddit
+    'ted,https://farside.link/teddit',
     'ted,https://teddit.zaggy.nl',
     'ted,https://teddit.totaldarkness.net',
     'ted,https://teddit.sethforprivacy.com',

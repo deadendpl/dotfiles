@@ -19,4 +19,3 @@ done
 
 makoctl reload
 # additionally here you can add some notify-send test notification
-notify-send "Material you notification"

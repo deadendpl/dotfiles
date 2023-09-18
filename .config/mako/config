@@ -11,9 +11,9 @@ default-timeout=5000
 
 on-notify=exec mpv $HOME/.config/mako/EVE_007.wav
 
-background-color=#01000089
-text-color=#f0dbdf
-border-color=#D0B6E2
+background-color=#100e0d89
+text-color=#b2c2bf
+border-color=#6E629E
 
 border-radius=15
 

@@ -1,4 +1,4 @@
-include dracula
+include /home/oliwier/.cache/wal/colors-zathurarc
 
 set recolor "true"
 set adjust-open width
