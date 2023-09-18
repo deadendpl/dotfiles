@@ -19,6 +19,14 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 ;; custom settings that emacs autosets put into it's own file
 (setq custom-file (concat user-emacs-directory "custom.el"))
+;; moving backup files to trash directory
+(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
+;; recentf file put somewhere else
+(setq recentf-save-file "~/.local/share/emacs/recentf")
+;; bookmarks file put somewhere else
+(setq bookmark-dafault-file "~/.local/share/emacs/bookmarks")
+;; tramp file put somewhere else
+(setq tramp-persistency-file-name "~/.local/share/emacs/tramp")
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
                 term-mode-hook
@@ -32,6 +40,12 @@
            (setq-local electric-pair-inhibit-predicate
                    `(lambda (c)
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+;; locking buffers from killing
+(with-current-buffer "*scratch*" 
+	  (emacs-lock-mode 'kill))
+(with-current-buffer "*Messages*"
+	  (emacs-lock-mode 'kill))
 
 ;; Initialize package sources
 (require 'package)
@@ -187,14 +201,14 @@
   "g ." '(magit-file-displatch :wk "Magit file dispatch")
   "g b" '(magit-branch-checkout :wk "Switch branch")
   "g c" '(:ignore t :wk "Create")
-  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-  "g c c" '(magit-commit-create :wk "Create commit")
-  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+    "g c c" '(magit-commit-create :wk "Create commit")
+    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
   "g C" '(magit-clone :wk "Clone repo")
   "g f" '(:ignore t :wk "Find")
-  "g f c" '(magit-show-commit :wk "Show commit")
-  "g f f" '(magit-find-file :wk "Magit find file")
-  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+    "g f c" '(magit-show-commit :wk "Show commit")
+    "g f f" '(magit-find-file :wk "Magit find file")
+    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
   "g F" '(magit-fetch :wk "Git fetch")
   "g g" '(magit-status :wk "Magit status")
   "g i" '(magit-init :wk "Initialize git repo")
@@ -210,15 +224,15 @@
   "h b" '(describe-bindings :wk "Describe bindings")
   "h c" '(describe-char :wk "Describe character under cursor")
   "h d" '(:ignore t :wk "Emacs documentation")
-  "h d a" '(about-emacs :wk "About Emacs")
-  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
-  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
-  "h d m" '(info-emacs-manual :wk "The Emacs manual")
-  "h d n" '(view-emacs-news :wk "View Emacs news")
-  "h d o" '(describe-distribution :wk "How to obtain Emacs")
-  "h d p" '(view-emacs-problems :wk "View Emacs problems")
-  "h d t" '(view-emacs-todo :wk "View Emacs todo")
-  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+    "h d a" '(about-emacs :wk "About Emacs")
+    "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+    "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+    "h d m" '(info-emacs-manual :wk "The Emacs manual")
+    "h d n" '(view-emacs-news :wk "View Emacs news")
+    "h d o" '(describe-distribution :wk "How to obtain Emacs")
+    "h d p" '(view-emacs-problems :wk "View Emacs problems")
+    "h d t" '(view-emacs-todo :wk "View Emacs todo")
+    "h d w" '(describe-no-warranty :wk "Describe no warranty")
   "h e" '(view-echo-area-messages :wk "View echo area messages")
   "h f" '(describe-function :wk "Describe function")
   "h F" '(describe-face :wk "Describe face")
@@ -230,19 +244,24 @@
   "h L" '(describe-language-environment :wk "Describe language environment")
   "h m" '(describe-mode :wk "Describe mode")
   "h r" '(:ignore t :wk "Reload")
-  "h r r" '((lambda () (interactive)
-              (load-file "~/.config/emacs/init.el"))
-            :wk "Reload emacs config")
+    "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
+    "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
   "h t" '(load-theme :wk "Load theme")
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
-
+    
 (custom/leader-keys
   "m" '(:ignore t :wk "Org")
   "m a" '(org-agenda :wk "Org agenda")
+  "m b" '(:ignore t :wk "Tables")
+    "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  "m d" '(:ignore t :wk "Date/deadline")
+    "m d t" '(org-time-stamp :wk "Org time stamp")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m i" '(org-toggle-item :wk "Org toggle item")
+  "m l" '(:ignore t :wk "Link")
+    "m l l" '(org-insert-link :wk "Insert link")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
@@ -253,13 +272,6 @@
   "o e" '(elfeed :wk "Elfeed RSS")
   "o f" '(make-frame :wk "Open buffer in new frame")
   "o F" '(select-frame-by-name :wk "Select frame by name"))
-(custom/leader-keys
-  "m b" '(:ignore t :wk "Tables")
-  "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
-
-(custom/leader-keys
-  "m d" '(:ignore t :wk "Date/deadline")
-  "m d t" '(org-time-stamp :wk "Org time stamp"))
 
 (custom/leader-keys
   "p" '(projectile-command-map :wk "Projectile"))
@@ -331,7 +343,7 @@
 
 (use-package beacon
   :custom
-    (beacon-mode 1))
+    (beacon-mode nil))
 
 (use-package buffer-move)
 
@@ -370,7 +382,7 @@
   :ensure t
   :custom
     (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-    (dashboard-startup-banner 'logo)
+    (dashboard-startup-banner "~/.config/emacs/banner.txt")
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
@@ -385,9 +397,37 @@
   :init (doom-modeline-mode 1))
 
 (use-package emojify
-  :init (global-emojify-mode 1))
-;;  :custom
-;;    (emojify-emojis-dir "~/.local/share/emacs/elpaca/builds/emojify/emojis"))
+  :init (global-emojify-mode 1)
+  :custom
+    (emojify-emojis-dir "~/.local/share/emacs/emojis"))
+
+(set-face-attribute 'default nil
+  :font "CodeNewRoman Nerd Font Mono"
+  :height 90
+  :weight 'medium)
+(set-face-attribute 'variable-pitch nil
+  :font "Ubuntu Nerd Font"
+  :height 100
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+  :font "CodeNewRoman Nerd Font Mono"
+  :height 90
+  :weight 'medium)
+;; Makes commented text and keywords italics.
+;; This is working in emacsclient but not emacs.
+;; Your font must have an italic face available.
+(set-face-attribute 'font-lock-comment-face nil
+  :slant 'italic)
+;; (set-face-attribute 'font-lock-keyword-face nil
+;;   :slant 'italic)
+
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right unless I also add this method of setting the default font.
+(add-to-list 'default-frame-alist '(font . "CodeNewRoman Nerd Font Mono-9"))
+
+;; Uncomment the following line if line spacing needs adjusting.
+;; (setq-default line-spacing 0.12)
 
 (use-package flycheck
   :after prog-mode
@@ -425,7 +465,20 @@
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
     (("C-c C-r" . ivy-resume)
-     ("C-x B" . ivy-switch-buffer-other-window))
+     ("C-x B" . ivy-switch-buffer-other-window)
+     ("C-s" . swiper)
+    :map ivy-minibuffer-map
+      ("TAB" . ivy-alt-done)
+      ("C-l" . ivy-alt-done)
+      ("C-j" . ivy-next-line)
+      ("C-k" . ivy-previous-line)
+    :map ivy-switch-buffer-map
+      ("C-k" . ivy-previous-line)
+      ("C-l" . ivy-done)
+      ("C-d" . ivy-switch-buffer-kill)
+    :map ivy-reverse-i-search-map
+      ("C-k" . ivy-previous-line)
+      ("C-d" . ivy-reverse-i-search-kill))
   :diminish
   :custom
     (ivy-use-virtual-buffers t
@@ -449,7 +502,7 @@
 (use-package counsel
   :bind
     (("M-x" . counsel-M-x)
-     ([remap ibuffer] . counsel-ibuffer)
+     ;; ([remap ibuffer] . counsel-ibuffer)
      ("C-x C-f" . counsel-find-file)
     :map minibuffer-local-map
       ("C-r" . 'counsel-minibuffer-history)))
@@ -493,6 +546,10 @@
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
 
+(use-package nav-flash
+  :ensure t
+  :init (nav-flash-show))
+
 (use-package neotree
   :disabled
   :config
@@ -518,7 +575,6 @@
   :after org
   :init
     (add-hook 'org-mode-hook 'evil-org-mode t)
-    (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h)
   :config
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     (with-eval-after-load 'evil-maps
@@ -528,8 +584,7 @@
     ;; Setting RETURN key in org-mode to follow links
     (setq org-return-follows-link  t)
     (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
+    (evil-org-agenda-set-keys))
 
 (require 'org-tempo)
 
@@ -597,6 +652,8 @@
 
 (use-package projectile
   :diminish projectile-mode
+  :custom
+    (projectile-known-projects-file "~/.local/share/emacs/projectile-bookmarks.eld")
   :config (projectile-mode)
   :bind-keymap
     ("C-c p" . projectile-command-map)
@@ -671,7 +728,9 @@
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'ewal-doom-one t)
+    
+    (setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+    (load-theme real-theme t)
   
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)

@@ -5,7 +5,7 @@ I'ts written using [[https://invidious.lunar.icu/playlist?list=PL5--8gKSku15e8lX
 At 4th video at 26:09
 
 * TABLE OF CONTENTS :toc:
-- [[#sane-defaults][SANE DEFAULTS]]
+- [[#sane-defaults-and-other][SANE DEFAULTS (and other)]]
 - [[#package-management-setup][PACKAGE MANAGEMENT SETUP]]
 - [[#evil-and-keybindings][EVIL AND KEYBINDINGS]]
 - [[#all-the-icons][ALL-THE-ICONS]]
@@ -16,6 +16,7 @@ At 4th video at 26:09
 - [[#dashboard][DASHBOARD]]
 - [[#doom-modeline][DOOM-MODELINE]]
 - [[#emojis][EMOJIS]]
+- [[#fonts][FONTS]]
 - [[#flycheck][FLYCHECK]]
 - [[#git-stuff][GIT STUFF]]
 - [[#helpful][HELPFUL]]
@@ -26,7 +27,7 @@ At 4th video at 26:09
   - [[#shell][Shell]]
 - [[#neotree][NEOTREE]]
 - [[#org-mode][ORG MODE]]
-  - [[#fixing-keybindings-in-evil-mode][FIXING KEYBINDINGS IN EVIL MODE]]
+  - [[#fixing-keybindings-and-evil-mode][FIXING KEYBINDINGS AND EVIL MODE]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
   - [[#org-superstar][ORG SUPERSTAR]]
   - [[#org-auto-tangle][ORG AUTO TANGLE]]
@@ -45,7 +46,7 @@ At 4th video at 26:09
 - [[#tldr][TLDR]]
 - [[#which-key][WHICH-KEY]]
 
-* SANE DEFAULTS
+* SANE DEFAULTS (and other)
 Here are some tweaks that idk where to put
 #+begin_src emacs-lisp
 (setq inhibit-startup-message t) ; default emacs startup message
@@ -69,6 +70,14 @@ Here are some tweaks that idk where to put
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 ;; custom settings that emacs autosets put into it's own file
 (setq custom-file (concat user-emacs-directory "custom.el"))
+;; moving backup files to trash directory
+(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
+;; recentf file put somewhere else
+(setq recentf-save-file "~/.local/share/emacs/recentf")
+;; bookmarks file put somewhere else
+(setq bookmark-dafault-file "~/.local/share/emacs/bookmarks")
+;; tramp file put somewhere else
+(setq tramp-persistency-file-name "~/.local/share/emacs/tramp")
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
                 term-mode-hook
@@ -82,6 +91,12 @@ Here are some tweaks that idk where to put
            (setq-local electric-pair-inhibit-predicate
                    `(lambda (c)
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+;; locking buffers from killing
+(with-current-buffer "*scratch*" 
+	  (emacs-lock-mode 'kill))
+(with-current-buffer "*Messages*"
+	  (emacs-lock-mode 'kill))
 #+end_src
 
 * PACKAGE MANAGEMENT SETUP
@@ -246,14 +261,14 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "g ." '(magit-file-displatch :wk "Magit file dispatch")
   "g b" '(magit-branch-checkout :wk "Switch branch")
   "g c" '(:ignore t :wk "Create")
-  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-  "g c c" '(magit-commit-create :wk "Create commit")
-  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+    "g c c" '(magit-commit-create :wk "Create commit")
+    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
   "g C" '(magit-clone :wk "Clone repo")
   "g f" '(:ignore t :wk "Find")
-  "g f c" '(magit-show-commit :wk "Show commit")
-  "g f f" '(magit-find-file :wk "Magit find file")
-  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+    "g f c" '(magit-show-commit :wk "Show commit")
+    "g f f" '(magit-find-file :wk "Magit find file")
+    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
   "g F" '(magit-fetch :wk "Git fetch")
   "g g" '(magit-status :wk "Magit status")
   "g i" '(magit-init :wk "Initialize git repo")
@@ -269,15 +284,15 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "h b" '(describe-bindings :wk "Describe bindings")
   "h c" '(describe-char :wk "Describe character under cursor")
   "h d" '(:ignore t :wk "Emacs documentation")
-  "h d a" '(about-emacs :wk "About Emacs")
-  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
-  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
-  "h d m" '(info-emacs-manual :wk "The Emacs manual")
-  "h d n" '(view-emacs-news :wk "View Emacs news")
-  "h d o" '(describe-distribution :wk "How to obtain Emacs")
-  "h d p" '(view-emacs-problems :wk "View Emacs problems")
-  "h d t" '(view-emacs-todo :wk "View Emacs todo")
-  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+    "h d a" '(about-emacs :wk "About Emacs")
+    "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+    "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+    "h d m" '(info-emacs-manual :wk "The Emacs manual")
+    "h d n" '(view-emacs-news :wk "View Emacs news")
+    "h d o" '(describe-distribution :wk "How to obtain Emacs")
+    "h d p" '(view-emacs-problems :wk "View Emacs problems")
+    "h d t" '(view-emacs-todo :wk "View Emacs todo")
+    "h d w" '(describe-no-warranty :wk "Describe no warranty")
   "h e" '(view-echo-area-messages :wk "View echo area messages")
   "h f" '(describe-function :wk "Describe function")
   "h F" '(describe-face :wk "Describe face")
@@ -289,19 +304,24 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "h L" '(describe-language-environment :wk "Describe language environment")
   "h m" '(describe-mode :wk "Describe mode")
   "h r" '(:ignore t :wk "Reload")
-  "h r r" '((lambda () (interactive)
-              (load-file "~/.config/emacs/init.el"))
-            :wk "Reload emacs config")
+    "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
+    "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
   "h t" '(load-theme :wk "Load theme")
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
-
+    
 (custom/leader-keys
   "m" '(:ignore t :wk "Org")
   "m a" '(org-agenda :wk "Org agenda")
+  "m b" '(:ignore t :wk "Tables")
+    "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  "m d" '(:ignore t :wk "Date/deadline")
+    "m d t" '(org-time-stamp :wk "Org time stamp")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m i" '(org-toggle-item :wk "Org toggle item")
+  "m l" '(:ignore t :wk "Link")
+    "m l l" '(org-insert-link :wk "Insert link")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
@@ -312,13 +332,6 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "o e" '(elfeed :wk "Elfeed RSS")
   "o f" '(make-frame :wk "Open buffer in new frame")
   "o F" '(select-frame-by-name :wk "Select frame by name"))
-(custom/leader-keys
-  "m b" '(:ignore t :wk "Tables")
-  "m b -" '(org-table-insert-hline :wk "Insert hline in table"))
-
-(custom/leader-keys
-  "m d" '(:ignore t :wk "Date/deadline")
-  "m d t" '(org-time-stamp :wk "Org time stamp"))
 
 (custom/leader-keys
   "p" '(projectile-command-map :wk "Projectile"))
@@ -449,7 +462,7 @@ This allows to easily move windows (splits) around.
   :ensure t
   :custom
     (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-    (dashboard-startup-banner 'logo)
+    (dashboard-startup-banner "~/.config/emacs/banner.txt")
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
@@ -472,9 +485,39 @@ This allows to easily move windows (splits) around.
 
 #+begin_src emacs-lisp
 (use-package emojify
-  :init (global-emojify-mode 1))
-;;  :custom
-;;    (emojify-emojis-dir "~/.local/share/emacs/elpaca/builds/emojify/emojis"))
+  :init (global-emojify-mode 1)
+  :custom
+    (emojify-emojis-dir "~/.local/share/emacs/emojis"))
+#+end_src
+* FONTS
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil
+  :font "CodeNewRoman Nerd Font Mono"
+  :height 90
+  :weight 'medium)
+(set-face-attribute 'variable-pitch nil
+  :font "Ubuntu Nerd Font"
+  :height 100
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+  :font "CodeNewRoman Nerd Font Mono"
+  :height 90
+  :weight 'medium)
+;; Makes commented text and keywords italics.
+;; This is working in emacsclient but not emacs.
+;; Your font must have an italic face available.
+(set-face-attribute 'font-lock-comment-face nil
+  :slant 'italic)
+;; (set-face-attribute 'font-lock-keyword-face nil
+;;   :slant 'italic)
+
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right unless I also add this method of setting the default font.
+(add-to-list 'default-frame-alist '(font . "CodeNewRoman Nerd Font Mono-9"))
+
+;; Uncomment the following line if line spacing needs adjusting.
+;; (setq-default line-spacing 0.12)
 #+end_src
 * FLYCHECK
 Install =luacheck= from your Linux distro's repositories for flycheck to work correctly with lua files. Install =python-pylint= for flycheck to work with python files. Haskell works with flycheck as long as =haskell-ghc= or =haskell-stack-ghc= is installed. For more information on language support for flycheck, [[https://www.flycheck.org/en/latest/languages.html][read this]].
@@ -529,7 +572,20 @@ Both are completion frameworks that make your life easier when doing M-x for exa
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
     (("C-c C-r" . ivy-resume)
-     ("C-x B" . ivy-switch-buffer-other-window))
+     ("C-x B" . ivy-switch-buffer-other-window)
+     ("C-s" . swiper)
+    :map ivy-minibuffer-map
+      ("TAB" . ivy-alt-done)
+      ("C-l" . ivy-alt-done)
+      ("C-j" . ivy-next-line)
+      ("C-k" . ivy-previous-line)
+    :map ivy-switch-buffer-map
+      ("C-k" . ivy-previous-line)
+      ("C-l" . ivy-done)
+      ("C-d" . ivy-switch-buffer-kill)
+    :map ivy-reverse-i-search-map
+      ("C-k" . ivy-previous-line)
+      ("C-d" . ivy-reverse-i-search-kill))
   :diminish
   :custom
     (ivy-use-virtual-buffers t
@@ -553,7 +609,7 @@ Both are completion frameworks that make your life easier when doing M-x for exa
 (use-package counsel
   :bind
     (("M-x" . counsel-M-x)
-     ([remap ibuffer] . counsel-ibuffer)
+     ;; ([remap ibuffer] . counsel-ibuffer)
      ("C-x C-f" . counsel-find-file)
     :map minibuffer-local-map
       ("C-r" . 'counsel-minibuffer-history)))
@@ -639,14 +695,13 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
 #+end_src
 * ORG MODE
 Improving and ricing org mode
-** FIXING KEYBINDINGS IN EVIL MODE
+** FIXING KEYBINDINGS AND EVIL MODE
 #+begin_src emacs-lisp
 (use-package evil-org
   :diminish
   :after org
   :init
     (add-hook 'org-mode-hook 'evil-org-mode t)
-    (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h)
   :config
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     (with-eval-after-load 'evil-maps
@@ -656,8 +711,7 @@ Improving and ricing org mode
     ;; Setting RETURN key in org-mode to follow links
     (setq org-return-follows-link  t)
     (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (remove-hook 'org-tab-first-hook #'+org-cycle-only-current-subtree-h))
+    (evil-org-agenda-set-keys))
 #+end_src
 
 ** Source Code Block Tag Expansion
@@ -773,6 +827,8 @@ NOTE that many projectile commands do not work if you have set "fish" as the "sh
 #+begin_src emacs-lisp
 (use-package projectile
   :diminish projectile-mode
+  :custom
+    (projectile-known-projects-file "~/.local/share/emacs/projectile-bookmarks.eld")
   :config (projectile-mode)
   :bind-keymap
     ("C-c p" . projectile-command-map)
@@ -877,7 +933,9 @@ I started to use pywal for my ricing so I use this as my theme.
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'ewal-doom-one t)
+    
+    (setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+    (load-theme real-theme t)
   
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)

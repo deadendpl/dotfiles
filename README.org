@@ -64,6 +64,3 @@ Stuff to rice [10/11]:
 - [X] nvim
 - [X] hyprland
 - [X] zathura
-
-[[https://github.com/dylanaraps/pywal/wiki/Customization][Important page]]
-[[https://github.com/deviantfero/wpgtk/wiki/Configuration][current page]]
