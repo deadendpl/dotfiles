@@ -94,12 +94,11 @@
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
     (evil-mode)
   :config
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
-
-(dolist (mode '(eshell-mode
-		term-mode
-                vterm-mode))
-(add-to-list 'evil-emacs-state-modes mode))
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (dolist (mode '(eshell-mode
+                    term-mode
+                    vterm-mode))
+    (add-to-list 'evil-emacs-state-modes mode)))
 
 
 (use-package evil-collection
@@ -256,8 +255,20 @@
   "m a" '(org-agenda :wk "Org agenda")
   "m b" '(:ignore t :wk "Tables")
     "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+    "m b a" '(org-table-align :wk "Align table")
+    "m b b" '(org-table-blank-field)
+    "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
+    "m b e" '(org-table-edit-field :wk "Edit field")
+    "m b f" '(org-table-edit-formulas :wk "Edit fromulas")
+    "m b h" '(org-table-field-info :wk "Field info")
+    "m b s" '(org-table-sort-lines :wk "Sort lines")
+    "m b r" '(org-table-recalculate :wk "Recalculate")
+    "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
   "m d" '(:ignore t :wk "Date/deadline")
+    "m d d" '(org-deadline :wk "Org deadline")
+    "m d s" '(org-schedule :wk "Org schedule")
     "m d t" '(org-time-stamp :wk "Org time stamp")
+    "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m l" '(:ignore t :wk "Link")
@@ -343,7 +354,7 @@
 
 (use-package beacon
   :custom
-    (beacon-mode nil))
+    (beacon-mode 1))
 
 (use-package buffer-move)
 
@@ -386,11 +397,15 @@
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
-                       (projects . 5))))
+                       (projects . 5)))
                        ;; (agenda . 5)
-                       ;; (registers . 5)))
+                       ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
+  :bind
+    (:map dashboard-mode-map
+      ([remap dashboard-next-line] . 'widget-forward)
+      ([remap dashboard-previous-line] . 'widget-backward)))
 
 (use-package doom-modeline
   :ensure t
@@ -546,12 +561,8 @@
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
 
-(use-package nav-flash
-  :ensure t
-  :init (nav-flash-show))
-
 (use-package neotree
-  :disabled
+  :defer t
   :config
   (setq neo-smart-open t
         neo-show-hidden-files t
@@ -606,9 +617,10 @@
   :defer t
   :init
     (setq org-directory "~/org/"
-     org-agenda-files (concat org-directory "agenda.org"))
+     org-agenda-files '("agenda.org"))
   :custom-face
-    ;; setting size of headers in org mode
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
     (org-level-1 ((t (:inherit outline-1 :height 1.7))))
     (org-level-2 ((t (:inherit outline-2 :height 1.6))))
     (org-level-3 ((t (:inherit outline-3 :height 1.5))))
@@ -673,23 +685,24 @@
   :diminish
   :hook org-mode prog-mode)
 
+(use-package eshell
+  :defer t
+  :custom
+    (eshell-rc-script "~/.config/eshell/profile")     ;; your profile for eshell; like a bashrc for eshell.
+    (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
+    (eshell-history-file-name "~/.local/share/emacs/eshell-history")
+    (eshell-last-dir-ring-file-name "~/.local/share/emacs/eshell-lastdir")
+    (eshell-history-size 5000)
+    (eshell-buffer-maximum-lines 5000)
+    (eshell-hist-ignoredups t)
+    (eshell-scroll-to-bottom-on-input t)
+    (eshell-destroy-buffer-when-process-dies t)
+    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh")))
+
 (use-package eshell-syntax-highlighting
   :after esh-mode
   :config
-  (eshell-syntax-highlighting-global-mode +1))
-
-;; eshell-syntax-highlighting -- adds fish/zsh-like syntax highlighting.
-;; eshell-rc-script -- your profile for eshell; like a bashrc for eshell.
-;; eshell-aliases-file -- sets an aliases file for the eshell.
-  
-(setq eshell-rc-script (concat user-emacs-directory "eshell/profile")
-      eshell-aliases-file (concat user-emacs-directory "eshell/aliases")
-      eshell-history-size 5000
-      eshell-buffer-maximum-lines 5000
-      eshell-hist-ignoredups t
-      eshell-scroll-to-bottom-on-input t
-      eshell-destroy-buffer-when-process-dies t
-      eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+    (eshell-syntax-highlighting-global-mode +1))
 
 (use-package vterm
   :defer t
@@ -701,8 +714,8 @@
 (use-package vterm-toggle
   :after vterm
   :config
-  (setq vterm-toggle-fullscreen-p nil)
-  (setq vterm-toggle-scope 'project)
+  (setq vterm-toggle-fullscreen-p nil
+        vterm-toggle-scope 'project)
   (add-to-list 'display-buffer-alist
                '((lambda (buffer-or-name _)
                      (let ((buffer (get-buffer buffer-or-name)))
