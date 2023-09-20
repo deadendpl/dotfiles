@@ -256,7 +256,7 @@
   "m b" '(:ignore t :wk "Tables")
     "m b -" '(org-table-insert-hline :wk "Insert hline in table")
     "m b a" '(org-table-align :wk "Align table")
-    "m b b" '(org-table-blank-field)
+    "m b b" '(org-table-blank-field :wk "Make blank field")
     "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
     "m b e" '(org-table-edit-field :wk "Edit field")
     "m b f" '(org-table-edit-formulas :wk "Edit fromulas")
@@ -264,6 +264,14 @@
     "m b s" '(org-table-sort-lines :wk "Sort lines")
     "m b r" '(org-table-recalculate :wk "Recalculate")
     "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
+    "m b d" '(:ignore t :wk "delete")
+      "m b d c" '(org-table-delete-column :wk "Delete column")
+      "m b d r" '(org-table-kill-row :wk "Delete row")
+    "m b i" '(:ignore t :wk "insert")
+      "m b i c" ('org-table-insert-column :wk "Insert column")
+      "m b i h" ('org-table-insert-hline :wk "Insert horizontal line")
+      "m b i r" ('org-table-insert-row :wk "Insert row")
+      "m b i H" ('org-table-hline-and-move :wk "Insert horizontal line and move")
   "m d" '(:ignore t :wk "Date/deadline")
     "m d d" '(org-deadline :wk "Org deadline")
     "m d s" '(org-schedule :wk "Org schedule")
@@ -375,12 +383,14 @@
   :hook (company-mode . company-box-mode))
 
 (setq dired-listing-switches "-la --group-directories-first")
+
 (use-package dired
   :disabled
   :config
     (evil-collection-dired-setup))
 
 (use-package dired-open
+  :after dired
   :defer t
   :config
     (setq dired-open-extensions '(("gif" . "swaiymg")
@@ -583,6 +593,7 @@
 
 (use-package evil-org
   :diminish
+  :defer t
   :after org
   :init
     (add-hook 'org-mode-hook 'evil-org-mode t)
@@ -600,16 +611,21 @@
 (require 'org-tempo)
 
 (use-package org-superstar
- :init (add-hook 'org-mode-hook 'org-superstar-mode t))
+  :defer t
+  :after org
+  :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 
 (use-package org-auto-tangle
   :defer t
+  :after org
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
 
 (setq org-edit-src-content-indentation 0)
 
 (use-package toc-org
+  :defer t
+  :after org
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 
@@ -617,7 +633,7 @@
   :defer t
   :init
     (setq org-directory "~/org/"
-     org-agenda-files '("agenda.org"))
+          org-agenda-files '("agenda.org"))
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -633,10 +649,12 @@
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
     (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
     (org-ellipsis " •")
     (org-agenda-block-separator 8411))
 
 (use-package company-org-block
+  :defer t
   :after org)
 
 (use-package perspective

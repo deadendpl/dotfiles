@@ -19,6 +19,7 @@ body {
 .main-text {
   font-size: 24px;
   margin-bottom: 20px;
+  color: var(--color12)
 }
 
 .machop {
