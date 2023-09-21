@@ -21,7 +21,7 @@ Here are various modules that you can enable by uncommenting.
        :ui
        ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
-       doom-dashboard    ; a nifty splash screen for Emacs
+       ;;doom-dashboard    ; a nifty splash screen for Emacs
        ;;doom-quit         ; DOOM quit-message prompts when you quit Emacs
        (emoji +unicode)  ; 🙂
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
@@ -205,8 +205,9 @@ Here you type =(package! package-name)= to install packages
 (package! org-auto-tangle)
 (package! company-org-block)
 (package! all-the-icons-ibuffer)
-(package! example
-  :recipe (:host github :repo "martenlienen/xresources-theme"))
+(package! ewal)
+(package! ewal-doom-themes)
+(package! dashboard)
 #+end_src
 
 * config.el
@@ -241,7 +242,7 @@ Here is some actual configuration. You can use =use-package!= to configure insta
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'ewal-doom-one)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -287,6 +288,10 @@ Here is some actual configuration. You can use =use-package!= to configure insta
 
 ** Actual interesting stuff
 *** Some tweaks
+#+begin_src emacs-lisp
+(setq doom-theme 'ewal-doom-one)
+#+end_src
+
 Emacs from version 29 supports transparency
 #+begin_src emacs-lisp :tangle config.el
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
@@ -298,9 +303,15 @@ Ibuffer by default doesn't have icons, so I fix that.
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 #+end_src
 
-Fish might cause issues with emacs packages so I set it to bash
+Fish might cause issues with emacs packages so I set it to sh
 #+begin_src emacs-lisp
 (setq shell-file-name (executable-find "bash"))
+#+end_src
+
+Eshell config files
+#+begin_src emacs-lisp
+(setq eshell-rc-script "~/.config/eshell/profile" ;; your profile for eshell; like a bashrc for eshell.
+      eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
 #+end_src
 
 *** IMENU-LIST
@@ -355,6 +366,7 @@ I don't use it often since terminal emulation with evil mode is wonky.
 Few org mode tweaks that make life in org better
 #+begin_src emacs-lisp :tangle config.el
 (use-package org-superstar
+  :defer t
   :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 
 (use-package org-auto-tangle
@@ -363,12 +375,56 @@ Few org mode tweaks that make life in org better
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package company-org-block
+  :defer t
   :after org)
 
-(setq org-hide-emphasis-markers t
-      org-ellipsis " •")
+(use-package org
+  :defer t
+  :init
+    (setq org-directory "~/org/"
+          org-agenda-files '("agenda.org"))
+  :custom-face
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+  :custom
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
+    (org-agenda-block-separator 8411))
+#+end_src
 
-(setq org-agenda-block-separator 8411)
+*** DASHBOARD
+#+begin_src emacs-lisp
+(use-package dashboard
+  :custom
+    (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+    (doom-fallback-buffer-name "*dashboard*")
+    (dashboard-startup-banner "~/.config/doom/banner.txt")
+    (dashboard-center-content t)
+    (dashboard-items '((recents  . 5)
+                       (bookmarks . 5)
+                       (projects . 5)
+                       (agenda . 5)))
+                       ;; (registers . 5)
+  :init
+    (dashboard-setup-startup-hook)
+  :bind
+    (:map dashboard-mode-map
+      ([remap dashboard-next-line] . 'widget-forward)
+      ([remap dashboard-previous-line] . 'widget-backward)
+      ("up" . 'widget-forward)
+      ("down" . 'widget-backward)))
 #+end_src
 
 *** DOOM-DASHBOARD
@@ -378,7 +434,7 @@ I tried to edit banner thing but idk what to put there
 
 (defun doom-dashboard-draw-ascii-banner-fn ()
   (let* ((banner
-          '("PP Poo Poo")) ;;the important line
+          '"PP Poo Poo") ;;the important line
          (longest-line (apply #'max (mapcar #'length banner))))
     (put-text-property
      (point)
@@ -402,13 +458,21 @@ I added a function that loads this file.
 
 (map! :leader
   (:prefix ("t" . "toggle")
-     :desc "Imenu list" "i" #'imenu-list-smart-toggle
-     :desc "Vterm" "v" #'vterm-toggle)
+    :desc "Imenu list" "i" #'imenu-list-smart-toggle
+    :desc "Vterm" "v" #'vterm-toggle)
   (:prefix ("f" . "file")
     :desc "Open config.org" "P" #'load-doom-config)
   (:prefix ("d" . "dired")
-     :desc "Open dired" "d" #'dired
-     :desc "Dired jump to current" "j" #'dired-jump
-     :desc "Open directory in neotree" "n" #'neotree-dir
-     :desc "Peep-dired" "n" #'peep-dired))
+    :desc "Open dired" "d" #'dired
+    :desc "Dired jump to current" "j" #'dired-jump
+    :desc "Open directory in neotree" "n" #'neotree-dir
+    :desc "Peep-dired" "n" #'peep-dired)
+  (:prefix ("e" . "eshell/evaluate")
+    :desc "Evaluate elisp in buffer" "b" #'eval-buffer
+    :desc "Evaluate defun containing or after point" "d" #'eval-defun
+    :desc "Evaluate and elisp expression" "e" #'eval-expression
+    :desc "Eshell history" "h" #'counsel-esh-history
+    :desc "Evaluate elisp expression before point" "l" #'eval-last-sexp
+    :desc "Evaluate elisp in region" "r" #'eval-region
+    :desc "Eshell" "s" #'eshell))
 #+end_src

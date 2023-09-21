@@ -29,8 +29,11 @@
 (setq tramp-persistency-file-name "~/.local/share/emacs/tramp")
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
+		vterm-mode-hook
                 term-mode-hook
                 shell-mode-hook
+		helpful-mode-hook
+		dashboard-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -51,6 +54,7 @@
 (require 'package)
 
 (setq package-user-dir "~/.local/share/emacs/packages/"
+      package-gnupghome-dir "~/.local/share/emacs/gpg"
       package-async t
       package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
@@ -268,10 +272,10 @@
       "m b d c" '(org-table-delete-column :wk "Delete column")
       "m b d r" '(org-table-kill-row :wk "Delete row")
     "m b i" '(:ignore t :wk "insert")
-      "m b i c" ('org-table-insert-column :wk "Insert column")
-      "m b i h" ('org-table-insert-hline :wk "Insert horizontal line")
-      "m b i r" ('org-table-insert-row :wk "Insert row")
-      "m b i H" ('org-table-hline-and-move :wk "Insert horizontal line and move")
+      ;; "m b i c" ('org-table-insert-column :wk "Insert column") FIXME
+      ;; "m b i h" ('org-table-insert-hline :wk "Insert horizontal line") FIXME
+      ;; "m b i r" ('org-table-insert-row :wk "Insert row") FIXME
+      ;; "m b i H" ('org-table-hline-and-move :wk "Insert horizontal line and move") FIXME
   "m d" '(:ignore t :wk "Date/deadline")
     "m d d" '(org-deadline :wk "Org deadline")
     "m d s" '(org-schedule :wk "Org schedule")
@@ -364,7 +368,8 @@
   :custom
     (beacon-mode 1))
 
-(use-package buffer-move)
+(use-package buffer-move
+  :defer t)
 
 (use-package company
   :defer 2
@@ -407,15 +412,17 @@
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
-                       (projects . 5)))
-                       ;; (agenda . 5)
+                       (projects . 5)
+                       (agenda . 5)))
                        ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
   :bind
     (:map dashboard-mode-map
       ([remap dashboard-next-line] . 'widget-forward)
-      ([remap dashboard-previous-line] . 'widget-backward)))
+      ([remap dashboard-previous-line] . 'widget-backward)
+      ("up" . 'widget-forward)
+      ("down" . 'widget-backward)))
 
 (use-package doom-modeline
   :ensure t
@@ -566,11 +573,6 @@
 (use-package markdown-mode
   :defer t)
 
-(use-package company-shell
-  :custom
-    (add-to-list 'company-backends 'company-shell)
-    (add-to-list 'company-backends 'company-shell-env))
-
 (use-package neotree
   :defer t
   :config
@@ -651,6 +653,7 @@
     (org-hide-emphasis-markers t)
     (org-startup-with-inline-images t)
     (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
     (org-agenda-block-separator 8411))
 
 (use-package company-org-block
@@ -702,6 +705,11 @@
 (use-package rainbow-mode
   :diminish
   :hook org-mode prog-mode)
+
+(use-package company-shell
+  :custom
+    (add-to-list 'company-backends 'company-shell)
+    (add-to-list 'company-backends 'company-shell-env))
 
 (use-package eshell
   :defer t

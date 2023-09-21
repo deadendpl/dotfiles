@@ -26,7 +26,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'ewal-doom-one)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -107,6 +107,7 @@
                   (window-height . 0.3))))
 
 (use-package org-superstar
+  :defer t
   :init (add-hook 'org-mode-hook 'org-superstar-mode t))
 
 (use-package org-auto-tangle
@@ -115,18 +116,39 @@
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package company-org-block
+  :defer t
   :after org)
 
-(setq org-hide-emphasis-markers t
-      org-ellipsis " •")
-
-(setq org-agenda-block-separator 8411)
+(use-package org
+  :defer t
+  :init
+    (setq org-directory "~/org/"
+          org-agenda-files '("agenda.org"))
+  :custom-face
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+  :custom
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
+    (org-agenda-block-separator 8411))
 
 ;;(setq fancy-splash-image "~/.config/doom/ricky.jpg")
 
 (defun doom-dashboard-draw-ascii-banner-fn ()
   (let* ((banner
-          '("PP Poo Poo")) ;;the important line
+          '"PP Poo Poo") ;;the important line
          (longest-line (apply #'max (mapcar #'length banner))))
     (put-text-property
      (point)
@@ -146,12 +168,20 @@
 
 (map! :leader
   (:prefix ("t" . "toggle")
-     :desc "Imenu list" "i" #'imenu-list-smart-toggle
-     :desc "Vterm" "v" #'vterm-toggle)
+    :desc "Imenu list" "i" #'imenu-list-smart-toggle
+    :desc "Vterm" "v" #'vterm-toggle)
   (:prefix ("f" . "file")
     :desc "Open config.org" "P" #'load-doom-config)
   (:prefix ("d" . "dired")
-     :desc "Open dired" "d" #'dired
-     :desc "Dired jump to current" "j" #'dired-jump
-     :desc "Open directory in neotree" "n" #'neotree-dir
-     :desc "Peep-dired" "n" #'peep-dired))
+    :desc "Open dired" "d" #'dired
+    :desc "Dired jump to current" "j" #'dired-jump
+    :desc "Open directory in neotree" "n" #'neotree-dir
+    :desc "Peep-dired" "n" #'peep-dired)
+  (:prefix ("e" . "eshell/evaluate")
+    :desc "Evaluate elisp in buffer" "b" #'eval-buffer
+    :desc "Evaluate defun containing or after point" "d" #'eval-defun
+    :desc "Evaluate and elisp expression" "e" #'eval-expression
+    :desc "Eshell history" "h" #'counsel-esh-history
+    :desc "Evaluate elisp expression before point" "l" #'eval-last-sexp
+    :desc "Evaluate elisp in region" "r" #'eval-region
+    :desc "Eshell" "s" #'eshell))

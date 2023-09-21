@@ -4,8 +4,46 @@
 * WARNING:
 This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies might not be available for other distros.
 
-* (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
-- Dracula [[file:screenshots/bspwm/dracula.png]]
+* PYWAL with hyprland
+I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android
+
+[[file:screenshots/pywal-hypr/2023-09-21_15-43-21.png]]
+
+[[file:screenshots/pywal-hypr/2023-09-21_15-46-01.png]]
+
+[[file:screenshots/pywal-hypr/2023-09-21_15-48-47.png]]
+
+| Type of program           | my default choice |
+|---------------------------+-------------------|
+| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
+| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
+| File Manager              | ([[https://github.com/gokcehan/lf][lf)]]  pcmanfm     |
+| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
+| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
+| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
+| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
+| Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
+
+Install dependencies from =install/dependencies/hypr/pywal.txt= with =yay=.
+At hyprland's startup the script =~/.config/scripts/hypr/pywal.sh= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
+After that you can exexute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
+
+Stuff to rice [10/11]:
+- [X] foot
+- [X] rofi (FIXME power menu need fixing)
+- [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
+- [ ] gtk4
+- [X] emacs
+- [X] qutebrowser
+- [X] waybar
+- [X] mako
+- [X] nvim
+- [X] hyprland
+- [X] zathura
+
+* UNMAINTAINED
+** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
+- (UNMAINTAINED)Dracula [[file:screenshots/bspwm/dracula.png]]
 
 - Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
 
@@ -22,7 +60,7 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies m
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/yshui/picom][picom]]             |
 
-* [[https://github.com//hyprwm/hyprland][Hyprland]]
+** [[https://github.com//hyprwm/hyprland][Hyprland]]
 - Dracula [[file:screenshots/hypr/dracula.png]]
 
 - Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]
@@ -46,21 +84,3 @@ Then go to =dependencies= directory and window manager you want to use. =pacman.
 
 After that copy/move all files in =home= directory to your =$HOME= directory.
 
-* TODO PYWAL
-I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android
-
-At hyprland's startup the script =~/.config/scripts/hypr/pywal.sh= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
-After that you can exexute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
-
-Stuff to rice [10/11]:
-- [X] foot
-- [X] rofi (FIXME power menu need fixing)
-- [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
-- [ ] gtk4
-- [X] emacs
-- [X] qutebrowser
-- [X] waybar
-- [X] mako
-- [X] nvim
-- [X] hyprland
-- [X] zathura

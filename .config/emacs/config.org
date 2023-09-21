@@ -24,7 +24,6 @@ At 4th video at 26:09
 - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#highlight-todo][HIGHLIGHT TODO]]
 - [[#language-support][LANGUAGE SUPPORT]]
-  - [[#shell][Shell]]
 - [[#neotree][NEOTREE]]
 - [[#org-mode][ORG MODE]]
   - [[#fixing-keybindings-and-evil-mode][FIXING KEYBINDINGS AND EVIL MODE]]
@@ -38,6 +37,7 @@ At 4th video at 26:09
 - [[#rainbow-delimiters][RAINBOW DELIMITERS]]
 - [[#rainbow-mode][RAINBOW MODE]]
 - [[#shells-and-terminals][SHELLS AND TERMINALS]]
+  - [[#shell][Shell]]
   - [[#eshell][Eshell]]
   - [[#vterm][Vterm]]
   - [[#vterm-toggle][Vterm-Toggle]]
@@ -80,8 +80,11 @@ Here are some tweaks that idk where to put
 (setq tramp-persistency-file-name "~/.local/share/emacs/tramp")
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
+		vterm-mode-hook
                 term-mode-hook
                 shell-mode-hook
+		helpful-mode-hook
+		dashboard-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -105,6 +108,7 @@ Here are some tweaks that idk where to put
 (require 'package)
 
 (setq package-user-dir "~/.local/share/emacs/packages/"
+      package-gnupghome-dir "~/.local/share/emacs/gpg"
       package-async t
       package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
@@ -423,7 +427,6 @@ All the icons and nerd icons
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 #+end_src
-
 * BEACON
 [[https://github.com/Malabarba/beacon][beacon]] lights up current line after bigger navigation in a file
 
@@ -436,7 +439,8 @@ All the icons and nerd icons
 This allows to easily move windows (splits) around.
 
 #+begin_src emacs-lisp
-(use-package buffer-move)
+(use-package buffer-move
+  :defer t)
 #+end_src
 * COMPANY
 [[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. Completion will start automatically after you type a few letters. Use M-n and M-p to select, <return> to complete or <tab> to complete the common part.
@@ -686,14 +690,6 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 (use-package markdown-mode
   :defer t)
 #+end_src
-
-** Shell
-#+begin_src emacs-lisp
-(use-package company-shell
-  :custom
-    (add-to-list 'company-backends 'company-shell)
-    (add-to-list 'company-backends 'company-shell-env))
-#+end_src
 * NEOTREE
 Neotree is a file tree viewer. When you open neotree, it jumps to the current file thanks to neo-smart-open. The neo-window-fixed-size setting makes the neotree width be adjustable. NeoTree provides following themes: classic, ascii, arrow, icons, and nerd. Theme can be configed by setting "two" themes for neo-theme: one for the GUI and one for the terminal.
 
@@ -824,6 +820,7 @@ Table of contents
     (org-hide-emphasis-markers t)
     (org-startup-with-inline-images t)
     (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
     (org-agenda-block-separator 8411))
 
 (use-package company-org-block
@@ -894,6 +891,13 @@ Display the actual color as a background for any hex color value (ex. #ffffff). 
   :hook org-mode prog-mode)
 #+end_src
 * SHELLS AND TERMINALS
+** Shell
+#+begin_src emacs-lisp
+(use-package company-shell
+  :custom
+    (add-to-list 'company-backends 'company-shell)
+    (add-to-list 'company-backends 'company-shell-env))
+#+end_src
 ** Eshell
 Eshell is an Emacs 'shell' that is written in Elisp.
 
