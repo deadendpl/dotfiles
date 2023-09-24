@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Farside
-// @author      Ben Busby, Founder
+// @author      Ben Busby, Founder,         deadendpl (on github), edited
 // @author      Schimon Jehudah, Adv.
 // @license     AGPL3
 // @namespace   link.farside
@@ -211,7 +211,7 @@ switch (true) {
   site = [
     // libreddit
     'lib,https://farside.link/libreddit',
-    'lib,https://libreddit.bus-hit.me',
+/*    'lib,https://libreddit.bus-hit.me',
     'lib,https://libreddit.northboot.xyz',
     'lib,https://libreddit.oxymagnesium.com',
     'lib,https://libreddit.privacydev.net',
@@ -222,7 +222,7 @@ switch (true) {
     'lib,https://reddit.simo.sh',
     'lib,https://reddit.smnz.de',
     'lib,https://safereddit.com',
-    'lib,https://libreddit.albony.xyz'];
+    'lib,https://libreddit.albony.xyz' */];
 
 
     /* teddit
@@ -247,7 +247,7 @@ switch (true) {
   site = [
     // nitter
     'nit,https://farside.link/nitter',
-    'nit,https://de.nttr.stream',
+/*    'nit,https://de.nttr.stream',
     'nit,https://nttr.stream',
     'nit,https://nitter.bus-hit.me',
     'nit,https://nitter.sethforprivacy.com',
@@ -272,7 +272,7 @@ switch (true) {
     'nit,https://nitter.fdn.fr',
     'nit,https://nitter.pussthecat.org',
     'nit,https://nitter.42l.fr',
-    'nit,https://nitter.net'];
+    'nit,https://nitter.net' */];
   break;
 
   case hostname.endsWith('wikipedia.org'):
@@ -280,13 +280,13 @@ switch (true) {
   site = [
     // wikiless
     'wik,https://farside.link/wikiless',
-    'wik,https://wikiless.sethforprivacy.com',
+ /*   'wik,https://wikiless.sethforprivacy.com',
     'wik,https://wikiless.org',
     'wik,https://wikiless.northboot.xyz',
     'wik,https://wikiless.lunar.icu',
     'wik,https://wikiless.alefvanoon.xyz',
     'wik,https://wiki.froth.zone',
-    'wik,https://wiki.604kph.xyz'];
+    'wik,https://wiki.604kph.xyz' */];
   break;
 
   case hostname.endsWith('youtube.com'):
@@ -294,7 +294,7 @@ switch (true) {
   site = [
     // invidious
     'inv,https://farside.link/invidious',
-    'inv,https://yt.artemislena.eu',
+/*    'inv,https://yt.artemislena.eu',
     'inv,https://youtube.076.ne.jp',
     'inv,https://yewtu.be',
     'inv,https://vid.puffyan.us',
@@ -310,13 +310,13 @@ switch (true) {
     'inv,https://invidious.flokinet.to',
     'inv,https://invidious.esmailelbob.xyz',
     'inv,https://invidious-us.kavin.rocks',
-    'inv,https://inv.riverside.rocks',
+    'inv,https://inv.riverside.rocks', */
     // piped
     'pip,https://farside.link/piped',
-    'pip,https://piped.mint.lgbt',
+/*    'pip,https://piped.mint.lgbt',
     'pip,https://piped.moomoo.me',
     'pip,https://piped.tokhmi.xyz',
-    'pip,https://piped.kavin.rocks'];
+    'pip,https://piped.kavin.rocks' */];
   break;
 };
 

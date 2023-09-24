@@ -1,32 +1,30 @@
-(setq inhibit-startup-message t) ; default emacs startup message
-(scroll-bar-mode -1)             ; Disable visible scrollbar
-(tool-bar-mode -1)               ; Disable the toolbar
-(tooltip-mode -1)                ; Disable tooltips
-(set-fringe-mode 10)             ; Give some breathing room
-(menu-bar-mode -1)               ; Disable the menu bar
-(global-auto-revert-mode t)      ; Automatically show changes if the file has changed
-(setq global-auto-revert-non-file-buffers t) ; refreshing buffers when files have changed
-(global-visual-line-mode t)      ; Enable truncated lines
-(setq use-dialog-box nil)        ; turns off graphical dialog boxes
-(delete-selection-mode 1)        ; You can select text and delete it by typing.
-(electric-pair-mode 1)           ; Turns on automatic parens pairing
-(electric-indent-mode -1)        ; Turn off the weird indenting that Emacs does by default.
-(column-number-mode)
-(global-display-line-numbers-mode t)
-;; Set up the visible bell
-(setq visible-bell nil)
+(scroll-bar-mode -1)                 ; Disable visible scrollbar
+(tool-bar-mode -1)                   ; Disable the toolbar
+(tooltip-mode -1)                    ; Disable tooltips
+(menu-bar-mode -1)                   ; Disable the menu bar
+(set-fringe-mode 10)                 ; Give some breathing room
+(global-auto-revert-mode t)          ; Automatically show changes if the file has changed
+(global-display-line-numbers-mode 1) ; Display line numbers
+(global-visual-line-mode t)          ; Enable truncated lines
+(delete-selection-mode 1)            ; You can select text and delete it by typing.
+(electric-pair-mode 1)               ; Turns on automatic parens pairing
+(electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
+
+(setq visible-bell nil ;; Set up the visible bell
+      inhibit-startup-message nil ; default emacs startup message
+      custom-file "~/.local/share/emacs/custom.el" ; custom settings that emacs autosets put into it's own file
+      backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+      recentf-save-file "~/.local/share/emacs/recentf" ; recentf file put somewhere else
+      bookmark-dafault-file "~/.local/share/emacs/bookmarks" ; bookmarks file put somewhere else
+      auto-save-list-file-name "~/.local/share/emacs/auto-save-list/list"
+      global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+      use-dialog-box nil        ; turns off graphical dialog boxes
+      tramp-persistency-file-name "~/.local/share/emacs/tramp" ; tramp file put somewhere else
+      initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
+      initial-scratch-message nil)         ; deleting scratch buffer message
+
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-;; custom settings that emacs autosets put into it's own file
-(setq custom-file (concat user-emacs-directory "custom.el"))
-;; moving backup files to trash directory
-(setq backup-directory-alist '((".*" . "~/.local/share/Trash/files")))
-;; recentf file put somewhere else
-(setq recentf-save-file "~/.local/share/emacs/recentf")
-;; bookmarks file put somewhere else
-(setq bookmark-dafault-file "~/.local/share/emacs/bookmarks")
-;; tramp file put somewhere else
-(setq tramp-persistency-file-name "~/.local/share/emacs/tramp")
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
 		vterm-mode-hook
@@ -34,15 +32,12 @@
                 shell-mode-hook
 		helpful-mode-hook
 		dashboard-mode-hook
+		dired-mode-hook
+                org-agenda-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-;; Otherwise, org-tempo is broken when you try to <s TAB...
-(add-hook 'org-mode-hook (lambda ()
-           (setq-local electric-pair-inhibit-predicate
-                   `(lambda (c)
-                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*" 
@@ -98,11 +93,12 @@
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
     (evil-mode)
   :config
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-    (dolist (mode '(eshell-mode
-                    term-mode
-                    vterm-mode))
-    (add-to-list 'evil-emacs-state-modes mode)))
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
+    ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
+    ;; (dolist (mode '(eshell-mode
+    ;;                 term-mode
+    ;;                 vterm-mode))
+    ;; (add-to-list 'evil-emacs-state-modes mode)))
 
 
 (use-package evil-collection
@@ -222,6 +218,10 @@
   "g u" '(magit-stage-file :wk "Git unstage file"))
 
 (custom/leader-keys
+  "G" '(:ignore :wk "Games")
+  "G m" '(minesweeper :wk "Minesweeper"))
+
+(custom/leader-keys
   "h" '(:ignore t :wk "Help")
   "h a" '(counsel-apropos :wk "Apropos")
   "h b" '(describe-bindings :wk "Describe bindings")
@@ -289,6 +289,11 @@
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
 
+
+(custom/leader-keys
+  "n" '(:ignore t :wk "Notes")
+  "n o" '(org-notes-dired :wk "Open notes folder"))
+
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
   "o d" '(dashboard-open :wk "Dashboard")
@@ -354,6 +359,7 @@
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
 (use-package all-the-icons-ibuffer
+  :defer t
   :after ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
@@ -387,27 +393,10 @@
   :diminish
   :hook (company-mode . company-box-mode))
 
-(setq dired-listing-switches "-la --group-directories-first")
-
-(use-package dired
-  :disabled
-  :config
-    (evil-collection-dired-setup))
-
-(use-package dired-open
-  :after dired
-  :defer t
-  :config
-    (setq dired-open-extensions '(("gif" . "swaiymg")
-                                  ("jpg" . "swaiymg")
-                                  ("png" . "swaiymg")
-                                  ("mkv" . "mpv")
-                                  ("mp4" . "mpv"))))
-
 (use-package dashboard
   :ensure t
   :custom
-    (initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+    (initial-buffer-choice (lambda () (dashboard-open)))
     (dashboard-startup-banner "~/.config/emacs/banner.txt")
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
@@ -423,6 +412,28 @@
       ([remap dashboard-previous-line] . 'widget-backward)
       ("up" . 'widget-forward)
       ("down" . 'widget-backward)))
+
+(use-package dired
+  :ensure nil
+  :defer t
+  :custom
+    (insert-directory-program "ls")
+    (dired-listing-switches "-la --group-directories-first")
+  :config
+    (evil-collection-dired-setup)
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file))
+
+(use-package dired-open
+  :after dired
+  :defer t
+  :config
+    (setq dired-open-extensions '(("gif" . "swaiymg")
+                                  ("jpg" . "swaiymg")
+                                  ("png" . "swaiymg")
+                                  ("mkv" . "mpv")
+                                  ("mp4" . "mpv"))))
 
 (use-package doom-modeline
   :ensure t
@@ -466,6 +477,11 @@
   :defer t
   :diminish
   :init (global-flycheck-mode))
+
+(use-package minesweeper
+  :defer t
+  :config
+    (evil-set-initial-state 'minesweeper-mode 'emacs))
 
 (use-package magit
   :defer t)
@@ -554,17 +570,18 @@
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
 
 (use-package hl-todo
+  :defer t
   :hook ((org-mode . hl-todo-mode)
          (prog-mode . hl-todo-mode))
-  :config
-    (setq hl-todo-highlight-punctuation ":"
-          hl-todo-keyword-faces
-          `(("TODO"       warning bold)
-            ("FIXME"      error bold)
-            ("HACK"       font-lock-constant-face bold)
-            ("REVIEW"     font-lock-keyword-face bold)
-            ("NOTE"       success bold)
-            ("DEPRECATED" font-lock-doc-face bold))))
+  :custom
+    (hl-todo-highlight-punctuation ":")
+    (hl-todo-keyword-faces
+    `(("TODO"       warning bold)
+      ("FIXME"      error bold)
+      ("HACK"       font-lock-constant-face bold)
+      ("REVIEW"     font-lock-keyword-face bold)
+      ("NOTE"       success bold)
+      ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package lua-mode
   :defer t)
@@ -598,17 +615,26 @@
   :defer t
   :after org
   :init
-    (add-hook 'org-mode-hook 'evil-org-mode t)
+    (setq org-return-follows-link t)
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys)
   :config
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     (with-eval-after-load 'evil-maps
       (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil))
+      ;; (define-key evil-motion-state-map (kbd "RET") nil)
+      (define-key evil-motion-state-map (kbd "TAB") nil)))
     ;; Setting RETURN key in org-mode to follow links
-    (setq org-return-follows-link  t)
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys))
+    ;; (setq org-return-follows-link t)
+    ;; (require 'evil-org-agenda)
+    ;; (evil-org-agenda-set-keys))
+
+;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+;; Otherwise, org-tempo is broken when you try to <s TAB...
+(add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
 (require 'org-tempo)
 
@@ -631,11 +657,13 @@
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 
+(defun org-notes-dired ()
+  "Opens org-directory in Dired."
+  (interactive)
+  (dired (concat org-directory "/")))
+
 (use-package org
   :defer t
-  :init
-    (setq org-directory "~/org/"
-          org-agenda-files '("agenda.org"))
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -647,18 +675,48 @@
     (org-level-6 ((t (:inherit outline-5 :height 1.2))))
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
   :custom
-    (org-insert-heading-respect-content nil)
-    (org-hide-emphasis-markers t)
-    (org-hide-leading-stars t)
-    (org-hide-emphasis-markers t)
-    (org-startup-with-inline-images t)
-    (org-ellipsis " •")
-    (org-agenda-window-setup 'current-window)
-    (org-agenda-block-separator 8411))
+    (org-directory "~/org/")
+    (org-agenda-files '("agenda.org"))
+    (org-todo-keywords
+     '((sequence
+        "TODO(t)"  ; A task that needs doing & is ready to do
+        "PROJ(p)"  ; A project, which usually contains other tasks
+        "LOOP(r)"  ; A recurring task
+        "STRT(s)"  ; A task that is in progress
+        "WAIT(w)"  ; Something external is holding up this task
+        "HOLD(h)"  ; This task is paused/on hold because of me
+        "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+        "|"
+        "DONE(d)"  ; Task successfully completed
+        "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+       (sequence
+        "[ ](T)"   ; A task that needs doing
+        "[-](S)"   ; Task is in progress
+        "[?](W)"   ; Task is being held up or paused
+        "|"
+        "[X](D)")  ; Task was completed
+       (sequence
+        "|"
+        "OKAY(o)"
+        "YES(y)"
+        "NO(n)")))
+      (org-insert-heading-respect-content nil)
+      (org-hide-emphasis-markers t)
+      (org-hide-leading-stars t)
+      (org-hide-emphasis-markers t)
+      (org-startup-with-inline-images t)
+      (org-ellipsis " •")
+      (org-agenda-window-setup 'current-window)
+      (org-agenda-block-separator 8411))
+  :config
 
 (use-package company-org-block
   :defer t
-  :after org)
+  :custom
+  (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
+  :hook ((org-mode . (lambda ()
+                       (setq-local company-backends '(company-org-block))
+                       (company-mode +1)))))
 
 (use-package perspective
   :disabled
@@ -699,14 +757,15 @@
     (counsel-projectile-mode 1))
 
 (use-package rainbow-delimiters
-  :hook ((emacs-lisp-mode . rainbow-delimiters-mode)
-         (clojure-mode . rainbow-delimiters-mode)))
+  :defer t
+  :after prog-mode)
 
 (use-package rainbow-mode
   :diminish
   :hook org-mode prog-mode)
 
 (use-package company-shell
+  :after sh-mode
   :custom
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
@@ -723,12 +782,19 @@
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input t)
     (eshell-destroy-buffer-when-process-dies t)
-    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh")))
+    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+  :config
+    (evil-set-initial-state 'eshell-mode 'emacs))
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
   :config
     (eshell-syntax-highlighting-global-mode +1))
+
+(use-package eshell-vterm
+  :after eshell
+  :config
+    (eshell-vterm-mode))
 
 (use-package vterm
   :defer t
@@ -739,9 +805,10 @@
 
 (use-package vterm-toggle
   :after vterm
+  :custom
+  (vterm-toggle-fullscreen-p t)
+  (vterm-toggle-scope 'project)
   :config
-  (setq vterm-toggle-fullscreen-p nil
-        vterm-toggle-scope 'project)
   (add-to-list 'display-buffer-alist
                '((lambda (buffer-or-name _)
                      (let ((buffer (get-buffer buffer-or-name)))
@@ -804,3 +871,7 @@
 	which-key-allow-imprecise-window-fit nil
 	which-key-separator " → "
         which-key-idle-delay 0.5))
+
+(use-package yasnippet
+  :defer t
+  :after prog-mode)

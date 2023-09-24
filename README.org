@@ -30,7 +30,7 @@ After that you can exexute the script from terminal or by pressing =Super+ALT+R=
 
 Stuff to rice [10/11]:
 - [X] foot
-- [X] rofi (FIXME power menu need fixing)
+- [X] rofi (FIXME power menu needs recoloring)
 - [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
 - [ ] gtk4
 - [X] emacs
@@ -43,7 +43,7 @@ Stuff to rice [10/11]:
 
 * UNMAINTAINED
 ** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
-- (UNMAINTAINED)Dracula [[file:screenshots/bspwm/dracula.png]]
+- Dracula [[file:screenshots/bspwm/dracula.png]]
 
 - Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
 
@@ -60,7 +60,7 @@ Stuff to rice [10/11]:
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/yshui/picom][picom]]             |
 
-** [[https://github.com//hyprwm/hyprland][Hyprland]]
+** (UNMAINTAINED) [[https://github.com//hyprwm/hyprland][Hyprland]]
 - Dracula [[file:screenshots/hypr/dracula.png]]
 
 - Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]

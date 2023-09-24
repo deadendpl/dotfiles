@@ -191,19 +191,3 @@ cmd select-dirs &{{
 
     lf -remote "send $id :unselect; toggle $(get_dirs)"
 }}
-
-# Function to select all files in the current directory
-cmd select-all &{{
-    get_all_files() {
-        if [ "$lf_hidden" = 'false' ]; then
-            find "$PWD" -mindepth 1 -maxdepth 1 -not -name '.*' -print0
-        else
-            find "$PWD" -mindepth 1 -maxdepth 1 -print0
-        fi |
-        xargs -0 printf ' %q'
-    }
-
-    lf -remote "send $id :unselect; toggle $(get_all_files)"
-}}
-
-map <c-a> :select-all

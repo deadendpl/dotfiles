@@ -71,3 +71,74 @@ alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
+
+
+
+function pyrice
+
+function wal-tile
+    wal -n -i $argv
+    pkill -x swaybg
+    swaybg -m fill -i (cat $HOME/.cache/wal/wal) &
+end
+
+set walls_dir "$HOME/Pictures/bg"
+cd $walls_dir
+set wall (ls $walls_dir | shuf -n 1 | xargs realpath)
+
+wal-tile $wall
+wpg -ns $wall
+
+set waybar_css "$HOME/.config/waybar/style.css"
+
+# Get the line containing "@import"
+set old_line (grep "@import" "$waybar_css")
+
+# Check if the old line exists in the file
+if test -n "$old_line"
+    # Replace the line using sed
+    set wal_filename (realpath $HOME/.cache/wal/colors-waybar.css)
+    set new_line "@import url('$wal_filename');"
+    sed -i "s|$old_line|$new_line|" "$waybar_css"
+    echo "Line replaced successfully!"
+else
+    echo "Old line not found in the file."
+end
+
+set qute_start_css "$HOME/.config/qutebrowser/start/styles.css"
+
+# Get the line containing "@import"
+set old_line (grep "@import" "$qute_start_css")
+
+# Check if the old line exists in the file
+if test -n "$old_line"
+    # Replace the line using sed
+    set wal_filename (realpath $HOME/.cache/wal/colors-waybar.css)
+    set new_line "@import url('$wal_filename');"
+    sed -i "s|$old_line|$new_line|" "$qute_start_css"
+    echo "Line replaced successfully!"
+else
+    echo "Old line not found in the file."
+end
+
+set zathurarc "$HOME/.config/zathura/zathurarc"
+
+set old_line (grep "include" "$zathurarc")
+
+# Check if the old line exists in the file
+if test -n "$old_line"
+    # Replace the line using sed
+    set wal_zathura (realpath $HOME/.cache/wal/colors-zathurarc)
+    set new_line "include $wal_zathura"
+    sed -i "s|$old_line|$new_line|" "$zathurarc"
+    echo "Line replaced successfully!"
+else
+    echo "Old line not found in the file."
+end
+
+$HOME/.config/scripts/hypr/waybar-start.sh
+$HOME/.config/mako/update-theme.sh
+
+notify-send "New rice applied"
+
+end

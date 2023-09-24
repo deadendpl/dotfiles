@@ -115,7 +115,7 @@ c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 
 # fonts
-c.fonts.default_family = "codenewromannerdfont"
+c.fonts.default_family = "CodeNewRoman Nerd Font"
 c.fonts.web.family.standard = "ubuntunerdfont"
 c.fonts.web.family.fixed = "codenewromannerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
@@ -139,4 +139,4 @@ c.auto_save.session = True
 
 c.content.default_encoding = "utf-8"
 
-c.editor.command = ["emacsclient", "-c", "-a", "''", "{}"]
+c.editor.command = ["emacsclient", "-c", "-a", '"nvim"', "{}"]

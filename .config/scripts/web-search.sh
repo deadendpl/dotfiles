@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "NixOS Wiki" "Nitter (Twitter/X)" "Nix Packages" "Whoogle" "GameFAQs" "Gutenberg" "Bitsearch (Torrents)" "Invidious (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "You" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
+declare -a search_engines=( "NixOS Wiki" "Nitter (Twitter/X)" "Nix Packages" "Whoogle" "GameFAQs" "Gutenberg" "Bitsearch (Torrents)" "Invidious (YouTube)" "Github" "Arch Wiki" "Arch Packages" "AUR (Arch User Repository)" "Brave Search" "Phind" "SearXNG" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 
@@ -13,9 +13,6 @@ case $selected_engine in
         ;;
     "Brave Search")
         URL="https://search.brave.com/search?q="
-        ;;
-    "You")
-        URL="https://you.com/search?q="
         ;;
     "AUR (Arch User Repository)")
         URL="https://aur.archlinux.org/packages?O=0&K="

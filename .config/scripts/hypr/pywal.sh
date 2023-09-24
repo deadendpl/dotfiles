@@ -33,12 +33,12 @@ fi
 qute_start_css="$HOME/.config/qutebrowser/start/styles.css"
 
 # Get the line containing "@import"
-old_line=$(grep "@import" "$waybar_css")
+old_line=$(grep "@import" "$qute_start_css")
 
 # Check if the old line exists in the file
 if [ -n "$old_line" ]; then
     # Replace the line using sed
-    wal_filename=$(realpath $HOME/.cache/wal/colors-waybar.css)
+    wal_filename=$(realpath $HOME/.cache/wal/colors.css)
     new_line="@import url('$wal_filename');"
     sed -i "s|$old_line|$new_line|" "$waybar_css"
     echo "Line replaced successfully!"
@@ -63,5 +63,6 @@ fi
 
 $HOME/.config/scripts/hypr/waybar-start.sh
 $HOME/.config/mako/update-theme.sh
+emacsclient --eval '(load-theme real-theme t)'
 
 notify-send "New rice applied"
