@@ -10,16 +10,22 @@
 (electric-pair-mode 1)               ; Turns on automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 
+;; This folder is for everything that clutters user-emacs-directory
+(defvar user-share-emacs-directory "~/.local/share/emacs/"
+  "A lot of stuff normally clutters user-emacs-directory.
+In order to prevent that this variable exists.
+Most of the stuff will get redirected here.")
+
 (setq visible-bell nil ;; Set up the visible bell
       inhibit-startup-message nil ; default emacs startup message
-      custom-file "~/.local/share/emacs/custom.el" ; custom settings that emacs autosets put into it's own file
+      custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
       backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-      recentf-save-file "~/.local/share/emacs/recentf" ; recentf file put somewhere else
-      bookmark-dafault-file "~/.local/share/emacs/bookmarks" ; bookmarks file put somewhere else
-      auto-save-list-file-name "~/.local/share/emacs/auto-save-list/list"
+      recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+      bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+      auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
       global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
       use-dialog-box nil        ; turns off graphical dialog boxes
-      tramp-persistency-file-name "~/.local/share/emacs/tramp" ; tramp file put somewhere else
+      tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
       initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
       initial-scratch-message nil)         ; deleting scratch buffer message
 
@@ -34,10 +40,13 @@
 		dashboard-mode-hook
 		dired-mode-hook
                 org-agenda-mode-hook
+                which-key-mode-hook
+                tldr-mode-hook
+                dictionary-mode-hook
+                Man-mode-hook
+                woman-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*" 
@@ -48,8 +57,8 @@
 ;; Initialize package sources
 (require 'package)
 
-(setq package-user-dir "~/.local/share/emacs/packages/"
-      package-gnupghome-dir "~/.local/share/emacs/gpg"
+(setq package-user-dir (concat user-share-emacs-directory "packages/")
+      package-gnupghome-dir (concat user-share-emacs-directory "gpg")
       package-async t
       package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
@@ -114,12 +123,6 @@
 (use-package general
   :config
   (general-evil-setup)
-
-;; Ctrl+r (which does redo functionality) didn't work so I fixed it
-;;(define-key evil-normal-state-map (kbd "C-r") 'undo-redo)
-
-;; Ctrl+u (which is page up) also didn't work
-;;(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
 
 ;; set up 'SPC' as the global leader key
 (general-create-definer custom/leader-keys
@@ -292,7 +295,7 @@
 
 (custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n o" '(org-notes-dired :wk "Open notes folder"))
+  "n d" '(org-notes-dired :wk "Open notes folder"))
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -320,7 +323,8 @@
   "t n" '(neotree-toggle :wk "Toggle neotree")
   "t r" '(rainbow-mode :wk "Toggle rainbow mode")
   "t t" '(visual-line-mode :wk "Toggle truncated lines")
-  "t v" '(vterm-toggle :wk "Toggle vterm"))
+  "t v" '(vterm-toggle :wk "Toggle vterm")
+  "t z" '(zen-mode :wk "Toggle zen mode"))
 
 (custom/leader-keys
   "w" '(:ignore t :wk "Windows")
@@ -442,7 +446,7 @@
 (use-package emojify
   :init (global-emojify-mode 1)
   :custom
-    (emojify-emojis-dir "~/.local/share/emacs/emojis"))
+    (emojify-emojis-dir (concat user-share-emacs-directory "emojis")))
 
 (set-face-attribute 'default nil
   :font "CodeNewRoman Nerd Font Mono"
@@ -622,7 +626,7 @@
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     (with-eval-after-load 'evil-maps
       (define-key evil-motion-state-map (kbd "SPC") nil)
-      ;; (define-key evil-motion-state-map (kbd "RET") nil)
+      (define-key evil-motion-state-map (kbd "RET") 'org-return)
       (define-key evil-motion-state-map (kbd "TAB") nil)))
     ;; Setting RETURN key in org-mode to follow links
     ;; (setq org-return-follows-link t)
@@ -729,7 +733,7 @@
     (persp-mode)
   :config
     ;; Sets a file to write to when we save states
-    (setq persp-state-default-file "~/.local/share/emacs/sessions"))
+    (setq persp-state-default-file (concat user-share-emacs-directory "sessions")))
 
     ;; This will group buffers by persp-name in ibuffer.
     (add-hook 'ibuffer-hook
@@ -744,7 +748,7 @@
 (use-package projectile
   :diminish projectile-mode
   :custom
-    (projectile-known-projects-file "~/.local/share/emacs/projectile-bookmarks.eld")
+    (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
   :config (projectile-mode)
   :bind-keymap
     ("C-c p" . projectile-command-map)
@@ -775,8 +779,8 @@
   :custom
     (eshell-rc-script "~/.config/eshell/profile")     ;; your profile for eshell; like a bashrc for eshell.
     (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
-    (eshell-history-file-name "~/.local/share/emacs/eshell-history")
-    (eshell-last-dir-ring-file-name "~/.local/share/emacs/eshell-lastdir")
+    (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
+    (eshell-last-dir-ring-file-name (concat user-share-emacs-directory "eshell-lastdir"))
     (eshell-history-size 5000)
     (eshell-buffer-maximum-lines 5000)
     (eshell-hist-ignoredups t)
@@ -851,7 +855,9 @@
 (add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth
 
 (use-package tldr
-  :defer t)
+  :defer t
+  :init
+    (setq tldr-directory-path (concat user-share-emacs-directory "tldr/")))
 
 (use-package which-key
   :init
@@ -875,3 +881,9 @@
 (use-package yasnippet
   :defer t
   :after prog-mode)
+
+(defun zen-mode ()
+  "Comfy writing experience"
+  (interactive)
+  (set-fringe-mode 200)
+  (display-line-numbers-mode 0))

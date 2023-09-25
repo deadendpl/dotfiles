@@ -7,19 +7,21 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies m
 * PYWAL with hyprland
 I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android
 
-[[file:screenshots/pywal-hypr/2023-09-21_15-43-21.png]]
+[[file:screenshots/pywal-hypr/2023-09-25_17-57-57.png]]
 
-[[file:screenshots/pywal-hypr/2023-09-21_15-46-01.png]]
+[[file:screenshots/pywal-hypr/2023-09-25_17-58-30.png]]
 
-[[file:screenshots/pywal-hypr/2023-09-21_15-48-47.png]]
+[[file:screenshots/pywal-hypr/2023-09-25_17-59-35.png]]
+
+[[file:screenshots/pywal-hypr/2023-09-25_17-59-51.png]]
 
 | Type of program           | my default choice |
 |---------------------------+-------------------|
 | Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | ([[https://github.com/gokcehan/lf][lf)]]  pcmanfm     |
+| File Manager              | ([[https://github.com/gokcehan/lf][lf)]] pcmanfm      |
 | Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
-| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
 | Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
