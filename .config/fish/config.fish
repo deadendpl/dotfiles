@@ -71,4 +71,3 @@ alias man='batman'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
-alias pp='echo "poopoo"'
