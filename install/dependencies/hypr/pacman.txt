@@ -3,7 +3,7 @@ otf-codenewroman-nerd
 htop
 papirus-icon-theme
 waybar
-exa
+eza
 qt5-wayland
 swaybg
 blueberry

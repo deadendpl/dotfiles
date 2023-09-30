@@ -4,19 +4,17 @@
 
 * Table of Contents :toc:
 - [[#beginning][beginning]]
-- [[#code][code]]
-  - [[#installing-plugins][installing plugins]]
-  - [[#variables][variables]]
-  - [[#options][options]]
-  - [[#keybindings][keybindings]]
-  - [[#startup][startup]]
+- [[#installing-plugins][installing plugins]]
+- [[#variables][variables]]
+- [[#options][options]]
+- [[#keybindings][keybindings]]
+- [[#startup][startup]]
 
 * beginning
 All of neovim configuration is in =init.lua=.
 I decided to make it this way because with org mode it's well organized 🗿
 
-* code
-** installing plugins
+* installing plugins
 The task during first boot will be installing packer(package manager) and installing plugins.
 If you will later add plugins you need to enter neovim and type =:PackerInstall= to install them.
 
@@ -111,10 +109,8 @@ use {'seandewar/nvimesweeper'}
 
 
 #+END_SRC
-
-** variables
+* variables
 Just setting few basic variables
-
 #+BEGIN_SRC lua
 -- variables
 
@@ -124,8 +120,7 @@ g.background = "dark"
 
 
 #+END_SRC
-
-** options
+* options
 Setting few options
 
 #+BEGIN_SRC lua
@@ -177,10 +172,9 @@ require('lualine').setup {
   }
 }
 
-
 #+END_SRC
 
-** keybindings
+* keybindings
 Setting keybindings.
 Most of them are set in a way that will allow to show their description in =which-key=.
 
@@ -237,8 +231,7 @@ map('i', 'jk', '<ESC>', {})
 
 
 #+END_SRC
-
-** startup
+* startup
 Some options that will be set on neovim's startup
 
 #+BEGIN_SRC lua
@@ -267,7 +260,6 @@ require('telescope').setup{
 }
 
 -- org mode setup
-
 -- Load custom treesitter grammar for org filetype
 require('orgmode').setup_ts_grammar()
 

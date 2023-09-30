@@ -15,7 +15,7 @@ I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal
 
 [[file:screenshots/pywal-hypr/2023-09-25_17-59-51.png]]
 
-| Type of program           | my default choice |
+| Type of program           | My default choice |
 |---------------------------+-------------------|
 | Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
@@ -27,8 +27,8 @@ I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
 
 Install dependencies from =install/dependencies/hypr/pywal.txt= with =yay=.
-At hyprland's startup the script =~/.config/scripts/hypr/pywal.sh= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
-After that you can exexute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
+At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
+After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
 Stuff to rice [10/11]:
 - [X] foot
@@ -81,8 +81,15 @@ Stuff to rice [10/11]:
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
 
 * INSTALLING
+** DEPENDENCIES
 Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
 Then go to =dependencies= directory and window manager you want to use. =pacman.sh= will install standard packages with pacman while =aur.sh= will install AUR packages (it installs them with [[https://github.com/Jguer/yay][yay]]).
+** CONFIG FILES
+Copy/move all files to your =$HOME= directory.
 
-After that copy/move all files in =home= directory to your =$HOME= directory.
+Another way to manage this conveniently is to install [[https://www.gnu.org/software/stow/][stow]].
+1. Move cloned repo into =~/.repo-name=.
+2. Backup your =~/.config= and delete everything inside if necessary.
+3. Then inside that directory do =stow .=
+This will link all files autmatically to its corrensponding places
 

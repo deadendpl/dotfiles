@@ -22,7 +22,7 @@
 # file types (with matching order)
 ln             # LINK
 or             # ORPHAN
-tw      t       # STICKY_OTHER_WRITABLE
+tw             # STICKY_OTHER_WRITABLE
 ow             # OTHER_WRITABLE
 st      t       # STICKY
 di             # DIR
@@ -227,6 +227,7 @@ fi             # FILE
 *Public                 󰚧
 *Templates              
 *Videos                 
+*.authinfo              
 
 # file patterns (vim-devicons) (patterns not supported in lf)
 # .*jquery.*\.js$         

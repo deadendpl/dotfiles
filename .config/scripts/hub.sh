@@ -18,7 +18,7 @@ if [[ $choice == "(hypr) Screen orientation" ]]; then
   ~/.config/scripts/hypr/screen-orientation.sh
 
 elif [[ $choice == "(hypr) New wallpaper" ]]; then
-  ~/.config/scripts/hypr/pywal.sh
+  ~/.local/bin/pyrice
 
 elif [[ $choice == "(hypr) Waybar reload" ]]; then
   ~/.config/scripts/hypr/waybar-start.sh

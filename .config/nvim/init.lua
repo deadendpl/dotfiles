@@ -215,7 +215,6 @@ require('telescope').setup{
 }
 
 -- org mode setup
-
 -- Load custom treesitter grammar for org filetype
 require('orgmode').setup_ts_grammar()
 

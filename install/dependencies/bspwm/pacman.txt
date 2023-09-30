@@ -16,7 +16,7 @@ vim
 pcmanfm-gtk3
 dmenu
 blueberry
-exa
+eza
 zathura
 imv
 neovim

@@ -4,24 +4,28 @@
 (menu-bar-mode -1)                   ; Disable the menu bar
 (set-fringe-mode 10)                 ; Give some breathing room
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
-(global-display-line-numbers-mode 1) ; Display line numbers
-(global-visual-line-mode t)          ; Enable truncated lines
+(global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
+(global-display-line-numbers-mode t) ; Line numbers
 (delete-selection-mode 1)            ; You can select text and delete it by typing.
 (electric-pair-mode 1)               ; Turns on automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
-  "A lot of stuff normally clutters user-emacs-directory.
-In order to prevent that this variable exists.
-Most of the stuff will get redirected here.")
+  "Elisp packages cache folders/files normally clutters user-emacs-directory.
+  The same goes for some default files like bookmarks file.
+  In order to prevent that this variable exists.
+  Most of the stuff will get redirected here.")
 
 (setq visible-bell nil ;; Set up the visible bell
       inhibit-startup-message nil ; default emacs startup message
       custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
       backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
       recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+      recentf-max-saved-items nil ; infinite amount of entries in recentf file
+      recentf-auto-cleanup 'never ; not cleaning recentf file
       bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+      elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
       auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
       global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
       use-dialog-box nil        ; turns off graphical dialog boxes
@@ -100,8 +104,8 @@ Most of the stuff will get redirected here.")
           evil-vsplit-window-right t
           evil-split-window-below t
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
-    (evil-mode)
   :config
+    (evil-mode)
     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
     ;; (dolist (mode '(eshell-mode
@@ -140,12 +144,12 @@ Most of the stuff will get redirected here.")
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
+  "b b" '(switch-to-buffer :wk "Switch to buffer")
   "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
   "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
   "b d" '(bookmark-delete :wk "Delete bookmark")
   "b i" '(ibuffer :wk "Ibuffer")
-  "b I" '(counsel-switch-buffer-other-window :wk "Switch buffer")
-  "b k" '(kill-this-buffer :wk "Kill this buffer")
+  "b k" '(kill-current-buffer :wk "Kill current buffer")
   "b K" '(kill-some-buffers :wk "Kill multiple buffers")
   "b l" '(list-bookmarks :wk "List bookmarks")
   "b m" '(bookmark-set :wk "Set bookmark")
@@ -163,19 +167,22 @@ Most of the stuff will get redirected here.")
 (custom/leader-keys
   "d" '(:ignore t :wk "Dired")
   "d d" '(dired :wk "Open dired")
+  "d h" '((lambda () (interactive) (dired "~/")) :wk "Open home directory")
   "d j" '(dired-jump :wk "Dired jump to current")
   "d n" '(neotree-dir :wk "Open directory in neotree")
   "d p" '(peep-dired :wk "Peep-dired"))
 
 (custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")
+  "e" '(:ignore t :wk "Eshell/Evaluate")    
   "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
   "e d" '(eval-defun :wk "Evaluate defun containing or after point")
   "e e" '(eval-expression :wk "Evaluate and elisp expression")
-  "e h" '(counsel-esh-history :wk "Eshell history")
+  "e h" '(counsel-esh-history :which-key "Eshell history")
   "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
   "e r" '(eval-region :wk "Evaluate elisp in region")
-  "e s" '(eshell :wk "Eshell"))
+  "e R" '(eww-reload :which-key "Reload current page in EWW")
+  "e s" '(eshell :which-key "Eshell")
+  "e w" '(eww :which-key "EWW emacs web wowser"))
 
 (custom/leader-keys
   "f" '(:ignore t :wk "Files")
@@ -295,7 +302,7 @@ Most of the stuff will get redirected here.")
 
 (custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n d" '(org-notes-dired :wk "Open notes folder"))
+  "n d" '(custom/org-notes-dired :wk "Open notes in Dired"))
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -420,11 +427,12 @@ Most of the stuff will get redirected here.")
 (use-package dired
   :ensure nil
   :defer t
+  :init
+    (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
     (dired-listing-switches "-la --group-directories-first")
   :config
-    (evil-collection-dired-setup)
     (evil-collection-define-key 'normal 'dired-mode-map
       "h" 'dired-up-directory
       "l" 'dired-find-file))
@@ -622,12 +630,11 @@ Most of the stuff will get redirected here.")
     (setq org-return-follows-link t)
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys)
-  :config
-    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     (with-eval-after-load 'evil-maps
       (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") 'org-return)
+      (define-key evil-motion-state-map (kbd "RET") nil)
       (define-key evil-motion-state-map (kbd "TAB") nil)))
+    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     ;; Setting RETURN key in org-mode to follow links
     ;; (setq org-return-follows-link t)
     ;; (require 'evil-org-agenda)
@@ -661,10 +668,10 @@ Most of the stuff will get redirected here.")
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 
-(defun org-notes-dired ()
+(defun custom/org-notes-dired ()
   "Opens org-directory in Dired."
   (interactive)
-  (dired (concat org-directory "/")))
+  (dired org-directory))
 
 (use-package org
   :defer t
@@ -711,8 +718,22 @@ Most of the stuff will get redirected here.")
       (org-startup-with-inline-images t)
       (org-ellipsis " •")
       (org-agenda-window-setup 'current-window)
-      (org-agenda-block-separator 8411))
-  :config
+      (org-fontify-quote-and-verse-blocks t)
+      (org-agenda-block-separator 8411)
+      (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+      (org-preview-latex-default-process 'dvisvgm)
+      :config
+        (defun custom/resize-org-latex-overlays ()
+	  "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
+          (cl-loop for o in (car (overlay-lists))
+             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+             do (plist-put (cdr (overlay-get o 'display))
+                   :scale (expt text-scale-mode-step
+                        text-scale-mode-amount))))
+	(plist-put org-format-latex-options :foreground nil)
+        (plist-put org-format-latex-options :background nil)
+      :hook
+        (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
 
 (use-package company-org-block
   :defer t
@@ -777,6 +798,7 @@ Most of the stuff will get redirected here.")
 (use-package eshell
   :defer t
   :custom
+    (eshell-directory-name "~/.config/eshell/")
     (eshell-rc-script "~/.config/eshell/profile")     ;; your profile for eshell; like a bashrc for eshell.
     (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
     (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
@@ -786,9 +808,9 @@ Most of the stuff will get redirected here.")
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input t)
     (eshell-destroy-buffer-when-process-dies t)
-    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh"))
+    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh")))
   :config
-    (evil-set-initial-state 'eshell-mode 'emacs))
+    ;; (evil-set-initial-state 'eshell-mode 'emacs))
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -804,8 +826,8 @@ Most of the stuff will get redirected here.")
   :defer t
   :config
     (setq shell-file-name "/bin/sh"
-          vterm-max-scrollback 5000))
-    (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs)))
+          vterm-max-scrollback 5000)
+    (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 
 (use-package vterm-toggle
   :after vterm
@@ -877,10 +899,6 @@ Most of the stuff will get redirected here.")
 	which-key-allow-imprecise-window-fit nil
 	which-key-separator " → "
         which-key-idle-delay 0.5))
-
-(use-package yasnippet
-  :defer t
-  :after prog-mode)
 
 (defun zen-mode ()
   "Comfy writing experience"

@@ -40,7 +40,7 @@ monitor=,preferred,auto,auto
 # boot stuff
 #exec-once = wal -R
 exec-once = mako &
-exec-once = ~/.config/scripts/hypr/pywal.sh
+exec-once = ~/.local/bin/pyrice
 exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec-once = emacs --daemon
 
@@ -268,13 +268,13 @@ bind = $mainMod, M,                exec, $terminal -e htop
 bind = $mainMod SHIFT, M,          exec, $terminal -e sudo htop
 
 # theme change
-bind = $mainMod ALT, R,            exec, ~/.config/scripts/hypr/pywal.sh
+bind = $mainMod ALT, R,            exec, ~/.local/bin/pyrice
 
 # web stuff
 bind = $mainMod, 61,               exec, ~/.config/scripts/web-search.sh
 bind = $mainMod SHIFT, 61,         exec, ~/.config/scripts/bookmarks.sh
 bind = $mainMod ALT, 61,           exec, ~/.config/scripts/bookmarking.sh
-bind = $mainMod ALT SHIFT, 61,     exec, $terminal -e nvim ~/Documents/bookmarks
+bind = $mainMod ALT SHIFT, 61,     exec, emacsclient -c -a 'nvim' ~/Documents/bookmarks
 
 # laptop keys
 bind = ,XF86AudioRaiseVolume,      exec, pactl set-sink-volume @DEFAULT_SINK@ +5%
