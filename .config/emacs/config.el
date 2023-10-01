@@ -113,7 +113,6 @@
     ;;                 vterm-mode))
     ;; (add-to-list 'evil-emacs-state-modes mode)))
 
-
 (use-package evil-collection
   :after evil
   :config
@@ -256,6 +255,8 @@
   "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
   "h L" '(describe-language-environment :wk "Describe language environment")
   "h m" '(describe-mode :wk "Describe mode")
+  "h M" '(describe-keymap :wk "Describe keymap")
+  "h p" '(describe-package :wk "Describe package")
   "h r" '(:ignore t :wk "Reload")
     "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
     "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
@@ -282,10 +283,10 @@
       "m b d c" '(org-table-delete-column :wk "Delete column")
       "m b d r" '(org-table-kill-row :wk "Delete row")
     "m b i" '(:ignore t :wk "insert")
-      ;; "m b i c" ('org-table-insert-column :wk "Insert column") FIXME
-      ;; "m b i h" ('org-table-insert-hline :wk "Insert horizontal line") FIXME
-      ;; "m b i r" ('org-table-insert-row :wk "Insert row") FIXME
-      ;; "m b i H" ('org-table-hline-and-move :wk "Insert horizontal line and move") FIXME
+      "m b i c" '(org-table-insert-column :wk "Insert column")
+      "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
+      "m b i r" '(org-table-insert-row :wk "Insert row")
+      "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
   "m d" '(:ignore t :wk "Date/deadline")
     "m d d" '(org-deadline :wk "Org deadline")
     "m d s" '(org-schedule :wk "Org schedule")
@@ -293,16 +294,28 @@
     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m i" '(org-toggle-item :wk "Org toggle item")
+  "m I" '(:ignore :wk "IDs")
+    "m I l" '(org-id-get-create :wk "Create ID")
   "m l" '(:ignore t :wk "Link")
     "m l l" '(org-insert-link :wk "Insert link")
+    "m l i" '(org-roam-node-insert :wk "Insert roam link")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
 
-
 (custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n d" '(custom/org-notes-dired :wk "Open notes in Dired"))
+  "n a" '(:ignore t :wk "Alias")
+    "n a a" '(org-roam-alias-add :wk "Add alias")
+    "n a r" '(org-roam-alias-remove :wk "Remove alias")
+  "n d" '(custom/org-notes-dired :wk "Open notes in Dired")
+  "n D" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n f" '(org-roam-node-find :wk "Find note")
+  "n i" '(org-roam-node-insert :wk "Insert note")
+  "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  "n r" '(:ignore t :wk "References")
+    "n r a" '(org-roam-ref-add :wk "Add reference")
+    "n r r" '(org-roam-ref-remove :wk "Remove reference"))
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -381,10 +394,6 @@
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
-(use-package beacon
-  :custom
-    (beacon-mode 1))
-
 (use-package buffer-move
   :defer t)
 
@@ -432,6 +441,7 @@
   :custom
     (insert-directory-program "ls")
     (dired-listing-switches "-la --group-directories-first")
+    (dired-kill-when-opening-new-dired-buffer t)
   :config
     (evil-collection-define-key 'normal 'dired-mode-map
       "h" 'dired-up-directory
@@ -649,6 +659,21 @@
 
 (require 'org-tempo)
 
+(use-package org-roam
+  :ensure t
+  :init
+    (setq org-roam-v2-ack t)
+  :custom
+    (org-roam-directory "~/org-roam")
+    (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
+  :bind
+    (("C-c n l" . org-roam-buffer-toggle)
+     ("C-c n f" . org-roam-node-find)
+     ("C-c n i" . org-roam-node-insert))
+  :config
+    (org-roam-setup)
+    (require 'org-roam-export))
+
 (use-package org-superstar
   :defer t
   :after org
@@ -672,6 +697,21 @@
   "Opens org-directory in Dired."
   (interactive)
   (dired org-directory))
+
+(defun custom/org-roam-notes-dired ()
+  "Opens org-roam-directory in Dired."
+  (interactive)
+  (dired org-roam-directory))
+
+(defun custom/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file which
+do not already have one."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
+
+(add-hook 'org-roam-mode-hook
+  (lambda ()
+    (add-hook 'before-save-hook 'custom/org-add-ids-to-headlines-in-file nil 'local)))
 
 (use-package org
   :defer t
@@ -711,29 +751,30 @@
         "OKAY(o)"
         "YES(y)"
         "NO(n)")))
-      (org-insert-heading-respect-content nil)
-      (org-hide-emphasis-markers t)
-      (org-hide-leading-stars t)
-      (org-hide-emphasis-markers t)
-      (org-startup-with-inline-images t)
-      (org-ellipsis " •")
-      (org-agenda-window-setup 'current-window)
-      (org-fontify-quote-and-verse-blocks t)
-      (org-agenda-block-separator 8411)
-      (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
-      (org-preview-latex-default-process 'dvisvgm)
-      :config
-        (defun custom/resize-org-latex-overlays ()
-	  "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
-          (cl-loop for o in (car (overlay-lists))
-             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
-             do (plist-put (cdr (overlay-get o 'display))
-                   :scale (expt text-scale-mode-step
-                        text-scale-mode-amount))))
-	(plist-put org-format-latex-options :foreground nil)
-        (plist-put org-format-latex-options :background nil)
-      :hook
-        (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-hide-emphasis-markers t)
+    (org-startup-with-inline-images t)
+    (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
+    (org-fontify-quote-and-verse-blocks t)
+    (org-agenda-block-separator 8411)
+    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+    (org-preview-latex-default-process 'dvisvgm)
+    (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+  :config
+    (defun custom/resize-org-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
+      (cl-loop for o in (car (overlay-lists))
+         if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+         do (plist-put (cdr (overlay-get o 'display))
+               :scale (expt text-scale-mode-step
+                    text-scale-mode-amount))))
+    (plist-put org-format-latex-options :foreground nil)
+    (plist-put org-format-latex-options :background nil)
+  :hook
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
 
 (use-package company-org-block
   :defer t

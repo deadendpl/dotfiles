@@ -25,7 +25,6 @@ export web_browser="firefox"
 export file_manager="pcmanfm"
 export editor="emacs"
 export editor2="$HOME/.config/scripts/bspwm/nvim.sh"
-export EDITOR="vim"
 
 #+END_SRC
 

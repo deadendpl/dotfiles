@@ -10,7 +10,7 @@ end
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
-export EDITOR='nvim'
+export EDITOR='emacsclient -c -a "nvim"'
 
 set fish_greeting
 fish_vi_key_bindings
@@ -49,7 +49,7 @@ alias ppu='yay -Rs'
 alias pup='yay -Syu'
 alias pinstalled='yay -Q'
 function pinsearch
-    yay -Q | grep $argv
+  yay -Q | grep $argv
 end
 alias psearch='yay -F'
 alias porphan='yay -Qtdq'
@@ -68,6 +68,6 @@ alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
-alias vim='nvim'
+alias vim='emacsclient -t -a "nvim"'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
