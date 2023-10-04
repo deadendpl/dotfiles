@@ -3,6 +3,7 @@
 
 export PATH=~/.config/emacs/bin:~/.local/bin:$PATH
 export EDITOR='emacsclient -t -a "nvim"'
+export HISTFILE="~/.local/share/bash/bash-history"
 
 # apt
 alias ainst='sudo apt install'
@@ -36,12 +37,13 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
+alias lf='lf && killall lf'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
-alias vim='emacsclient -t -a "nvim"'
+alias v='$EDITOR'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 PS1='[\u@\h \W]\$'

@@ -97,7 +97,7 @@
 
 
 (use-package evil
-  :init      ;; tweak evil's configuration before loading it
+  :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil
 	  evil-want-C-u-scroll t
@@ -294,8 +294,8 @@
     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m i" '(org-toggle-item :wk "Org toggle item")
-  "m I" '(:ignore :wk "IDs")
-    "m I l" '(org-id-get-create :wk "Create ID")
+  "m I" '(:ignore t :wk "IDs")
+    "m I c" '(org-id-get-create :wk "Create ID")
   "m l" '(:ignore t :wk "Link")
     "m l l" '(org-insert-link :wk "Insert link")
     "m l i" '(org-roam-node-insert :wk "Insert roam link")
@@ -308,8 +308,11 @@
   "n a" '(:ignore t :wk "Alias")
     "n a a" '(org-roam-alias-add :wk "Add alias")
     "n a r" '(org-roam-alias-remove :wk "Remove alias")
-  "n d" '(custom/org-notes-dired :wk "Open notes in Dired")
-  "n D" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n d" '(:ignore t :wk "Roam dailies")
+    "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  "n D" '(:ignore t :wk "Dired")
+    "n D o" '(custom/org-notes-dired :wk "Open notes in Dired")
+    "n D r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
   "n f" '(org-roam-node-find :wk "Find note")
   "n i" '(org-roam-node-insert :wk "Insert note")
   "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
@@ -662,9 +665,9 @@
 (use-package org-roam
   :ensure t
   :init
-    (setq org-roam-v2-ack t)
+    (setq org-roam-v2-ack t
+          org-roam-directory "~/org-roam")
   :custom
-    (org-roam-directory "~/org-roam")
     (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
   :bind
     (("C-c n l" . org-roam-buffer-toggle)
@@ -673,6 +676,12 @@
   :config
     (org-roam-setup)
     (require 'org-roam-export))
+
+(setq org-roam-capture-templates
+  '(("d" "default" plain "%?"
+     :target (file+head "${slug}.org"
+                        "#+title: ${title}\n#+date: %U\n")
+     :unnarrowed t)))
 
 (use-package org-superstar
   :defer t
@@ -709,10 +718,6 @@ do not already have one."
   (interactive)
   (org-map-entries 'org-id-get-create))
 
-(add-hook 'org-roam-mode-hook
-  (lambda ()
-    (add-hook 'before-save-hook 'custom/org-add-ids-to-headlines-in-file nil 'local)))
-
 (use-package org
   :defer t
   :custom-face
@@ -727,7 +732,7 @@ do not already have one."
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
   :custom
     (org-directory "~/org/")
-    (org-agenda-files '("agenda.org"))
+    (org-agenda-files (list (concat org-roam-directory "/agenda.org")))
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
@@ -783,6 +788,16 @@ do not already have one."
   :hook ((org-mode . (lambda ()
                        (setq-local company-backends '(company-org-block))
                        (company-mode +1)))))
+
+(defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
+  "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
+  (let ((result (apply orig-func args)))
+    (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
+      (evil-insert-state)))
+  result)
+
+(advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+(advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 
 (use-package perspective
   :disabled

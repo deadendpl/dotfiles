@@ -10,7 +10,7 @@ end
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
-export EDITOR='emacsclient -c -a "nvim"'
+export EDITOR='emacsclient -t -a "nvim"'
 
 set fish_greeting
 fish_vi_key_bindings
@@ -62,12 +62,12 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lfcd'
+alias lf='lfcd && killall lf'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
-alias vim='emacsclient -t -a "nvim"'
+alias v='emacsclient -t -a "nvim"'
 alias RGB='ls -laR / | lolcat'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
