@@ -58,6 +58,15 @@
 (with-current-buffer "*Messages*"
 	  (emacs-lock-mode 'kill))
 
+(defun quit-window (&optional kill window)
+ "Quit WINDOW, deleting it, and kill its buffer.
+WINDOW must be a live window and defaults to the selected one.
+The buffer is killed instead of being buried.
+This function ignores the information stored in WINDOW's `quit-restore' window parameter."
+ (interactive "P")
+ (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
+ (quit-restore-window window 'kill))
+
 ;; Initialize package sources
 (require 'package)
 
@@ -293,6 +302,8 @@
     "m d t" '(org-time-stamp :wk "Org time stamp")
     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
+  "m f" '(:ignore t :wk "Fonts")
+    "m f b" '(custom/org-make-bold-in-region :wk "Bold in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
     "m I c" '(org-id-get-create :wk "Create ID")
@@ -339,20 +350,26 @@
 
 (custom/leader-keys
   "t" '(:ignore t :wk "Toggle")
-  "t e" '(eshell-toggle :wk "Toggle eshell")
-  "t f" '(flycheck-mode :wk "Toggle flycheck")
-  "t i" '(imenu-list-smart-toggle :wk "Toggle imenu list")
-  "t l" '(display-line-numbers-mode :wk "Toggle line numbers")
-  "t n" '(neotree-toggle :wk "Toggle neotree")
-  "t r" '(rainbow-mode :wk "Toggle rainbow mode")
-  "t t" '(visual-line-mode :wk "Toggle truncated lines")
-  "t v" '(vterm-toggle :wk "Toggle vterm")
-  "t z" '(zen-mode :wk "Toggle zen mode"))
+  "t d" '(toggle-debug-on-error :wk "Debug on error")
+  "t e" '(eshell-toggle :wk "Eshell")
+  "t f" '(flycheck-mode :wk "Flycheck")
+  "t i" '(imenu-list-smart-toggle :wk "Imenu list")
+  "t l" '(display-line-numbers-mode :wk "Line numbers")
+  "t n" '(neotree-toggle :wk "Neotree")
+  "t r" '(rainbow-mode :wk "Rainbow mode")
+  "t t" '(visual-line-mode :wk "Truncated lines")
+  "t v" '(vterm-toggle :wk "Vterm")
+  "t z" '(zen-mode :wk "Zen mode"))
 
 (custom/leader-keys
   "w" '(:ignore t :wk "Windows")
   ;; Window splits
   "w c" '(evil-window-delete :wk "Close window")
+  "w C" '(:ingore t :wk "Close on side")
+    "w C h" '(custom/kill-left-window :wk "Left")
+    "w C j" '(custom/kill-down-window :wk "Down")
+    "w C k" '(custom/kill-up-window :wk "Up")
+    "w C l" '(custom/kill-right-window :wk "Right")
   "w n" '(evil-window-new :wk "New window")
   "w s" '(evil-window-split :wk "Horizontal split window")
   "w v" '(evil-window-vsplit :wk "Vertical split window")
@@ -396,9 +413,6 @@
   :ensure t
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
-
-(use-package buffer-move
-  :defer t)
 
 (use-package company
   :defer 2
@@ -492,7 +506,7 @@
 ;; This sets the default font on all graphical frames created after restarting Emacs.
 ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
 ;; are not right unless I also add this method of setting the default font.
-(add-to-list 'default-frame-alist '(font . "CodeNewRoman Nerd Font Mono-9"))
+;; (add-to-list 'default-frame-alist '(font . "CodeNewRoman Nerd Font Mono-9"))
 
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
@@ -640,7 +654,6 @@
   :defer t
   :after org
   :init
-    (setq org-return-follows-link t)
     (require 'evil-org-agenda)
     (evil-org-agenda-set-keys)
     (with-eval-after-load 'evil-maps
@@ -687,6 +700,10 @@
   :defer t
   :after org
   :init (add-hook 'org-mode-hook 'org-superstar-mode t))
+  :config
+    (setq org-superstar-item-bullet-alist
+      '((?+ . ?➤)
+        (?- . ?•)))
 
 (use-package org-auto-tangle
   :defer t
@@ -723,6 +740,7 @@ do not already have one."
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-default ((t (:inherit variable-pitch))))
     (org-level-1 ((t (:inherit outline-1 :height 1.7))))
     (org-level-2 ((t (:inherit outline-2 :height 1.6))))
     (org-level-3 ((t (:inherit outline-3 :height 1.5))))
@@ -768,6 +786,8 @@ do not already have one."
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+    (org-id-locations (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-return-follows-link t)
   :config
     (defun custom/resize-org-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
@@ -778,13 +798,22 @@ do not already have one."
                     text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
+    
+    (defun custom/org-make-bold-in-region (start end)
+      "Add asterisks before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "*")
+        (goto-char start)
+        (insert "*")))
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
 
 (use-package company-org-block
   :defer t
   :custom
-  (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
+    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
   :hook ((org-mode . (lambda ()
                        (setq-local company-backends '(company-org-block))
                        (company-mode +1)))))
@@ -793,8 +822,8 @@ do not already have one."
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
   (let ((result (apply orig-func args)))
     (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
-      (evil-insert-state)))
-  result)
+      (evil-insert-state))
+    result))
 
 (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
@@ -864,7 +893,7 @@ do not already have one."
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input t)
     (eshell-destroy-buffer-when-process-dies t)
-    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh")))
+    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
   :config
     ;; (evil-set-initial-state 'eshell-mode 'emacs))
 
@@ -888,9 +917,12 @@ do not already have one."
 (use-package vterm-toggle
   :after vterm
   :custom
-  (vterm-toggle-fullscreen-p t)
-  (vterm-toggle-scope 'project)
+    (vterm-toggle-fullscreen-p nil)
+    (vterm-toggle-scope 'project)
   :config
+  ;; When running programs in Vterm and in 'normal' mode, make sure that ESC
+  ;; kills the program as it would in most standard terminal programs.
+  (evil-define-key 'normal vterm-mode-map (kbd "<escape>") 'vterm--self-insert)
   (add-to-list 'display-buffer-alist
                '((lambda (buffer-or-name _)
                      (let ((buffer (get-buffer buffer-or-name)))
@@ -903,7 +935,7 @@ do not already have one."
                   ;;(direction . bottom)
                   ;;(dedicated . t) ;dedicated is supported in emacs27
                   (reusable-frames . visible)
-                  (window-height . 0.3))))
+                  (window-height . 0.4))))
 
 (use-package sudo-edit
   :defer t)
@@ -956,8 +988,55 @@ do not already have one."
 	which-key-separator " → "
         which-key-idle-delay 0.5))
 
+(use-package buffer-move
+  :defer t)
+
+(defun custom/kill-down-window ()
+  "Goes down the window and closes it"
+  (interactive)
+  (evil-window-down 1)
+  (evil-window-delete))
+
+(defun custom/kill-up-window ()
+  "Goes up the window and closes it"
+  (interactive)
+  (evil-window-up 1)
+  (evil-window-delete))
+
+(defun custom/kill-left-window ()
+  "Goes left the window and closes it"
+  (interactive)
+  (evil-window-left 1)
+  (evil-window-delete))
+
+(defun custom/kill-right-window ()
+  "Goes right the window and closes it"
+  (interactive)
+  (evil-window-right 1)
+  (evil-window-delete))
+
 (defun zen-mode ()
   "Comfy writing experience"
   (interactive)
   (set-fringe-mode 200)
   (display-line-numbers-mode 0))
+
+(define-minor-mode zen-mode
+  "Toggle zen Minor Mode.
+  When enabled, it sets fringe mode to 200 and turns off display-line-numbers-mode."
+  :init-value nil
+  :lighter " CustomConfig"
+  :global nil
+
+  (if zen-mode
+      (progn
+        (set-fringe-mode 200)
+        (display-line-numbers-mode 0))
+    (progn
+      (set-fringe-mode nil)
+      (display-line-numbers-mode 1))))
+
+(add-hook 'zen-mode-hook
+          (lambda ()
+            (message "Zen Mode %s"
+                     (if zen-mode "enabled" "disabled"))))

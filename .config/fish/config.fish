@@ -70,4 +70,5 @@ alias ip='ip -color=auto'
 alias man='batman'
 alias v='emacsclient -t -a "nvim"'
 alias RGB='ls -laR / | lolcat'
+alias remacs='killall emacs;killall emacs && emacs --daemon'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"

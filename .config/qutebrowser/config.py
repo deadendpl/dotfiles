@@ -140,3 +140,5 @@ c.auto_save.session = True
 c.content.default_encoding = "utf-8"
 
 c.editor.command = ["emacsclient", "-c", "-a", '"nvim"', "{}"]
+
+c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"

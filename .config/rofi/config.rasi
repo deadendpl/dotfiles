@@ -1,21 +1,28 @@
-configuration{
-    modi: "window,drun,run,";
-    icon-theme: "Papirus-Dark";
-    show-icons: true;
-    terminal: "foot";
-    drun-display-format: "{icon} {name}";
-    location: 6;
-    disable-history: false;
-    hide-scrollbar: true;
-    display-drun: "   Apps ";
-    display-run: "   Run ";
-    display-window: "   Window ";
-    display-ssh: " 󰤨  ssh ";
-    sidebar-mode: true;
-    font: "CodeNewRoman Nerd Font Regular 12";
+configuration {
+  modi: "window,drun,run,";
+  icon-theme: "Papirus-Dark";
+  show-icons: true;
+  terminal: "foot";
+  drun-display-format: "{icon} {name}";
+  location: 6;
+  disable-history: false;
+  hide-scrollbar: true;
+  display-drun: "   Apps ";
+  display-run: "   Run ";
+  display-window: "   Window ";
+  display-ssh: " 󰤨  ssh ";
+  sidebar-mode: true;
+  font: "CodeNewRoman Nerd Font Regular 12";
+
+  /* Keybindings */   
+  kb-move-word-back: "";
+  kb-remove-to-eol: "";
+  kb-accept-entry: "Return";
+  kb-row-up: "Up,Control+k";
+  kb-row-down: "Down,Control+j";
 }
 
-/* Pywal theme. */
+/* Pywal theme */
 @theme "~/.cache/wal/colors-rofi-custom.rasi"
 
 /* If you want to import default pywal theme then
