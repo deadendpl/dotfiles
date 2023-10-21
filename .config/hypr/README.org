@@ -213,7 +213,7 @@ Probably the most important thing in here
 | SUPER + Shift + Enter   | launches script hub                                                      |
 | SUPER + B               | launches bitwarden menu                                                  |
 | SUPER + M               | launches task manager                                                    |
-| SUPER + Shift + M       | launches task manager with admin permissions                             |
+| SUPER + Shift + M       | launches task manager with sudo permissions                              |
 | SUPER + /               | launches web search                                                      |
 | SUPER + Shift + /       | launches bookmarks menu                                                  |
 | SUPER + Alt + /         | puts item in clipboard into bookmarks file                               |
@@ -356,4 +356,14 @@ bindm = $mainMod, mouse:273, resizewindow
 # Scroll through existing workspaces with mainMod + scroll
 bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
+     
+# trying submaps to act as keychords
+# bind = SUPER, e, submap, emacs
+# submap = emacs
+# bind = ,e,exec,emacsclient -c -a "emacs"
+# bind = ,e,submap,reset
+# bind = ,d,exec,emacsclient -c -e "(dired nil)"
+# bind = ,d,submap,reset
+# bind=,escape,submap,reset 
+# submap = reset
 #+END_SRC

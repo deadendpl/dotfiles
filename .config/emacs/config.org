@@ -1,13 +1,12 @@
 #+title: GNU Emacs Configuration
 #+STARTUP: fold
 
-I'ts written using [[https://invidious.lunar.icu/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][DistroTube's emacs configuring YouTube videos]] and [[https://systemcrafters.net/emacs-from-scratch/][System Crafters' "Emacs From Scratch" series]].
-At 4th video at 44:17
-
 * TABLE OF CONTENTS :toc:
 - [[#sane-defaults-and-other][SANE DEFAULTS (and other)]]
 - [[#package-management-setup][PACKAGE MANAGEMENT SETUP]]
 - [[#evil-and-keybindings][EVIL AND KEYBINDINGS]]
+  - [[#evil-setup][EVIL SETUP]]
+  - [[#actual-keybindings][ACTUAL KEYBINDINGS]]
 - [[#all-the-icons][ALL-THE-ICONS]]
 - [[#company][COMPANY]]
 - [[#dashboard][DASHBOARD]]
@@ -24,7 +23,9 @@ At 4th video at 44:17
 - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#highlight-todo][HIGHLIGHT TODO]]
 - [[#language-support][LANGUAGE SUPPORT]]
+- [[#markdown][MARKDOWN]]
 - [[#neotree][NEOTREE]]
+- [[#obsidian][OBSIDIAN]]
 - [[#org-mode][ORG MODE]]
   - [[#fixing-keybindings-and-evil-mode][FIXING KEYBINDINGS AND EVIL MODE]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
@@ -34,6 +35,7 @@ At 4th video at 44:17
   - [[#toc][TOC]]
   - [[#notes][NOTES]]
   - [[#other-tweaks][OTHER TWEAKS]]
+- [[#pandoc][PANDOC]]
 - [[#perspective][PERSPECTIVE]]
 - [[#projectile][PROJECTILE]]
 - [[#rainbow-delimiters][RAINBOW DELIMITERS]]
@@ -44,18 +46,19 @@ At 4th video at 44:17
   - [[#vterm][Vterm]]
   - [[#vterm-toggle][Vterm-Toggle]]
 - [[#sudo-edit][SUDO EDIT]]
-- [[#theme-ewal][THEME (EWAL)]]
+- [[#theme][THEME]]
 - [[#tldr][TLDR]]
 - [[#which-key][WHICH-KEY]]
 - [[#windowbuffer-management][WINDOW/BUFFER MANAGEMENT]]
   - [[#buffer-move][BUFFER-MOVE]]
   - [[#window-close-functions][WINDOW CLOSE FUNCTIONS]]
 - [[#zen-mode][ZEN MODE]]
+- [[#credits][CREDITS]]
 
 * SANE DEFAULTS (and other)
 Here are some tweaks that idk where to put
 
-Some mode turned on and off
+Some modes turned on and off
 #+begin_src emacs-lisp
 (scroll-bar-mode -1)                 ; Disable visible scrollbar
 (tool-bar-mode -1)                   ; Disable the toolbar
@@ -65,18 +68,20 @@ Some mode turned on and off
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (global-display-line-numbers-mode t) ; Line numbers
-(delete-selection-mode 1)            ; You can select text and delete it by typing.
+(delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 1)               ; Turns on automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
+(column-number-mode 1)               ; Column number in modeline
+(fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 #+end_src
 
 #+begin_src emacs-lisp
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
-  "Elisp packages cache folders/files normally clutters user-emacs-directory.
-  The same goes for some default files like bookmarks file.
-  In order to prevent that this variable exists.
-  Most of the stuff will get redirected here.")
+  "Elisp packages cache folders/files normally clutter user-emacs-directory.
+The same goes for some default files like bookmarks file.
+In order to prevent that this variable exists.
+Most of the stuff will get redirected here.")
 
 (setq visible-bell nil ;; Set up the visible bell
       inhibit-startup-message nil ; default emacs startup message
@@ -89,20 +94,27 @@ Some mode turned on and off
       elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
       auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
       global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-      use-dialog-box nil        ; turns off graphical dialog boxes
+      use-dialog-box nil ; turns off graphical dialog boxes
       tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
       initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-      initial-scratch-message nil)         ; deleting scratch buffer message
+      initial-scratch-message nil ; deleting scratch buffer message
+      scroll-conservatively 1000 ; Scroll one line at a time
+      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+      vc-follow-symlinks t) ; Enable follow symlinks
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
 		vterm-mode-hook
                 term-mode-hook
                 shell-mode-hook
+		Info-mode-hook
 		helpful-mode-hook
+		help-mode-hook
 		dashboard-mode-hook
+                dashboard-after-initialize-hook
 		dired-mode-hook
                 org-agenda-mode-hook
                 which-key-mode-hook
@@ -110,6 +122,16 @@ Some mode turned on and off
                 dictionary-mode-hook
                 Man-mode-hook
                 woman-mode-hook
+		ibuffer-mode-hook
+		elisp-refs-mode-hook
+		imenu-list-minor-mode-hook
+		imenu-list-major-mode-hook
+		imenu-list-after-jump-hook
+		imenu-list-update-hook
+		backtrace-revert-hook
+		backtrace-mode-hook
+		calendar-mode-hook
+                special-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -161,9 +183,9 @@ Default package management using =package.el=
 (use-package command-log-mode
   :disabled)
 #+end_src
-
 * EVIL AND KEYBINDINGS
-I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil mode.
+Before having my own Emacs config I used [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil mode.
+** EVIL SETUP
 #+begin_src emacs-lisp
 ;;(defun custom/evil-hook ()
 ;;  (dolist (mode '(custom-mode
@@ -204,7 +226,12 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
+#+end_src
 
+** ACTUAL KEYBINDINGS
+General lets you bind keybindings.
+This is a big list.
+#+begin_src emacs-lisp
 (use-package general
   :config
   (general-evil-setup)
@@ -221,7 +248,20 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "." '(find-file :wk "Find file")
   "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
   "TAB TAB" '(comment-line :wk "Comment lines")
-  "u" '(universal-argument :wk "Universal argument"))
+  "u" '(universal-argument :wk "Universal argument")
+  "x" '(execute-extended-command :wk "M-x"))
+
+(custom/leader-keys
+  "a" '(:ignore t :wk "Amusement")
+  "a b" '(animate-birthday-present :wk "Birthday")
+  "a d" '(dissociated-press :wk "Dissoctation")
+  "a g" '(:ignore t :wk "Games")
+    "a g b" '(bubbles :wk "Bubbles")
+    "a g m" '(minesweeper :wk "Minesweeper")
+    "a g p" '(pong :wk "Pong")
+    "a g s" '(snake :wk "Snake")
+    "a g t" '(tetris :wk "Tetris")
+  "a z" '(zone :wk "Zone"))
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
@@ -251,7 +291,8 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "d h" '((lambda () (interactive) (dired "~/")) :wk "Open home directory")
   "d j" '(dired-jump :wk "Dired jump to current")
   "d n" '(neotree-dir :wk "Open directory in neotree")
-  "d p" '(peep-dired :wk "Peep-dired"))
+  "d p" '(peep-dired :wk "Peep-dired")
+  "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
 (custom/leader-keys
   "e" '(:ignore t :wk "Eshell/Evaluate")    
@@ -307,10 +348,6 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "g s" '(magit-stage-file :wk "Git stage file")
   "g t" '(git-timemachine :wk "Git time machine")
   "g u" '(magit-stage-file :wk "Git unstage file"))
-
-(custom/leader-keys
-  "G" '(:ignore :wk "Games")
-  "G m" '(minesweeper :wk "Minesweeper"))
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
@@ -377,32 +414,51 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m f" '(:ignore t :wk "Fonts")
     "m f b" '(custom/org-make-bold-in-region :wk "Bold in region")
+    "m f l" '(custom/org-make-latex-in-region :wk "Latex in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
     "m I c" '(org-id-get-create :wk "Create ID")
   "m l" '(:ignore t :wk "Link")
     "m l l" '(org-insert-link :wk "Insert link")
     "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  "m q" '(org-set-tags-command :wk "Set tag")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
 
 (custom/leader-keys
+  "M" '(:ignore t :wk "MarkDown")
+  "M f" '(:ignore t :wk "Fonts")
+    "M f b" '(markdown-insert-bold :wk "Bold in region")
+  "M l" '(:ignore t :wk "Link")
+    "M l l" '(markdown-insert-link :wk "Insert link"))
+
+(custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n a" '(:ignore t :wk "Alias")
-    "n a a" '(org-roam-alias-add :wk "Add alias")
-    "n a r" '(org-roam-alias-remove :wk "Remove alias")
-  "n d" '(:ignore t :wk "Roam dailies")
-    "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
-  "n D" '(:ignore t :wk "Dired")
-    "n D o" '(custom/org-notes-dired :wk "Open notes in Dired")
-    "n D r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-  "n f" '(org-roam-node-find :wk "Find note")
-  "n i" '(org-roam-node-insert :wk "Insert note")
-  "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-  "n r" '(:ignore t :wk "References")
-    "n r a" '(org-roam-ref-add :wk "Add reference")
-    "n r r" '(org-roam-ref-remove :wk "Remove reference"))
+  "n d" '(:ignore t :wk "Dired")
+    "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
+    "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n o" '(:ignore t :wk "Obsidian")
+    "n o c" '(obsidian-capture :wk "Create note")
+    "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+    "n o f" '(obsidian-tag-find :wk "Find by tag")
+    "n o j" '(obsidian-jump :wk "Jump to note")
+    "n o m" '(obsidian-move-file :wk "Move note/file")
+    "n o r" '(obsidian-update :wk "Update")
+    "n o /" '(obsidian-search :wk "Search")
+    "n o ?" '(obsidian-hydra/body :wk "Everything")
+  "n r" '(:ignore t :wk "Org Roam")
+    "n r a" '(:ignore t :wk "Alias")
+      "n r a a" '(org-roam-alias-add :wk "Add alias")
+      "n r a r" '(org-roam-alias-remove :wk "Remove alias")
+    "n r d" '(:ignore t :wk "Roam dailies")
+      "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
+    "n r f" '(org-roam-node-find :wk "Find note")
+    "n r i" '(org-roam-node-insert :wk "Insert note")
+    "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+    "n r r" '(:ignore t :wk "References")
+      "n r r a" '(org-roam-ref-add :wk "Add reference")
+      "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -430,7 +486,7 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   "t l" '(display-line-numbers-mode :wk "Line numbers")
   "t n" '(neotree-toggle :wk "Neotree")
   "t r" '(rainbow-mode :wk "Rainbow mode")
-  "t t" '(visual-line-mode :wk "Truncated lines")
+  "t t" '(visual-line-mode :wk "Word Wrap")
   "t v" '(vterm-toggle :wk "Vterm")
   "t z" '(zen-mode :wk "Zen mode"))
 
@@ -439,10 +495,10 @@ I love [[https://github.com/doomemacs/doomemacs][Doom Emacs]] so I set up evil m
   ;; Window splits
   "w c" '(evil-window-delete :wk "Close window")
   "w C" '(:ingore t :wk "Close on side")
-    "w C h" '(custom/kill-left-window :wk "Left")
-    "w C j" '(custom/kill-down-window :wk "Down")
-    "w C k" '(custom/kill-up-window :wk "Up")
-    "w C l" '(custom/kill-right-window :wk "Right")
+    "w C h" '(custom/close-left-window :wk "Left")
+    "w C j" '(custom/close-down-window :wk "Down")
+    "w C k" '(custom/close-up-window :wk "Up")
+    "w C l" '(custom/close-right-window :wk "Right")
   "w n" '(evil-window-new :wk "New window")
   "w s" '(evil-window-split :wk "Horizontal split window")
   "w v" '(evil-window-vsplit :wk "Vertical split window")
@@ -483,10 +539,9 @@ All the icons and nerd icons
   :after ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
-(use-package nerd-icons)
+(use-package nerd-icons :defer t)
 
 (use-package all-the-icons-ivy-rich
-  :ensure t
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 #+end_src
@@ -549,14 +604,26 @@ All the icons and nerd icons
       "l" 'dired-find-file))
 
 (use-package dired-open
-  :after dired
   :defer t
+  :after dired
   :config
     (setq dired-open-extensions '(("gif" . "swaiymg")
                                   ("jpg" . "swaiymg")
                                   ("png" . "swaiymg")
                                   ("mkv" . "mpv")
                                   ("mp4" . "mpv"))))
+
+(use-package diredfl
+  :defer t
+  :after dired)
+
+(use-package dired-ranger
+  :defer t
+  :after dired
+  :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      [remap evil-yank] 'dired-ranger-copy
+      "p" 'dired-ranger-paste))
 #+end_src
 * DOOM-MODELINE
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
@@ -571,9 +638,11 @@ All the icons and nerd icons
 
 #+begin_src emacs-lisp
 (use-package emojify
-  :init (global-emojify-mode 1)
+  :defer t
   :custom
-    (emojify-emojis-dir (concat user-share-emacs-directory "emojis")))
+    (emojify-emojis-dir (concat user-share-emacs-directory "emojis"))
+  :config
+    (global-emojify-mode 1))
 #+end_src
 * FONTS
 #+begin_src emacs-lisp
@@ -589,6 +658,10 @@ All the icons and nerd icons
   :font "CodeNewRoman Nerd Font Mono"
   :height 90
   :weight 'medium)
+(set-face-attribute 'fixed-pitch-serif nil
+  :inherit 'fixed-pitch
+  :slant 'italic)
+
 ;; Makes commented text and keywords italics.
 ;; This is working in emacsclient but not emacs.
 ;; Your font must have an italic face available.
@@ -670,6 +743,9 @@ This makes emacs documentation look pretty
 Both are completion frameworks that make your life easier when doing M-x for example.
 #+begin_src emacs-lisp
 (use-package ivy
+  :ensure t
+  :demand t
+  :diminish
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
     (("C-c C-r" . ivy-resume)
@@ -687,7 +763,6 @@ Both are completion frameworks that make your life easier when doing M-x for exa
     :map ivy-reverse-i-search-map
       ("C-k" . ivy-previous-line)
       ("C-d" . ivy-reverse-i-search-kill))
-  :diminish
   :custom
     (ivy-use-virtual-buffers t
      ivy-count-format "(%d/%d) "
@@ -697,7 +772,6 @@ Both are completion frameworks that make your life easier when doing M-x for exa
     
 (use-package ivy-rich
   :after ivy
-  :ensure t
   :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
   :custom
     (ivy-virtual-abbreviate 'full
@@ -706,15 +780,6 @@ Both are completion frameworks that make your life easier when doing M-x for exa
   :config
     (ivy-set-display-transformer 'ivy-switch-buffer
                                  'ivy-rich-switch-buffer-transformer))
-
-(use-package counsel
-  :bind
-    (("M-x" . counsel-M-x)
-     ;; ([remap ibuffer] . counsel-ibuffer)
-     ("C-x C-f" . counsel-find-file)
-    :map minibuffer-local-map
-      ("C-r" . 'counsel-minibuffer-history)))
-
 
 (use-package counsel
   :after ivy
@@ -729,6 +794,18 @@ Both are completion frameworks that make your life easier when doing M-x for exa
     (counsel-mode)
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
 #+end_src	
+
+
+
+#+begin_src emacs-lisp
+(use-package ivy-prescient
+  :after counsel
+  :custom
+    (ivy-prescient-enable-filtering nil)
+  :config
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
+#+end_src
 * HIGHLIGHT TODO
 Adding highlights to TODO and related words.
 
@@ -755,8 +832,25 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
   :defer t)
 (use-package nix-mode
   :defer t)
+#+end_src
+* MARKDOWN
+I'm making transition to [[https://obsidian.md][obsidian]] so I'm trying to improve markdown
+#+begin_src emacs-lisp
 (use-package markdown-mode
-  :defer t)
+  :defer t
+  :custom-face
+    ;; setting size of headers
+    (markdown-link-face((t (:inherit link))))
+    (markdown-table-face((t (:inherit org-table))))
+    (markdown-header-face-1 ((t (:inherit outline-1 :height 1.7))))
+    (markdown-header-face-2 ((t (:inherit outline-2 :height 1.6))))
+    (markdown-header-face-3 ((t (:inherit outline-3 :height 1.5))))
+    (markdown-header-face-4 ((t (:inherit outline-4 :height 1.4))))
+    (markdown-header-face-5 ((t (:inherit outline-5 :height 1.3))))
+    (markdown-header-face-6 ((t (:inherit outline-5 :height 1.2))))
+  :custom
+    (markdown-enable-highlighting-syntax t)
+    (markdown-hide-markup t))
 #+end_src
 * NEOTREE
 Neotree is a file tree viewer. When you open neotree, it jumps to the current file thanks to neo-smart-open. The neo-window-fixed-size setting makes the neotree width be adjustable. NeoTree provides following themes: classic, ascii, arrow, icons, and nerd. Theme can be configed by setting "two" themes for neo-theme: one for the GUI and one for the terminal.
@@ -786,6 +880,24 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
                  (setq auto-hscroll-mode nil)))))
 
 ;; show hidden files
+#+end_src
+* OBSIDIAN
+#+begin_src emacs-lisp
+(use-package obsidian
+  :defer t
+  :config
+    (obsidian-specify-path "~/Documents/Obsidian/pppoopoo")
+    ;; (global-obsidian-mode t)
+  :custom
+    ;; This directory will be used for `obsidian-capture' if set.
+    (obsidian-inbox-directory "Inbox"))
+  ;; :bind (:map obsidian-mode-map
+    ;; Replace C-c C-o with Obsidian.el's implementation. It's ok to use another key binding.
+    ;; ("C-c C-o" . obsidian-follow-link-at-point)
+    ;; Jump to backlinks
+    ;; ("C-c C-b" . obsidian-backlink-jump)
+    ;; If you prefer you can use `obsidian-insert-link'
+    ;; ("C-c C-l" . obsidian-insert-wikilink)))
 #+end_src
 * ORG MODE
 Improving and ricing [[https://orgmode.org/][org mode]]
@@ -847,21 +959,20 @@ Org-tempo is a module within org that can be enabled. It allows for '<s' followe
           org-roam-directory "~/org-roam")
   :custom
     (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
+    (org-roam-dailies-directory "journals/")
+    (org-roam-capture-templates
+      '(("d" "default" plain "%?"
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+date: %U\n")
+         :unnarrowed t)))
   :bind
     (("C-c n l" . org-roam-buffer-toggle)
      ("C-c n f" . org-roam-node-find)
      ("C-c n i" . org-roam-node-insert))
   :config
     (org-roam-setup)
+    (evil-collection-org-roam-setup)
     (require 'org-roam-export))
-
-(setq org-roam-capture-templates
-  '(("d" "default" plain "%?"
-     :target (file+head "${slug}.org"
-                        "#+title: ${title}\n#+date: %U\n")
-     :unnarrowed t)))
-  
-  
 #+end_src
 ** ORG SUPERSTAR
 [[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
@@ -887,11 +998,6 @@ Org-tempo is a module within org that can be enabled. It allows for '<s' followe
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
 #+end_src
-
-#+begin_src emacs-lisp
-(setq org-edit-src-content-indentation 0)
-#+end_src
-
 ** TOC
 Table of contents
 #+begin_src emacs-lisp
@@ -929,7 +1035,6 @@ do not already have one."
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-default ((t (:inherit variable-pitch))))
     (org-level-1 ((t (:inherit outline-1 :height 1.7))))
     (org-level-2 ((t (:inherit outline-2 :height 1.6))))
     (org-level-3 ((t (:inherit outline-3 :height 1.5))))
@@ -939,7 +1044,7 @@ do not already have one."
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
   :custom
     (org-directory "~/org/")
-    (org-agenda-files (list (concat org-roam-directory "/agenda.org")))
+    (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/phone.org")))
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
@@ -968,6 +1073,7 @@ do not already have one."
     (org-hide-leading-stars t)
     (org-hide-emphasis-markers t)
     (org-startup-with-inline-images t)
+    (org-display-remote-inline-images 'download)
     (org-ellipsis " •")
     (org-agenda-window-setup 'current-window)
     (org-fontify-quote-and-verse-blocks t)
@@ -975,11 +1081,16 @@ do not already have one."
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-    (org-id-locations (concat user-share-emacs-directory "org/.org-id-locations"))
     (org-return-follows-link t)
+    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-tags-column 0)
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-confirm-babel-evaluate nil)
+    (org-edit-src-content-indentation 0)
   :config
-    (defun custom/resize-org-latex-overlays ()
-      "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
+    (defun custom/org-resize-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
          if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
          do (plist-put (cdr (overlay-get o 'display))
@@ -996,8 +1107,28 @@ do not already have one."
         (insert "*")
         (goto-char start)
         (insert "*")))
+
+    (defun custom/org-make-italic-in-region (start end)
+      "Add asterisks before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "/")
+        (goto-char start)
+        (insert "/")))
+
+    (defun custom/org-make-latex-in-region (start end)
+      "Add dollar signs before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "$")
+        (goto-char start)
+        (insert "$")))
+  :bind
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
-    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
 
 (use-package company-org-block
   :defer t
@@ -1017,8 +1148,13 @@ do not already have one."
 (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 #+end_src
+* PANDOC
+#+begin_src emacs-lisp
+(use-package pandoc-mode
+  :defer t)
+#+end_src
 * PERSPECTIVE
-[[https://github.com/nex3/perspective-el][Perspective]] provides multiple named workspaces (or "perspectives") in Emacs, similar to multiple desktops in window managers.  Each perspective has its own buffer list and its own window layout, along with some other isolated niceties, like the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]] ring.
+[[https://github.com/nex3/perspective-el][Perspective]] provides multiple named workspaces (or "perspectives") in Emacs, similar to multiple desktops in window managers. Each perspective has its own buffer list and its own window layout, along with some other isolated niceties, like the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html][xref]] ring.
 
 #+begin_src emacs-lisp
 (use-package perspective
@@ -1050,16 +1186,17 @@ NOTE that many projectile commands do not work if you have set "fish" as the "sh
 
 #+begin_src emacs-lisp
 (use-package projectile
+  :defer t
   :diminish projectile-mode
   :custom
     (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
+    (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
   :bind-keymap
-    ("C-c p" . projectile-command-map)
-  :init
-    (setq projectile-switch-project-action #'projectile-dired))
+    ("C-c p" . projectile-command-map))
 
 (use-package counsel-projectile
+  :defer t
   :after projectile
   :config
     (counsel-projectile-mode 1))
@@ -1104,7 +1241,7 @@ Eshell is an Emacs 'shell' that is written in Elisp.
     (eshell-history-size 5000)
     (eshell-buffer-maximum-lines 5000)
     (eshell-hist-ignoredups t)
-    (eshell-scroll-to-bottom-on-input t)
+    (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
     (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
   :config
@@ -1134,8 +1271,8 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
   :defer t
   :config
     (setq shell-file-name "/bin/sh"
-          vterm-max-scrollback 5000)
-    (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
+          vterm-max-scrollback 5000))
+    ;; (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 #+end_src
 
 ** Vterm-Toggle 
@@ -1166,27 +1303,21 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
                   (window-height . 0.4))))
 #+end_src
 * SUDO EDIT
-[[https://github.com/nflath/sudo-edit][sudo-edit]] gives us the ability to open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
+[[https://github.com/nflath/sudo-edit][sudo-edit]] lets us open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
 
 #+begin_src emacs-lisp
 (use-package sudo-edit
   :defer t)
 #+end_src
-* THEME (EWAL)
-I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://gitlab.com/jjzmajic/ewal][this]] as my theme.
+* THEME
+I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
 #+begin_src emacs-lisp
-(use-package ewal)
-(use-package ewal-doom-themes)
 (use-package doom-themes
   :ensure t
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    
-    (setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
-    (load-theme real-theme t)
-  
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
     ;; Enable custom neotree theme (all-the-icons must be installed!)
@@ -1196,9 +1327,26 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
     ;;(doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
+(use-package ewal-doom-themes)
+(use-package ewal
+  :ensure t
+  :config
+    (set-face-attribute 'line-number t
+      :foreground (ewal-load-color 'comment)
+      :inherit 'default)
+    (set-face-attribute 'line-number-current-line t
+      :foreground (ewal--get-base-color 'green)
+      :inherit 'default))
+
+(defvar real-theme nil
+  "It represents theme to load at startup.
+It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+
+(setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+(load-theme real-theme t)
 #+end_src
 
-With Emacs version 29, true transparency has been added.  
+With Emacs 29, true transparency has been added.  
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth
 #+end_src
@@ -1213,28 +1361,27 @@ With Emacs version 29, true transparency has been added.
 It shows you available keybindings, the default ones and the ones you create.
 #+begin_src emacs-lisp
 (use-package which-key
-  :init
-    (which-key-mode 1)
   :diminish
+  :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order #'which-key-key-order-alpha)
+    (which-key-sort-uppercase-first nil)
+    (which-key-add-column-padding 1)
+    (which-key-max-display-columns nil)
+    (which-key-min-display-lines 6)
+    (which-key-side-window-slot -10)
+    (which-key-side-window-max-height 0.25)
+    (which-key-idle-delay 0.8)
+    (which-key-max-description-length 25)
+    (which-key-allow-imprecise-window-fit nil)
+    (which-key-separator " → ")
+    (which-key-idle-delay 0.5)
   :config
-  (setq which-key-side-window-location 'bottom
-	which-key-sort-order #'which-key-key-order-alpha
-	which-key-sort-uppercase-first nil
-	which-key-add-column-padding 1
-	which-key-max-display-columns nil
-	which-key-min-display-lines 6
-	which-key-side-window-slot -10
-	which-key-side-window-max-height 0.25
-	which-key-idle-delay 0.8
-	which-key-max-description-length 25
-	which-key-allow-imprecise-window-fit nil
-	which-key-separator " → "
-        which-key-idle-delay 0.5))
+    (which-key-mode 1))
 #+end_src
 * WINDOW/BUFFER MANAGEMENT
 ** BUFFER-MOVE
 This allows to easily move windows (splits) around.
-
 #+begin_src emacs-lisp
 (use-package buffer-move
   :defer t)
@@ -1242,25 +1389,25 @@ This allows to easily move windows (splits) around.
 ** WINDOW CLOSE FUNCTIONS
 These functions move to window on specified side and closes it
 #+begin_src emacs-lisp
-(defun custom/kill-down-window ()
+(defun custom/close-down-window ()
   "Goes down the window and closes it"
   (interactive)
   (evil-window-down 1)
   (evil-window-delete))
 
-(defun custom/kill-up-window ()
+(defun custom/close-up-window ()
   "Goes up the window and closes it"
   (interactive)
   (evil-window-up 1)
   (evil-window-delete))
 
-(defun custom/kill-left-window ()
+(defun custom/close-left-window ()
   "Goes left the window and closes it"
   (interactive)
   (evil-window-left 1)
   (evil-window-delete))
 
-(defun custom/kill-right-window ()
+(defun custom/close-right-window ()
   "Goes right the window and closes it"
   (interactive)
   (evil-window-right 1)
@@ -1295,3 +1442,7 @@ Comfy writing experience
             (message "Zen Mode %s"
                      (if zen-mode "enabled" "disabled"))))
 #+end_src
+* CREDITS
+- DistroTube with his [[https://farside.link/invidious/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][Emacs Configuration videos]]
+- System Crafters with his Emacs from Scratch [[https://farside.link/invidious/playlist?list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ][videos]] and [[https://systemcrafters.net/emacs-from-scratch/][web atricles]]
+At 4th video at 44:17

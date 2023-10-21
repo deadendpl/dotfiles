@@ -10,7 +10,7 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Screen orientation" "(hypr) New wallpaper" "(hypr) Waybar reload" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Web search" )
+declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Toggle warm colors" "(hypr) Screen orientation" "(hypr) New wallpaper" "(hypr) Waybar reload" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
@@ -19,6 +19,9 @@ if [[ $choice == "(hypr) Screen orientation" ]]; then
 
 elif [[ $choice == "(hypr) New wallpaper" ]]; then
   ~/.local/bin/pyrice
+
+elif [[ $choice == "(hypr) Toggle warm colors" ]]; then
+  ~/.config/scripts/hypr/gammastep.sh
 
 elif [[ $choice == "(hypr) Waybar reload" ]]; then
   ~/.config/scripts/hypr/waybar-start.sh

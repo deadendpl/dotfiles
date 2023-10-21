@@ -6,16 +6,18 @@
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (global-display-line-numbers-mode t) ; Line numbers
-(delete-selection-mode 1)            ; You can select text and delete it by typing.
+(delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 1)               ; Turns on automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
+(column-number-mode 1)               ; Column number in modeline
+(fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
-  "Elisp packages cache folders/files normally clutters user-emacs-directory.
-  The same goes for some default files like bookmarks file.
-  In order to prevent that this variable exists.
-  Most of the stuff will get redirected here.")
+  "Elisp packages cache folders/files normally clutter user-emacs-directory.
+The same goes for some default files like bookmarks file.
+In order to prevent that this variable exists.
+Most of the stuff will get redirected here.")
 
 (setq visible-bell nil ;; Set up the visible bell
       inhibit-startup-message nil ; default emacs startup message
@@ -28,20 +30,27 @@
       elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
       auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
       global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-      use-dialog-box nil        ; turns off graphical dialog boxes
+      use-dialog-box nil ; turns off graphical dialog boxes
       tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
       initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-      initial-scratch-message nil)         ; deleting scratch buffer message
+      initial-scratch-message nil ; deleting scratch buffer message
+      scroll-conservatively 1000 ; Scroll one line at a time
+      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+      vc-follow-symlinks t) ; Enable follow symlinks
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
 		vterm-mode-hook
                 term-mode-hook
                 shell-mode-hook
+		Info-mode-hook
 		helpful-mode-hook
+		help-mode-hook
 		dashboard-mode-hook
+                dashboard-after-initialize-hook
 		dired-mode-hook
                 org-agenda-mode-hook
                 which-key-mode-hook
@@ -49,6 +58,16 @@
                 dictionary-mode-hook
                 Man-mode-hook
                 woman-mode-hook
+		ibuffer-mode-hook
+		elisp-refs-mode-hook
+		imenu-list-minor-mode-hook
+		imenu-list-major-mode-hook
+		imenu-list-after-jump-hook
+		imenu-list-update-hook
+		backtrace-revert-hook
+		backtrace-mode-hook
+		calendar-mode-hook
+                special-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -148,7 +167,20 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "." '(find-file :wk "Find file")
   "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
   "TAB TAB" '(comment-line :wk "Comment lines")
-  "u" '(universal-argument :wk "Universal argument"))
+  "u" '(universal-argument :wk "Universal argument")
+  "x" '(execute-extended-command :wk "M-x"))
+
+(custom/leader-keys
+  "a" '(:ignore t :wk "Amusement")
+  "a b" '(animate-birthday-present :wk "Birthday")
+  "a d" '(dissociated-press :wk "Dissoctation")
+  "a g" '(:ignore t :wk "Games")
+    "a g b" '(bubbles :wk "Bubbles")
+    "a g m" '(minesweeper :wk "Minesweeper")
+    "a g p" '(pong :wk "Pong")
+    "a g s" '(snake :wk "Snake")
+    "a g t" '(tetris :wk "Tetris")
+  "a z" '(zone :wk "Zone"))
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
@@ -178,7 +210,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "d h" '((lambda () (interactive) (dired "~/")) :wk "Open home directory")
   "d j" '(dired-jump :wk "Dired jump to current")
   "d n" '(neotree-dir :wk "Open directory in neotree")
-  "d p" '(peep-dired :wk "Peep-dired"))
+  "d p" '(peep-dired :wk "Peep-dired")
+  "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
 (custom/leader-keys
   "e" '(:ignore t :wk "Eshell/Evaluate")    
@@ -234,10 +267,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "g s" '(magit-stage-file :wk "Git stage file")
   "g t" '(git-timemachine :wk "Git time machine")
   "g u" '(magit-stage-file :wk "Git unstage file"))
-
-(custom/leader-keys
-  "G" '(:ignore :wk "Games")
-  "G m" '(minesweeper :wk "Minesweeper"))
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
@@ -304,32 +333,51 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m f" '(:ignore t :wk "Fonts")
     "m f b" '(custom/org-make-bold-in-region :wk "Bold in region")
+    "m f l" '(custom/org-make-latex-in-region :wk "Latex in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
     "m I c" '(org-id-get-create :wk "Create ID")
   "m l" '(:ignore t :wk "Link")
     "m l l" '(org-insert-link :wk "Insert link")
     "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  "m q" '(org-set-tags-command :wk "Set tag")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
 
 (custom/leader-keys
+  "M" '(:ignore t :wk "MarkDown")
+  "M f" '(:ignore t :wk "Fonts")
+    "M f b" '(markdown-insert-bold :wk "Bold in region")
+  "M l" '(:ignore t :wk "Link")
+    "M l l" '(markdown-insert-link :wk "Insert link"))
+
+(custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n a" '(:ignore t :wk "Alias")
-    "n a a" '(org-roam-alias-add :wk "Add alias")
-    "n a r" '(org-roam-alias-remove :wk "Remove alias")
-  "n d" '(:ignore t :wk "Roam dailies")
-    "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
-  "n D" '(:ignore t :wk "Dired")
-    "n D o" '(custom/org-notes-dired :wk "Open notes in Dired")
-    "n D r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-  "n f" '(org-roam-node-find :wk "Find note")
-  "n i" '(org-roam-node-insert :wk "Insert note")
-  "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-  "n r" '(:ignore t :wk "References")
-    "n r a" '(org-roam-ref-add :wk "Add reference")
-    "n r r" '(org-roam-ref-remove :wk "Remove reference"))
+  "n d" '(:ignore t :wk "Dired")
+    "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
+    "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n o" '(:ignore t :wk "Obsidian")
+    "n o c" '(obsidian-capture :wk "Create note")
+    "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+    "n o f" '(obsidian-tag-find :wk "Find by tag")
+    "n o j" '(obsidian-jump :wk "Jump to note")
+    "n o m" '(obsidian-move-file :wk "Move note/file")
+    "n o r" '(obsidian-update :wk "Update")
+    "n o /" '(obsidian-search :wk "Search")
+    "n o ?" '(obsidian-hydra/body :wk "Everything")
+  "n r" '(:ignore t :wk "Org Roam")
+    "n r a" '(:ignore t :wk "Alias")
+      "n r a a" '(org-roam-alias-add :wk "Add alias")
+      "n r a r" '(org-roam-alias-remove :wk "Remove alias")
+    "n r d" '(:ignore t :wk "Roam dailies")
+      "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
+    "n r f" '(org-roam-node-find :wk "Find note")
+    "n r i" '(org-roam-node-insert :wk "Insert note")
+    "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+    "n r r" '(:ignore t :wk "References")
+      "n r r a" '(org-roam-ref-add :wk "Add reference")
+      "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -357,7 +405,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "t l" '(display-line-numbers-mode :wk "Line numbers")
   "t n" '(neotree-toggle :wk "Neotree")
   "t r" '(rainbow-mode :wk "Rainbow mode")
-  "t t" '(visual-line-mode :wk "Truncated lines")
+  "t t" '(visual-line-mode :wk "Word Wrap")
   "t v" '(vterm-toggle :wk "Vterm")
   "t z" '(zen-mode :wk "Zen mode"))
 
@@ -366,10 +414,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   ;; Window splits
   "w c" '(evil-window-delete :wk "Close window")
   "w C" '(:ingore t :wk "Close on side")
-    "w C h" '(custom/kill-left-window :wk "Left")
-    "w C j" '(custom/kill-down-window :wk "Down")
-    "w C k" '(custom/kill-up-window :wk "Up")
-    "w C l" '(custom/kill-right-window :wk "Right")
+    "w C h" '(custom/close-left-window :wk "Left")
+    "w C j" '(custom/close-down-window :wk "Down")
+    "w C k" '(custom/close-up-window :wk "Up")
+    "w C l" '(custom/close-right-window :wk "Right")
   "w n" '(evil-window-new :wk "New window")
   "w s" '(evil-window-split :wk "Horizontal split window")
   "w v" '(evil-window-vsplit :wk "Vertical split window")
@@ -407,10 +455,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
 
-(use-package nerd-icons)
+(use-package nerd-icons :defer t)
 
 (use-package all-the-icons-ivy-rich
-  :ensure t
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
@@ -465,8 +512,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "l" 'dired-find-file))
 
 (use-package dired-open
-  :after dired
   :defer t
+  :after dired
   :config
     (setq dired-open-extensions '(("gif" . "swaiymg")
                                   ("jpg" . "swaiymg")
@@ -474,14 +521,28 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                                   ("mkv" . "mpv")
                                   ("mp4" . "mpv"))))
 
+(use-package diredfl
+  :defer t
+  :after dired)
+
+(use-package dired-ranger
+  :defer t
+  :after dired
+  :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      [remap evil-yank] 'dired-ranger-copy
+      "p" 'dired-ranger-paste))
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1))
 
 (use-package emojify
-  :init (global-emojify-mode 1)
+  :defer t
   :custom
-    (emojify-emojis-dir (concat user-share-emacs-directory "emojis")))
+    (emojify-emojis-dir (concat user-share-emacs-directory "emojis"))
+  :config
+    (global-emojify-mode 1))
 
 (set-face-attribute 'default nil
   :font "CodeNewRoman Nerd Font Mono"
@@ -495,6 +556,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :font "CodeNewRoman Nerd Font Mono"
   :height 90
   :weight 'medium)
+(set-face-attribute 'fixed-pitch-serif nil
+  :inherit 'fixed-pitch
+  :slant 'italic)
+
 ;; Makes commented text and keywords italics.
 ;; This is working in emacsclient but not emacs.
 ;; Your font must have an italic face available.
@@ -549,6 +614,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      imenu-list-auto-resize t))
 
 (use-package ivy
+  :ensure t
+  :demand t
+  :diminish
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
     (("C-c C-r" . ivy-resume)
@@ -566,7 +634,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     :map ivy-reverse-i-search-map
       ("C-k" . ivy-previous-line)
       ("C-d" . ivy-reverse-i-search-kill))
-  :diminish
   :custom
     (ivy-use-virtual-buffers t
      ivy-count-format "(%d/%d) "
@@ -576,7 +643,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     
 (use-package ivy-rich
   :after ivy
-  :ensure t
   :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
   :custom
     (ivy-virtual-abbreviate 'full
@@ -585,15 +651,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config
     (ivy-set-display-transformer 'ivy-switch-buffer
                                  'ivy-rich-switch-buffer-transformer))
-
-(use-package counsel
-  :bind
-    (("M-x" . counsel-M-x)
-     ;; ([remap ibuffer] . counsel-ibuffer)
-     ("C-x C-f" . counsel-find-file)
-    :map minibuffer-local-map
-      ("C-r" . 'counsel-minibuffer-history)))
-
 
 (use-package counsel
   :after ivy
@@ -607,6 +664,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config 
     (counsel-mode)
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
+
+(use-package ivy-prescient
+  :after counsel
+  :custom
+    (ivy-prescient-enable-filtering nil)
+  :config
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
 
 (use-package hl-todo
   :defer t
@@ -626,8 +691,22 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :defer t)
 (use-package nix-mode
   :defer t)
+
 (use-package markdown-mode
-  :defer t)
+  :defer t
+  :custom-face
+    ;; setting size of headers
+    (markdown-link-face((t (:inherit link))))
+    (markdown-table-face((t (:inherit org-table))))
+    (markdown-header-face-1 ((t (:inherit outline-1 :height 1.7))))
+    (markdown-header-face-2 ((t (:inherit outline-2 :height 1.6))))
+    (markdown-header-face-3 ((t (:inherit outline-3 :height 1.5))))
+    (markdown-header-face-4 ((t (:inherit outline-4 :height 1.4))))
+    (markdown-header-face-5 ((t (:inherit outline-5 :height 1.3))))
+    (markdown-header-face-6 ((t (:inherit outline-5 :height 1.2))))
+  :custom
+    (markdown-enable-highlighting-syntax t)
+    (markdown-hide-markup t))
 
 (use-package neotree
   :defer t
@@ -648,6 +727,22 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                  (setq auto-hscroll-mode nil)))))
 
 ;; show hidden files
+
+(use-package obsidian
+  :defer t
+  :config
+    (obsidian-specify-path "~/Documents/Obsidian/pppoopoo")
+    ;; (global-obsidian-mode t)
+  :custom
+    ;; This directory will be used for `obsidian-capture' if set.
+    (obsidian-inbox-directory "Inbox"))
+  ;; :bind (:map obsidian-mode-map
+    ;; Replace C-c C-o with Obsidian.el's implementation. It's ok to use another key binding.
+    ;; ("C-c C-o" . obsidian-follow-link-at-point)
+    ;; Jump to backlinks
+    ;; ("C-c C-b" . obsidian-backlink-jump)
+    ;; If you prefer you can use `obsidian-insert-link'
+    ;; ("C-c C-l" . obsidian-insert-wikilink)))
 
 (use-package evil-org
   :diminish
@@ -682,19 +777,20 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
           org-roam-directory "~/org-roam")
   :custom
     (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
+    (org-roam-dailies-directory "journals/")
+    (org-roam-capture-templates
+      '(("d" "default" plain "%?"
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+date: %U\n")
+         :unnarrowed t)))
   :bind
     (("C-c n l" . org-roam-buffer-toggle)
      ("C-c n f" . org-roam-node-find)
      ("C-c n i" . org-roam-node-insert))
   :config
     (org-roam-setup)
+    (evil-collection-org-roam-setup)
     (require 'org-roam-export))
-
-(setq org-roam-capture-templates
-  '(("d" "default" plain "%?"
-     :target (file+head "${slug}.org"
-                        "#+title: ${title}\n#+date: %U\n")
-     :unnarrowed t)))
 
 (use-package org-superstar
   :defer t
@@ -710,8 +806,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after org
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
-
-(setq org-edit-src-content-indentation 0)
 
 (use-package toc-org
   :defer t
@@ -740,7 +834,6 @@ do not already have one."
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-default ((t (:inherit variable-pitch))))
     (org-level-1 ((t (:inherit outline-1 :height 1.7))))
     (org-level-2 ((t (:inherit outline-2 :height 1.6))))
     (org-level-3 ((t (:inherit outline-3 :height 1.5))))
@@ -750,7 +843,7 @@ do not already have one."
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
   :custom
     (org-directory "~/org/")
-    (org-agenda-files (list (concat org-roam-directory "/agenda.org")))
+    (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/phone.org")))
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
@@ -779,6 +872,7 @@ do not already have one."
     (org-hide-leading-stars t)
     (org-hide-emphasis-markers t)
     (org-startup-with-inline-images t)
+    (org-display-remote-inline-images 'download)
     (org-ellipsis " •")
     (org-agenda-window-setup 'current-window)
     (org-fontify-quote-and-verse-blocks t)
@@ -786,11 +880,16 @@ do not already have one."
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-    (org-id-locations (concat user-share-emacs-directory "org/.org-id-locations"))
     (org-return-follows-link t)
+    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-tags-column 0)
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-confirm-babel-evaluate nil)
+    (org-edit-src-content-indentation 0)
   :config
-    (defun custom/resize-org-latex-overlays ()
-      "It rescales all latex preview fragments correctly with the text size as you zoom text. Works pretty much instantly, since no image regeneration is required."
+    (defun custom/org-resize-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
          if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
          do (plist-put (cdr (overlay-get o 'display))
@@ -807,8 +906,28 @@ do not already have one."
         (insert "*")
         (goto-char start)
         (insert "*")))
+
+    (defun custom/org-make-italic-in-region (start end)
+      "Add asterisks before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "/")
+        (goto-char start)
+        (insert "/")))
+
+    (defun custom/org-make-latex-in-region (start end)
+      "Add dollar signs before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "$")
+        (goto-char start)
+        (insert "$")))
+  :bind
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
-    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/resize-org-latex-overlays nil t))))
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
 
 (use-package company-org-block
   :defer t
@@ -827,6 +946,9 @@ do not already have one."
 
 (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+
+(use-package pandoc-mode
+  :defer t)
 
 (use-package perspective
   :disabled
@@ -852,16 +974,17 @@ do not already have one."
     (add-hook 'kill-emacs-hook #'persp-state-save)
 
 (use-package projectile
+  :defer t
   :diminish projectile-mode
   :custom
     (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
+    (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
   :bind-keymap
-    ("C-c p" . projectile-command-map)
-  :init
-    (setq projectile-switch-project-action #'projectile-dired))
+    ("C-c p" . projectile-command-map))
 
 (use-package counsel-projectile
+  :defer t
   :after projectile
   :config
     (counsel-projectile-mode 1))
@@ -891,7 +1014,7 @@ do not already have one."
     (eshell-history-size 5000)
     (eshell-buffer-maximum-lines 5000)
     (eshell-hist-ignoredups t)
-    (eshell-scroll-to-bottom-on-input t)
+    (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
     (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
   :config
@@ -911,8 +1034,8 @@ do not already have one."
   :defer t
   :config
     (setq shell-file-name "/bin/sh"
-          vterm-max-scrollback 5000)
-    (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
+          vterm-max-scrollback 5000))
+    ;; (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 
 (use-package vterm-toggle
   :after vterm
@@ -940,18 +1063,12 @@ do not already have one."
 (use-package sudo-edit
   :defer t)
 
-(use-package ewal)
-(use-package ewal-doom-themes)
 (use-package doom-themes
   :ensure t
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    
-    (setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
-    (load-theme real-theme t)
-  
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
     ;; Enable custom neotree theme (all-the-icons must be installed!)
@@ -961,6 +1078,23 @@ do not already have one."
     ;;(doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
+(use-package ewal-doom-themes)
+(use-package ewal
+  :ensure t
+  :config
+    (set-face-attribute 'line-number t
+      :foreground (ewal-load-color 'comment)
+      :inherit 'default)
+    (set-face-attribute 'line-number-current-line t
+      :foreground (ewal--get-base-color 'green)
+      :inherit 'default))
+
+(defvar real-theme nil
+  "It represents theme to load at startup.
+It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+
+(setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+(load-theme real-theme t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth
 
@@ -970,46 +1104,46 @@ do not already have one."
     (setq tldr-directory-path (concat user-share-emacs-directory "tldr/")))
 
 (use-package which-key
-  :init
-    (which-key-mode 1)
   :diminish
+  :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order #'which-key-key-order-alpha)
+    (which-key-sort-uppercase-first nil)
+    (which-key-add-column-padding 1)
+    (which-key-max-display-columns nil)
+    (which-key-min-display-lines 6)
+    (which-key-side-window-slot -10)
+    (which-key-side-window-max-height 0.25)
+    (which-key-idle-delay 0.8)
+    (which-key-max-description-length 25)
+    (which-key-allow-imprecise-window-fit nil)
+    (which-key-separator " → ")
+    (which-key-idle-delay 0.5)
   :config
-  (setq which-key-side-window-location 'bottom
-	which-key-sort-order #'which-key-key-order-alpha
-	which-key-sort-uppercase-first nil
-	which-key-add-column-padding 1
-	which-key-max-display-columns nil
-	which-key-min-display-lines 6
-	which-key-side-window-slot -10
-	which-key-side-window-max-height 0.25
-	which-key-idle-delay 0.8
-	which-key-max-description-length 25
-	which-key-allow-imprecise-window-fit nil
-	which-key-separator " → "
-        which-key-idle-delay 0.5))
+    (which-key-mode 1))
 
 (use-package buffer-move
   :defer t)
 
-(defun custom/kill-down-window ()
+(defun custom/close-down-window ()
   "Goes down the window and closes it"
   (interactive)
   (evil-window-down 1)
   (evil-window-delete))
 
-(defun custom/kill-up-window ()
+(defun custom/close-up-window ()
   "Goes up the window and closes it"
   (interactive)
   (evil-window-up 1)
   (evil-window-delete))
 
-(defun custom/kill-left-window ()
+(defun custom/close-left-window ()
   "Goes left the window and closes it"
   (interactive)
   (evil-window-left 1)
   (evil-window-delete))
 
-(defun custom/kill-right-window ()
+(defun custom/close-right-window ()
   "Goes right the window and closes it"
   (interactive)
   (evil-window-right 1)
