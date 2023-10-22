@@ -78,18 +78,18 @@ users.users.oliwier = {
   ];
 };
 
-# {
-#   environment.etc."xdg/user-dirs.defaults".text = ''
-#     DESKTOP=Desktop
-#     DOWNLOAD=Downloads
-#     TEMPLATES=Templates
-#     PUBLICSHARE=Public
-#     DOCUMENTS=Documents
-#     MUSIC=Music
-#     PICTURES=Pictures
-#     VIDEOS=Videos
-#   '';
-# }
+{
+  environment.etc."xdg/user-dirs.defaults".text = ''
+    DESKTOP=Desktop
+    DOWNLOAD=Downloads
+    TEMPLATES=Templates
+    PUBLICSHARE=Public
+    DOCUMENTS=Documents
+    MUSIC=Music
+    PICTURES=Pictures
+    VIDEOS=Videos
+  '';
+}
 
 users.defaultUserShell = pkgs.fish;
 programs.fish.enable = true;
@@ -100,12 +100,9 @@ services.flatpak.enable = false;
 
 # $ nix search wget
 environment.systemPackages = with pkgs; [
-  udisks
-  vim
   wget
   lolcat
   htop
-  lynx
   neofetch
   fish
   bash
@@ -116,12 +113,9 @@ environment.systemPackages = with pkgs; [
   foot
   neovim
   waybar
-  rofi
-  firefox
+  rofi-wayland
   wl-clipboard
   sway-contrib.grimshot
-  feh
-  dunst
   xdg-utils
   gnome.gnome-tweaks
   gnumake
@@ -141,7 +135,6 @@ environment.systemPackages = with pkgs; [
   swaybg
   pcmanfm
   light
-  dwt1-shell-color-scripts
   bat-extras.batman
   bat-extras.prettybat
   bat-extras.batgrep
@@ -151,8 +144,8 @@ environment.systemPackages = with pkgs; [
   unrar
   gnome.file-roller
   qutebrowser
-  alacritty
   emacs29
+  lf
   (retroarch.override {
     cores = with libretro; [
       ppsspp
@@ -163,13 +156,13 @@ environment.systemPackages = with pkgs; [
   })
 ];
 
-nixpkgs.config.permittedInsecurePackages = [
-  "openssl-1.1.1u"
-];
+# nixpkgs.config.permittedInsecurePackages = [
+#   "openssl-1.1.1u"
+# ];
 
 nixpkgs.config.allowUnfree = true;
 
-nix.settings.experimental-features = [ "nix-command" "flakes" ];
+# nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 fonts.fonts = with pkgs; [
   (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })

@@ -1,5 +1,6 @@
 #+title: NixOS Configuration
 #+PROPERTY: header-args :tangle configuration.nix
+#+auto_tangle t
 
 * Table of Contents :toc:
 - [[#booting][Booting]]
@@ -99,8 +100,7 @@ Locales are weird to set up. I set my timezone and keyboard layout for xorg (eve
 * Graphical environment
 I enable xorg since that installs display (login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
 
-I enable hyprland which install necessary packages and sets up desktop entry in display manager.
-
+I enable hyprland which installs necessary packages and sets up desktop entry in display manager.
 I also enable =light= which lets me change screen brightness.
 #+begin_src nix
   # Enable the X11 windowing system.
@@ -153,18 +153,18 @@ There is a user called =oliwier= which belongs to groups:
 
 I also set up xdg default user directories
 #+begin_src nix
-  # {
-  #   environment.etc."xdg/user-dirs.defaults".text = ''
-  #     DESKTOP=Desktop
-  #     DOWNLOAD=Downloads
-  #     TEMPLATES=Templates
-  #     PUBLICSHARE=Public
-  #     DOCUMENTS=Documents
-  #     MUSIC=Music
-  #     PICTURES=Pictures
-  #     VIDEOS=Videos
-  #   '';
-  # }
+  {
+    environment.etc."xdg/user-dirs.defaults".text = ''
+      DESKTOP=Desktop
+      DOWNLOAD=Downloads
+      TEMPLATES=Templates
+      PUBLICSHARE=Public
+      DOCUMENTS=Documents
+      MUSIC=Music
+      PICTURES=Pictures
+      VIDEOS=Videos
+    '';
+  }
 
 #+end_src
 
@@ -184,12 +184,9 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
 
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    udisks
-    vim
     wget
     lolcat
     htop
-    lynx
     neofetch
     fish
     bash
@@ -200,12 +197,9 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
     foot
     neovim
     waybar
-    rofi
-    firefox
+    rofi-wayland
     wl-clipboard
     sway-contrib.grimshot
-    feh
-    dunst
     xdg-utils
     gnome.gnome-tweaks
     gnumake
@@ -225,7 +219,6 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
     swaybg
     pcmanfm
     light
-    dwt1-shell-color-scripts
     bat-extras.batman
     bat-extras.prettybat
     bat-extras.batgrep
@@ -235,8 +228,8 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
     unrar
     gnome.file-roller
     qutebrowser
-    alacritty
     emacs29
+    lf
     (retroarch.override {
       cores = with libretro; [
         ppsspp
@@ -247,9 +240,9 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
     })
   ];
 
-  nixpkgs.config.permittedInsecurePackages = [
-    "openssl-1.1.1u"
-  ];
+  # nixpkgs.config.permittedInsecurePackages = [
+  #   "openssl-1.1.1u"
+  # ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -259,12 +252,12 @@ I disable flatpak since I don't want it. Then I install a lot of packages.
 
 I also enable flakes even though I don't use them
 #+begin_src nix
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  # nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 #+end_src
 
 * Fonts
-I install nerd fonts.
+I install nerd fonts. Istead of installing all fonts you can specify which ones you want.
 #+begin_src nix
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })

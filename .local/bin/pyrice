@@ -7,7 +7,7 @@ wal-tile() {
 }
 
 wpg-tile() {
-  wpg -ns "$@"
+  wpg -s "$@"
   killall swaybg
   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 }
@@ -73,6 +73,6 @@ fi
 $HOME/.config/scripts/hypr/waybar-start.sh
 $HOME/.config/mako/update-theme.sh
 emacsclient --eval '(load-theme real-theme t)'
-reTheme $(cat $HOME/.cache/wal/wal)
+# reTheme $(cat $HOME/.cache/wal/wal)
 
 notify-send "New rice applied"

@@ -33,7 +33,7 @@ qt5ct
 foot
 networkmanager
 gksu
-firefox
+qutebrowser
 mpv
 polkit-gnome
 grimshot
@@ -45,4 +45,5 @@ ripgrep
 fzf
 hyprpicker-git
 swayimg
-fortune
+emacs
+lf

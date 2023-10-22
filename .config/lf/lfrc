@@ -1,3 +1,6 @@
+# sixel support
+set sixel true
+
 # showing hidden files
 set hidden!
 

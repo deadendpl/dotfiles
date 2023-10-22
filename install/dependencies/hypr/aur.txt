@@ -1,12 +1,7 @@
 bitwarden-rofi-git
 networkmanager-dmenu-git
-udiskie-dmenu-git
 clipboard
-catppuccin-gtk-theme-mocha
-dracula-gtk-theme
-catppuccin-gtk-theme-latte
 rofi-bluetooth-git
-lf-sixel-git
 ctpv-git
 cp-p-git
 rofi-lbonn-wayland-git
