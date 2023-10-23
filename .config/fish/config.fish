@@ -57,19 +57,21 @@ alias pclean='yay -Sc && porphan | yay -Rns -'
 alias listaur="yay -Qqem"
 
 # nix
-alias nup='sudo nixos-rebuild switch'
+alias ninst='nix-env -iA'
+alias nup='sudo cp ~/.dotfiles/nixos/configuration.nix /etc/nixos/configuration.nix &&  nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lfcd && killall lf'
+alias lf='lfcd -single'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
 alias v='emacsclient -t -a "nvim"'
+alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias remacs='killall emacs;killall emacs && emacs --daemon'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"

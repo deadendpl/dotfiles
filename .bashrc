@@ -32,13 +32,14 @@ alias listaur="yay -Qqem"
 alias yinst='yay -S'
 
 # nix
+alias ninst='nix-env -iA'
 alias nup='sudo nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lf && killall lf'
+alias lf='lf -single'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'

@@ -78,26 +78,26 @@ users.users.oliwier = {
   ];
 };
 
-{
-  environment.etc."xdg/user-dirs.defaults".text = ''
-    DESKTOP=Desktop
-    DOWNLOAD=Downloads
-    TEMPLATES=Templates
-    PUBLICSHARE=Public
-    DOCUMENTS=Documents
-    MUSIC=Music
-    PICTURES=Pictures
-    VIDEOS=Videos
-  '';
-}
+environment.etc."xdg/user-dirs.defaults".text = ''
+  DESKTOP=Desktop
+  DOWNLOAD=Downloads
+  TEMPLATES=Templates
+  PUBLICSHARE=Public
+  DOCUMENTS=Documents
+  MUSIC=Music
+  PICTURES=Pictures
+  VIDEOS=Videos
+'';
 
 users.defaultUserShell = pkgs.fish;
 programs.fish.enable = true;
 
 services.flatpak.enable = false;
 
-# List packages installed in system profile. To search, run:
 
+
+
+# List packages installed in system profile. To search, run:
 # $ nix search wget
 environment.systemPackages = with pkgs; [
   wget
@@ -106,46 +106,66 @@ environment.systemPackages = with pkgs; [
   neofetch
   fish
   bash
+  fzf
   git
-  exa
+  eza
   starship
+  bat
+  bat-extras.batman
+  bat-extras.prettybat
+  bat-extras.batgrep
+  lf
+  fortune
+  cowsay
+  pokemonsay
+  ctpv
+  chafa
+  killall
+  unrar
+  ripgrep
+  clipboard-jh
+
   hyprland
   foot
+  mako
   neovim
   waybar
   rofi-wayland
   wl-clipboard
   sway-contrib.grimshot
   xdg-utils
+  xdg-user-dirs
   gnome.gnome-tweaks
+  lxappearance-gtk2
+  mpv
+  wpgtk
+  pywal
+
   gnumake
   cmake
-  github-desktop
+  gcc
+  libtool
+
   polkit_gnome
   blueberry
-  pulseaudio
   dracula-theme
   networkmanager_dmenu
   gammastep
   pavucontrol
   papirus-icon-theme
-  killall
-  clipboard-jh
-  ranger
   swaybg
   pcmanfm
   light
-  bat-extras.batman
-  bat-extras.prettybat
-  bat-extras.batgrep
-  ripgrep
   syncthing
   libnotify
-  unrar
   gnome.file-roller
+
   qutebrowser
+  python311Packages.inotify-simple
+  python311Packages.psutil
+  python311Packages.python-daemon
+
   emacs29
-  lf
   (retroarch.override {
     cores = with libretro; [
       ppsspp
@@ -164,9 +184,19 @@ nixpkgs.config.allowUnfree = true;
 
 # nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+# in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
   (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
 ];
+
+environment.etc."xdg/gtk-2.0/gtkrc".text = ''
+    gtk-theme-name = "Dracula"
+  '';
+
+environment.etc."xdg/gtk-3.0/settings.ini".text = ''
+    [Settings]
+    gtk-theme-name = "Dracula"
+  '';
 
 # setting up xdg desktop portal
 services.dbus.enable = true;
@@ -198,15 +228,15 @@ systemd = {
 };
 
 # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  system.copySystemConfiguration = true;
+# (/run/current-system/configuration.nix). This is useful in case you
+# accidentally delete configuration.nix.
+system.copySystemConfiguration = true;
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.05"; # Did you read the comment?
+# This value determines the NixOS release from which the default
+# settings for stateful data, like file locations and database versions
+# on your system were taken. It's perfectly fine and recommended to leave
+# this value at the release version of the first install of this system.
+# Before changing this value read the documentation for this option
+# (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+system.stateVersion = "23.05"; # Did you read the comment?
 }

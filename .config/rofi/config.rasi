@@ -1,5 +1,5 @@
 configuration {
-  modi: "window,drun,run,";
+  modi: "drun,run,";
   icon-theme: "Papirus-Dark";
   show-icons: true;
   terminal: "foot";

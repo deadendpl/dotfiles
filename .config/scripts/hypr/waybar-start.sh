@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-# Terminate already running bar instances
-killall -q waybar
-
-# Launch waybar
-echo "waybar launches..."
-
-waybar &
+if pgrep "waybar" > /dev/null; then
+  pgrep "waybar" | xargs kill
+  # Launch waybar
+  echo "waybar launches..."
+  waybar &
+else
+  # Launch waybar
+  echo "waybar launches..."
+  waybar &
+fi
