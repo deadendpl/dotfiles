@@ -36,11 +36,11 @@ time.timeZone = "Europe/Warsaw";
 
 # Select internationalisation properties.
 # i18n.defaultLocale = "en_US.UTF-8";
-# console = {
+console = {
 #   font = "Lat2-Terminus16";
-#   keyMap = "us";
+  keyMap = "pl";
 #   useXkbConfig = true; # use xkbOptions in tty.
-# };
+};
 
 # Configure keymap in X11
 services.xserver.layout = "pl";
@@ -48,6 +48,9 @@ services.xserver.layout = "pl";
 
 # Enable the X11 windowing system.
 services.xserver.enable = true;
+
+# choosing simple greeter for lightdm
+services.xserver.displayManager.lightdm.greeters.tiny.enable = true;
 
 # for 32-bit stuff (like wine)
 # hardware.opengl.driSupport32Bit = true;
@@ -94,9 +97,6 @@ programs.fish.enable = true;
 
 services.flatpak.enable = false;
 
-
-
-
 # List packages installed in system profile. To search, run:
 # $ nix search wget
 environment.systemPackages = with pkgs; [
@@ -108,7 +108,7 @@ environment.systemPackages = with pkgs; [
   bash
   fzf
   git
-  eza
+  exa
   starship
   bat
   bat-extras.batman
@@ -151,6 +151,7 @@ environment.systemPackages = with pkgs; [
   dracula-theme
   networkmanager_dmenu
   gammastep
+  pulseaudio
   pavucontrol
   papirus-icon-theme
   swaybg
@@ -159,6 +160,8 @@ environment.systemPackages = with pkgs; [
   syncthing
   libnotify
   gnome.file-roller
+  bitwarden
+  bitwarden-cli
 
   qutebrowser
   python311Packages.inotify-simple
@@ -172,17 +175,14 @@ environment.systemPackages = with pkgs; [
       parallel-n64
       snes9x
       swanstation
+      melonds
     ];
   })
 ];
 
-# nixpkgs.config.permittedInsecurePackages = [
-#   "openssl-1.1.1u"
-# ];
-
 nixpkgs.config.allowUnfree = true;
 
-# nix.settings.experimental-features = [ "nix-command" "flakes" ];
+services.emacs.defaultEditor = true;
 
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
