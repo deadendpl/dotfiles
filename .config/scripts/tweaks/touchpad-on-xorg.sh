@@ -15,6 +15,6 @@ if [ -e "/etc/X11/xorg.conf.d/90-touchpad.conf" ]; then
     exit
 else
     echo "$touchpad_conf" | sudo tee /etc/X11/xorg.conf.d/90-touchpad.conf > /dev/null
-    echo "The changes have been apllied. After reboot touchpad should work."
+    echo "The changes have been applied. After reboot touchpad should work."
     read -p "Press Enter to exit"
 fi

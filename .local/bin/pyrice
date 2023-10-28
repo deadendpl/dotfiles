@@ -71,7 +71,8 @@ else
 fi
 
 $HOME/.config/scripts/hypr/waybar-start.sh
-$HOME/.config/mako/update-theme.sh
+# $HOME/.config/mako/update-theme.sh
+$HOME/.config/swaync/reload.sh
 emacsclient --eval '(load-theme real-theme t)'
 # reTheme $(cat $HOME/.cache/wal/wal)
 

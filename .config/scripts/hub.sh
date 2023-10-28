@@ -10,12 +10,15 @@ dir="$HOME/.config/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Toggle warm colors" "(hypr) Screen orientation" "(hypr) New wallpaper" "(hypr) Waybar reload" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Web search" )
+declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Toggle warm colors" "(hypr) Screen orientation" "(hypr) New wallpaper" "(hypr) Notification center" "(hypr) Waybar reload" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Web search" )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
 if [[ $choice == "(hypr) Screen orientation" ]]; then
   ~/.config/scripts/hypr/screen-orientation.sh
+
+elif [[ $choice == "(hypr) Notification center" ]]; then
+  swaync-client -t
 
 elif [[ $choice == "(hypr) New wallpaper" ]]; then
   ~/.local/bin/pyrice

@@ -51,7 +51,6 @@ alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 PS1='[\u@\h \W]\$'
 
 if [ -n "$PS1" ]; then
-  (cat ~/.cache/wal/sequences &)
   fortune | pokemonsay
   eval "$(starship init bash)"
 fi

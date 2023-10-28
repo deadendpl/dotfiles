@@ -1,4 +1,0 @@
-dracula-gtk-theme
-catppuccin-gtk-theme-mocha
-catppuccin-gtk-theme-latte
-udiskie-dmenu-git

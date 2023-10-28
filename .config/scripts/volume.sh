@@ -15,5 +15,5 @@ if [[ $choice =~ ^-?[0-9]+$ ]]; then
   # Adjust the volume using pactl
   pactl set-sink-volume @DEFAULT_SINK@ "$formatted_choice"
 else
-  echo "Invalid input: $choice"
+  notify-send "Invalid input: $choice"
 fi

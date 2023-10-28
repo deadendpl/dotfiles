@@ -1,3 +1,54 @@
 #!/bin/sh
 
-sudo pacman -S $(cat pacman.txt | cut -d' ' -f1)
+sudo pacman -S hyprland \
+               otf-codenewroman-nerd \
+	       htop \
+	       papirus-icon-theme \
+	       waybar \
+	       eza \
+	       qt5-wayland \
+	       swaybg \
+	       blueberry \
+	       vim \
+	       mako \
+	       swaync \
+	       wdisplays-git \
+	       wl-clipboard \
+	       grim \
+	       slurp \
+	       bat-extras \
+	       rofi \
+	       dmenu \
+	       fish \
+	       starship \
+	       pcmanfm-gtk3 \
+	       file-roller \
+	       p7zip \
+	       unrar \
+	       zathura \
+	       neovim \
+	       gammastep \
+	       lolcat \
+	       ttf-ubuntu-nerd \
+	       pavucontrol \
+	       qt5ct \
+	       foot \
+	       networkmanager \
+	       gksu \
+	       qutebrowser \
+	       mpv \
+	       polkit-gnome \
+	       grimshot \
+	       dracula-cursors-git \
+	       ttf-go-nerd \
+	       light \
+	       chafa \
+	       ripgrep \
+	       fzf \
+	       hyprpicker-git \
+	       swayimg \
+	       emacs \
+	       lf \
+	       stow \
+	       expac \
+	       # shell-color-scripts \

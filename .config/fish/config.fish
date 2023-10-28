@@ -2,7 +2,6 @@ if status is-interactive
   function fish_greeting
     fortune | pokemonsay
   end
-  cat ~/.cache/wal/sequences &
   starship init fish | source
 end
 

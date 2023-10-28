@@ -2,7 +2,7 @@
 #+STARTUP: noinlineimages
 
 * WARNING:
-This is meant for [[https://archlinux.org/][Arch]] based distros. Dependencies might not be available for other distros.
+This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP nixos config. Dependencies might not be available for other distros.
 
 * PYWAL with hyprland
 I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android

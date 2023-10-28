@@ -11,6 +11,7 @@
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 (column-number-mode 1)               ; Column number in modeline
 (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
+(save-place-mode 1)                  ; Saving last place in file
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
@@ -29,9 +30,11 @@ Most of the stuff will get redirected here.")
       bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
       elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
       auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+      prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
       global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
       use-dialog-box nil ; turns off graphical dialog boxes
       tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+      save-place-file (concat user-share-emacs-directory "places")
       initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
       initial-scratch-message nil ; deleting scratch buffer message
       scroll-conservatively 1000 ; Scroll one line at a time
@@ -108,6 +111,17 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (setq use-package-always-ensure t
       use-package-verbose t)
 
+(use-package quelpa
+  :defer 5
+  ;; :custom (quelpa-upgrade-p t "Always try to update packages")
+  :config
+    ;; Get ‘quelpa-use-package’ via ‘quelpa’
+    (quelpa
+     '(quelpa-use-package
+       :fetcher git
+       :url "https://github.com/quelpa/quelpa-use-package.git"))
+    (require 'quelpa-use-package))
+
 (use-package command-log-mode
   :disabled)
 
@@ -132,6 +146,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
           evil-vsplit-window-right t
           evil-split-window-below t
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
+  :bind
+    (:map evil-normal-state-map
+      ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
@@ -150,6 +167,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
+
+(use-package ibuffer
+  :defer t
+  :config
+    (evil-collection-define-key 'normal 'ibuffer-mode-map
+      "l" 'ibuffer-visit-buffer))
 
 (use-package general
   :config
@@ -490,12 +513,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                        ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
+    (evil-collection-define-key 'normal 'dashboard-mode-map
+      "j" 'widget-forward
+      "k" 'widget-backward
+      "l" 'dashboard-return)
   :bind
     (:map dashboard-mode-map
       ([remap dashboard-next-line] . 'widget-forward)
-      ([remap dashboard-previous-line] . 'widget-backward)
-      ("up" . 'widget-forward)
-      ("down" . 'widget-backward)))
+      ([remap dashboard-previous-line] . 'widget-backward)))
 
 (use-package dired
   :ensure nil
@@ -1059,6 +1084,16 @@ do not already have one."
                   ;;(dedicated . t) ;dedicated is supported in emacs27
                   (reusable-frames . visible)
                   (window-height . 0.4))))
+
+(use-package helm
+ :defer t
+ :diminish
+ :bind (
+   :map helm-map
+     ("C-j" . helm-next-line)
+     ("C-k" . helm-previous-line)))
+(use-package system-packages :defer t)
+(use-package helm-system-packages :defer t)
 
 (use-package sudo-edit
   :defer t)

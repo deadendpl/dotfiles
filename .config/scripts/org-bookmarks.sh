@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-org_text=$(cat $HOME/Documents/knowledge/org/org-pog/bookmarks.org)
+org_text=$(cat $HOME/org-roam/web_bookmarks.org)
 
 # Extract link names and URLs using a regex pattern
 links=$(echo "$org_text" | grep -oE '\[\[[^]]+\]\[[^]]+\]\]')
