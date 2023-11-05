@@ -1,3 +1,4 @@
+# -*- mode: sh -*-
 if status is-interactive
   function fish_greeting
     fortune | pokemonsay
@@ -9,7 +10,8 @@ end
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
-export EDITOR='emacsclient -t -a "nvim"'
+set EDITOR emacsclient -t -a "nvim"
+set VISUAL emacsclient -c -a "emacs"
 
 set fish_greeting
 fish_vi_key_bindings
@@ -57,13 +59,13 @@ alias listaur="yay -Qqem"
 
 # nix
 alias ninst='nix-env -iA'
-alias nup='sudo cp ~/.dotfiles/nixos/configuration.nix /etc/nixos/configuration.nix &&  nixos-rebuild switch'
+alias nup='sudo cp ~/.dotfiles/nixos/* /etc/nixos/ && sudo nixos-rebuild switch'
 alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lfcd -single'
+alias lf='lfcd'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
@@ -72,5 +74,9 @@ alias man='batman'
 alias v='emacsclient -t -a "nvim"'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
+alias demacs='emacs --daemon'
 alias remacs='killall emacs;killall emacs && emacs --daemon'
+alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
+alias myip='curl "https://wtfismyip.com/text"'
+alias swaylock='~/.cache/wal/swaylock.sh'

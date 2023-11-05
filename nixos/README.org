@@ -1,25 +1,30 @@
 #+title: NixOS Configuration
-#+PROPERTY: header-args :tangle configuration.nix
 #+auto_tangle: t
+#+startup: fold
 
 * Table of Contents :toc:
-- [[#booting][Booting]]
-- [[#networking][Networking]]
-- [[#locales][Locales]]
-- [[#graphical-environment][Graphical environment]]
-- [[#sound][Sound]]
-- [[#users][Users]]
-- [[#packages][Packages]]
-- [[#fonts-and-gtk-theme][Fonts and GTK theme]]
-- [[#xdg-desktop-portal][XDG Desktop Portal]]
-- [[#polkit][Polkit]]
-- [[#os-version][OS Version]]
+- [[#main-configuration][Main configuration]]
+  - [[#booting][Booting]]
+  - [[#networking][Networking]]
+  - [[#locales][Locales]]
+  - [[#graphical-environment][Graphical environment]]
+  - [[#sound][Sound]]
+  - [[#users][Users]]
+  - [[#packages][Packages]]
+  - [[#fonts][Fonts]]
+  - [[#xdg-desktop-portal][XDG Desktop Portal]]
+  - [[#polkit][Polkit]]
+  - [[#automatic-garbage-collector][Automatic garbage collector]]
+  - [[#os-version][OS Version]]
+- [[#sddm-theme][SDDM theme]]
+- [[#cp-p][cp-p]]
 
-* Booting
-=hardware-configuration.nix= is setting the drives by their ID on which the OS will run.
+* Main configuration
+** Booting
+=hardware-configuration.nix= is handling the drives and some GPU and CPU related things.
 You should use =hardware-configuration.nix= of your own.
 
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 { config, pkgs, ... }:
 
 {
@@ -31,31 +36,33 @@ You should use =hardware-configuration.nix= of your own.
 #+end_src
 
 Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
-#+begin_src nix
-boot.loader.efi.canTouchEfiVariables = true;
+#+begin_src nix :tangle configuration.nix
+boot = {
+  loader.efi.canTouchEfiVariables = true;
 
-boot.loader.grub.enable = true;
-boot.loader.grub.device = "nodev";
-boot.loader.grub.efiSupport = true;
+  loader.grub.enable = true;
+  loader.grub.device = "nodev";
+  loader.grub.efiSupport = true;
 
 #+end_src
 
 I set ntfs as supported filesystem because without this you can't mount ntfs drives.
-#+begin_src nix
-boot.supportedFilesystems = [ "ntfs" ];
+#+begin_src nix :tangle configuration.nix
+  supportedFilesystems = [ "ntfs" ];
 
 #+end_src
 
 The default kernel is latest lts kernel. I change that to zen kernel.
-#+begin_src nix
-boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+#+begin_src nix :tangle configuration.nix
+  kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+};
 
 #+end_src
 
-* Networking
+** Networking
 I set my hostname, enable networkmanager and disable firewall.
 Just in case I also enable bluetooth.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 networking.hostName = "lenovo-nixos";
 networking.networkmanager.enable = true;
 networking.firewall.enable = false;
@@ -64,23 +71,10 @@ hardware.bluetooth.enable = true;
 
 #+end_src
 
-I also set up =gnupg= and enable =gnome-keyring=
-#+begin_src nix
-# Some programs need SUID wrappers, can be configured further or are
-# started in user sessions.
-programs.mtr.enable = true;
-programs.gnupg.agent = {
-  enable = true;
-  enableSSHSupport = true;
-};
 
-services.gnome.gnome-keyring.enable = true;
-
-#+end_src
-
-* Locales
+** Locales
 Locales are weird to set up. I set my timezone and keyboard layout for xorg (even though I have hyprland set up on this)
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 time.timeZone = "Europe/Warsaw";
 
 # Select internationalisation properties.
@@ -109,34 +103,66 @@ i18n.extraLocaleSettings = {
 
 #+end_src
 
-* Graphical environment
+** Graphical environment
 I enable xorg since that installs display (login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
 
 I enable hyprland which installs necessary packages and sets up desktop entry in display manager.
 I also enable =light= which lets me change screen brightness.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 # Enable the X11 windowing system.
-services.xserver.enable = true;
+services.xserver = {
+  enable = true;
+  # Enable touchpad support (enabled default in most desktopManager).
+  libinput.enable = true;
+  # sddm configuration
+  displayManager.sddm = {
+    enable = true;
+    theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
+  };
+};
 
 # choosing simple greeter for lightdm
 # services.xserver.displayManager.lightdm.greeters.tiny.enable = true;
 
+
 # for 32-bit stuff (like wine)
 # hardware.opengl.driSupport32Bit = true;
 
-# Enable touchpad support (enabled default in most desktopManager).
-services.xserver.libinput.enable = true;
+  #+end_src
 
-programs.hyprland.enable = true;
+Here I enable stuff in one block since you can do that.
+#+begin_src nix :tangle configuration.nix
+programs = {
+  hyprland.enable = true;
+  light.enable = true;
+  #+end_src
 
-programs.light.enable = true;
+I also set up =gnupg= and enable =gnome-keyring=
+#+begin_src nix :tangle configuration.nix
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  mtr.enable = true;
+  gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
 #+end_src
 
-* Sound
+I set =fish= as my default shell
+#+begin_src nix :tangle configuration.nix
+  fish.enable = true;
+};
+
+users.defaultUserShell = pkgs.fish;
+services.gnome.gnome-keyring.enable = true;
+
+#+end_src
+
+** Sound
 I set up pipewire as my sound thing.
 =pulse.enable= lets me use it with pulseaudio intended software like =pavucontrol=.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 # rtkit is optional but recommended
 security.rtkit.enable = true;
 services.pipewire = {
@@ -150,15 +176,16 @@ services.pipewire = {
 
 #+end_src
 
-* Users
+** Users
 There is a user called =oliwier= which belongs to groups:
 - =wheel= to use sudo commands
 - =video= to use =light=
 - =networkmanager= to use networkmanager without sudo permissions.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 # Define a user account. Don't forget to set a password with ‘passwd’.
 users.users.oliwier = {
   isNormalUser = true;
+  createHome = true;
   extraGroups = [ "wheel" "video" "networkmanager" ];
   packages = with pkgs; [
   ];
@@ -167,7 +194,7 @@ users.users.oliwier = {
 #+end_src
 
 I also set up xdg default user directories
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 environment.etc."xdg/user-dirs.defaults".text = ''
   DESKTOP=Desktop
   DOWNLOAD=Downloads
@@ -181,21 +208,17 @@ environment.etc."xdg/user-dirs.defaults".text = ''
 
 #+end_src
 
-The default shell I set up is fish and I enable it so tab completion works for nix commands.
-#+begin_src nix
-users.defaultUserShell = pkgs.fish;
-programs.fish.enable = true;
-
-#+end_src
-
-* Packages
+** Packages
 I disable flatpak since I don't want it. Then I install a lot of packages.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 services.flatpak.enable = false;
 
 # List packages installed in system profile. To search, run:
 # $ nix search wget
 environment.systemPackages = with pkgs; [
+  # (import ./cp-p.nix)
+  # cli utils
+  (import ./cp-p.nix { inherit pkgs; })
   wget
   lolcat
   htop
@@ -221,6 +244,11 @@ environment.systemPackages = with pkgs; [
   ripgrep
   clipboard-jh
 
+  # for sddm
+  libsForQt5.qt5.qtquickcontrols2  
+  libsForQt5.qt5.qtgraphicaleffects
+
+  # desktop
   hyprland
   foot
   mako
@@ -237,11 +265,13 @@ environment.systemPackages = with pkgs; [
   wpgtk
   pywal
 
+  # some dev stuff
   gnumake
   cmake
   gcc
   libtool
 
+  # service things
   polkit_gnome
   blueberry
   dracula-theme
@@ -251,6 +281,8 @@ environment.systemPackages = with pkgs; [
   pavucontrol
   papirus-icon-theme
   swaybg
+  swayimg
+  swaynotificationcenter
   pcmanfm
   light
   syncthing
@@ -259,12 +291,33 @@ environment.systemPackages = with pkgs; [
   bitwarden
   bitwarden-cli
 
+  # qutebrowser
   qutebrowser
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
 
   emacs29
+  # this is for installing elisp packages from nix repos instead of normal elisp repos
+  # (pkgs.emacsWithPackagesFromUsePackage {
+  #     package = pkgs.emacsGit;  # replace with pkgs.emacsPgtk, or another version if desired.
+  #     config = path/to/your/config.el;
+  #     # config = path/to/your/config.org; # Org-Babel configs also supported
+
+  #     # Optionally provide extra packages not in the configuration file.
+  #     extraEmacsPackages = epkgs: [
+  #       epkgs.use-package;
+  #     ];
+
+  #     # Optionally override derivations.
+  #     override = epkgs: epkgs // {
+  #       somePackage = epkgs.melpaPackages.somePackage.overrideAttrs(old: {
+  #          # Apply fixes here
+  #       });
+  #     };
+  #   })
+
+  # i love how you can specify retroarch cores here
   (retroarch.override {
     cores = with libretro; [
       ppsspp
@@ -281,37 +334,24 @@ nixpkgs.config.allowUnfree = true;
 #+end_src
 
 I set Emacs as as =$EDITOR=
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 services.emacs.defaultEditor = true;
 
 #+end_src
 
-* Fonts and GTK theme
+** Fonts
 I install nerd fonts. Istead of installing all fonts you can specify which ones you want.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
-  (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
+  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
 ];
 
 #+end_src
 
-I set gtk theme to Dracula
-#+begin_src nix
-environment.etc."xdg/gtk-2.0/gtkrc".text = ''
-    gtk-theme-name = "Dracula"
-  '';
-
-environment.etc."xdg/gtk-3.0/settings.ini".text = ''
-    [Settings]
-    gtk-theme-name = "Dracula"
-  '';
-
-#+end_src 
-
-* XDG Desktop Portal
-I set it up so it will work with hyprland
-#+begin_src nix
+** XDG Desktop Portal
+I set it up to work with hyprland
+#+begin_src nix :tangle configuration.nix
 # setting up xdg desktop portal
 services.dbus.enable = true;
 xdg.portal = {
@@ -323,9 +363,9 @@ xdg.portal = {
 
 #+end_src
 
-* Polkit
+** Polkit
 I set up =gnome-polkit=.
-#+begin_src nix
+#+begin_src nix :tangle configuration.nix
 # gnome polkit
 systemd = {
  user.services.polkit-gnome-authentication-agent-1 = {
@@ -348,20 +388,71 @@ systemd = {
 
 #+end_src
 
-* OS Version
-I set it up on 23.05
+** Automatic garbage collector
 #+begin_src nix
-# Copy the NixOS configuration file and link it from the resulting system
-# (/run/current-system/configuration.nix). This is useful in case you
-# accidentally delete configuration.nix.
-system.copySystemConfiguration = true;
+nix = {
+   settings.auto-optimise-store = true;
+   gc = {
+     automatic = true;
+     dates = "2d";
+     options = "-d";
+   };
+ };
 
-# This value determines the NixOS release from which the default
-# settings for stateful data, like file locations and database versions
-# on your system were taken. It's perfectly fine and recommended to leave
-# this value at the release version of the first install of this system.
-# Before changing this value read the documentation for this option
-# (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-system.stateVersion = "23.05"; # Did you read the comment?
+#+end_src
+** OS Version
+I set it up on 23.05
+#+begin_src nix :tangle configuration.nix
+system = {
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  copySystemConfiguration = false;
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It's perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  stateVersion = "23.05"; # Did you read the comment?
+};
+
+}
+#+end_src
+
+* SDDM theme
+#+begin_src nix :tangle sddm-theme.nix
+{ pkgs }:
+
+pkgs.stdenv.mkDerivation {
+  name = "sddm-theme";
+  src = pkgs.fetchFromGitHub {
+    owner = "MarianArlt";
+    repo = "sddm-sugar-dark";
+    rev = "ceb2c455663429be03ba62d9f898c571650ef7fe";
+    sha256 = "0153z1kylbhc9d12nxy9vpn0spxgrhgy36wy37pk6ysq7akaqlvy";
+  };
+  installPhase = ''
+    mkdir -p $out
+    cp -R ./* $out/
+  '';
+}
+#+end_src
+* cp-p
+#+begin_src nix :tangle cp-p.nix
+{ pkgs }:
+
+pkgs.stdenv.mkDerivation {
+  name = "cp-p";
+  src = pkgs.fetchFromGitHub {
+    owner = "deadendpl";
+    repo = "nix-cp-p";
+    rev = "414f7983dfd3abe8048363b2ca1019472802c5b5";
+    sha256 = "1vfjx3xh58ihll1sz3v3dmwjag9s0j50gxdzpql6frl1ilrdpwli";
+  };
+  installPhase = ''
+    mkdir -p $out/bin
+    cp cp-p mv-p $out/bin/
+  '';
 }
 #+end_src

@@ -6,31 +6,23 @@
       ./hardware-configuration.nix
     ];
 
-boot.loader.efi.canTouchEfiVariables = true;
+boot = {
+  loader.efi.canTouchEfiVariables = true;
 
-boot.loader.grub.enable = true;
-boot.loader.grub.device = "nodev";
-boot.loader.grub.efiSupport = true;
+  loader.grub.enable = true;
+  loader.grub.device = "nodev";
+  loader.grub.efiSupport = true;
 
-boot.supportedFilesystems = [ "ntfs" ];
+supportedFilesystems = [ "ntfs" ];
 
-boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+};
 
 networking.hostName = "lenovo-nixos";
 networking.networkmanager.enable = true;
 networking.firewall.enable = false;
 
 hardware.bluetooth.enable = true;
-
-# Some programs need SUID wrappers, can be configured further or are
-# started in user sessions.
-programs.mtr.enable = true;
-programs.gnupg.agent = {
-  enable = true;
-  enableSSHSupport = true;
-};
-
-services.gnome.gnome-keyring.enable = true;
 
 time.timeZone = "Europe/Warsaw";
 
@@ -59,20 +51,41 @@ i18n.extraLocaleSettings = {
 };
 
 # Enable the X11 windowing system.
-services.xserver.enable = true;
+services.xserver = {
+  enable = true;
+  # Enable touchpad support (enabled default in most desktopManager).
+  libinput.enable = true;
+  # sddm configuration
+  displayManager.sddm = {
+    enable = true;
+    theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
+  };
+};
 
 # choosing simple greeter for lightdm
 # services.xserver.displayManager.lightdm.greeters.tiny.enable = true;
 
+
 # for 32-bit stuff (like wine)
 # hardware.opengl.driSupport32Bit = true;
 
-# Enable touchpad support (enabled default in most desktopManager).
-services.xserver.libinput.enable = true;
+programs = {
+  hyprland.enable = true;
+  light.enable = true;
 
-programs.hyprland.enable = true;
+# Some programs need SUID wrappers, can be configured further or are
+# started in user sessions.
+mtr.enable = true;
+gnupg.agent = {
+  enable = true;
+  enableSSHSupport = true;
+};
 
-programs.light.enable = true;
+fish.enable = true;
+};
+
+users.defaultUserShell = pkgs.fish;
+services.gnome.gnome-keyring.enable = true;
 
 # rtkit is optional but recommended
 security.rtkit.enable = true;
@@ -88,6 +101,7 @@ services.pipewire = {
 # Define a user account. Don't forget to set a password with ‘passwd’.
 users.users.oliwier = {
   isNormalUser = true;
+  createHome = true;
   extraGroups = [ "wheel" "video" "networkmanager" ];
   packages = with pkgs; [
   ];
@@ -104,14 +118,14 @@ environment.etc."xdg/user-dirs.defaults".text = ''
   VIDEOS=Videos
 '';
 
-users.defaultUserShell = pkgs.fish;
-programs.fish.enable = true;
-
 services.flatpak.enable = false;
 
 # List packages installed in system profile. To search, run:
 # $ nix search wget
 environment.systemPackages = with pkgs; [
+  # (import ./cp-p.nix)
+  # cli utils
+  (import ./cp-p.nix { inherit pkgs; })
   wget
   lolcat
   htop
@@ -137,6 +151,11 @@ environment.systemPackages = with pkgs; [
   ripgrep
   clipboard-jh
 
+  # for sddm
+  libsForQt5.qt5.qtquickcontrols2  
+  libsForQt5.qt5.qtgraphicaleffects
+
+  # desktop
   hyprland
   foot
   mako
@@ -153,11 +172,13 @@ environment.systemPackages = with pkgs; [
   wpgtk
   pywal
 
+  # some dev stuff
   gnumake
   cmake
   gcc
   libtool
 
+  # service things
   polkit_gnome
   blueberry
   dracula-theme
@@ -167,6 +188,8 @@ environment.systemPackages = with pkgs; [
   pavucontrol
   papirus-icon-theme
   swaybg
+  swayimg
+  swaynotificationcenter
   pcmanfm
   light
   syncthing
@@ -175,12 +198,33 @@ environment.systemPackages = with pkgs; [
   bitwarden
   bitwarden-cli
 
+  # qutebrowser
   qutebrowser
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
 
   emacs29
+  # this is for installing elisp packages from nix repos instead of normal elisp repos
+  # (pkgs.emacsWithPackagesFromUsePackage {
+  #     package = pkgs.emacsGit;  # replace with pkgs.emacsPgtk, or another version if desired.
+  #     config = path/to/your/config.el;
+  #     # config = path/to/your/config.org; # Org-Babel configs also supported
+
+  #     # Optionally provide extra packages not in the configuration file.
+  #     extraEmacsPackages = epkgs: [
+  #       epkgs.use-package;
+  #     ];
+
+  #     # Optionally override derivations.
+  #     override = epkgs: epkgs // {
+  #       somePackage = epkgs.melpaPackages.somePackage.overrideAttrs(old: {
+  #          # Apply fixes here
+  #       });
+  #     };
+  #   })
+
+  # i love how you can specify retroarch cores here
   (retroarch.override {
     cores = with libretro; [
       ppsspp
@@ -198,17 +242,8 @@ services.emacs.defaultEditor = true;
 
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
-  (nerdfonts.override { fonts = [ "CodeNewRoman" "Ubuntu" "Go-Mono" ]; })
+  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
 ];
-
-environment.etc."xdg/gtk-2.0/gtkrc".text = ''
-    gtk-theme-name = "Dracula"
-  '';
-
-environment.etc."xdg/gtk-3.0/settings.ini".text = ''
-    [Settings]
-    gtk-theme-name = "Dracula"
-  '';
 
 # setting up xdg desktop portal
 services.dbus.enable = true;
@@ -239,16 +274,18 @@ systemd = {
   '';
 };
 
-# Copy the NixOS configuration file and link it from the resulting system
-# (/run/current-system/configuration.nix). This is useful in case you
-# accidentally delete configuration.nix.
-system.copySystemConfiguration = true;
+system = {
+  # Copy the NixOS configuration file and link it from the resulting system
+  # (/run/current-system/configuration.nix). This is useful in case you
+  # accidentally delete configuration.nix.
+  copySystemConfiguration = false;
+  # This value determines the NixOS release from which the default
+  # settings for stateful data, like file locations and database versions
+  # on your system were taken. It's perfectly fine and recommended to leave
+  # this value at the release version of the first install of this system.
+  # Before changing this value read the documentation for this option
+  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
+  stateVersion = "23.05"; # Did you read the comment?
+};
 
-# This value determines the NixOS release from which the default
-# settings for stateful data, like file locations and database versions
-# on your system were taken. It's perfectly fine and recommended to leave
-# this value at the release version of the first install of this system.
-# Before changing this value read the documentation for this option
-# (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-system.stateVersion = "23.05"; # Did you read the comment?
 }

@@ -12,6 +12,7 @@
 (column-number-mode 1)               ; Column number in modeline
 (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
+(set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
@@ -35,6 +36,7 @@ Most of the stuff will get redirected here.")
       use-dialog-box nil ; turns off graphical dialog boxes
       tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
       save-place-file (concat user-share-emacs-directory "places")
+      url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
       initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
       initial-scratch-message nil ; deleting scratch buffer message
       scroll-conservatively 1000 ; Scroll one line at a time
@@ -71,6 +73,7 @@ Most of the stuff will get redirected here.")
 		backtrace-mode-hook
 		calendar-mode-hook
                 special-mode-hook
+		outline-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -79,6 +82,9 @@ Most of the stuff will get redirected here.")
 	  (emacs-lock-mode 'kill))
 (with-current-buffer "*Messages*"
 	  (emacs-lock-mode 'kill))
+
+(use-package swiper
+  :ensure t)
 
 (defun quit-window (&optional kill window)
  "Quit WINDOW, deleting it, and kill its buffer.
@@ -113,7 +119,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package quelpa
   :defer 5
-  ;; :custom (quelpa-upgrade-p t "Always try to update packages")
+  :custom
+    ;; (quelpa-upgrade-p t "Always try to update packages")
+    (quelpa-dir (concat user-share-emacs-directory "quelpa"))
   :config
     ;; Get ‘quelpa-use-package’ via ‘quelpa’
     (quelpa
@@ -335,7 +343,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "m b b" '(org-table-blank-field :wk "Make blank field")
     "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
     "m b e" '(org-table-edit-field :wk "Edit field")
-    "m b f" '(org-table-edit-formulas :wk "Edit fromulas")
+    "m b f" '(org-table-edit-formulas :wk "Edit formulas")
     "m b h" '(org-table-field-info :wk "Field info")
     "m b s" '(org-table-sort-lines :wk "Sort lines")
     "m b r" '(org-table-recalculate :wk "Recalculate")
@@ -363,6 +371,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "m l" '(:ignore t :wk "Link")
     "m l l" '(org-insert-link :wk "Insert link")
     "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  "m p" '(:ignore t :wk "Priority")
+    "m p d" '(org-priority-down :wk "Down")
+    "m p p" '(org-priority-down :wk "Set priority")
+    "m p u" '(org-priority-down :wk "Up")
   "m q" '(org-set-tags-command :wk "Set tag")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
@@ -570,7 +582,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (global-emojify-mode 1))
 
 (set-face-attribute 'default nil
-  :font "CodeNewRoman Nerd Font Mono"
+  :font "JetBrainsMono Nerd Font Mono"
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
@@ -595,11 +607,27 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 ;; This sets the default font on all graphical frames created after restarting Emacs.
 ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right unless I also add this method of setting the default font.
-;; (add-to-list 'default-frame-alist '(font . "CodeNewRoman Nerd Font Mono-9"))
+;; are not right, idk why
+(add-to-list 'default-frame-alist '(font . "JetBrainsMono Nerd Font Mono-9"))
 
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
+
+(use-package ligature
+  :config
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable ligatures in programming modes                                                           
+    (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
+                                     ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
+                                     "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
+                                     "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
+                                     "/=" "/==" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
+                                     "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
+                                     "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
+                                     "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
+                                     "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
+                                     "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
+    (global-ligature-mode 't))
 
 (use-package flycheck
   :after prog-mode
@@ -754,6 +782,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; show hidden files
 
 (use-package obsidian
+  :disabled
   :defer t
   :config
     (obsidian-specify-path "~/Documents/Obsidian/pppoopoo")
@@ -779,12 +808,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (with-eval-after-load 'evil-maps
       (define-key evil-motion-state-map (kbd "SPC") nil)
       (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)))
+      (define-key evil-motion-state-map (kbd "TAB") nil))
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     ;; Setting RETURN key in org-mode to follow links
-    ;; (setq org-return-follows-link t)
-    ;; (require 'evil-org-agenda)
-    ;; (evil-org-agenda-set-keys))
+    (setq org-return-follows-link t))
 
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
@@ -817,6 +844,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-collection-org-roam-setup)
     (require 'org-roam-export))
 
+(use-package org-roam-ui
+  :after org-roam)
+
+(use-package simple-httpd
+  :after org-roam-ui)
+(use-package websocket
+  :after org-roam-ui)
+(use-package f
+  :after org-roam-ui)
+
 (use-package org-superstar
   :defer t
   :after org
@@ -831,6 +868,37 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after org
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
+
+(use-package org-modern
+  :after org
+  :init (add-hook 'org-mode-hook 'org-modern-mode t))
+
+(use-package org-yt
+  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
+  :defer t
+  :after org
+  :config
+    (require 'org-yt)
+
+    (defun org-image-link (protocol link _description)
+      "Interpret LINK as base64-encoded image data."
+      (cl-assert (string-match "\\`img" protocol) nil
+                 "Expected protocol type starting with img")
+      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+        (cl-assert buf nil
+                   "Download of image \"%s\" failed." link)
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (re-search-forward "\r?\n\r?\n")
+          (buffer-substring-no-properties (point) (point-max)))))
+
+    (org-link-set-parameters
+     "imghttp"
+     :image-data-fun #'org-image-link)
+
+    (org-link-set-parameters
+     "imghttps"
+     :image-data-fun #'org-image-link))
 
 (use-package toc-org
   :defer t
@@ -1028,11 +1096,19 @@ do not already have one."
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
 
+(use-package eshell-toggle
+  :defer t
+  :custom
+    (eshell-toggle-size-fraction 3)
+    (eshell-toggle-use-projectile-root t)
+    (eshell-toggle-run-command nil)
+    (eshell-toggle-init-function #'eshell-toggle-init-eshell))
+
 (use-package eshell
   :defer t
   :custom
     (eshell-directory-name "~/.config/eshell/")
-    (eshell-rc-script "~/.config/eshell/profile")     ;; your profile for eshell; like a bashrc for eshell.
+    (eshell-rc-script "~/.config/eshell/profile")    ;; your profile for eshell; like a bashrc for eshell.
     (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
     (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
     (eshell-last-dir-ring-file-name (concat user-share-emacs-directory "eshell-lastdir"))
@@ -1117,10 +1193,10 @@ do not already have one."
 (use-package ewal
   :ensure t
   :config
-    (set-face-attribute 'line-number t
+    (set-face-attribute 'line-number-current-line t
       :foreground (ewal-load-color 'comment)
       :inherit 'default)
-    (set-face-attribute 'line-number-current-line t
+    (set-face-attribute 'line-number t
       :foreground (ewal--get-base-color 'green)
       :inherit 'default))
 
@@ -1183,6 +1259,25 @@ It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
   (interactive)
   (evil-window-right 1)
   (evil-window-delete))
+
+(use-package yasnippet
+  :defer t
+  :quelpa t
+  :after prog-mode)
+
+(use-package yasnippet-snippets
+  :defer t
+  :after yasnippet)
+
+;; This is for html snippets
+;; (use-package emmet-mode
+;;   :defer t
+;;   :after html-mode mhtml-mode
+;;   :config
+;;     (evil-collection-define-key 'normal 'html-mode-map
+;;       "TAB" 'emmet-expand-line)
+;;     (evil-collection-define-key 'normal 'mhtml-mode-map
+;;       "TAB" 'emmet-expand-line))
 
 (defun zen-mode ()
   "Comfy writing experience"

@@ -115,9 +115,9 @@ c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 
 # fonts
-c.fonts.default_family = "CodeNewRoman Nerd Font"
+c.fonts.default_family = "JetBrainsMono Nerd Font"
 c.fonts.web.family.standard = "ubuntunerdfont"
-c.fonts.web.family.fixed = "codenewromannerdfont"
+c.fonts.web.family.fixed = "jetbrainsmononerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
 
 c.scrolling.smooth = False

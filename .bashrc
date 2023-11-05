@@ -2,7 +2,8 @@
 [[ $- != *i* ]] && return
 
 export PATH=~/.config/emacs/bin:~/.local/bin:$PATH
-export EDITOR='emacsclient -t -a "nvim"'
+EDITOR='emacsclient -t -a "nvim"'
+VISUAL='emacsclient -c -a "emacs"'
 export HISTFILE="~/.local/share/bash/bash-history"
 
 # apt
@@ -39,15 +40,19 @@ alias nclean='sudo nix-collect-garbage -d'
 # other
 alias cp='cp -v'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
-alias lf='lf -single'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
 alias v='$EDITOR'
+alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
+alias demacs='emacs --daemon'
+alias remacs='killall emacs;killall emacs && emacs --daemon'
+alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
+alias myip='curl "https://wtfismyip.com/text"'
 PS1='[\u@\h \W]\$'
 
 if [ -n "$PS1" ]; then
