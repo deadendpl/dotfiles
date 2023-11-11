@@ -22,7 +22,7 @@ sudo pacman -S --noconfirm hyprland \
                            p7zip \
                            unrar \
                            zathura \
-			   zathura-pdf-poppler \
+			   zathura-pdf-mupdf \
                            neovim \
                            gammastep \
                            lolcat \
@@ -50,5 +50,7 @@ sudo pacman -S --noconfirm hyprland \
                            lf \
                            stow \
                            expac \
-			   python-tldextract # for bitwarden in qutebrowser \
-                           # shell-color-scripts \
+                           # for bitwarden in qutebrowser 
+			   python-tldextract \
+			   # for keepassxc in qutebrowser
+                           python-pynacl

@@ -70,8 +70,6 @@ networking.firewall.enable = false;
 hardware.bluetooth.enable = true;
 
 #+end_src
-
-
 ** Locales
 Locales are weird to set up. I set my timezone and keyboard layout for xorg (even though I have hyprland set up on this)
 #+begin_src nix :tangle configuration.nix
@@ -104,10 +102,8 @@ i18n.extraLocaleSettings = {
 #+end_src
 
 ** Graphical environment
-I enable xorg since that installs display (login) manager. The default login manager is lightdm so I leave it as it is. I enable touchpad since I'm on netbook.
+I enable xorg since that installs display (login) manager. The default login manager is lightdm but I change is to sddm and use a nice theme. I enable touchpad since I'm on netbook.
 
-I enable hyprland which installs necessary packages and sets up desktop entry in display manager.
-I also enable =light= which lets me change screen brightness.
 #+begin_src nix :tangle configuration.nix
 # Enable the X11 windowing system.
 services.xserver = {
@@ -131,6 +127,8 @@ services.xserver = {
   #+end_src
 
 Here I enable stuff in one block since you can do that.
+I enable hyprland which installs necessary packages and sets up desktop entry in display manager.
+I also enable =light= which lets me change screen brightness.
 #+begin_src nix :tangle configuration.nix
 programs = {
   hyprland.enable = true;
@@ -297,6 +295,8 @@ environment.systemPackages = with pkgs; [
   python311Packages.psutil
   python311Packages.python-daemon
 
+  # for latex in emacs
+  #texlive.combined.scheme-medium
   emacs29
   # this is for installing elisp packages from nix repos instead of normal elisp repos
   # (pkgs.emacsWithPackagesFromUsePackage {

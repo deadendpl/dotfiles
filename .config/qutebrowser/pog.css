@@ -2,6 +2,6 @@
   font-family: "Ubuntu Nerd Font", sans-serif;
 }
 
-pre, code {
+pre, code, kbd, tt, var, samp {
   font-family: "JetBrainsMono Nerd Font", monospace, monospace;
 }

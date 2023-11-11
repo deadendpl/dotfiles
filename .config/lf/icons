@@ -163,6 +163,7 @@ fi             # FILE
 *.sol           󰡪
 *.pem           
 *.doc           
+*.asc           󰦝
 
 # file names (vim-devicons) (case-insensitive not supported in lf)
 *gruntfile.coffee       

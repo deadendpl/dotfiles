@@ -204,6 +204,8 @@ environment.systemPackages = with pkgs; [
   python311Packages.psutil
   python311Packages.python-daemon
 
+  # for latex in emacs
+  #texlive.combined.scheme-medium
   emacs29
   # this is for installing elisp packages from nix repos instead of normal elisp repos
   # (pkgs.emacsWithPackagesFromUsePackage {

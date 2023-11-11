@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name        Farside
-// @author      Ben Busby, Founder,         deadendpl (on github), edited
+// @author      Ben Busby, Founder,
 // @author      Schimon Jehudah, Adv.
+// @author      Oliwier Czerwiński (oliwier.czerwi@proton.me), editor
 // @license     AGPL3
 // @namespace   link.farside
 // @description A smart redirecting gateway for various frontend services
@@ -9,6 +10,8 @@
 // @run-at      document-start
 // @match       *://bing.com/*
 // @match       *://*.bing.com/*
+// @match       *://goodreads.com/*
+// @match       *://*.goodreads.com/*
 // @match       *://google.*/*
 // @match       *://*.google.*/*
 // @match       *://imgur.com/*
@@ -100,49 +103,49 @@ switch (true) {
   site = [
     // searx
     'srx,https://farside.link/searx',
-    'srx,https://searx.webheberg.info',
-    'srx,https://searx.tyil.nl',
-    'srx,https://searx.tuxcloud.net',
-    'srx,https://searx.tux.land',
-    'srx,https://searx.theanonymouse.xyz',
-    'srx,https://searx.stuehieyr.com',
-    'srx,https://searx.sp-codes.de',
-    'srx,https://searx.ru',
-    'srx,https://searx.rasp.fr',
-    'srx,https://searx.ninja',
-    'srx,https://searx.gnu.style',
-    'srx,https://searx.divided-by-zero.eu',
-    'srx,https://search.neet.works',
-    'srx,https://search.jpope.org',
-    'srx,https://search.asynchronousexchange.com',
-    'srx,https://procurx.pt',
-    'srx,https://dynabyte.ca',
+    // 'srx,https://searx.webheberg.info',
+    // 'srx,https://searx.tyil.nl',
+    // 'srx,https://searx.tuxcloud.net',
+    // 'srx,https://searx.tux.land',
+    // 'srx,https://searx.theanonymouse.xyz',
+    // 'srx,https://searx.stuehieyr.com',
+    // 'srx,https://searx.sp-codes.de',
+    // 'srx,https://searx.ru',
+    // 'srx,https://searx.rasp.fr',
+    // 'srx,https://searx.ninja',
+    // 'srx,https://searx.gnu.style',
+    // 'srx,https://searx.divided-by-zero.eu',
+    // 'srx,https://search.neet.works',
+    // 'srx,https://search.jpope.org',
+    // 'srx,https://search.asynchronousexchange.com',
+    // 'srx,https://procurx.pt',
+    // 'srx,https://dynabyte.ca',
     // searxng
     'sng,https://farside.link/searxng',
-    'sng,https://swag.pw',
-    'sng,https://searxng.zackptg5.com',
-    'sng,https://searx.tiekoetter.com',
-    'sng,https://searx.prvcy.eu',
-    'sng,https://searx.mha.fi',
-    'sng,https://searx.jaska.cc',
-    'sng,https://searx.fmac.xyz',
-    'sng,https://searx.ebnar.xyz',
-    'sng,https://searx.be',
-    'sng,https://search.zzls.xyz',
-    'sng,https://search.vojkovic.xyz',
-    'sng,https://search.rabbit-company.com',
-    'sng,https://search.ononoki.org',
-    'sng,https://search.neet.works',
-    'sng,https://search.mdosch.de',
-    'sng,https://s.zhaocloud.net',
-    'sng,https://paulgo.io',
-    'sng,https://northboot.xyz',
-    'sng,https://etsi.me',
+    // 'sng,https://swag.pw',
+    // 'sng,https://searxng.zackptg5.com',
+    // 'sng,https://searx.tiekoetter.com',
+    // 'sng,https://searx.prvcy.eu',
+    // 'sng,https://searx.mha.fi',
+    // 'sng,https://searx.jaska.cc',
+    // 'sng,https://searx.fmac.xyz',
+    // 'sng,https://searx.ebnar.xyz',
+    // 'sng,https://searx.be',
+    // 'sng,https://search.zzls.xyz',
+    // 'sng,https://search.vojkovic.xyz',
+    // 'sng,https://search.rabbit-company.com',
+    // 'sng,https://search.ononoki.org',
+    // 'sng,https://search.neet.works',
+    // 'sng,https://search.mdosch.de',
+    // 'sng,https://s.zhaocloud.net',
+    // 'sng,https://paulgo.io',
+    // 'sng,https://northboot.xyz',
+    // 'sng,https://etsi.me',
     // whoogle
     'who,https://farside.link/whoogle',
-    'who,https://gowogle.voring.me',
-    'who,https://s.alefvanoon.xyz',
-    'who,https://search.sethforprivacy.com',
+    // 'who,https://gowogle.voring.me',
+    // 'who,https://s.alefvanoon.xyz',
+    // 'who,https://search.sethforprivacy.com',
     // yacy
     //'ycy,https://farside.link/yacy',
     'ycy,https://51.79.164.235:8443',
@@ -163,16 +166,13 @@ switch (true) {
   case hostname.endsWith('imgur.com'):
 
   site = [
-    // imgin
-    'img,https://farside.link/imgin',
-    'img,https://imgin.voidnet.tech',
     // rimgo
     'rim,https://farside.link/rimgo',
-    'rim,https://rimgo.bus-hit.me',
+  /*'rim,https://rimgo.bus-hit.me',
     'rim,https://rimgo.totaldarkness.net',
     'rim,https://img.riverside.rocks',
     'rim,https://rimgo.pussthecat.org',
-    'rim,https://i.bcow.xyz'];
+    'rim,https://i.bcow.xyz' */];
   break;
 
   case hostname.endsWith('instagram.com'):
@@ -180,7 +180,7 @@ switch (true) {
   site = [
     // bibliogram
     'bib,https://farside.link/bibliogram',
-    'bib,https://bibliogram.art',
+  /*'bib,https://bibliogram.art',
     'bib,https://bibliogram.snopyta.org',
     'bib,https://bibliogram.froth.zone',
     'bib,https://insta.trom.tf',
@@ -191,7 +191,7 @@ switch (true) {
     'bib,https://biblio.alefvanoon.xyz',
     'bib,https://bib.actionsack.com',
     'bib,https://bibliogram.1d4.us',
-    'bib,https://bibliogram.pussthecat.org'];
+    'bib,https://bibliogram.pussthecat.org' */];
   break;
 
   case hostname.endsWith('medium.com'):
@@ -287,6 +287,20 @@ switch (true) {
     'wik,https://wikiless.alefvanoon.xyz',
     'wik,https://wiki.froth.zone',
     'wik,https://wiki.604kph.xyz' */];
+  break;
+
+  case hostname.endsWith('goodreads.com'):
+
+  site = [
+    // biblioreads
+    'bibr,https://biblioreads.eu.org',
+    'bibr,https://biblioreads.vercel.app',
+    'bibr,https://biblioreads.mooo.com',
+    'bibr,https://bl.vern.cc',
+    'bibr,https://biblioreads.lunar.icu',
+    // 'bibr,https://read.whateveritworks.org',
+    'bibr,https://biblioreads.privacyfucking.rocks',
+    'bibr,https://read.seitan-ayoub.lol'];
   break;
 
   case hostname.endsWith('youtube.com'):

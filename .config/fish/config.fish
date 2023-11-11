@@ -66,6 +66,7 @@ alias nclean='sudo nix-collect-garbage -d'
 alias cp='cp -v'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
 alias lf='lfcd'
+alias cp='cp-p'
 alias clr='clear'
 alias cllr='clear && l'
 alias grep='grep --color=auto'
@@ -80,3 +81,4 @@ alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickroll
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 alias myip='curl "https://wtfismyip.com/text"'
 alias swaylock='~/.cache/wal/swaylock.sh'
+alias pi='ping wp.pl'

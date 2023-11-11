@@ -13,6 +13,7 @@
 (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
 (set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
+(display-battery-mode 1)             ; Setting battery percentage in modeline
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
@@ -41,10 +42,8 @@ Most of the stuff will get redirected here.")
       initial-scratch-message nil ; deleting scratch buffer message
       scroll-conservatively 1000 ; Scroll one line at a time
       scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+      tab-always-indent nil
       vc-follow-symlinks t) ; Enable follow symlinks
-
-;; Make ESC quit prompts immediately
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
@@ -77,14 +76,13 @@ Most of the stuff will get redirected here.")
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-;; locking buffers from killing
-(with-current-buffer "*scratch*" 
-	  (emacs-lock-mode 'kill))
-(with-current-buffer "*Messages*"
-	  (emacs-lock-mode 'kill))
-
 (use-package swiper
   :ensure t)
+
+(add-to-list 'display-buffer-alist
+             '("*compilation"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
 
 (defun quit-window (&optional kill window)
  "Quit WINDOW, deleting it, and kill its buffer.
@@ -94,6 +92,17 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
  (interactive "P")
  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
  (quit-restore-window window 'kill))
+
+(add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
+
+;; locking buffers from killing
+(with-current-buffer "*scratch*" 
+	  (emacs-lock-mode 'kill))
+(with-current-buffer "*Messages*"
+	  (emacs-lock-mode 'kill))
+
+;; Make ESC quit prompts immediately
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Initialize package sources
 (require 'package)
@@ -219,6 +228,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
   "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
   "b d" '(bookmark-delete :wk "Delete bookmark")
+  "b f" '(scratch-buffer :wk "Scratch buffer")
   "b i" '(ibuffer :wk "Ibuffer")
   "b k" '(kill-current-buffer :wk "Kill current buffer")
   "b K" '(kill-some-buffers :wk "Kill multiple buffers")
@@ -356,6 +366,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
       "m b i r" '(org-table-insert-row :wk "Insert row")
       "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
+  "m c" '(org-capture :wk "Capture")
   "m d" '(:ignore t :wk "Date/deadline")
     "m d d" '(org-deadline :wk "Org deadline")
     "m d s" '(org-schedule :wk "Org schedule")
@@ -364,7 +375,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m f" '(:ignore t :wk "Fonts")
     "m f b" '(custom/org-make-bold-in-region :wk "Bold in region")
+    "m f c" '(custom/org-make-code-in-region :wk "Code in region")
+    "m f C" '(custom/org-make-code-alt-in-region :wk "Alt. Code in region")
+    "m f i" '(custom/org-make-italic-in-region :wk "Italic in region")
     "m f l" '(custom/org-make-latex-in-region :wk "Latex in region")
+    "m f u" '(custom/org-make-underline-in-region :wk "Underline in region")
+    "m f -" '(custom/org-make-stroke-in-region :wk "Strike through in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
     "m I c" '(org-id-get-create :wk "Create ID")
@@ -376,6 +392,21 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "m p p" '(org-priority-down :wk "Set priority")
     "m p u" '(org-priority-down :wk "Up")
   "m q" '(org-set-tags-command :wk "Set tag")
+  "m s" '(:ignore t :wk "Tree/Subtree")
+    "m s a" '(org-toggle-archive-tag :wk "Archive tag")
+    "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
+    "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
+    "m s d" '(org-cut-subtree :wk "Cut subtree")
+    "m s h" '(org-promote-subtree :wk "Promote subtree")
+    "m s j" '(org-move-subtree-down :wk "Move subtree down")
+    "m s k" '(org-move-subtree-up :wk "Move subtree up")
+    "m s l" '(org-demote-subtree :wk "Demote subtree")
+    "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
+    "m s r" '(org-refile :wk "Refile")
+    "m s s" '(org-sparse-tree :wk "Sparse tree")
+    "m s A" '(org-archive-subtree :wk "Archive subtree")
+    "m s N" '(widen :wk "Widen")
+    "m s S" '(org-sort :wk "Sort")
   "m t" '(org-todo :wk "Org todo")
   "m B" '(org-babel-tangle :wk "Org babel tangle")
   "m T" '(org-todo-list :wk "Org todo list"))
@@ -407,6 +438,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "n r a r" '(org-roam-alias-remove :wk "Remove alias")
     "n r d" '(:ignore t :wk "Roam dailies")
       "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
+      "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
     "n r f" '(org-roam-node-find :wk "Find note")
     "n r i" '(org-roam-node-insert :wk "Insert note")
     "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
@@ -442,7 +474,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "t r" '(rainbow-mode :wk "Rainbow mode")
   "t t" '(visual-line-mode :wk "Word Wrap")
   "t v" '(vterm-toggle :wk "Vterm")
-  "t z" '(zen-mode :wk "Zen mode"))
+  "t z" '(writeroom-mode :wk "Zen mode"))
 
 (custom/leader-keys
   "w" '(:ignore t :wk "Windows")
@@ -529,6 +561,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "j" 'widget-forward
       "k" 'widget-backward
       "l" 'dashboard-return)
+    (emacs-lock-mode 'kill)
   :bind
     (:map dashboard-mode-map
       ([remap dashboard-next-line] . 'widget-forward)
@@ -572,7 +605,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package doom-modeline
   :ensure t
-  :init (doom-modeline-mode 1))
+  :init (doom-modeline-mode 1)
+  :custom
+    (doom-modeline-battery t))
 
 (use-package emojify
   :defer t
@@ -641,7 +676,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-set-initial-state 'minesweeper-mode 'emacs))
 
 (use-package magit
-  :defer t)
+  :defer t
+  :custom
+    (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
+    (magit-bury-buffer-function 'magit-restore-window-configuration))
 
 (use-package git-timemachine
   :after git-timemachine
@@ -745,6 +783,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package nix-mode
   :defer t)
 
+(use-package lorem-ipsum
+  :defer t)
+
 (use-package markdown-mode
   :defer t
   :custom-face
@@ -822,6 +863,23 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (require 'org-tempo)
 
+(use-package org-appear
+  :defer t
+  :after org
+  :init (add-hook 'org-mode-hook 'org-appear-mode t)
+  :custom
+    (org-appear-trigger 'manual)
+  :config
+    (add-hook 'org-mode-hook (lambda ()
+      (add-hook 'evil-insert-state-entry-hook
+        #'org-appear-manual-start
+        nil
+        t)
+      (add-hook 'evil-insert-state-exit-hook
+        #'org-appear-manual-stop
+          nil
+          t))))
+
 (use-package org-roam
   :ensure t
   :init
@@ -845,13 +903,17 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (require 'org-roam-export))
 
 (use-package org-roam-ui
+  :defer t
   :after org-roam)
 
 (use-package simple-httpd
+  :defer t
   :after org-roam-ui)
 (use-package websocket
+  :defer t
   :after org-roam-ui)
 (use-package f
+  :defer t
   :after org-roam-ui)
 
 (use-package org-superstar
@@ -871,7 +933,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package org-modern
   :after org
-  :init (add-hook 'org-mode-hook 'org-modern-mode t))
+  :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :custom
+    (org-modern-star nil))
 
 (use-package org-yt
   :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
@@ -934,6 +998,7 @@ do not already have one."
     (org-level-5 ((t (:inherit outline-5 :height 1.3))))
     (org-level-6 ((t (:inherit outline-5 :height 1.2))))
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-agenda-date-today ((t (:height 1.3))))
   :custom
     (org-directory "~/org/")
     (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/phone.org")))
@@ -960,12 +1025,20 @@ do not already have one."
         "OKAY(o)"
         "YES(y)"
         "NO(n)")))
+    (org-capture-templates
+      '(("t" "Todo" entry (file "~/org-roam/agenda.org")
+         "* TODO %?\n  %i\n  %a")
+        ("s" "School Todo" entry (file+headline "~/org-roam/agenda.org" "SCHOOL")
+         "* TODO %?\n  %i\n  %a")))
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
     (org-hide-emphasis-markers t)
+    (org-pretty-entities t)
     (org-startup-with-inline-images t)
+    (org-cycle-inline-images-display t)
     (org-display-remote-inline-images 'download)
+    (org-list-allow-alphabetical t)
     (org-ellipsis " •")
     (org-agenda-window-setup 'current-window)
     (org-fontify-quote-and-verse-blocks t)
@@ -981,6 +1054,21 @@ do not already have one."
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
   :config
+    (add-to-list 'display-buffer-alist
+      '("*Agenda Commands*"
+        (display-buffer-at-bottom)
+        (window-height . 12)))
+
+    (add-to-list 'display-buffer-alist
+      '("*Org Select*"
+        (display-buffer-at-bottom)
+        (window-height . 12)))
+
+    (add-to-list 'display-buffer-alist
+      '("*Org Links*"
+         (display-buffer-at-bottom)
+         (window-height . 1)))
+
     (defun custom/org-resize-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
@@ -992,7 +1080,7 @@ do not already have one."
     (plist-put org-format-latex-options :background nil)
     
     (defun custom/org-make-bold-in-region (start end)
-      "Add asterisks before and after the selected text."
+      "Add asterisks (*) before and after the selected text."
       (interactive "r")
       (save-excursion
         (goto-char end)
@@ -1001,7 +1089,7 @@ do not already have one."
         (insert "*")))
 
     (defun custom/org-make-italic-in-region (start end)
-      "Add asterisks before and after the selected text."
+      "Add forward slashes (/) before and after the selected text."
       (interactive "r")
       (save-excursion
         (goto-char end)
@@ -1010,13 +1098,49 @@ do not already have one."
         (insert "/")))
 
     (defun custom/org-make-latex-in-region (start end)
-      "Add dollar signs before and after the selected text."
+      "Add dollar signs ($) before and after the selected text."
       (interactive "r")
       (save-excursion
         (goto-char end)
         (insert "$")
         (goto-char start)
         (insert "$")))
+    
+    (defun custom/org-make-code-in-region (start end)
+      "Add equal signs (=) before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "=")
+        (goto-char start)
+        (insert "=")))
+    
+    (defun custom/org-make-code-alt-in-region (start end)
+      "Add tilde (~) signs before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "~")
+        (goto-char start)
+        (insert "~")))
+    
+    (defun custom/org-make-underline-in-region (start end)
+      "Add tilde underscore (_) signs before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "_")
+        (goto-char start)
+        (insert "_")))
+    
+    (defun custom/org-make-stroke-in-region (start end)
+      "Add plus (+) signs before and after the selected text."
+      (interactive "r")
+      (save-excursion
+        (goto-char end)
+        (insert "+")
+        (goto-char start)
+        (insert "+")))
   :bind
     ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
@@ -1117,9 +1241,9 @@ do not already have one."
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
-    (eshell-visual-commands'("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
-  :config
-    ;; (evil-set-initial-state 'eshell-mode 'emacs))
+    (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
+    ;; :config
+    ;; (evil-set-initial-state 'eshell-mode 'emacs)
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -1173,6 +1297,34 @@ do not already have one."
 
 (use-package sudo-edit
   :defer t)
+
+(use-package autoinsert
+  :hook (after-init . auto-insert-mode)
+  :custom
+    (auto-insert-directory (concat user-emacs-directory "templates/"))
+    (auto-insert-query nil)
+  :config
+    (add-to-list 'auto-insert-alist '(sh-mode nil "#!/usr/bin/env bash\n\n"))
+    (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
+
+(use-package yasnippet
+  :defer t
+  :quelpa t
+  :after prog-mode)
+
+(use-package yasnippet-snippets
+  :defer t
+  :after yasnippet)
+
+;; This is for html snippets
+;; (use-package emmet-mode
+;;   :defer t
+;;   :after html-mode mhtml-mode
+;;   :config
+;;     (evil-collection-define-key 'normal 'html-mode-map
+;;       "TAB" 'emmet-expand-line)
+;;     (evil-collection-define-key 'normal 'mhtml-mode-map
+;;       "TAB" 'emmet-expand-line))
 
 (use-package doom-themes
   :ensure t
@@ -1260,47 +1412,7 @@ It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
   (evil-window-right 1)
   (evil-window-delete))
 
-(use-package yasnippet
-  :defer t
-  :quelpa t
-  :after prog-mode)
+(use-package writeroom-mode
+  :defer t)
 
-(use-package yasnippet-snippets
-  :defer t
-  :after yasnippet)
-
-;; This is for html snippets
-;; (use-package emmet-mode
-;;   :defer t
-;;   :after html-mode mhtml-mode
-;;   :config
-;;     (evil-collection-define-key 'normal 'html-mode-map
-;;       "TAB" 'emmet-expand-line)
-;;     (evil-collection-define-key 'normal 'mhtml-mode-map
-;;       "TAB" 'emmet-expand-line))
-
-(defun zen-mode ()
-  "Comfy writing experience"
-  (interactive)
-  (set-fringe-mode 200)
-  (display-line-numbers-mode 0))
-
-(define-minor-mode zen-mode
-  "Toggle zen Minor Mode.
-  When enabled, it sets fringe mode to 200 and turns off display-line-numbers-mode."
-  :init-value nil
-  :lighter " CustomConfig"
-  :global nil
-
-  (if zen-mode
-      (progn
-        (set-fringe-mode 200)
-        (display-line-numbers-mode 0))
-    (progn
-      (set-fringe-mode nil)
-      (display-line-numbers-mode 1))))
-
-(add-hook 'zen-mode-hook
-          (lambda ()
-            (message "Zen Mode %s"
-                     (if zen-mode "enabled" "disabled"))))
+(use-package elfeed :defer t)

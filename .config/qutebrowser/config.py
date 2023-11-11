@@ -98,8 +98,10 @@ c.content.javascript.clipboard = "access-paste"
 
 # search
 c.url.searchengines = {
-  'DEFAULT': 'https://farside.link/whoogle/search?q={}&lang_interface=en',
+  'DEFAULT': 'https://www.ecosia.org/search?method=index&q={}',
+  'whoo': 'https://farside.link/whoogle/search?q={}&lang_interface=en',
   'ph': 'https://www.phind.com/search?q={}',
+  'xn': 'https://farside.link/searxng/search?q={}',
 }
 
 # Page(s) to open at the start.
@@ -145,3 +147,7 @@ c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"
 
 config.bind('<ctrl+j>', 'completion-item-focus next', 'command')
 config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
+config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 870444FF', mode='insert')
+config.bind('pw', 'spawn --userscript qute-keepassxc --key 870444FF', mode='normal')
+
+config.set('content.blocking.enabled', True, '*://www.ecosia.org/*')

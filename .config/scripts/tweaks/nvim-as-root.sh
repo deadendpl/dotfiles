@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# this script will copy you current neovim cofiguration to root account
+# this script will copy your current neovim cofiguration to root account
 
 src=$HOME/.config/nvim
 destination=/root/.config/nvim
