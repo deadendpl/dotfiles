@@ -117,7 +117,7 @@ c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 
 # fonts
-c.fonts.default_family = "JetBrainsMono Nerd Font"
+c.fonts.default_family = ["JetBrainsMono NF", "Noto Color Emoji"]
 c.fonts.web.family.standard = "ubuntunerdfont"
 c.fonts.web.family.fixed = "jetbrainsmononerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
@@ -149,5 +149,6 @@ config.bind('<ctrl+j>', 'completion-item-focus next', 'command')
 config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
 config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 870444FF', mode='insert')
 config.bind('pw', 'spawn --userscript qute-keepassxc --key 870444FF', mode='normal')
+config.bind('gr', 'config-source', mode='normal')
 
-config.set('content.blocking.enabled', True, '*://www.ecosia.org/*')
+config.set('content.blocking.enabled', True, '*.ecosia.org/*')

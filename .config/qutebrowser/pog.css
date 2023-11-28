@@ -1,7 +1,7 @@
 * {
-  font-family: "Ubuntu Nerd Font", sans-serif;
+  font-family: "JetBrainsMono NF", monospace;
 }
 
 pre, code, kbd, tt, var, samp {
-  font-family: "JetBrainsMono Nerd Font", monospace, monospace;
+  font-family: "JetBrainsMono NF", monospace, monospace;
 }

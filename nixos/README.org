@@ -16,33 +16,73 @@
   - [[#polkit][Polkit]]
   - [[#automatic-garbage-collector][Automatic garbage collector]]
   - [[#os-version][OS Version]]
-- [[#sddm-theme][SDDM theme]]
+- [[#sddm-themes][SDDM themes]]
+  - [[#sugar-dark][Sugar Dark]]
+  - [[#windows-7][Windows 7]]
 - [[#cp-p][cp-p]]
 
 * Main configuration
 ** Booting
-=hardware-configuration.nix= is handling the drives and some GPU and CPU related things.
-You should use =hardware-configuration.nix= of your own.
+*** Importing unstable channel
+I import unstable package channel to use with some bledding-edge software (like hyprland).
+I can then install unstable packages with =unstable.package=.
+
 
 #+begin_src nix :tangle configuration.nix
 { config, pkgs, ... }:
 
+let
+  unstableTarball =
+    fetchTarball
+      https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
+in
 {
+  nixpkgs.config = {
+    packageOverrides = pkgs: {
+      unstable = import unstableTarball {
+        config = config.nixpkgs.config;
+      };
+    };
+  };
+
+#+end_src
+
+=hardware-configuration.nix= is handling the drives and some GPU and CPU related things.
+You should use =hardware-configuration.nix= of your own.
+
+#+begin_src nix :tangle configuration.nix
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
+
 #+end_src
 
+*** Actual boot configuration
 Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
 #+begin_src nix :tangle configuration.nix
 boot = {
   loader.efi.canTouchEfiVariables = true;
 
-  loader.grub.enable = true;
-  loader.grub.device = "nodev";
-  loader.grub.efiSupport = true;
+  loader.grub = {
+    enable = true;
+      device = "nodev";
+      efiSupport = true;
+      theme = pkgs.fetchFromGitHub { # current as of 11/2023
+        owner = "deadendpl";
+        repo = "nix-grub_gtg";
+        rev = "f0a6eec0993b731562fd44acfe7851aed82179ec";
+        sha256 = "1fg3vdqxj7qqpbhl96xhl3175a68bg0c7xbn7q2hspc2272hmh6b";
+      };
+      # theme = pkgs.fetchFromGitHub { # current as of 11/2023
+      #   owner = "shvchk";
+      #   repo = "fallout-grub-theme";
+      #   rev = "e8433860b11abb08720d7c32f5b9a2a534011bca";
+      #   sha256 = "1cf0gd7gziw1j6kilhihpdlna6j1hhvpsgaxsmsqckjmc7igixls";
+      # };
+  };
+     
 
 #+end_src
 
@@ -54,9 +94,14 @@ I set ntfs as supported filesystem because without this you can't mount ntfs dri
 
 The default kernel is latest lts kernel. I change that to zen kernel.
 #+begin_src nix :tangle configuration.nix
-  kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+  kernelPackages = pkgs.unstable.linuxKernel.packages.linux_zen;
 };
 
+#+end_src
+
+I turn on =nix-command= and =flakes= and idk where to put it
+#+begin_src nix :tangle configuration.nix
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
 #+end_src
 
 ** Networking
@@ -96,10 +141,11 @@ i18n.extraLocaleSettings = {
   LC_NUMERIC = "pl_PL.UTF-8";
   LC_PAPER = "pl_PL.UTF-8";
   LC_TELEPHONE = "pl_PL.UTF-8";
-  LC_TIME = "pl_PL.UTF-8";
+  LC_TIME = "en_US.UTF-8";
 };
 
 #+end_src
+The time is set to US because my org notes are already written with that in mind.
 
 ** Graphical environment
 I enable xorg since that installs display (login) manager. The default login manager is lightdm but I change is to sddm and use a nice theme. I enable touchpad since I'm on netbook.
@@ -113,7 +159,7 @@ services.xserver = {
   # sddm configuration
   displayManager.sddm = {
     enable = true;
-    theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
+    theme = "${import ./sddm-win7.nix { inherit pkgs; }}";
   };
 };
 
@@ -154,6 +200,7 @@ I set =fish= as my default shell
 
 users.defaultUserShell = pkgs.fish;
 services.gnome.gnome-keyring.enable = true;
+services.udisks2.enable = true;
 
 #+end_src
 
@@ -216,22 +263,24 @@ services.flatpak.enable = false;
 environment.systemPackages = with pkgs; [
   # (import ./cp-p.nix)
   # cli utils
-  (import ./cp-p.nix { inherit pkgs; })
+  (import ./cp-p.nix { inherit (pkgs) lib stdenv fetchFromGitHub; })
   wget
   lolcat
   htop
-  neofetch
+  btop
+  unstable.fastfetch
+  uwufetch
   fish
   bash
   fzf
   git
-  exa
+  unstable.eza
   starship
   bat
   bat-extras.batman
   bat-extras.prettybat
   bat-extras.batgrep
-  lf
+  unstable.lf
   fortune
   cowsay
   pokemonsay
@@ -240,19 +289,25 @@ environment.systemPackages = with pkgs; [
   killall
   unrar
   ripgrep
+  fd
   clipboard-jh
+  nix-prefetch-git
+  stow
+  unzip
 
   # for sddm
   libsForQt5.qt5.qtquickcontrols2  
   libsForQt5.qt5.qtgraphicaleffects
 
   # desktop
-  hyprland
+  unstable.hyprland
+  unstable.hyprpicker
   foot
   mako
-  neovim
-  waybar
+  unstable.neovim
+  unstable.waybar
   rofi-wayland
+  rofi-bluetooth
   wl-clipboard
   sway-contrib.grimshot
   xdg-utils
@@ -262,6 +317,16 @@ environment.systemPackages = with pkgs; [
   mpv
   wpgtk
   pywal
+  swaybg
+  swayimg
+  swaynotificationcenter
+  swaylock
+  swaylock-fancy
+  gnome.file-roller
+  papirus-icon-theme
+  dracula-theme
+  zathura
+  libreoffice-still
 
   # some dev stuff
   gnumake
@@ -272,28 +337,28 @@ environment.systemPackages = with pkgs; [
   # service things
   polkit_gnome
   blueberry
-  dracula-theme
   networkmanager_dmenu
   gammastep
-  pulseaudio
-  pavucontrol
-  papirus-icon-theme
-  swaybg
-  swayimg
-  swaynotificationcenter
   pcmanfm
   light
   syncthing
   libnotify
-  gnome.file-roller
-  bitwarden
-  bitwarden-cli
+  keepassxc
+  pulseaudio
+  pavucontrol
+  udiskie
+  # bitwarden
+  # bitwarden-cli
 
   # qutebrowser
-  qutebrowser
+  unstable.qutebrowser
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
+  
+  # android
+  android-tools
+  unstable.scrcpy
 
   # for latex in emacs
   #texlive.combined.scheme-medium
@@ -317,14 +382,15 @@ environment.systemPackages = with pkgs; [
   #     };
   #   })
 
+  # games
   # i love how you can specify retroarch cores here
-  (retroarch.override {
+  (unstable.retroarch.override {
     cores = with libretro; [
-      ppsspp
       parallel-n64
       snes9x
       swanstation
       melonds
+      fbneo
     ];
   })
 ];
@@ -345,6 +411,7 @@ I install nerd fonts. Istead of installing all fonts you can specify which ones 
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
   (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
+  noto-fonts-emoji
 ];
 
 #+end_src
@@ -420,8 +487,9 @@ system = {
 }
 #+end_src
 
-* SDDM theme
-#+begin_src nix :tangle sddm-theme.nix
+* SDDM themes
+** Sugar Dark
+#+begin_src nix :tangle sddm-sugar-dark.nix
 { pkgs }:
 
 pkgs.stdenv.mkDerivation {
@@ -438,21 +506,49 @@ pkgs.stdenv.mkDerivation {
   '';
 }
 #+end_src
-* cp-p
-#+begin_src nix :tangle cp-p.nix
+** Windows 7
+#+begin_src nix :tangle sddm-win7.nix
 { pkgs }:
 
 pkgs.stdenv.mkDerivation {
-  name = "cp-p";
+  name = "sddm-theme";
   src = pkgs.fetchFromGitHub {
-    owner = "deadendpl";
-    repo = "nix-cp-p";
-    rev = "414f7983dfd3abe8048363b2ca1019472802c5b5";
-    sha256 = "1vfjx3xh58ihll1sz3v3dmwjag9s0j50gxdzpql6frl1ilrdpwli";
+    owner = "AudacityXD62";
+    repo = "win7welcomesddm";
+    rev = "4887e163786657892eee452fddce36e5f02f4780";
+    sha256 = "18x4mik24bahqn1ivqzc0120xl12ynd17vh1f8vvq5zlvqn3v78d";
   };
   installPhase = ''
-    mkdir -p $out/bin
-    cp cp-p mv-p $out/bin/
+    mkdir -p $out
+    cp -R ./* $out/
   '';
+}
+#+end_src
+* cp-p
+#+begin_src nix :tangle cp-p.nix
+{ lib
+, stdenv
+, fetchFromGitHub }:
+
+stdenv.mkDerivation {
+  pname = "cp-p";
+  version = "unstable-2022-08-07";
+
+  src = fetchFromGitHub {
+    owner = "Naheel-Azawy";
+    repo = "cp-p";
+    rev = "2e97ba534a5892c47a0317a038b19bcda221e5e6";
+    hash = "sha256-OB6evgfRaEVKL07sOUPsBsWB+9w6gmyjJK6nNsZdKM4=";
+  };
+
+  makeFlags = [ "PREFIX=$(out)" "BINPREFIX=$(PREFIX)/bin" ];
+
+  meta = {
+    homepage = "https://github.com/Naheel-Azawy/cp-p";
+    description = "cp (and mv), with progress";
+    license = with lib.licenses; [ gpl3Only ];
+    maintainers = with lib.maintainers; [ deadendpl ];
+    platforms = lib.platforms.all;
+  };
 }
 #+end_src

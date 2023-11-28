@@ -14,6 +14,7 @@
 (save-place-mode 1)                  ; Saving last place in file
 (set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
 (display-battery-mode 1)             ; Setting battery percentage in modeline
+(indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 
 ;; This folder is for everything that clutters user-emacs-directory
 (defvar user-share-emacs-directory "~/.local/share/emacs/"
@@ -22,65 +23,63 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq visible-bell nil ;; Set up the visible bell
-      inhibit-startup-message nil ; default emacs startup message
-      custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
-      backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-      recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
-      recentf-max-saved-items nil ; infinite amount of entries in recentf file
-      recentf-auto-cleanup 'never ; not cleaning recentf file
-      bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-      elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-      auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-      prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
-      global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-      use-dialog-box nil ; turns off graphical dialog boxes
-      tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-      save-place-file (concat user-share-emacs-directory "places")
-      url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-      initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-      initial-scratch-message nil ; deleting scratch buffer message
-      scroll-conservatively 1000 ; Scroll one line at a time
-      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-      tab-always-indent nil
-      vc-follow-symlinks t) ; Enable follow symlinks
+(setq-default visible-bell nil ;; Set up the visible bell
+              inhibit-startup-message nil ; default emacs startup message
+              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+              recentf-max-saved-items nil ; infinite amount of entries in recentf file
+              recentf-auto-cleanup 'never ; not cleaning recentf file
+              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
+              auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
+              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+              use-dialog-box nil ; turns off graphical dialog boxes
+              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+              save-place-file (concat user-share-emacs-directory "places")
+              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
+              initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
+              initial-scratch-message nil ; deleting scratch buffer message
+              scroll-conservatively 1000 ; Scroll one line at a time
+              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+              tab-always-indent nil
+              vc-follow-symlinks t ; Enable follow symlinks
+              indent-tabs-mode nil) ; use spaces instead of tabs for indenting
 
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
-		vterm-mode-hook
+                vterm-mode-hook
                 term-mode-hook
                 shell-mode-hook
-		Info-mode-hook
-		helpful-mode-hook
-		help-mode-hook
-		dashboard-mode-hook
+                Info-mode-hook
+                helpful-mode-hook
+                help-mode-hook
+                dashboard-mode-hook
                 dashboard-after-initialize-hook
-		dired-mode-hook
+                dired-mode-hook
                 org-agenda-mode-hook
                 which-key-mode-hook
                 tldr-mode-hook
                 dictionary-mode-hook
                 Man-mode-hook
                 woman-mode-hook
-		ibuffer-mode-hook
-		elisp-refs-mode-hook
-		imenu-list-minor-mode-hook
-		imenu-list-major-mode-hook
-		imenu-list-after-jump-hook
-		imenu-list-update-hook
-		backtrace-revert-hook
-		backtrace-mode-hook
-		calendar-mode-hook
+                ibuffer-mode-hook
+                elisp-refs-mode-hook
+                imenu-list-minor-mode-hook
+                imenu-list-major-mode-hook
+                imenu-list-after-jump-hook
+                imenu-list-update-hook
+                backtrace-revert-hook
+                backtrace-mode-hook
+                calendar-mode-hook
                 special-mode-hook
-		outline-mode-hook
+                outline-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-(use-package swiper
-  :ensure t)
-
 (add-to-list 'display-buffer-alist
-             '("*compilation"
+             '("*(Backtrace|Compile-log|compilation|Messages|Warnings)*"
                (display-buffer-at-bottom)
                (window-height . 12)))
 
@@ -125,22 +124,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (require 'use-package)
 (setq use-package-always-ensure t
       use-package-verbose t)
-
-(use-package quelpa
-  :defer 5
-  :custom
-    ;; (quelpa-upgrade-p t "Always try to update packages")
-    (quelpa-dir (concat user-share-emacs-directory "quelpa"))
-  :config
-    ;; Get ‘quelpa-use-package’ via ‘quelpa’
-    (quelpa
-     '(quelpa-use-package
-       :fetcher git
-       :url "https://github.com/quelpa/quelpa-use-package.git"))
-    (require 'quelpa-use-package))
-
-(use-package command-log-mode
-  :disabled)
 
 ;;(defun custom/evil-hook ()
 ;;  (dolist (mode '(custom-mode
@@ -374,13 +357,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m f" '(:ignore t :wk "Fonts")
-    "m f b" '(custom/org-make-bold-in-region :wk "Bold in region")
-    "m f c" '(custom/org-make-code-in-region :wk "Code in region")
-    "m f C" '(custom/org-make-code-alt-in-region :wk "Alt. Code in region")
-    "m f i" '(custom/org-make-italic-in-region :wk "Italic in region")
-    "m f l" '(custom/org-make-latex-in-region :wk "Latex in region")
-    "m f u" '(custom/org-make-underline-in-region :wk "Underline in region")
-    "m f -" '(custom/org-make-stroke-in-region :wk "Strike through in region")
+    "m f b" '(lambda () (interactive) (custom/org-format-in-region "*") :wk "Bold in region")
+    "m f c" '(lambda () (interactive) (custom/org-format-in-region "~") :wk "Alt. Code in region")
+    "m f C" '(lambda () (interactive) (custom/org-format-in-region "=") :wk "Verbatim in region")
+    "m f i" '(lambda () (interactive) (custom/org-format-in-region "/") :wk "Italic in region")
+    "m f l" '(lambda () (interactive) (custom/org-format-in-region "$") :wk "Latex in region")
+    "m f u" '(lambda () (interactive) (custom/org-format-in-region "_") :wk "Underline in region")
+    "m f -" '(lambda () (interactive) (custom/org-format-in-region "+") :wk "Strike through in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
     "m I c" '(org-id-get-create :wk "Create ID")
@@ -389,7 +372,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "m l i" '(org-roam-node-insert :wk "Insert roam link")
   "m p" '(:ignore t :wk "Priority")
     "m p d" '(org-priority-down :wk "Down")
-    "m p p" '(org-priority-down :wk "Set priority")
+    "m p p" '(org-priority :wk "Set priority")
     "m p u" '(org-priority-down :wk "Up")
   "m q" '(org-set-tags-command :wk "Set tag")
   "m s" '(:ignore t :wk "Tree/Subtree")
@@ -439,6 +422,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "n r d" '(:ignore t :wk "Roam dailies")
       "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
       "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
+      "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+      "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
     "n r f" '(org-roam-node-find :wk "Find note")
     "n r i" '(org-roam-node-insert :wk "Insert note")
     "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
@@ -561,7 +546,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "j" 'widget-forward
       "k" 'widget-backward
       "l" 'dashboard-return)
-    (emacs-lock-mode 'kill)
   :bind
     (:map dashboard-mode-map
       ([remap dashboard-next-line] . 'widget-forward)
@@ -603,6 +587,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       [remap evil-yank] 'dired-ranger-copy
       "p" 'dired-ranger-paste))
 
+;; (use-package dirvish
+;;   :config
+;;   (dirvish-override-dired-mode))
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
@@ -616,8 +604,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config
     (global-emojify-mode 1))
 
+(use-package elfeed
+  :defer t
+  :custom
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/")))
+
 (set-face-attribute 'default nil
-  :font "JetBrainsMono Nerd Font Mono"
+  :font "JetBrainsMono NFM"
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
@@ -643,7 +636,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; This sets the default font on all graphical frames created after restarting Emacs.
 ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
 ;; are not right, idk why
-(add-to-list 'default-frame-alist '(font . "JetBrainsMono Nerd Font Mono-9"))
+(add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
 
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
@@ -663,12 +656,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                                      "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
                                      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
     (global-ligature-mode 't))
-
-(use-package flycheck
-  :after prog-mode
-  :defer t
-  :diminish
-  :init (global-flycheck-mode))
 
 (use-package minesweeper
   :defer t
@@ -760,9 +747,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after counsel
   :custom
     (ivy-prescient-enable-filtering nil)
+    ;; Here are commands that I don't want to get sorted
+    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer))
   :config
     (prescient-persist-mode 1)
     (ivy-prescient-mode 1))
+
+(use-package swiper
+  :ensure t)
 
 (use-package hl-todo
   :defer t
@@ -777,11 +769,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ("REVIEW"     font-lock-keyword-face bold)
       ("NOTE"       success bold)
       ("DEPRECATED" font-lock-doc-face bold))))
-
-(use-package lua-mode
-  :defer t)
-(use-package nix-mode
-  :defer t)
 
 (use-package lorem-ipsum
   :defer t)
@@ -819,8 +806,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                  (setq word-wrap nil)
                  (make-local-variable 'auto-hscroll-mode)
                  (setq auto-hscroll-mode nil)))))
-
-;; show hidden files
 
 (use-package obsidian
   :disabled
@@ -862,6 +847,15 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
 (require 'org-tempo)
+
+(use-package company-org-block
+  :defer t
+  :after org
+  :custom
+    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
+  :hook ((org-mode . (lambda ()
+                       (setq-local company-backends '(company-org-block))
+                       (company-mode +1)))))
 
 (use-package org-appear
   :defer t
@@ -934,35 +928,37 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package org-modern
   :after org
   :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :custom-face
+    (org-modern-label ((t (:height 1.2))))
   :custom
-    (org-modern-star nil))
+    (org-modern-star nil)
+    (org-modern-list nil))
 
-(use-package org-yt
-  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
-  :defer t
-  :after org
-  :config
-    (require 'org-yt)
+;; (use-package org-yt
+;;   :defer t
+;;   :after org
+;;   :config
+;;     (require 'org-yt)
 
-    (defun org-image-link (protocol link _description)
-      "Interpret LINK as base64-encoded image data."
-      (cl-assert (string-match "\\`img" protocol) nil
-                 "Expected protocol type starting with img")
-      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-        (cl-assert buf nil
-                   "Download of image \"%s\" failed." link)
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (re-search-forward "\r?\n\r?\n")
-          (buffer-substring-no-properties (point) (point-max)))))
+;;     (defun org-image-link (protocol link _description)
+;;       "Interpret LINK as base64-encoded image data."
+;;       (cl-assert (string-match "\\`img" protocol) nil
+;;                  "Expected protocol type starting with img")
+;;       (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+;;         (cl-assert buf nil
+;;                    "Download of image \"%s\" failed." link)
+;;         (with-current-buffer buf
+;;           (goto-char (point-min))
+;;           (re-search-forward "\r?\n\r?\n")
+;;           (buffer-substring-no-properties (point) (point-max)))))
 
-    (org-link-set-parameters
-     "imghttp"
-     :image-data-fun #'org-image-link)
+;;     (org-link-set-parameters
+;;      "imghttp"
+;;      :image-data-fun #'org-image-link)
 
-    (org-link-set-parameters
-     "imghttps"
-     :image-data-fun #'org-image-link))
+;;     (org-link-set-parameters
+;;      "imghttps"
+;;      :image-data-fun #'org-image-link))
 
 (use-package toc-org
   :defer t
@@ -1028,8 +1024,17 @@ do not already have one."
     (org-capture-templates
       '(("t" "Todo" entry (file "~/org-roam/agenda.org")
          "* TODO %?\n  %i\n  %a")
-        ("s" "School Todo" entry (file+headline "~/org-roam/agenda.org" "SCHOOL")
-         "* TODO %?\n  %i\n  %a")))
+        ("s" "School Todo" entry (file "~/org-roam/agenda.org")
+         "* TODO %? :school:\n %i")))
+    (org-agenda-include-all-todo nil)
+    (org-agenda-skip-scheduled-if-done t)
+    (org-agenda-skip-deadline-if-done t)
+    (org-agenda-columns-add-appointments-to-effort-sum t)
+    (org-agenda-custom-commands nil)
+    (org-agenda-default-appointment-duration 60)
+    (org-agenda-mouse-1-follows-link t)
+    (org-agenda-skip-unavailable-files t)
+    (org-agenda-use-time-grid t)
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
@@ -1038,6 +1043,7 @@ do not already have one."
     (org-startup-with-inline-images t)
     (org-cycle-inline-images-display t)
     (org-display-remote-inline-images 'download)
+    (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
     (org-ellipsis " •")
     (org-agenda-window-setup 'current-window)
@@ -1053,6 +1059,7 @@ do not already have one."
     (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
+    (org-export-preserve-breaks t)
   :config
     (add-to-list 'display-buffer-alist
       '("*Agenda Commands*"
@@ -1079,80 +1086,25 @@ do not already have one."
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
     
-    (defun custom/org-make-bold-in-region (start end)
-      "Add asterisks (*) before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "*")
-        (goto-char start)
-        (insert "*")))
+(defvar custom/org-bold-symbol "*"
+  "Default symbol for `custom/org-format-in-region' function.")
 
-    (defun custom/org-make-italic-in-region (start end)
-      "Add forward slashes (/) before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "/")
-        (goto-char start)
-        (insert "/")))
-
-    (defun custom/org-make-latex-in-region (start end)
-      "Add dollar signs ($) before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "$")
-        (goto-char start)
-        (insert "$")))
-    
-    (defun custom/org-make-code-in-region (start end)
-      "Add equal signs (=) before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "=")
-        (goto-char start)
-        (insert "=")))
-    
-    (defun custom/org-make-code-alt-in-region (start end)
-      "Add tilde (~) signs before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "~")
-        (goto-char start)
-        (insert "~")))
-    
-    (defun custom/org-make-underline-in-region (start end)
-      "Add tilde underscore (_) signs before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "_")
-        (goto-char start)
-        (insert "_")))
-    
-    (defun custom/org-make-stroke-in-region (start end)
-      "Add plus (+) signs before and after the selected text."
-      (interactive "r")
-      (save-excursion
-        (goto-char end)
-        (insert "+")
-        (goto-char start)
-        (insert "+")))
+(defun custom/org-format-in-region (&optional symbol)
+  "Add symbols before and after the selected text."
+  (interactive)
+  (setq symbol (or symbol
+                   (read-string "Enter symbol: " custom/org-bold-symbol)))
+  (when (region-active-p)
+    (save-excursion
+      (goto-char (region-end))
+      (insert symbol)
+      (goto-char (region-beginning))
+      (insert symbol)))
+  (deactivate-mark))
   :bind
     ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
-
-(use-package company-org-block
-  :defer t
-  :custom
-    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
-  :hook ((org-mode . (lambda ()
-                       (setq-local company-backends '(company-org-block))
-                       (company-mode +1)))))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1213,6 +1165,73 @@ do not already have one."
 (use-package rainbow-mode
   :diminish
   :hook org-mode prog-mode)
+
+(use-package flycheck
+  :after prog-mode
+  :defer t
+  :diminish
+  :init (global-flycheck-mode))
+
+(use-package lua-mode
+  :defer t)
+(use-package nix-mode
+  :defer t)
+
+(setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+     ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
+     (c "https://github.com/tree-sitter/tree-sitter-c")
+     (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+     (css "https://github.com/tree-sitter/tree-sitter-css")))
+     ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+     ;; (go "https://github.com/tree-sitter/tree-sitter-go")
+     ;; (html "https://github.com/tree-sitter/tree-sitter-html")
+     ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+     ;; (json "https://github.com/tree-sitter/tree-sitter-json")
+     ;; (make "https://github.com/alemuller/tree-sitter-make")
+     ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+     ;; (python "https://github.com/tree-sitter/tree-sitter-python")
+     ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
+     ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+     ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+     ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+(unless (treesit-language-available-p 'bash)
+  (message "Installing tree-sitter parsers")
+  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
+
+(setq major-mode-remap-alist
+ '((c-or-c++-mode . c-or-c++-ts-mode)
+   (c++-mode . c++-ts-mode)
+   (css-mode . css-ts-mode)
+   (sh-mode . bash-ts-mode)))
+
+(use-package autoinsert
+  :hook (after-init . auto-insert-mode)
+  :custom
+    (auto-insert-directory (concat user-emacs-directory "templates/"))
+    (auto-insert-query nil)
+  :config
+    (add-to-list 'auto-insert-alist '(sh-mode nil "#!/usr/bin/env bash\n\n"))
+    (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
+
+(use-package yasnippet
+  :defer t
+  :after prog-mode)
+
+(use-package yasnippet-snippets
+  :defer t
+  :after yasnippet)
+
+;; This is for html snippets
+;; (use-package emmet-mode
+;;   :defer t
+;;   :after html-mode mhtml-mode
+;;   :config
+;;     (evil-collection-define-key 'normal 'html-mode-map
+;;       "TAB" 'emmet-expand-line)
+;;     (evil-collection-define-key 'normal 'mhtml-mode-map
+;;       "TAB" 'emmet-expand-line))
 
 (use-package company-shell
   :after sh-mode
@@ -1288,8 +1307,8 @@ do not already have one."
 (use-package helm
  :defer t
  :diminish
- :bind (
-   :map helm-map
+ :bind
+   (:map helm-map
      ("C-j" . helm-next-line)
      ("C-k" . helm-previous-line)))
 (use-package system-packages :defer t)
@@ -1297,34 +1316,6 @@ do not already have one."
 
 (use-package sudo-edit
   :defer t)
-
-(use-package autoinsert
-  :hook (after-init . auto-insert-mode)
-  :custom
-    (auto-insert-directory (concat user-emacs-directory "templates/"))
-    (auto-insert-query nil)
-  :config
-    (add-to-list 'auto-insert-alist '(sh-mode nil "#!/usr/bin/env bash\n\n"))
-    (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
-
-(use-package yasnippet
-  :defer t
-  :quelpa t
-  :after prog-mode)
-
-(use-package yasnippet-snippets
-  :defer t
-  :after yasnippet)
-
-;; This is for html snippets
-;; (use-package emmet-mode
-;;   :defer t
-;;   :after html-mode mhtml-mode
-;;   :config
-;;     (evil-collection-define-key 'normal 'html-mode-map
-;;       "TAB" 'emmet-expand-line)
-;;     (evil-collection-define-key 'normal 'mhtml-mode-map
-;;       "TAB" 'emmet-expand-line))
 
 (use-package doom-themes
   :ensure t
@@ -1378,9 +1369,9 @@ It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
     (which-key-side-window-slot -10)
     (which-key-side-window-max-height 0.25)
     (which-key-idle-delay 0.8)
-    (which-key-max-description-length 25)
+    (which-key-max-description-length nil)
     (which-key-allow-imprecise-window-fit nil)
-    (which-key-separator " → ")
+    (which-key-separator "  ")
     (which-key-idle-delay 0.5)
   :config
     (which-key-mode 1))
@@ -1414,5 +1405,3 @@ It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
 (use-package writeroom-mode
   :defer t)
-
-(use-package elfeed :defer t)

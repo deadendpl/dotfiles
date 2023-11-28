@@ -30,6 +30,7 @@ sudo pacman -S --noconfirm hyprland \
                            ttf-ubuntu-nerd \
                            ttf-go-nerd \
                            ttf-jetbrains-mono-nerd \
+                           noto-fonts-emoji \
                            pavucontrol \
                            qt5ct \
                            foot \
@@ -50,7 +51,6 @@ sudo pacman -S --noconfirm hyprland \
                            lf \
                            stow \
                            expac \
-                           # for bitwarden in qutebrowser 
 			   python-tldextract \
-			   # for keepassxc in qutebrowser
-                           python-pynacl
+                           python-pynacl \
+		           fastfetch

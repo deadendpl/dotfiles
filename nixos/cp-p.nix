@@ -1,15 +1,25 @@
-{ pkgs }:
+{ lib
+, stdenv
+, fetchFromGitHub }:
 
-pkgs.stdenv.mkDerivation {
-  name = "cp-p";
-  src = pkgs.fetchFromGitHub {
-    owner = "deadendpl";
-    repo = "nix-cp-p";
-    rev = "414f7983dfd3abe8048363b2ca1019472802c5b5";
-    sha256 = "1vfjx3xh58ihll1sz3v3dmwjag9s0j50gxdzpql6frl1ilrdpwli";
+stdenv.mkDerivation {
+  pname = "cp-p";
+  version = "unstable-2022-08-07";
+
+  src = fetchFromGitHub {
+    owner = "Naheel-Azawy";
+    repo = "cp-p";
+    rev = "2e97ba534a5892c47a0317a038b19bcda221e5e6";
+    hash = "sha256-OB6evgfRaEVKL07sOUPsBsWB+9w6gmyjJK6nNsZdKM4=";
   };
-  installPhase = ''
-    mkdir -p $out/bin
-    cp cp-p mv-p $out/bin/
-  '';
+
+  makeFlags = [ "PREFIX=$(out)" "BINPREFIX=$(PREFIX)/bin" ];
+
+  meta = {
+    homepage = "https://github.com/Naheel-Azawy/cp-p";
+    description = "cp (and mv), with progress";
+    license = with lib.licenses; [ gpl3Only ];
+    maintainers = with lib.maintainers; [ deadendpl ];
+    platforms = lib.platforms.all;
+  };
 }

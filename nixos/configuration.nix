@@ -1,22 +1,51 @@
 { config, pkgs, ... }:
 
+let
+  unstableTarball =
+    fetchTarball
+      https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz;
+in
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  nixpkgs.config = {
+    packageOverrides = pkgs: {
+      unstable = import unstableTarball {
+        config = config.nixpkgs.config;
+      };
+    };
+  };
+
+imports =
+  [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
 boot = {
   loader.efi.canTouchEfiVariables = true;
 
-  loader.grub.enable = true;
-  loader.grub.device = "nodev";
-  loader.grub.efiSupport = true;
+  loader.grub = {
+    enable = true;
+      device = "nodev";
+      efiSupport = true;
+      theme = pkgs.fetchFromGitHub { # current as of 11/2023
+        owner = "deadendpl";
+        repo = "nix-grub_gtg";
+        rev = "f0a6eec0993b731562fd44acfe7851aed82179ec";
+        sha256 = "1fg3vdqxj7qqpbhl96xhl3175a68bg0c7xbn7q2hspc2272hmh6b";
+      };
+      # theme = pkgs.fetchFromGitHub { # current as of 11/2023
+      #   owner = "shvchk";
+      #   repo = "fallout-grub-theme";
+      #   rev = "e8433860b11abb08720d7c32f5b9a2a534011bca";
+      #   sha256 = "1cf0gd7gziw1j6kilhihpdlna6j1hhvpsgaxsmsqckjmc7igixls";
+      # };
+  };
 
 supportedFilesystems = [ "ntfs" ];
 
-kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+kernelPackages = pkgs.unstable.linuxKernel.packages.linux_zen;
 };
+
+nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
 networking.hostName = "lenovo-nixos";
 networking.networkmanager.enable = true;
@@ -47,7 +76,7 @@ i18n.extraLocaleSettings = {
   LC_NUMERIC = "pl_PL.UTF-8";
   LC_PAPER = "pl_PL.UTF-8";
   LC_TELEPHONE = "pl_PL.UTF-8";
-  LC_TIME = "pl_PL.UTF-8";
+  LC_TIME = "en_US.UTF-8";
 };
 
 # Enable the X11 windowing system.
@@ -58,7 +87,7 @@ services.xserver = {
   # sddm configuration
   displayManager.sddm = {
     enable = true;
-    theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
+    theme = "${import ./sddm-win7.nix { inherit pkgs; }}";
   };
 };
 
@@ -86,6 +115,7 @@ fish.enable = true;
 
 users.defaultUserShell = pkgs.fish;
 services.gnome.gnome-keyring.enable = true;
+services.udisks2.enable = true;
 
 # rtkit is optional but recommended
 security.rtkit.enable = true;
@@ -125,22 +155,24 @@ services.flatpak.enable = false;
 environment.systemPackages = with pkgs; [
   # (import ./cp-p.nix)
   # cli utils
-  (import ./cp-p.nix { inherit pkgs; })
+  (import ./cp-p.nix { inherit (pkgs) lib stdenv fetchFromGitHub; })
   wget
   lolcat
   htop
-  neofetch
+  btop
+  unstable.fastfetch
+  uwufetch
   fish
   bash
   fzf
   git
-  exa
+  unstable.eza
   starship
   bat
   bat-extras.batman
   bat-extras.prettybat
   bat-extras.batgrep
-  lf
+  unstable.lf
   fortune
   cowsay
   pokemonsay
@@ -149,19 +181,25 @@ environment.systemPackages = with pkgs; [
   killall
   unrar
   ripgrep
+  fd
   clipboard-jh
+  nix-prefetch-git
+  stow
+  unzip
 
   # for sddm
   libsForQt5.qt5.qtquickcontrols2  
   libsForQt5.qt5.qtgraphicaleffects
 
   # desktop
-  hyprland
+  unstable.hyprland
+  unstable.hyprpicker
   foot
   mako
-  neovim
-  waybar
+  unstable.neovim
+  unstable.waybar
   rofi-wayland
+  rofi-bluetooth
   wl-clipboard
   sway-contrib.grimshot
   xdg-utils
@@ -171,6 +209,16 @@ environment.systemPackages = with pkgs; [
   mpv
   wpgtk
   pywal
+  swaybg
+  swayimg
+  swaynotificationcenter
+  swaylock
+  swaylock-fancy
+  gnome.file-roller
+  papirus-icon-theme
+  dracula-theme
+  zathura
+  libreoffice-still
 
   # some dev stuff
   gnumake
@@ -181,28 +229,28 @@ environment.systemPackages = with pkgs; [
   # service things
   polkit_gnome
   blueberry
-  dracula-theme
   networkmanager_dmenu
   gammastep
-  pulseaudio
-  pavucontrol
-  papirus-icon-theme
-  swaybg
-  swayimg
-  swaynotificationcenter
   pcmanfm
   light
   syncthing
   libnotify
-  gnome.file-roller
-  bitwarden
-  bitwarden-cli
+  keepassxc
+  pulseaudio
+  pavucontrol
+  udiskie
+  # bitwarden
+  # bitwarden-cli
 
   # qutebrowser
-  qutebrowser
+  unstable.qutebrowser
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
+  
+  # android
+  android-tools
+  unstable.scrcpy
 
   # for latex in emacs
   #texlive.combined.scheme-medium
@@ -226,14 +274,15 @@ environment.systemPackages = with pkgs; [
   #     };
   #   })
 
+  # games
   # i love how you can specify retroarch cores here
-  (retroarch.override {
+  (unstable.retroarch.override {
     cores = with libretro; [
-      ppsspp
       parallel-n64
       snes9x
       swanstation
       melonds
+      fbneo
     ];
   })
 ];
@@ -245,6 +294,7 @@ services.emacs.defaultEditor = true;
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
   (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
+  noto-fonts-emoji
 ];
 
 # setting up xdg desktop portal

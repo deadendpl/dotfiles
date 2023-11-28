@@ -13,7 +13,7 @@ elif [ "$CHOICE" = "Select Area" ]; then
   grimshot --notify save area ~/Pictures/$filename
 
 elif [ "$CHOICE" = "Color Picker" ]; then
-  hyprpicker -a
+  sleep 0.4 && hyprpicker -a
 
 else
   exit

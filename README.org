@@ -92,6 +92,3 @@ Another way to manage this conveniently is to install [[https://www.gnu.org/soft
 2. Backup your =~/.config= and delete everything inside if necessary.
 3. Then inside that directory do =stow .=
 This will link all files autmatically to its corrensponding places
-
-* TODO TODO list
-- [ ] getting flatcolor wirking on nixos

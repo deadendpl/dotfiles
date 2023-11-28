@@ -40,10 +40,10 @@ monitor=,preferred,auto,auto
 # boot stuff
 #exec-once = wal -R
 exec-once = swaync &
-# exec-once = ~/.config/scripts/hypr/pipewire.sh # if pipewire isn't set up with systemd
+exec-once = udiskie
 exec-once = ~/.local/bin/pyrice
 exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec-once = emacs --daemon
+exec-once = ~/.config/scripts/emacs.sh
 
 #+END_SRC
 
@@ -128,12 +128,12 @@ decoration {
 
   rounding = 5
 
-  # blur {
-  #   enabled = yes
-  #   size = 3
-  #   passes = 1
-  #   new_optimizations = on
-  # }
+  blur {
+    enabled = yes
+    size = 3
+    passes = 1
+    new_optimizations = on
+  }
 }
 
 animations {
@@ -185,12 +185,13 @@ device:epic-mouse-v1 {
 # See https://wiki.hyprland.org/Configuring/Window-Rules/ for more
 
 windowrule = float, wdisplays
-windowrule = float, pavucontrol
 windowrule = float, blueberry
+windowrule = float, pavucontrol
 windowrule = float, feh
 windowrule = float, swayimg
 windowrule = float, gcolor3
 windowrule = fullscreen, Waydroid
+windowrulev2 = float,class:^(scratch)$
 windowrulev2 = float,class:^(firefox)$,title:^(Picture-in-Picture)$
 windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 
@@ -203,6 +204,7 @@ Probably the most important thing in here
 | Keybinding            | command                                    |
 |-----------------------+--------------------------------------------|
 | SUPER + T             | launches terminal                          |
+| SUPER + Alt + T       | launches terminal as a scratchpad          |
 | SUPER + W             | launches web browser                       |
 | SUPER + E             | launches first IDE (emacs)                 |
 | SUPER + Alt + E       | launches first IDE (emacs) as a scratchpad |
@@ -281,6 +283,7 @@ $mainMod = SUPER
 
 # basic stuff
 bind = $mainMod, T,                exec, $terminal
+bind = $mainMod ALT, T,            exec, $terminal -a scratch
 bind = $mainMod, W,                exec, $web_browser
 bind = $mainMod, E,                exec, $editor
 bind = $mainMod ALT, E,            exec, $editor -e "(scratch-buffer)"

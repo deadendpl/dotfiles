@@ -10,7 +10,7 @@ end
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
-set EDITOR emacsclient -t -a "nvim"
+set EDITOR nvim
 set VISUAL emacsclient -c -a "emacs"
 
 set fish_greeting
@@ -64,7 +64,11 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
-alias l='exa --all --long --header --icons --git --group-directories-first --color-scale'
+# i couldn't set this as alias
+function connect
+  nmcli device wifi connect $argv
+end
+alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
 alias lf='lfcd'
 alias cp='cp-p'
 alias clr='clear'
@@ -72,11 +76,12 @@ alias cllr='clear && l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
+alias neofetch='fastfetch'
 alias v='emacsclient -t -a "nvim"'
 alias vim='nvim'
 alias RGB='ls -laR / | lolcat'
 alias demacs='emacs --daemon'
-alias remacs='killall emacs;killall emacs && emacs --daemon'
+alias remacs='pkill emacs && emacs --daemon'
 alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 alias myip='curl "https://wtfismyip.com/text"'

@@ -1,12 +1,10 @@
 * {{
-    font:                        "CodeNewRoman Nerd Font 9";
-    prompt-font:                 "Ubuntu Nerd Font Bold 9";
     prompt-padding:              4px;
     spacing:                     3;
     background-color:            {background};
     border-color:                {background};
     text-color:                  {foreground};
-    font:                        "CodeNewRoman Nerd Font 9";
+    font:                        "JetBrainsMono NF 9";
     prompt-font:                 "Ubuntu Nerd Font Bold 9";
     prompt-background:           {color1};
     prompt-foreground:           {background};

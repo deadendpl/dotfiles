@@ -12,7 +12,6 @@ configuration {
   display-window: "   Window ";
   display-ssh: " 󰤨  ssh ";
   sidebar-mode: true;
-  font: "CodeNewRoman Nerd Font Regular 12";
 
   /* Keybindings */   
   kb-move-word-back: "";
