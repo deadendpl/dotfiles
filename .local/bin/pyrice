@@ -1,56 +1,59 @@
 #!/usr/bin/env bash
 
-wal-tile() {
-  wal -n -i "$@"
-  killall swaybg
-  swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
-}
+# wal-tile() {
+#   wal -n -i "$@"
+#   killall swaybg
+#   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
+# }
 
 wpg-tile() {
-  wpg -s "$@"
+  local wallpaper_path="$1"
+
+  # If no wallpaper path is provided, choose a random one
+  if [ -z "$wallpaper_path" ]; then
+    local walls_dir="$HOME/Pictures/bg"
+    wallpaper_path="$(find "$walls_dir" -type f | shuf -n 1)"
+  fi
+
+  wallpaper_path=$(realpath "$wallpaper_path")
+
+  wpg --backend haishoku -s "$wallpaper_path"
   killall swaybg
   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 }
 
-walls_dir="$HOME/Pictures/bg"
-cd $walls_dir
-wall=$(ls $walls_dir | shuf -n 1 | xargs realpath)
-
-# wal-tile $wall
-# wpg -ns $wall
-wpg-tile $wall
+# Use the wpg-tile function with the provided or default wallpaper file path
+wpg-tile "$1"
 
 file-line-change() {
-  arg1=$(realpath "$1") # file name
-  arg2=$2 # string in a line that will be replaced
-  arg3=$3 # string that will replace the line
-  
-# Get the line containing "@import"
-old_line=$(grep $arg2 $arg1)
+  arg1=$(realpath "$1")  # file name
+  arg2=$2                # string in a line that will be replaced
+  arg3=$3                # string that will replace the line
 
-# Check if the old line exists in the file
-if [ -n "$old_line" ]; then
+  # Get the line containing "@import"
+  old_line=$(grep "$arg2" "$arg1")
+
+  # Check if the old line exists in the file
+  if [ -n "$old_line" ]; then
     # Replace the line using sed
-    # wal_filename=$(realpath $HOME/.cache/wal/colors-waybar.css)
-    new_line=$arg3
+    new_line="$arg3"
     sed -i "s|$old_line|$new_line|" "$arg1"
     echo "Line replaced successfully in $arg1"
-else
+  else
     echo "Old line not found in the file."
-fi
+  fi
 }
 
 # waybar
 file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
 
-# qutebrowser 
+# qutebrowser
 file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
 
 # zathura
 file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
 $HOME/.config/scripts/hypr/waybar-start.sh
-# $HOME/.config/mako/update-theme.sh
 $HOME/.config/swaync/reload.sh
 emacsclient --eval '(load-theme real-theme t)'
 

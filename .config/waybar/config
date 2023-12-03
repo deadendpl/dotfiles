@@ -42,8 +42,8 @@
       "default": "",
     },
 
-    "persistent_workspaces": {
-      "*": 2, // 5 workspaces by default on every monitor
+    "persistent-workspaces": {
+      "*": 2, // 2 workspaces by default on every monitor
       // "1": [],
       // "2": [],
       // "3": [],
@@ -76,10 +76,10 @@
   },
 
   "clock": {
-      // "timezone": "America/New_York",
-      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-      "format": "{:%H:%M}",
-      "format-alt": "{:%a %d %b}"
+    // "timezone": "America/New_York",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a %d %b}"
   },
 
   "battery": {

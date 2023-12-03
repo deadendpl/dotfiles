@@ -7,7 +7,12 @@ The script generated from this is called ~install.sh~.
 * WARNING
 To anyone that wants to apply these dotfiles.
 The script is intended to use after minimal Arch Linux has been installed.
-The script assumes that you have network connection you use *systemd*.
+
+The script assumes that you have:
+- network connection
+- *systemd* as init system
+- *GRUB* as a bootloader
+- no display (login) manager
 
 * Services
 ** Bluetooth
@@ -16,7 +21,7 @@ sudo pacman -S --noconfirm bluez
 sudo systemctl enable bluetooth
 #+end_src
 ** Pipewire
-The issue with this is that 
+By default pulseadio is installed so I remove that.
 I think pipewire sets up its' service automatically with reboot.
 #+begin_src sh
 sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
@@ -44,7 +49,8 @@ else
   echo "SDDM theme not applied successfully!"
 fi
 #+end_src
-* Arco Linux pacman repo
+* Pacman
+** Arco Linux pacman repo
 Some packages installed below are from Arco Linux's repo because I don't want to install everything from AUR.
 #+begin_src sh
 repo_lines="
@@ -61,11 +67,11 @@ sudo bash -c "echo '$repo_lines' >> /etc/pacman.conf"
 sudo pacman -Syyu
 #+end_src
 
-* Dependencies
-** Normal dependiencies
+** Dependencies
+*** Normal dependiencies
 #+BEGIN_SRC sh
 sudo pacman -S --noconfirm hyprland \
-      	                   htop \
+                           htop \
                            papirus-icon-theme \
                            waybar \
                            eza \
@@ -86,7 +92,7 @@ sudo pacman -S --noconfirm hyprland \
                            p7zip \
                            unrar \
                            zathura \
-			   zathura-pdf-mupdf \
+                           zathura-pdf-mupdf \
                            neovim \
                            gammastep \
                            lolcat \
@@ -115,14 +121,15 @@ sudo pacman -S --noconfirm hyprland \
                            lf \
                            stow \
                            expac \
-			   python-tldextract \
+                           python-tldextract \
                            python-pynacl \
-		           fastfetch \
+                           fastfetch \
                            git \
-                           tree-sitter
+                           tree-sitter \
+                           udiskie
 #+end_src
 
-** Yay dependencies
+*** Yay dependencies
 yay is AUR wrapper which is can also be used as frontend to pacman.
 #+begin_src sh
 if $(pacman -Q yay >> /dev/null); then
@@ -154,7 +161,7 @@ yay -S --noconfirm networkmanager-dmenu-git \
                    # udiskie-dmenu-git
 #+end_src
 
-** Pywal dependencies
+*** Pywal dependencies
 Pywal is like Material You from android but on Linux
 #+begin_src sh
 yay -S --noconfirm pywal \
@@ -162,17 +169,19 @@ yay -S --noconfirm pywal \
                    python-psutil \
                    python-prctl \
                    python-daemon \
+                   python-haishoku \
                    wpgtk \
                    gtk-theme-flat-color-git
 
 wpg-install.sh -g
 #+end_src
 
-* Optional software
+*** Optional software
 #+begin_src sh
 yay -S --noconfirm appimagelauncher-bin \
                    keepassxc \
-                   syncthing
+                   syncthing \
+                   gnome-disk-utility
                    # syncthing-gtk
 #+end_src
 * Touchpad setup on Xorg
@@ -222,4 +231,5 @@ It sets some apps to be defaults for some files
 #+begin_src sh
 xdg-mime default org.pwmt.zathura.desktop application/pdf
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+xdg-mime default pcmanfm.desktop inode/directory
 #+end_src

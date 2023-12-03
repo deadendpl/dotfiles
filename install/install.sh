@@ -38,7 +38,7 @@ sudo bash -c "echo '$repo_lines' >> /etc/pacman.conf"
 sudo pacman -Syyu
 
 sudo pacman -S --noconfirm hyprland \
-      	                   htop \
+                           htop \
                            papirus-icon-theme \
                            waybar \
                            eza \
@@ -59,7 +59,7 @@ sudo pacman -S --noconfirm hyprland \
                            p7zip \
                            unrar \
                            zathura \
-			   zathura-pdf-mupdf \
+                           zathura-pdf-mupdf \
                            neovim \
                            gammastep \
                            lolcat \
@@ -88,11 +88,12 @@ sudo pacman -S --noconfirm hyprland \
                            lf \
                            stow \
                            expac \
-			   python-tldextract \
+                           python-tldextract \
                            python-pynacl \
-		           fastfetch \
+                           fastfetch \
                            git \
-                           tree-sitter
+                           tree-sitter \
+                           udiskie
 
 if $(pacman -Q yay >> /dev/null); then
   echo "yay is installed"
@@ -124,6 +125,7 @@ yay -S --noconfirm pywal \
                    python-psutil \
                    python-prctl \
                    python-daemon \
+                   python-haishoku \
                    wpgtk \
                    gtk-theme-flat-color-git
 
@@ -131,7 +133,8 @@ wpg-install.sh -g
 
 yay -S --noconfirm appimagelauncher-bin \
                    keepassxc \
-                   syncthing
+                   syncthing \
+                   gnome-disk-utility
                    # syncthing-gtk
 
 touchpad_conf='Section "InputClass"
@@ -170,3 +173,4 @@ rm -rf grub_gtg
 
 xdg-mime default org.pwmt.zathura.desktop application/pdf
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+xdg-mime default pcmanfm.desktop inode/directory

@@ -42,7 +42,7 @@ window#waybar {
 }
 
 #taskbar button.active {
-  border-radius: 8px;
+  border-radius: 15px;
   background-image: linear-gradient(0deg, @selection, @background-darker);
 }
 

@@ -130,7 +130,8 @@ Most of the stuff will get redirected here.")
               scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
               tab-always-indent nil
               vc-follow-symlinks t ; Enable follow symlinks
-              indent-tabs-mode nil) ; use spaces instead of tabs for indenting
+              indent-tabs-mode nil ; use spaces instead of tabs for indenting
+              standard-indent 2) ; indenting set to 2
 #+end_src
 
 ** Line numbers off in some modes
@@ -195,10 +196,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
 
 ;; locking buffers from killing
-(with-current-buffer "*scratch*" 
-	  (emacs-lock-mode 'kill))
+(with-current-buffer "*scratch*"
+          (emacs-lock-mode 'kill))
 (with-current-buffer "*Messages*"
-	  (emacs-lock-mode 'kill))
+          (emacs-lock-mode 'kill))
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -252,7 +253,7 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
   :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil
-	  evil-want-C-u-scroll t
+          evil-want-C-u-scroll t
           evil-vsplit-window-right t
           evil-split-window-below t
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
@@ -272,8 +273,8 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
   :after evil
   :config
     ;; Do not uncomment this unless you want to specify each and every mode
-    ;; that evil-collection should works with.  The following line is here 
-    ;; for documentation purposes in case you need it.  
+    ;; that evil-collection should works with.  The following line is here
+    ;; for documentation purposes in case you need it.
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
@@ -304,9 +305,14 @@ This is a big list.
   "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
   "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
-  "TAB TAB" '(comment-line :wk "Comment lines")
   "u" '(universal-argument :wk "Universal argument")
   "x" '(execute-extended-command :wk "M-x"))
+
+(custom/leader-keys
+  "TAB" '(:ignore t :wk "Spacing/Indent")
+  "TAB TAB" '(comment-line :wk "Comment lines")
+  "TAB SPC" '(untabify :wk "Untabify")
+  "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
 
 (custom/leader-keys
   "a" '(:ignore t :wk "Amusement")
@@ -353,7 +359,7 @@ This is a big list.
   "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
 (custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")    
+  "e" '(:ignore t :wk "Eshell/Evaluate")
   "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
   "e d" '(eval-defun :wk "Evaluate defun containing or after point")
   "e e" '(eval-expression :wk "Evaluate and elisp expression")
@@ -441,7 +447,7 @@ This is a big list.
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
-    
+
 (custom/leader-keys
   "m" '(:ignore t :wk "Org")
   "m a" '(org-agenda :wk "Org agenda")
@@ -794,7 +800,7 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 (use-package ligature
   :config
     (ligature-set-ligatures 't '("www"))
-    ;; Enable ligatures in programming modes                                                           
+    ;; Enable ligatures in programming modes
     (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
                                      ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
                                      "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
@@ -853,7 +859,6 @@ This makes emacs documentation look pretty
 #+end_src
 * IMENU LIST
 [[https://github.com/bmag/imenu-list][imenu-list]] is basically TOC as its own buffer
-
 #+begin_src emacs-lisp
 (use-package imenu-list
   :defer t
@@ -891,7 +896,7 @@ Both are completion frameworks that make your life easier when doing M-x for exa
      enable-recursive-minibuffers t)
   :config
     (ivy-mode))
-    
+
 (use-package ivy-rich
   :after ivy
   :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
@@ -912,13 +917,13 @@ Both are completion frameworks that make your life easier when doing M-x for exa
      ("C-x C-f" . counsel-find-file)
       :map minibuffer-local-map
         ("C-r" . 'counsel-minibuffer-history))
-  :config 
+  :config
     (counsel-mode)
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
 #+end_src
 
 [[https://github.com/radian-software/prescient.el][Prescient]] adds rememebring and filtering to ivy choices which is convenient.
-#+begin_src emacs-lisp	
+#+begin_src emacs-lisp
 (use-package ivy-prescient
   :after counsel
   :custom
@@ -994,7 +999,7 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
         neo-window-width 35
         neo-window-fixed-size nil
         inhibit-compacting-font-caches t
-        projectile-switch-project-action 'neotree-projectile-action) 
+        projectile-switch-project-action 'neotree-projectile-action)
         ;; truncate long file names in neotree
         (add-hook 'neo-after-create-hook
            #'(lambda (_)
@@ -1169,7 +1174,7 @@ It's set up so it will display markers when entering insert mode.
 #+end_src
 ** ORG MODERN
 It prettifies almost everything.
-If you don't use the same font as me then you need to edit =org-moder-label= height.
+If you don't use the same font as me then you need to edit ~org-modern-label~ height.
 #+begin_src emacs-lisp
 (use-package org-modern
   :after org
@@ -1281,7 +1286,7 @@ do not already have one."
         "NO(n)")))
     (org-capture-templates
       '(("t" "Todo" entry (file "~/org-roam/agenda.org")
-         "* TODO %?\n  %i\n  %a")
+         "* TODO %?\n %a")
         ("s" "School Todo" entry (file "~/org-roam/agenda.org")
          "* TODO %? :school:\n %i")))
     (org-agenda-include-all-todo nil)
@@ -1343,7 +1348,7 @@ do not already have one."
                     text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
-    
+
 (defvar custom/org-bold-symbol "*"
   "Default symbol for `custom/org-format-in-region' function.")
 
@@ -1435,7 +1440,7 @@ Adding rainbow coloring to parentheses.
   :after prog-mode)
 #+end_src
 * RAINBOW MODE
-Display the actual color as a background for any hex color value (ex. #ffffff). The code block below enables rainbow-mode in all programming modes (prog-mode) as well as org-mode, which is why rainbow works in this document.  
+Display the actual color as a background for any hex color value (ex. #ffffff). The code block below enables rainbow-mode in all programming modes (prog-mode) as well as org-mode, which is why rainbow works in this document.
 
 #+begin_src emacs-lisp
 (use-package rainbow-mode
@@ -1603,7 +1608,7 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
     ;; (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 #+end_src
 
-** Vterm-Toggle 
+** Vterm-Toggle
 [[https://github.com/jixiuf/vterm-toggle][vterm-toggle]] toggles the vterm buffer at the bottom of the screen
 
 #+begin_src emacs-lisp
@@ -1647,8 +1652,7 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
 (use-package helm-system-packages :defer t)
 #+end_src
 * SUDO EDIT
-[[https://github.com/nflath/sudo-edit][sudo-edit]] lets us open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
-
+[[https://github.com/nflath/sudo-edit][sudo-edit]] lets you open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
 #+begin_src emacs-lisp
 (use-package sudo-edit
   :defer t)
@@ -1675,10 +1679,10 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
 (use-package ewal
   :ensure t
   :config
-    (set-face-attribute 'line-number-current-line t
+    (set-face-attribute 'line-number-current-line nil
       :foreground (ewal-load-color 'comment)
       :inherit 'default)
-    (set-face-attribute 'line-number t
+    (set-face-attribute 'line-number nil
       :foreground (ewal--get-base-color 'green)
       :inherit 'default))
 
@@ -1690,7 +1694,7 @@ It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 (load-theme real-theme t)
 #+end_src
 
-With Emacs 29, true transparency has been added.  
+With Emacs 29, true transparency has been added.
 #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth
 #+end_src

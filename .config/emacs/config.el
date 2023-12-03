@@ -45,7 +45,8 @@ Most of the stuff will get redirected here.")
               scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
               tab-always-indent nil
               vc-follow-symlinks t ; Enable follow symlinks
-              indent-tabs-mode nil) ; use spaces instead of tabs for indenting
+              indent-tabs-mode nil ; use spaces instead of tabs for indenting
+              standard-indent 2) ; indenting set to 2
 
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
@@ -92,13 +93,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
  (quit-restore-window window 'kill))
 
+;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
 
 ;; locking buffers from killing
-(with-current-buffer "*scratch*" 
-	  (emacs-lock-mode 'kill))
+(with-current-buffer "*scratch*"
+          (emacs-lock-mode 'kill))
 (with-current-buffer "*Messages*"
-	  (emacs-lock-mode 'kill))
+          (emacs-lock-mode 'kill))
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -142,7 +144,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil
-	  evil-want-C-u-scroll t
+          evil-want-C-u-scroll t
           evil-vsplit-window-right t
           evil-split-window-below t
           evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
@@ -162,8 +164,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after evil
   :config
     ;; Do not uncomment this unless you want to specify each and every mode
-    ;; that evil-collection should works with.  The following line is here 
-    ;; for documentation purposes in case you need it.  
+    ;; that evil-collection should works with.  The following line is here
+    ;; for documentation purposes in case you need it.
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
@@ -189,9 +191,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
   "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
-  "TAB TAB" '(comment-line :wk "Comment lines")
   "u" '(universal-argument :wk "Universal argument")
   "x" '(execute-extended-command :wk "M-x"))
+
+(custom/leader-keys
+  "TAB" '(:ignore t :wk "Spacing/Indent")
+  "TAB TAB" '(comment-line :wk "Comment lines")
+  "TAB SPC" '(untabify :wk "Untabify")
+  "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
 
 (custom/leader-keys
   "a" '(:ignore t :wk "Amusement")
@@ -238,7 +245,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
 (custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")    
+  "e" '(:ignore t :wk "Eshell/Evaluate")
   "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
   "e d" '(eval-defun :wk "Evaluate defun containing or after point")
   "e e" '(eval-expression :wk "Evaluate and elisp expression")
@@ -326,7 +333,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
-    
+
 (custom/leader-keys
   "m" '(:ignore t :wk "Org")
   "m a" '(org-agenda :wk "Org agenda")
@@ -644,7 +651,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package ligature
   :config
     (ligature-set-ligatures 't '("www"))
-    ;; Enable ligatures in programming modes                                                           
+    ;; Enable ligatures in programming modes
     (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
                                      ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
                                      "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
@@ -718,7 +725,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      enable-recursive-minibuffers t)
   :config
     (ivy-mode))
-    
+
 (use-package ivy-rich
   :after ivy
   :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
@@ -739,7 +746,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      ("C-x C-f" . counsel-find-file)
       :map minibuffer-local-map
         ("C-r" . 'counsel-minibuffer-history))
-  :config 
+  :config
     (counsel-mode)
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
 
@@ -797,7 +804,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
         neo-window-width 35
         neo-window-fixed-size nil
         inhibit-compacting-font-caches t
-        projectile-switch-project-action 'neotree-projectile-action) 
+        projectile-switch-project-action 'neotree-projectile-action)
         ;; truncate long file names in neotree
         (add-hook 'neo-after-create-hook
            #'(lambda (_)
@@ -1023,7 +1030,7 @@ do not already have one."
         "NO(n)")))
     (org-capture-templates
       '(("t" "Todo" entry (file "~/org-roam/agenda.org")
-         "* TODO %?\n  %i\n  %a")
+         "* TODO %?\n %a")
         ("s" "School Todo" entry (file "~/org-roam/agenda.org")
          "* TODO %? :school:\n %i")))
     (org-agenda-include-all-todo nil)
@@ -1085,7 +1092,7 @@ do not already have one."
                     text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
-    
+
 (defvar custom/org-bold-symbol "*"
   "Default symbol for `custom/org-format-in-region' function.")
 
@@ -1336,10 +1343,10 @@ do not already have one."
 (use-package ewal
   :ensure t
   :config
-    (set-face-attribute 'line-number-current-line t
+    (set-face-attribute 'line-number-current-line nil
       :foreground (ewal-load-color 'comment)
       :inherit 'default)
-    (set-face-attribute 'line-number t
+    (set-face-attribute 'line-number nil
       :foreground (ewal--get-base-color 'green)
       :inherit 'default))
 
