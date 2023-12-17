@@ -207,6 +207,7 @@ environment.systemPackages = with pkgs; [
   gnome.gnome-tweaks
   lxappearance-gtk2
   mpv
+  mpvScripts.mpris
   wpgtk
   pywal
   swaybg
@@ -294,8 +295,8 @@ services.emacs.defaultEditor = true;
 
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
-  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
-  noto-fonts-emoji
+  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" ]; })
+  noto-fonts-color-emoji
 ];
 
 # setting up xdg desktop portal

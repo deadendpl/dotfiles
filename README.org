@@ -19,7 +19,7 @@ I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal
 |---------------------------+-------------------|
 | Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | ([[https://github.com/gokcehan/lf][lf)]] pcmanfm      |
+| File Manager              | [[https://github.com/gokcehan/lf][lf]], pcmanfm       |
 | Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
 | editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
 | Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
@@ -83,7 +83,7 @@ Stuff to rice [10/11]:
 * INSTALLING
 ** DEPENDENCIES
 Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
-Then go to =dependencies= directory and window manager you want to use. =pacman.sh= will install standard packages with pacman while =aur.sh= will install AUR packages (it installs them with [[https://github.com/Jguer/yay][yay]]).
+Then go to =install/README.org= to look at the dependencies.
 ** CONFIG FILES
 Copy/move all files to your =$HOME= directory.
 

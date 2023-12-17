@@ -1,7 +1,7 @@
 @import url('/home/oliwier/.cache/wal/colors-waybar.css');
 * {
   border: none;
-  border-radius: 0px;
+  border-radius: 8px;
   font-family: Ubuntu Nerd Font;
   font-size: 11pt;
   min-height: 0;
@@ -22,17 +22,14 @@ window#waybar {
   color: @foreground;
   /* border: 2px solid #3a3b3c; */
   margin-right: 2px;
-  border-radius: 8px;
 }
 
 #workspaces button.active {
-  border-radius: 8px;
   background-color: @foreground;
   color: @background;
 }
 
 #workspaces button.urgent {
-  border-radius: 8px;
   background-color: @color0;
   color: @foreground;
 }
@@ -47,61 +44,51 @@ window#waybar {
 }
 
 #clock {
-  border-radius: 8px;
   padding: 0 4px;
   background: @background;
 }
 
 #battery {
-  border-radius: 8px;
   background-color: @color1;
   color: @background;
 }
 
 #pulseaudio {
-  border-radius: 8px;
   background-color: @color2;
   color: @background;
 }
 
 #pulseaudio.muted {
-  border-radius: 8px;
   background-color: @background;
   color: @color2;
 }
 
 #backlight {
-  border-radius: 8px;
   background-color: @color3;
   color: @background;
 }
 
 #bluetooth {
-  border-radius: 8px;
   background-color: @color4;
   color: @background;
 }
 
 #bluetooth.disabled {
-  border-radius: 8px;
   background-color: @background;
   color: @color4;
 }
 
 #bluetooth.off {
-  border-radius: 8px;
   background-color: @background;
   color: @color4;
 }
 
 #network {
-  border-radius: 8px;
   background-color: @color5;
   color: @background;
 }
 
 #custom-gammastep {
-  border-radius: 8px;
   background-color: @color6;
   color: @background;
 }

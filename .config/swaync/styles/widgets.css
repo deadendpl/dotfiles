@@ -1,4 +1,3 @@
-
 /* Mpris widget */
 .widget-mpris {
   /* The parent to all players */
@@ -15,8 +14,6 @@
   font-weight: bold;
   font-size: 1.25rem;
   color: @foreground;
-  letter-spacing: 2px;
-  font: bold 1em Megrim;
 }
 .widget-mpris-subtitle {
   font-size: 1em;

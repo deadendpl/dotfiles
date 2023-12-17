@@ -5,14 +5,15 @@ I decided to put all installation shell scripts in this file because it's cool.
 The script generated from this is called ~install.sh~.
 
 * WARNING
-To anyone that wants to apply these dotfiles.
-The script is intended to use after minimal Arch Linux has been installed.
+TO ANYONE THAT WANTS TO APPLY THESE DOTFILES.
+The script is intended to use after minimal Arch Linux installation.
 
-The script assumes that you have:
-- network connection
-- *systemd* as init system
-- *GRUB* as a bootloader
-- no display (login) manager
+The script assumes that you:
+- have network connection
+- have *systemd* as init system
+- have *GRUB* as a bootloader
+- have no display (login) manager
+- execute the script with your user, not root
 
 * Services
 ** Bluetooth
@@ -27,7 +28,6 @@ I think pipewire sets up its' service automatically with reboot.
 sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
 sudo pacman -S --noconfirm pipewire pipewire-pulse pipewire-audio
 #+end_src
-
 ** Display manager (SDDM)
 #+begin_src sh
 sudo pacman -S --noconfirm sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
@@ -49,7 +49,7 @@ else
   echo "SDDM theme not applied successfully!"
 fi
 #+end_src
-* Pacman
+* Packages
 ** Arco Linux pacman repo
 Some packages installed below are from Arco Linux's repo because I don't want to install everything from AUR.
 #+begin_src sh
@@ -66,9 +66,8 @@ sudo bash -c "echo '$repo_lines' >> /etc/pacman.conf"
 
 sudo pacman -Syyu
 #+end_src
-
 ** Dependencies
-*** Normal dependiencies
+*** Normal dependencies
 #+BEGIN_SRC sh
 sudo pacman -S --noconfirm hyprland \
                            htop \
@@ -98,16 +97,15 @@ sudo pacman -S --noconfirm hyprland \
                            lolcat \
                            otf-codenewroman-nerd \
                            ttf-ubuntu-nerd \
-                           ttf-go-nerd \
                            ttf-jetbrains-mono-nerd \
                            noto-fonts-emoji \
                            pavucontrol \
                            qt5ct \
                            foot \
                            networkmanager \
-                           gksu \
                            qutebrowser \
                            mpv \
+                           mpv-mpris \
                            polkit-gnome \
                            grimshot \
                            dracula-cursors-git \
@@ -162,7 +160,7 @@ yay -S --noconfirm networkmanager-dmenu-git \
 #+end_src
 
 *** Pywal dependencies
-Pywal is like Material You from android but on Linux
+Pywal is like Material You from Android but on Linux
 #+begin_src sh
 yay -S --noconfirm pywal \
                    python-inotify-simple \
@@ -175,7 +173,6 @@ yay -S --noconfirm pywal \
 
 wpg-install.sh -g
 #+end_src
-
 *** Optional software
 #+begin_src sh
 yay -S --noconfirm appimagelauncher-bin \
@@ -185,6 +182,7 @@ yay -S --noconfirm appimagelauncher-bin \
                    # syncthing-gtk
 #+end_src
 * Touchpad setup on Xorg
+Hyprland is set up but SDDM uses Xorg and that doesn't support touchpad tapping.
 #+begin_src sh
 touchpad_conf='Section "InputClass"
         Identifier "touchpad"

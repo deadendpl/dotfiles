@@ -22,9 +22,6 @@ wpg-tile() {
   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 }
 
-# Use the wpg-tile function with the provided or default wallpaper file path
-wpg-tile "$1"
-
 file-line-change() {
   arg1=$(realpath "$1")  # file name
   arg2=$2                # string in a line that will be replaced
@@ -44,6 +41,9 @@ file-line-change() {
   fi
 }
 
+# Use the wpg-tile function with the provided or default wallpaper file path
+wpg-tile "$1"
+
 # waybar
 file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
 
@@ -54,7 +54,8 @@ file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import
 file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
 $HOME/.config/scripts/hypr/waybar-start.sh
-$HOME/.config/swaync/reload.sh
+swaync-client -rs
+swaync-client -R
 emacsclient --eval '(load-theme real-theme t)'
 
 notify-send "New rice applied"

@@ -10,11 +10,11 @@ end
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
 
-set EDITOR nvim
+set EDITOR emacsclient -t -a "nvim"
 set VISUAL emacsclient -c -a "emacs"
 
 set fish_greeting
-fish_vi_key_bindings
+# fish_vi_key_bindings
 
 # going to last directory from lf
 function lfcd
@@ -64,10 +64,7 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
-# i couldn't set this as alias
-function connect
-  nmcli device wifi connect $argv
-end
+alias connect='nmcli device wifi connect'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
 alias lf='lfcd'
 alias cp='cp-p'
@@ -75,15 +72,27 @@ alias clr='clear'
 alias cllr='clear && l'
 alias fetch='fastfetch'
 alias grep='grep --color=auto'
-alias ip='ip -color=auto'
+alias ip='ip --color=auto'
 alias man='batman'
+alias mv='mv-p'
 alias v='emacsclient -t -a "nvim"'
 alias vim='nvim'
-alias RGB='ls -laR / | lolcat'
+alias RGB="cat /dev/urandom | tr -dc 'a-z A-Z' | lolcat"
 alias demacs='emacs --daemon'
 alias remacs='pkill emacs && emacs --daemon'
 alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
-alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 alias myip='curl "https://wtfismyip.com/text"'
 alias swaylock='~/.cache/wal/swaylock.sh'
 alias pi='ping wp.pl'
+
+if set -q INSIDE_EMACS
+    or set -q NVIM
+    fish_default_key_bindings
+else
+    fish_vi_key_bindings
+    set fish_cursor_replace_one underscore
+    set fish_cursor_insert line
+    if string match -rq 'wezterm|foot|tmux' -- $TERM
+        set fish_vi_force_cursor true
+    end
+end

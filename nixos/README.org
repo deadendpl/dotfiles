@@ -315,6 +315,7 @@ environment.systemPackages = with pkgs; [
   gnome.gnome-tweaks
   lxappearance-gtk2
   mpv
+  mpvScripts.mpris
   wpgtk
   pywal
   swaybg
@@ -411,8 +412,8 @@ I install nerd fonts. Istead of installing all fonts you can specify which ones 
 #+begin_src nix :tangle configuration.nix
 # in unstable: fonts.packages = with pkgs; [
 fonts.fonts = with pkgs; [
-  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" "Go-Mono" ]; })
-  noto-fonts-emoji
+  (nerdfonts.override { fonts = [ "CodeNewRoman" "JetBrainsMono" "Ubuntu" ]; })
+  noto-fonts-color-emoji
 ];
 
 #+end_src

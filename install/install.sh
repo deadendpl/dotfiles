@@ -65,16 +65,15 @@ sudo pacman -S --noconfirm hyprland \
                            lolcat \
                            otf-codenewroman-nerd \
                            ttf-ubuntu-nerd \
-                           ttf-go-nerd \
                            ttf-jetbrains-mono-nerd \
                            noto-fonts-emoji \
                            pavucontrol \
                            qt5ct \
                            foot \
                            networkmanager \
-                           gksu \
                            qutebrowser \
                            mpv \
+                           mpv-mpris \
                            polkit-gnome \
                            grimshot \
                            dracula-cursors-git \

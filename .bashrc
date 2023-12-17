@@ -39,10 +39,7 @@ alias nclean='sudo nix-collect-garbage -d'
 
 # other
 alias cp='cp -v'
-# i couldn't set this as alias
-connect() {
-  nmcli device wifi connect "$@"
-}
+alias connect='nmcli device wifi connect'
 alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
 alias clr='clear'
 alias cllr='clear && l'
@@ -50,13 +47,13 @@ alias fetch='fastfetch'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias man='batman'
+alias mv='mv-p'
 alias v='$EDITOR'
 alias vim='nvim'
-alias RGB='ls -laR / | lolcat'
+alias RGB="cat /dev/urandom | tr -dc 'a-z A-Z' | lolcat"
 alias demacs='emacs --daemon'
 alias remacs='pkill emacs && emacs --daemon'
 alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
-alias killonclick="xprop | grep "PID" | awk '{print $3}' | xargs kill"
 alias myip='curl "https://wtfismyip.com/text"'
 PS1='[\u@\h \W]\$'
 
