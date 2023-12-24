@@ -43,7 +43,19 @@ Stuff to rice [10/11]:
 - [X] hyprland
 - [X] zathura
 
-* UNMAINTAINED
+* INSTALLING
+** DEPENDENCIES
+Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
+Then go to =install/README.org= to look at the dependencies and other tweaks.
+** CONFIG FILES
+Copy/move all files to your =$HOME= directory.
+
+Another way to manage this conveniently is to install [[https://www.gnu.org/software/stow/][stow]].
+1. Move cloned repo into =~/.repo-name=.
+2. Backup your =~/.config= and delete everything inside if necessary.
+3. Then inside that directory do =stow .=
+This will link all files autmatically to its corrensponding places
+* UNMAINTAINED :ARCHIVE:
 ** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
 - Dracula [[file:screenshots/bspwm/dracula.png]]
 
@@ -80,15 +92,3 @@ Stuff to rice [10/11]:
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
 
-* INSTALLING
-** DEPENDENCIES
-Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
-Then go to =install/README.org= to look at the dependencies.
-** CONFIG FILES
-Copy/move all files to your =$HOME= directory.
-
-Another way to manage this conveniently is to install [[https://www.gnu.org/software/stow/][stow]].
-1. Move cloned repo into =~/.repo-name=.
-2. Backup your =~/.config= and delete everything inside if necessary.
-3. Then inside that directory do =stow .=
-This will link all files autmatically to its corrensponding places

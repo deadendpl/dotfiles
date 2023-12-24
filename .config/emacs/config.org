@@ -238,11 +238,12 @@ Packages that are not on elisp packages repos
 #+begin_src emacs-lisp
 (use-package quelpa
   :custom
-    (quelpa-dir (concat user-share-emacs-directory "quelpa/")))
+    (quelpa-dir (concat user-share-emacs-directory "quelpa/"))
+    (quelpa-checkout-melpa-p nil))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
     ;; (quelpa-packages-dir (concat quelpa-dir "packages/")))
-(use-package quelpa-use-package)
+(use-package quelpa-use-package :after quelpa)
 #+end_src
 * EVIL AND KEYBINDINGS
 Before having my own Emacs config I used [[https://github.com/doomemacs/doomemacs][Doom Emacs]] and before that I used vanilla Vim so I set up evil mode.
@@ -339,7 +340,7 @@ This is a big list.
 
   (custom/leader-keys
     "b" '(:ignore t :wk "Bookmarks/Buffers")
-    "b b" '(switch-to-buffer :wk "Switch to buffer")
+    "b b" '(counsel-ibuffer :wk "Switch to buffer")
     "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
     "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
     "b d" '(bookmark-delete :wk "Delete bookmark")
@@ -448,6 +449,7 @@ This is a big list.
     "h f" '(describe-function :wk "Describe function")
     "h F" '(describe-face :wk "Describe face")
     "h g" '(describe-gnu-project :wk "Describe GNU Project")
+    "h h" '(helpful-at-point :wk "Describe at point")
     "h i" '(info :wk "Info")
     "h I" '(describe-input-method :wk "Describe input method")
     "h k" '(describe-key :wk "Describe key")
@@ -680,7 +682,8 @@ This is a big list.
   :ensure t
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner "~/.config/emacs/banner.txt")
+    (dashboard-startup-banner "~/.cache/wal/emacs.svg")
+    (dashboard-banner-logo-title "Welcome to Church of Emacs!")
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
@@ -850,9 +853,8 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
                                      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
     (global-ligature-mode 't))
 #+end_src
-
 ** Mixed Pitch
-This incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will prbably keep that font.
+[[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
 I turn that mode in Org Mode.
 #+begin_src emacs-lisp
 (use-package mixed-pitch
@@ -1111,7 +1113,7 @@ Improving and ricing [[https://orgmode.org/][org mode]]
 #+end_src
 
 ** Source Code Block Tag Expansion
-Org-tempo is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a begin_src tag. Other expansions available include:
+Org-tempo is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a =begin_src= tag. Other expansions available include:
 
 | Typing the below + TAB | Expands to ...                        |
 |------------------------+---------------------------------------|
@@ -1233,13 +1235,25 @@ It's set up so it will display markers when entering insert mode.
 If you don't use the same font as me then you need to edit ~org-modern-label~'s height.
 #+begin_src emacs-lisp
 (use-package org-modern
+  :defer t
   :after org
   :init (add-hook 'org-mode-hook 'org-modern-mode t)
   :custom-face
     (org-modern-label ((t (:height 1.2))))
   :custom
     (org-modern-star nil)
-    (org-modern-list nil))
+    (org-modern-list nil)
+    (org-modern-table nil))
+#+end_src
+
+But it doesn't work well with =org-indent-mode= which indents text to headers.
+Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
+#+begin_src emacs-lisp
+(use-package org-modern-indent
+  :defer t
+  :after org
+  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
+  :init (add-hook 'org-modern-hook 'org-modern-indent-mode t))
 #+end_src
 ** ORG YT
 It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.
@@ -1304,127 +1318,129 @@ A whole lot of other stuff
 #+begin_src emacs-lisp
 (use-package org
   :defer t
+  :init (add-hook 'org-mode-hook 'org-indent-mode t)
   :custom-face
-  ;; setting size of headers
-  (org-document-title ((t (:inherit outline-1 :height 1.7))))
-  (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-  (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-  (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-  (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-  (org-level-5 ((t (:inherit outline-5 :height 1.3))))
-  (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-  (org-level-7 ((t (:inherit outline-5 :height 1.1))))
-  (org-agenda-date-today ((t (:height 1.3))))
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-agenda-date-today ((t (:height 1.3))))
   :custom
-  (org-directory "~/org/")
-  (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/phone.org")))
-  (org-todo-keywords
-   '((sequence
-      "TODO(t)"  ; A task that needs doing & is ready to do
-      "PROJ(p)"  ; A project, which usually contains other tasks
-      "LOOP(r)"  ; A recurring task
-      "STRT(s)"  ; A task that is in progress
-      "WAIT(w)"  ; Something external is holding up this task
-      "HOLD(h)"  ; This task is paused/on hold because of me
-      "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-      "|"
-      "DONE(d)"  ; Task successfully completed
-      "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-     (sequence
-      "[ ](T)"   ; A task that needs doing
-      "[-](S)"   ; Task is in progress
-      "[?](W)"   ; Task is being held up or paused
-      "|"
-      "[X](D)")  ; Task was completed
-     (sequence
-      "|"
-      "OKAY(o)"
-      "YES(y)"
-      "NO(n)")))
-  (org-capture-templates
-   '(("t" "Todo" entry (file "~/org-roam/agenda.org")
-      "* TODO %?\n %a")
-     ("s" "School Todo" entry (file "~/org-roam/agenda.org")
-      "* TODO %? :school:\n %i")))
-  (org-agenda-include-all-todo nil)
-  (org-agenda-skip-scheduled-if-done t)
-  (org-agenda-skip-deadline-if-done t)
-  (org-agenda-columns-add-appointments-to-effort-sum t)
-  (org-agenda-custom-commands nil)
-  (org-agenda-default-appointment-duration 60)
-  (org-agenda-mouse-1-follows-link t)
-  (org-agenda-skip-unavailable-files t)
-  (org-agenda-use-time-grid t)
-  (org-insert-heading-respect-content nil)
-  (org-hide-emphasis-markers t)
-  (org-hide-leading-stars t)
-  (org-hide-emphasis-markers t)
-  (org-pretty-entities t)
-  (org-startup-with-inline-images t)
-  (org-cycle-inline-images-display t)
-  (org-display-remote-inline-images 'download)
-  (org-image-actual-width nil)
-  (org-list-allow-alphabetical t)
-  (org-ellipsis " •")
-  (org-agenda-window-setup 'current-window)
-  (org-fontify-quote-and-verse-blocks t)
-  (org-agenda-block-separator 8411)
-  (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (org-return-follows-link t)
-  (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
-  (org-export-backends (quote (ascii html icalendar latex odt md)))
-  (org-tags-column 0)
-  (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
-  (org-confirm-babel-evaluate nil)
-  (org-edit-src-content-indentation 0)
-  (org-export-preserve-breaks t)
+    (org-directory "~/org/")
+    (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/nonagenda.org")(concat org-roam-directory "/phone.org")))
+    (org-todo-keywords
+     '((sequence
+        "TODO(t)"  ; A task that needs doing & is ready to do
+        "PROJ(p)"  ; A project, which usually contains other tasks
+        "LOOP(r)"  ; A recurring task
+        "STRT(s)"  ; A task that is in progress
+        "WAIT(w)"  ; Something external is holding up this task
+        "HOLD(h)"  ; This task is paused/on hold because of me
+        "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+        "|"
+        "DONE(d)"  ; Task successfully completed
+        "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+       (sequence
+        "[ ](T)"   ; A task that needs doing
+        "[-](S)"   ; Task is in progress
+        "[?](W)"   ; Task is being held up or paused
+        "|"
+        "[X](D)")  ; Task was completed
+       (sequence
+        "|"
+        "OKAY(o)"
+        "YES(y)"
+        "NO(n)")))
+    (org-capture-templates
+     '(("t" "Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %?\n %a")
+       ("s" "School Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %? :school:\n %i")))
+    (org-agenda-include-all-todo nil)
+    (org-agenda-skip-scheduled-if-done t)
+    (org-agenda-skip-deadline-if-done t)
+    (org-agenda-columns-add-appointments-to-effort-sum t)
+    (org-agenda-custom-commands nil)
+    (org-agenda-default-appointment-duration 60)
+    (org-agenda-mouse-1-follows-link t)
+    (org-agenda-skip-unavailable-files t)
+    (org-agenda-use-time-grid t)
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-hide-emphasis-markers t)
+    (org-pretty-entities t)
+    (org-startup-with-inline-images t)
+    (org-cycle-inline-images-display t)
+    (org-display-remote-inline-images 'download)
+    (org-image-actual-width nil)
+    (org-list-allow-alphabetical t)
+    (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
+    (org-fontify-quote-and-verse-blocks t)
+    (org-agenda-block-separator 8411)
+    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+    (org-preview-latex-default-process 'dvisvgm)
+    (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+    (org-return-follows-link t)
+    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-tags-column 0)
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-confirm-babel-evaluate nil)
+    (org-edit-src-content-indentation 0)
+    (org-export-preserve-breaks t)
+    (org-export-with-properties t)
   :config
-  (add-to-list 'display-buffer-alist
-               '("*Agenda Commands*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-
-  (add-to-list 'display-buffer-alist
-               '("*Org Select*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-
-  (add-to-list 'display-buffer-alist
-               '("*Org Links*"
-                 (display-buffer-at-bottom)
-                 (window-height . 1)))
-
-  (defun custom/org-resize-latex-overlays ()
-    "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
-    (cl-loop for o in (car (overlay-lists))
-             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
-             do (plist-put (cdr (overlay-get o 'display))
-                           :scale (expt text-scale-mode-step
-                                        text-scale-mode-amount))))
-  (plist-put org-format-latex-options :foreground nil)
-  (plist-put org-format-latex-options :background nil)
-
-  (defvar custom/org-bold-symbol "*"
-    "Default symbol for `custom/org-format-in-region' function.")
-
-  (defun custom/org-format-in-region (&optional symbol)
-    "Add symbols before and after the selected text."
-    (interactive)
-    (setq symbol (or symbol
-                     (read-string "Enter symbol: " custom/org-bold-symbol)))
-    (when (region-active-p)
-      (save-excursion
-        (goto-char (region-end))
-        (insert symbol)
-        (goto-char (region-beginning))
-        (insert symbol)))
-    (deactivate-mark))
+    (add-to-list 'display-buffer-alist
+                 '("*Agenda Commands*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+   
+    (add-to-list 'display-buffer-alist
+                 '("*Org Select*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+   
+    (add-to-list 'display-buffer-alist
+                 '("*Org Links*"
+                   (display-buffer-at-bottom)
+                   (window-height . 1)))
+   
+    (defun custom/org-resize-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
+      (cl-loop for o in (car (overlay-lists))
+               if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+               do (plist-put (cdr (overlay-get o 'display))
+                             :scale (expt text-scale-mode-step
+                                          text-scale-mode-amount))))
+    (plist-put org-format-latex-options :foreground nil)
+    (plist-put org-format-latex-options :background nil)
+   
+    (defvar custom/org-bold-symbol "*"
+      "Default symbol for `custom/org-format-in-region' function.")
+   
+    (defun custom/org-format-in-region (&optional symbol)
+      "Add symbols before and after the selected text."
+      (interactive)
+      (setq symbol (or symbol
+                       (read-string "Enter symbol: " custom/org-bold-symbol)))
+      (when (region-active-p)
+        (save-excursion
+          (goto-char (region-end))
+          (insert symbol)
+          (goto-char (region-beginning))
+          (insert symbol)))
+      (deactivate-mark))
   :bind
-  ([remap org-insert-heading-respect-content] . org-meta-return)
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
-  (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1649,7 +1665,7 @@ This remaps specified major modes to its tree-sitter counterparts
     (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp")))
 #+end_src
 *** Command templates
-~yasnippet~ implements snippets for commands etc.
+[[https://github.com/joaotavora/yasnippet][yasnippet]] implements snippets for commands etc.
 #+begin_src emacs-lisp
 (use-package yasnippet
   :defer t
@@ -1721,11 +1737,9 @@ Eshell is an Emacs 'shell' that is written in Elisp.
 Probably the most comfy terminal experience in Emacs
 [[https://codeberg.org/akib/emacs-eat][EAT repo link]]
 #+begin_src emacs-lisp
-;; (use-package eat
-;;   :defer t
-;;   :after eshell
-;;   :config
-
+(use-package eat
+  :defer t
+  :after eshell)
 #+end_src
 ** Vterm
 Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x ansi-term= and =M-x vterm=.
@@ -1817,10 +1831,9 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
       :inherit 'default))
 
 (defvar real-theme nil
-  "It represents theme to load at startup.
-It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
-(setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
 (load-theme real-theme t)
 #+end_src
 

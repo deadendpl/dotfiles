@@ -2,6 +2,10 @@ include /home/oliwier/.cache/wal/colors-zathurarc
 
 set recolor "true"
 set adjust-open width
+set font "CodeNewRoman Nerd Font Mono 10"
 
 set window-title-basename "true"
 set selection-clipboard "clipboard"
+
+map [normal] f toggle_fullscreen
+map [fullscreen] f toggle_fullscreen

@@ -1,2 +1,2 @@
 install:
-	gcc -lstdc++ main.cpp -o main
+	g++ -o main main.cpp 

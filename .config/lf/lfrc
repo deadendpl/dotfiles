@@ -62,15 +62,12 @@ cmd open &{{
 }}
 
 # define a custom 'rename' command without prompt for overwrite
-cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
-map R push :rename<space>
-
-# make sure trash folder exists
-# %mkdir -p ~/.trash
+# cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
+# map R push :rename<space>
 
 # move current file or selected files to trash folder
 # (also see 'man mv' for backup/overwrite options)
-cmd trash %set -f; mv $fx ~/.trash
+cmd trash %set -f; mv $fx ~/.local/share/Trash/files
 
 # define a custom 'delete' command
 # cmd delete ${{
@@ -124,9 +121,9 @@ set cleaner ctpvclear
 &ctpvquit $id
 
 # setting exa for details
-#cmd on-select &{{
-#    lf -remote "send $id set statfmt \"$(exa -ld --color=always "$f")\""
-#}}
+# cmd on-select &{{
+#    lf -remote "send $id set statfmt \"$(eza -ld --color=always "$f")\""
+# }}
 
 # ripgrep searching
 cmd fzf_search ${{
@@ -195,3 +192,19 @@ cmd select-dirs &{{
 
     lf -remote "send $id :unselect; toggle $(get_dirs)"
 }}
+
+cmd on-redraw %{{
+    if [ $lf_width -le 80 ]; then
+        lf -remote "send $id set ratios 1:2"
+    elif [ $lf_width -le 160 ]; then
+        lf -remote "send $id set ratios 1:2:3"
+    else
+        lf -remote "send $id set ratios 1:2:3:5"
+    fi
+}}
+
+# refresh every 1 second
+set period 1
+
+set info size
+set dircounts

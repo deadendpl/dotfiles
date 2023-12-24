@@ -130,11 +130,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package quelpa
   :custom
-    (quelpa-dir (concat user-share-emacs-directory "quelpa/")))
+    (quelpa-dir (concat user-share-emacs-directory "quelpa/"))
+    (quelpa-checkout-melpa-p nil))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
     ;; (quelpa-packages-dir (concat quelpa-dir "packages/")))
-(use-package quelpa-use-package)
+(use-package quelpa-use-package :after quelpa)
 
 ;;(defun custom/evil-hook ()
 ;;  (dolist (mode '(custom-mode
@@ -222,7 +223,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
   (custom/leader-keys
     "b" '(:ignore t :wk "Bookmarks/Buffers")
-    "b b" '(switch-to-buffer :wk "Switch to buffer")
+    "b b" '(counsel-ibuffer :wk "Switch to buffer")
     "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
     "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
     "b d" '(bookmark-delete :wk "Delete bookmark")
@@ -331,6 +332,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "h f" '(describe-function :wk "Describe function")
     "h F" '(describe-face :wk "Describe face")
     "h g" '(describe-gnu-project :wk "Describe GNU Project")
+    "h h" '(helpful-at-point :wk "Describe at point")
     "h i" '(info :wk "Info")
     "h I" '(describe-input-method :wk "Describe input method")
     "h k" '(describe-key :wk "Describe key")
@@ -553,7 +555,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :ensure t
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner "~/.config/emacs/banner.txt")
+    (dashboard-startup-banner "~/.cache/wal/emacs.svg")
+    (dashboard-banner-logo-title "Welcome to Church of Emacs!")
     (dashboard-center-content t)
     (dashboard-items '((recents  . 5)
                        (bookmarks . 5)
@@ -944,13 +947,21 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package org-modern
+  :defer t
   :after org
   :init (add-hook 'org-mode-hook 'org-modern-mode t)
   :custom-face
     (org-modern-label ((t (:height 1.2))))
   :custom
     (org-modern-star nil)
-    (org-modern-list nil))
+    (org-modern-list nil)
+    (org-modern-table nil))
+
+(use-package org-modern-indent
+  :defer t
+  :after org
+  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
+  :init (add-hook 'org-modern-hook 'org-modern-indent-mode t))
 
 ;; (use-package org-yt
 ;;   :defer t
@@ -1002,127 +1013,129 @@ do not already have one."
 
 (use-package org
   :defer t
+  :init (add-hook 'org-mode-hook 'org-indent-mode t)
   :custom-face
-  ;; setting size of headers
-  (org-document-title ((t (:inherit outline-1 :height 1.7))))
-  (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-  (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-  (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-  (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-  (org-level-5 ((t (:inherit outline-5 :height 1.3))))
-  (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-  (org-level-7 ((t (:inherit outline-5 :height 1.1))))
-  (org-agenda-date-today ((t (:height 1.3))))
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-agenda-date-today ((t (:height 1.3))))
   :custom
-  (org-directory "~/org/")
-  (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/phone.org")))
-  (org-todo-keywords
-   '((sequence
-      "TODO(t)"  ; A task that needs doing & is ready to do
-      "PROJ(p)"  ; A project, which usually contains other tasks
-      "LOOP(r)"  ; A recurring task
-      "STRT(s)"  ; A task that is in progress
-      "WAIT(w)"  ; Something external is holding up this task
-      "HOLD(h)"  ; This task is paused/on hold because of me
-      "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-      "|"
-      "DONE(d)"  ; Task successfully completed
-      "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-     (sequence
-      "[ ](T)"   ; A task that needs doing
-      "[-](S)"   ; Task is in progress
-      "[?](W)"   ; Task is being held up or paused
-      "|"
-      "[X](D)")  ; Task was completed
-     (sequence
-      "|"
-      "OKAY(o)"
-      "YES(y)"
-      "NO(n)")))
-  (org-capture-templates
-   '(("t" "Todo" entry (file "~/org-roam/agenda.org")
-      "* TODO %?\n %a")
-     ("s" "School Todo" entry (file "~/org-roam/agenda.org")
-      "* TODO %? :school:\n %i")))
-  (org-agenda-include-all-todo nil)
-  (org-agenda-skip-scheduled-if-done t)
-  (org-agenda-skip-deadline-if-done t)
-  (org-agenda-columns-add-appointments-to-effort-sum t)
-  (org-agenda-custom-commands nil)
-  (org-agenda-default-appointment-duration 60)
-  (org-agenda-mouse-1-follows-link t)
-  (org-agenda-skip-unavailable-files t)
-  (org-agenda-use-time-grid t)
-  (org-insert-heading-respect-content nil)
-  (org-hide-emphasis-markers t)
-  (org-hide-leading-stars t)
-  (org-hide-emphasis-markers t)
-  (org-pretty-entities t)
-  (org-startup-with-inline-images t)
-  (org-cycle-inline-images-display t)
-  (org-display-remote-inline-images 'download)
-  (org-image-actual-width nil)
-  (org-list-allow-alphabetical t)
-  (org-ellipsis " •")
-  (org-agenda-window-setup 'current-window)
-  (org-fontify-quote-and-verse-blocks t)
-  (org-agenda-block-separator 8411)
-  (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (org-return-follows-link t)
-  (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
-  (org-export-backends (quote (ascii html icalendar latex odt md)))
-  (org-tags-column 0)
-  (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
-  (org-confirm-babel-evaluate nil)
-  (org-edit-src-content-indentation 0)
-  (org-export-preserve-breaks t)
+    (org-directory "~/org/")
+    (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/nonagenda.org")(concat org-roam-directory "/phone.org")))
+    (org-todo-keywords
+     '((sequence
+        "TODO(t)"  ; A task that needs doing & is ready to do
+        "PROJ(p)"  ; A project, which usually contains other tasks
+        "LOOP(r)"  ; A recurring task
+        "STRT(s)"  ; A task that is in progress
+        "WAIT(w)"  ; Something external is holding up this task
+        "HOLD(h)"  ; This task is paused/on hold because of me
+        "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+        "|"
+        "DONE(d)"  ; Task successfully completed
+        "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+       (sequence
+        "[ ](T)"   ; A task that needs doing
+        "[-](S)"   ; Task is in progress
+        "[?](W)"   ; Task is being held up or paused
+        "|"
+        "[X](D)")  ; Task was completed
+       (sequence
+        "|"
+        "OKAY(o)"
+        "YES(y)"
+        "NO(n)")))
+    (org-capture-templates
+     '(("t" "Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %?\n %a")
+       ("s" "School Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %? :school:\n %i")))
+    (org-agenda-include-all-todo nil)
+    (org-agenda-skip-scheduled-if-done t)
+    (org-agenda-skip-deadline-if-done t)
+    (org-agenda-columns-add-appointments-to-effort-sum t)
+    (org-agenda-custom-commands nil)
+    (org-agenda-default-appointment-duration 60)
+    (org-agenda-mouse-1-follows-link t)
+    (org-agenda-skip-unavailable-files t)
+    (org-agenda-use-time-grid t)
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-hide-emphasis-markers t)
+    (org-pretty-entities t)
+    (org-startup-with-inline-images t)
+    (org-cycle-inline-images-display t)
+    (org-display-remote-inline-images 'download)
+    (org-image-actual-width nil)
+    (org-list-allow-alphabetical t)
+    (org-ellipsis " •")
+    (org-agenda-window-setup 'current-window)
+    (org-fontify-quote-and-verse-blocks t)
+    (org-agenda-block-separator 8411)
+    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+    (org-preview-latex-default-process 'dvisvgm)
+    (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+    (org-return-follows-link t)
+    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-tags-column 0)
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-confirm-babel-evaluate nil)
+    (org-edit-src-content-indentation 0)
+    (org-export-preserve-breaks t)
+    (org-export-with-properties t)
   :config
-  (add-to-list 'display-buffer-alist
-               '("*Agenda Commands*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-
-  (add-to-list 'display-buffer-alist
-               '("*Org Select*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-
-  (add-to-list 'display-buffer-alist
-               '("*Org Links*"
-                 (display-buffer-at-bottom)
-                 (window-height . 1)))
-
-  (defun custom/org-resize-latex-overlays ()
-    "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
-    (cl-loop for o in (car (overlay-lists))
-             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
-             do (plist-put (cdr (overlay-get o 'display))
-                           :scale (expt text-scale-mode-step
-                                        text-scale-mode-amount))))
-  (plist-put org-format-latex-options :foreground nil)
-  (plist-put org-format-latex-options :background nil)
-
-  (defvar custom/org-bold-symbol "*"
-    "Default symbol for `custom/org-format-in-region' function.")
-
-  (defun custom/org-format-in-region (&optional symbol)
-    "Add symbols before and after the selected text."
-    (interactive)
-    (setq symbol (or symbol
-                     (read-string "Enter symbol: " custom/org-bold-symbol)))
-    (when (region-active-p)
-      (save-excursion
-        (goto-char (region-end))
-        (insert symbol)
-        (goto-char (region-beginning))
-        (insert symbol)))
-    (deactivate-mark))
+    (add-to-list 'display-buffer-alist
+                 '("*Agenda Commands*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+   
+    (add-to-list 'display-buffer-alist
+                 '("*Org Select*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+   
+    (add-to-list 'display-buffer-alist
+                 '("*Org Links*"
+                   (display-buffer-at-bottom)
+                   (window-height . 1)))
+   
+    (defun custom/org-resize-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
+      (cl-loop for o in (car (overlay-lists))
+               if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+               do (plist-put (cdr (overlay-get o 'display))
+                             :scale (expt text-scale-mode-step
+                                          text-scale-mode-amount))))
+    (plist-put org-format-latex-options :foreground nil)
+    (plist-put org-format-latex-options :background nil)
+   
+    (defvar custom/org-bold-symbol "*"
+      "Default symbol for `custom/org-format-in-region' function.")
+   
+    (defun custom/org-format-in-region (&optional symbol)
+      "Add symbols before and after the selected text."
+      (interactive)
+      (setq symbol (or symbol
+                       (read-string "Enter symbol: " custom/org-bold-symbol)))
+      (when (region-active-p)
+        (save-excursion
+          (goto-char (region-end))
+          (insert symbol)
+          (goto-char (region-beginning))
+          (insert symbol)))
+      (deactivate-mark))
   :bind
-  ([remap org-insert-heading-respect-content] . org-meta-return)
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :hook
-  (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1316,10 +1329,9 @@ If not then copy c++ makefile and put it in the current directory"
   :config
     (eshell-syntax-highlighting-global-mode +1))
 
-;; (use-package eat
-;;   :defer t
-;;   :after eshell
-;;   :config
+(use-package eat
+  :defer t
+  :after eshell)
 
 (use-package vterm
   :defer t
@@ -1381,10 +1393,9 @@ If not then copy c++ makefile and put it in the current directory"
       :inherit 'default))
 
 (defvar real-theme nil
-  "It represents theme to load at startup.
-It will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
-(setq real-theme 'ewal-doom-one) ;; NOTE this is where you should set your theme
+(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
 (load-theme real-theme t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth

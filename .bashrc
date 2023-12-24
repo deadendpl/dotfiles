@@ -26,7 +26,7 @@ pinsearch() {
 }
 alias psearch='yay -F'
 alias porphan='yay -Qtdq'
-alias pclean='yay -Sc && porphan | yay -Rns -'
+alias pclean='yay --noconfirm -Sc && porphan | yay --noconfirm -Rns -'
 alias listaur="yay -Qqem"
 
 # yay
