@@ -2,6 +2,8 @@
 #+STARTUP: fold
 
 * TABLE OF CONTENTS :toc:noexport:
+- [[#todo-list][TODO list]]
+  - [[#look-if-this-will-bring-any-use-to-me][look if this will bring any use to me]]
 - [[#sane-defaults-and-other][SANE DEFAULTS (and other)]]
   - [[#some-modes-turned-on-and-off][Some modes turned on and off]]
   - [[#uncluttering-user-emacs-directory-and-other][Uncluttering user-emacs-directory and other]]
@@ -40,18 +42,18 @@
 - [[#neotree][NEOTREE]]
 - [[#obsidian][OBSIDIAN]]
 - [[#org-mode][ORG MODE]]
+  - [[#org-roam][ORG ROAM]]
+  - [[#other-tweaks][OTHER TWEAKS]]
   - [[#fixing-keybindings-and-evil-mode][FIXING KEYBINDINGS AND EVIL MODE]]
   - [[#source-code-block-tag-expansion][Source Code Block Tag Expansion]]
   - [[#company-support][COMPANY SUPPORT]]
   - [[#org-appear][ORG APPEAR]]
-  - [[#org-roam][ORG ROAM]]
   - [[#org-superstar][ORG SUPERSTAR]]
   - [[#org-auto-tangle][ORG AUTO TANGLE]]
   - [[#org-modern][ORG MODERN]]
   - [[#org-yt][ORG YT]]
   - [[#toc][TOC]]
   - [[#notes][NOTES]]
-  - [[#other-tweaks][OTHER TWEAKS]]
 - [[#pandoc][PANDOC]]
 - [[#parenthesis][PARENTHESIS]]
 - [[#perspective][PERSPECTIVE]]
@@ -81,6 +83,8 @@
 - [[#writeroom][WRITEROOM]]
 - [[#credits][CREDITS]]
 
+* TODO TODO list
+** look if [[https://github.com/alhassy/org-special-block-extras][this]] will bring any use to me
 * SANE DEFAULTS (and other)
 Here are some tweaks that idk where to put
 ** Some modes turned on and off
@@ -174,24 +178,24 @@ Most of the stuff will get redirected here.")
                 outline-mode-hook
                 eat-mode-hook
                 compilation-mode-hook
+                Custom-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 #+end_src
 
 ** Quitting stuff
-With this =quit-window= which is used by most modes to quit kills the mode's buffer so it won't clutter Emacs
+With this =quit-window= which is used by most single use modes to quit kills the mode's buffer so it won't clutter Emacs
 #+begin_src emacs-lisp
 (defun quit-window (&optional kill window)
- "Quit WINDOW, deleting it, and kill its buffer.
+  "Quit WINDOW, deleting it, and kill its buffer.
 WINDOW must be a live window and defaults to the selected one.
 The buffer is killed instead of being buried.
 This function ignores the information stored in WINDOW's `quit-restore' window parameter."
- (interactive "P")
- (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
- (quit-restore-window window 'kill))
+  (interactive "P")
+  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
+  (quit-restore-window window 'kill))
 #+end_src
-
 ** Other
 #+begin_src emacs-lisp
 ;; Some file extensions set for certain modes
@@ -205,6 +209,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; make utf-8 the coding system
+(prefer-coding-system 'utf-8)
 #+end_src
 * PACKAGE MANAGEMENT SETUP
 ** Normal packages
@@ -230,23 +237,26 @@ Default package management using =package.el=
    (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t
-      use-package-verbose t)
+(setq use-package-verbose t
+      use-package-always-defer t) ; packages by default will be lazy loaded, like the will have defer: t
 #+end_src
 ** Not normal packages
 Packages that are not on elisp packages repos
 #+begin_src emacs-lisp
 (use-package quelpa
+  :demand
   :custom
     (quelpa-dir (concat user-share-emacs-directory "quelpa/"))
     (quelpa-checkout-melpa-p nil))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
     ;; (quelpa-packages-dir (concat quelpa-dir "packages/")))
-(use-package quelpa-use-package :after quelpa)
+(use-package quelpa-use-package
+  :demand
+  :after quelpa)
 #+end_src
 * EVIL AND KEYBINDINGS
-Before having my own Emacs config I used [[https://github.com/doomemacs/doomemacs][Doom Emacs]] and before that I used vanilla Vim so I set up evil mode.
+Before having my own Emacs config I used [[https://github.com/doomemacs/doomemacs][Doom Emacs]] and before that I used vanilla Vim so I set up [[https://github.com/emacs-evil/evil][evil mode]].
 ** EVIL SETUP
 #+begin_src emacs-lisp
 ;;(defun custom/evil-hook ()
@@ -263,6 +273,7 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
 
 
 (use-package evil
+  :demand
   :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil
@@ -275,10 +286,12 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
       ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
 
 (use-package evil-collection
+  :demand
   :after evil
   :config
     ;; Do not uncomment this unless you want to specify each and every mode
@@ -287,16 +300,9 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
-
-(use-package ibuffer
-  :defer t
-  :config
-    (evil-collection-define-key 'normal 'ibuffer-mode-map
-      "l" 'ibuffer-visit-buffer))
 #+end_src
-
 ** ACTUAL KEYBINDINGS
-General lets you bind keybindings.
+[[https://github.com/noctuid/general.el][General]] lets you bind keybindings.
 This is a big list.
 #+begin_src emacs-lisp
 (use-package general
@@ -336,6 +342,16 @@ This is a big list.
     "a g p" '(pong :wk "Pong")
     "a g s" '(snake :wk "Snake")
     "a g t" '(tetris :wk "Tetris")
+    "a e" '(:ignore t :wk "Emoji")
+    "a e +" '(emoji-zoom-increase :wk "Zoom in")
+    "a e -" '(emoji-zoom-decrease :wk "Zoom out")
+    "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
+    "a e d" '(emoji-describe :wk "Describe")
+    "a e e" '(emoji-insert :wk "Insert")
+    "a e i" '(emoji-insert :wk "Insert")
+    "a e l" '(emoji-list :wk "List")
+    "a e r" '(emoji-recent :wk "Recent")
+    "a e s" '(emoji-search :wk "Search")
     "a z" '(zone :wk "Zone"))
 
   (custom/leader-keys
@@ -604,12 +620,12 @@ This is a big list.
     "w" '(:ignore t :wk "Windows")
     ;; Window splits
     "w c" '(evil-window-delete :wk "Close window")
-    "w C" '(:ingore t :wk "Close on side")
-    "w C h" '(custom/close-left-window :wk "Left")
-    "w C j" '(custom/close-down-window :wk "Down")
-    "w C k" '(custom/close-up-window :wk "Up")
-    "w C l" '(custom/close-right-window :wk "Right")
     "w n" '(evil-window-new :wk "New window")
+    "w q" '(:ingore t :wk "Close on side")
+    "w q h" '(custom/close-left-window :wk "Left")
+    "w q j" '(custom/close-down-window :wk "Down")
+    "w q k" '(custom/close-up-window :wk "Up")
+    "w q l" '(custom/close-right-window :wk "Right")
     "w s" '(evil-window-split :wk "Horizontal split window")
     "w v" '(evil-window-vsplit :wk "Vertical split window")
     ;; Window motions
@@ -635,21 +651,19 @@ This is a big list.
 * ALL-THE-ICONS
 [[https://github.com/domtronn/all-the-icons.el][All the icons]] and [[https://github.com/rainstormstudio/nerd-icons.el][nerd icons]]
 #+begin_src emacs-lisp
+(use-package nerd-icons :defer t)
+
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
 
 (use-package all-the-icons-dired
-  :defer t
   :after dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
 (use-package all-the-icons-ibuffer
-  :defer t
   :after ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
-
-(use-package nerd-icons :defer t)
 
 (use-package all-the-icons-ivy-rich
   :after ivy
@@ -657,7 +671,6 @@ This is a big list.
 #+end_src
 * COMPANY
 [[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. Completion will start automatically after you type a few letters. Use M-n and M-p to select, <return> to complete or <tab> to complete the common part.
-
 #+begin_src emacs-lisp
 (use-package company
   :defer 2
@@ -679,7 +692,7 @@ This is a big list.
 [[https://github.com/emacs-dashboard/emacs-dashboard][Dashboard]] is nice and extensible dahboard.
 #+begin_src emacs-lisp
 (use-package dashboard
-  :ensure t
+  :demand
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
     (dashboard-startup-banner "~/.cache/wal/emacs.svg")
@@ -705,12 +718,11 @@ This is a big list.
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
-  :defer t
   :init
     (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-la --group-directories-first")
+    (dired-listing-switches "-lah --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
   :config
     (evil-collection-define-key 'normal 'dired-mode-map
@@ -718,7 +730,6 @@ This is a big list.
       "l" 'dired-find-file))
 
 (use-package dired-open
-  :defer t
   :after dired
   :config
     (setq dired-open-extensions '(("gif" . "swaiymg")
@@ -728,18 +739,15 @@ This is a big list.
                                   ("mp4" . "mpv"))))
 
 (use-package diredfl
-  :defer t
   :after dired)
 
 (use-package dired-ranger
-  :defer t
   :after dired
   :config
     (evil-collection-define-key 'normal 'dired-mode-map
       [remap evil-yank] 'dired-ranger-copy
       "p" 'dired-ranger-paste))
 #+end_src
-
 ** TODO DIRVISH
 [[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
 I don't currently use that since it displays all files as buffers and doesn't kill them.
@@ -764,21 +772,18 @@ This makes emacs documentation look pretty
 #+end_src
 ** TLDR
 #+begin_src emacs-lisp
-(use-package tldr
-  :defer t
-  :init
-    (setq tldr-directory-path (concat user-share-emacs-directory "tldr/")))
+(use-package tldr)
 #+end_src
 * DOOM-MODELINE
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
 #+begin_src emacs-lisp
 (use-package doom-modeline
-  :ensure t
+  :demand
   :init (doom-modeline-mode 1)
   :custom
     (doom-modeline-battery t))
 #+end_src
-* EMOJIS
+* EMOJIS :ARCHIVE:
 [[https://github.com/iqbalansari/emacs-emojify][emojify]] enables support for unicode characters and emojis.
 Though Emacs 29 has some emoji support.
 #+begin_src emacs-lisp
@@ -792,7 +797,6 @@ Though Emacs 29 has some emoji support.
 * ELFEED
 #+begin_src emacs-lisp
 (use-package elfeed
-  :defer t
   :custom
     (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
     (elfeed-search-filter "@6-months-ago"))
@@ -810,8 +814,8 @@ Though Emacs 29 has some emoji support.
   :height 100
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-  :family "CodeNewRoman Nerd Font Mono"
-  :height 90
+  :family "JetBrainsMono NFM Mono"
+  :height 80
   :weight 'medium)
 (set-face-attribute 'fixed-pitch-serif nil
   :inherit 'fixed-pitch
@@ -838,6 +842,7 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 [[https://github.com/mickeynp/ligature.el][ligature.el]] allows us in emacs to use them.
 #+begin_src emacs-lisp
 (use-package ligature
+  :after prog-mode
   :config
     (ligature-set-ligatures 't '("www"))
     ;; Enable ligatures in programming modes
@@ -858,9 +863,11 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 I turn that mode in Org Mode.
 #+begin_src emacs-lisp
 (use-package mixed-pitch
-  :defer t
-  :hook
-  (org-mode . mixed-pitch-mode))
+  :hook (org-mode . mixed-pitch-mode)
+  :config
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
 #+end_src
 * GAMES
 ** MINESWEEPER
@@ -870,7 +877,6 @@ I turn that mode in Org Mode.
 - Reveal all the neighbors of a square by pressing c.
 #+begin_src emacs-lisp
 (use-package minesweeper
-  :defer t
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
 #+end_src
@@ -900,7 +906,6 @@ A Git Porcelain inside Emacs
 [[https://github.com/bmag/imenu-list][imenu-list]] is basically TOC as its own buffer
 #+begin_src emacs-lisp
 (use-package imenu-list
-  :defer t
   :custom
     (imenu-list-focus-after-activation t
      imenu-list-auto-resize t))
@@ -909,8 +914,7 @@ A Git Porcelain inside Emacs
 Both are completion frameworks that make your life easier when doing M-x for example.
 #+begin_src emacs-lisp
 (use-package ivy
-  :ensure t
-  :demand t
+  :demand
   :diminish
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
@@ -977,14 +981,12 @@ Both are completion frameworks that make your life easier when doing M-x for exa
 This is nice search thing that shows whole lines.
 #+begin_src emacs-lisp
 (use-package swiper
-  :ensure t)
+  :demand)
 #+end_src
 * HIGHLIGHT TODO
 Adding highlights to TODO and related words.
-
 #+begin_src emacs-lisp
 (use-package hl-todo
-  :defer t
   :hook ((org-mode . hl-todo-mode)
          (prog-mode . hl-todo-mode))
   :custom
@@ -999,8 +1001,7 @@ Adding highlights to TODO and related words.
 #+end_src
 * LOREM IPSUM GENERATOR
 #+begin_src emacs-lisp
-(use-package lorem-ipsum
-  :defer t)
+(use-package lorem-ipsum)
 #+end_src
 * MARKDOWN :ARCHIVE:
 I'm trying to improve markdown
@@ -1031,7 +1032,6 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
 
 #+BEGIN_SRC emacs-lisp
 (use-package neotree
-  :defer t
   :custom
     (neo-smart-open t)
     (neo-show-hidden-files t)
@@ -1048,7 +1048,6 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
                 (setq word-wrap nil)
                 (make-local-variable 'auto-hscroll-mode)
                 (setq auto-hscroll-mode nil)))))
-
 #+end_src
 * OBSIDIAN :ARCHIVE:
 #+begin_src emacs-lisp
@@ -1070,107 +1069,15 @@ Neotree is a file tree viewer. When you open neotree, it jumps to the current fi
     ;; ("C-c C-l" . obsidian-insert-wikilink)))
 #+end_src
 * ORG MODE
-Improving and ricing [[https://orgmode.org/][org mode]]
-** FIXING KEYBINDINGS AND EVIL MODE
-#+begin_src emacs-lisp
-(use-package evil-org
-  :diminish
-  :defer t
-  :after org
-  :init
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
-      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line))
-
-    ;; In tables pressing RET doesn't follow links.
-    ;; I fix that
-    (defun custom/org-return-follow-link ()
-      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
-      (interactive)
-      (if (org-in-regexp org-link-any-re 1)
-          (org-open-at-point)
-          (org-return)))
-
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
-
-    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
-    ;; Setting RETURN key in org-mode to follow links
-    (setq org-return-follows-link t))
-
-;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-;; Otherwise, org-tempo is broken when you try to <s TAB...
-(add-hook 'org-mode-hook (lambda ()
-           (setq-local electric-pair-inhibit-predicate
-                   `(lambda (c)
-                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-#+end_src
-
-** Source Code Block Tag Expansion
-Org-tempo is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a =begin_src= tag. Other expansions available include:
-
-| Typing the below + TAB | Expands to ...                        |
-|------------------------+---------------------------------------|
-| <a                     | '#+BEGIN_EXPORT ascii' … '#+END_EXPORT  |
-| <c                     | '#+BEGIN_CENTER' … '#+END_CENTER'       |
-| <C                     | '#+BEGIN_COMMENT' … '#+END_COMMENT'     |
-| <e                     | '#+BEGIN_EXAMPLE' … '#+END_EXAMPLE'     |
-| <E                     | '#+BEGIN_EXPORT' … '#+END_EXPORT'       |
-| <h                     | '#+BEGIN_EXPORT html' … '#+END_EXPORT'  |
-| <l                     | '#+BEGIN_EXPORT latex' … '#+END_EXPORT' |
-| <q                     | '#+BEGIN_QUOTE' … '#+END_QUOTE'         |
-| <s                     | '#+BEGIN_SRC' … '#+END_SRC'             |
-| <v                     | '#+BEGIN_VERSE' … '#+END_VERSE'         |
-
-#+begin_src emacs-lisp
-(require 'org-tempo)
-#+end_src
-
-** COMPANY SUPPORT
-#+begin_src emacs-lisp
-(use-package company-org-block
-  :defer t
-  :after org
-  :custom
-    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
-  :hook ((org-mode . (lambda ()
-                       (setq-local company-backends '(company-org-block))
-                       (company-mode +1)))))
-#+end_src
-** ORG APPEAR
-With [[https://github.com/awth13/org-appear][this]] emphasis markers will display when hovering on rich text.
-It's set up so it will display markers when entering insert mode.
-#+begin_src emacs-lisp
-(use-package org-appear
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-appear-mode t)
-  :custom
-    (org-appear-trigger 'manual)
-    (org-appear-autolinks t)
-  :config
-    (add-hook 'org-mode-hook (lambda ()
-      (add-hook 'evil-insert-state-entry-hook
-        #'org-appear-manual-start
-        nil
-        t)
-      (add-hook 'evil-insert-state-exit-hook
-        #'org-appear-manual-stop
-          nil
-          t))))
-#+end_src
+[[https://orgmode.org/][Org Mode]] is one of the killer features of Emacs.
+It's very big markup language like Markdown
+Here I'm improving it as much as I can.
 ** ORG ROAM
 [[https://www.orgroam.com/][Org roam]] is nice wiki-like note management thing. Reminds me of [[https://obsidian.md][Obsidian]].
-
 #+begin_src emacs-lisp
 (use-package org-roam
-  :ensure t
+  :demand
+  :after org
   :init
     (setq org-roam-v2-ack t
           org-roam-directory "~/org-roam")
@@ -1206,119 +1113,15 @@ It's set up so it will display markers when entering insert mode.
 ;;   :defer t
 ;;   :after org-roam-ui)
 #+end_src
-** ORG SUPERSTAR
-[[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
-
-#+begin_src emacs-lisp
-(use-package org-superstar
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-superstar-mode t)
-  :config
-    (setq org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
-#+end_src
-** ORG AUTO TANGLE
-[[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] automatically tangles files that have =#+auto_tangle: t= in them.
-
-#+begin_src emacs-lisp
-(use-package org-auto-tangle
-  :defer t
-  :after org
-  :diminish
-  :hook (org-mode . org-auto-tangle-mode))
-#+end_src
-** ORG MODERN
-[[https://github.com/minad/org-modern][It]] prettifies almost everything.
-If you don't use the same font as me then you need to edit ~org-modern-label~'s height.
-#+begin_src emacs-lisp
-(use-package org-modern
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-modern-mode t)
-  :custom-face
-    (org-modern-label ((t (:height 1.2))))
-  :custom
-    (org-modern-star nil)
-    (org-modern-list nil)
-    (org-modern-table nil))
-#+end_src
-
-But it doesn't work well with =org-indent-mode= which indents text to headers.
-Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
-#+begin_src emacs-lisp
-(use-package org-modern-indent
-  :defer t
-  :after org
-  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-modern-hook 'org-modern-indent-mode t))
-#+end_src
-** ORG YT
-It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.
-#+begin_src emacs-lisp
-;; (use-package org-yt
-;;   :defer t
-;;   :after org
-;;   :config
-;;     (require 'org-yt)
-
-;;     (defun org-image-link (protocol link _description)
-;;       "Interpret LINK as base64-encoded image data."
-;;       (cl-assert (string-match "\\`img" protocol) nil
-;;                  "Expected protocol type starting with img")
-;;       (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-;;         (cl-assert buf nil
-;;                    "Download of image \"%s\" failed." link)
-;;         (with-current-buffer buf
-;;           (goto-char (point-min))
-;;           (re-search-forward "\r?\n\r?\n")
-;;           (buffer-substring-no-properties (point) (point-max)))))
-
-;;     (org-link-set-parameters
-;;      "imghttp"
-;;      :image-data-fun #'org-image-link)
-
-;;     (org-link-set-parameters
-;;      "imghttps"
-;;      :image-data-fun #'org-image-link))
-#+end_src
-** TOC
-Table of contents after after typing =:toc:= in header
-#+begin_src emacs-lisp
-(use-package toc-org
-  :defer t
-  :after org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
-#+end_src
-** NOTES
-Here are some functions that make using org mode notes easier.
-
-#+begin_src emacs-lisp
-(defun custom/org-notes-dired ()
-  "Opens org-directory in Dired."
-  (interactive)
-  (dired org-directory))
-
-(defun custom/org-roam-notes-dired ()
-  "Opens org-roam-directory in Dired."
-  (interactive)
-  (dired org-roam-directory))
-
-(defun custom/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file which
-do not already have one."
-  (interactive)
-  (org-map-entries 'org-id-get-create))
-#+end_src
 ** OTHER TWEAKS
 A whole lot of other stuff
 #+begin_src emacs-lisp
 (use-package org
-  :defer t
-  :init (add-hook 'org-mode-hook 'org-indent-mode t)
+  :hook
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+    (org-mode . (lambda () (org-indent-mode t)))
+  :bind
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1357,9 +1160,11 @@ A whole lot of other stuff
         "YES(y)"
         "NO(n)")))
     (org-capture-templates
-     '(("t" "Todo" entry (file "~/org-roam/agenda.org")
+     '(("t" "Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %?\n %a")
-       ("s" "School Todo" entry (file "~/org-roam/agenda.org")
+       ("T" "Repetable Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %?\n %a")
+       ("s" "School Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %? :school:\n %i")))
     (org-agenda-include-all-todo nil)
     (org-agenda-skip-scheduled-if-done t)
@@ -1396,22 +1201,51 @@ A whole lot of other stuff
     (org-edit-src-content-indentation 0)
     (org-export-preserve-breaks t)
     (org-export-with-properties t)
+    (org-startup-folded 'overview)
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
                    (display-buffer-at-bottom)
                    (window-height . 12)))
-   
     (add-to-list 'display-buffer-alist
                  '("*Org Select*"
                    (display-buffer-at-bottom)
                    (window-height . 12)))
-   
     (add-to-list 'display-buffer-alist
                  '("*Org Links*"
                    (display-buffer-at-bottom)
                    (window-height . 1)))
-   
+
+     ;; My attempt to create new time keyword STARTED
+     ;; which would signify the time at which somehting was started
+     ;; (defvar org-started-string "STARTED:"
+     ;;   "String to mark started entries.")
+     ;; (defconst org-element-started-keyword "STARTED:"
+     ;;   "Keyword used to mark started TODO entries.")
+     ;; (defconst org-started-time-regexp
+     ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
+     ;;   "Matches the STARTED keyword together with a time stamp.")
+     ;; (defcustom org-started-keep-when-no-todo nil
+     ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
+     ;;   :group 'org-todo
+     ;;   :group 'org-keywords
+     ;;   :version "24.4"
+     ;;   :package-version '(Org . "8.0")
+     ;;   :type 'boolean)
+     ;; (defconst org-all-time-keywords
+     ;;   (mapcar (lambda (w) (substring w 0 -1))
+     ;;           (list org-scheduled-string org-deadline-string
+     ;;                 org-clock-string org-closed-string org-started-string))
+     ;;   "List of time keywords.")
+     ;; (defconst org-keyword-time-regexp
+     ;;   (concat "\\<"
+     ;;           (regexp-opt
+     ;;            (list org-scheduled-string org-deadline-string org-closed-string
+     ;;                  org-clock-string org-started-string)
+     ;;            t)
+     ;;           " *[[<]\\([^]>]+\\)[]>]")
+     ;;   "Matches any of the 5 keywords, together with the time stamp.")
+
     (defun custom/org-resize-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
@@ -1421,10 +1255,10 @@ A whole lot of other stuff
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
-   
+
     (defvar custom/org-bold-symbol "*"
       "Default symbol for `custom/org-format-in-region' function.")
-   
+
     (defun custom/org-format-in-region (&optional symbol)
       "Add symbols before and after the selected text."
       (interactive)
@@ -1436,11 +1270,7 @@ A whole lot of other stuff
           (insert symbol)
           (goto-char (region-beginning))
           (insert symbol)))
-      (deactivate-mark))
-  :bind
-    ([remap org-insert-heading-respect-content] . org-meta-return)
-  :hook
-    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
+      (deactivate-mark)))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1451,6 +1281,204 @@ A whole lot of other stuff
 
 (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+#+end_src
+** FIXING KEYBINDINGS AND EVIL MODE
+#+begin_src emacs-lisp
+(use-package evil-org
+  :after org
+  :init
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys)
+    (with-eval-after-load 'evil-maps
+      (define-key evil-motion-state-map (kbd "SPC") nil)
+      (define-key evil-motion-state-map (kbd "RET") nil)
+      (define-key evil-motion-state-map (kbd "TAB") nil)
+      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
+      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-h") 'org-metaleft)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-j") 'org-metadown)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-k") 'org-metaup)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-l") 'org-metaright))
+
+    ;; In tables pressing RET doesn't follow links.
+    ;; I fix that
+    (defun custom/org-return-follow-link ()
+      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
+      (interactive)
+      (if (org-in-regexp org-link-any-re 1)
+          (org-open-at-point)
+          (org-return)))
+
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
+
+    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
+    ;; Setting RETURN key in org-mode to follow links
+    (setq org-return-follows-link t))
+
+;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+;; Otherwise, org-tempo is broken when you try to <s TAB...
+(add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+#+end_src
+** Source Code Block Tag Expansion
+Org-tempo is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a =begin_src= tag. Other expansions available include:
+
+| Typing the below + TAB | Expands to ...                      |
+|------------------------+-------------------------------------|
+| <a                     | =#+BEGIN_EXPORT ascii= … =#+END_EXPORT= |
+| <c                     | =#+BEGIN_CENTER= … =#+END_CENTER=       |
+| <C                     | =#+BEGIN_COMMENT= … =#+END_COMMENT=     |
+| <e                     | =#+BEGIN_EXAMPLE= … =#+END_EXAMPLE=     |
+| <E                     | =#+BEGIN_EXPORT= … =#+END_EXPORT=       |
+| <h                     | =#+BEGIN_EXPORT html= … =#+END_EXPORT=  |
+| <l                     | =#+BEGIN_EXPORT latex= … =#+END_EXPORT= |
+| <q                     | =#+BEGIN_QUOTE= … =#+END_QUOTE=         |
+| <s                     | =#+BEGIN_SRC= … =#+END_SRC=             |
+| <v                     | =#+BEGIN_VERSE= … =#+END_VERSE=         |
+
+#+begin_src emacs-lisp
+(require 'org-tempo)
+#+end_src
+** COMPANY SUPPORT
+#+begin_src emacs-lisp
+(use-package company-org-block
+  :defer t
+  :after org
+  :custom
+    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
+  :hook ((org-mode . (lambda ()
+                       (setq-local company-backends '(company-org-block))
+                       (company-mode +1)))))
+#+end_src
+** ORG APPEAR
+With [[https://github.com/awth13/org-appear][this]] emphasis markers will display when hovering on rich text.
+It's set up so it will display markers when entering insert mode.
+#+begin_src emacs-lisp
+(use-package org-appear
+  :after org
+  :hook (org-mode . (lambda () (org-appear-mode t)))
+  :custom
+    (org-appear-trigger 'manual)
+    (org-appear-autolinks t)
+  :config
+    (add-hook 'org-mode-hook (lambda ()
+      (add-hook 'evil-insert-state-entry-hook
+        #'org-appear-manual-start
+        nil
+        t)
+      (add-hook 'evil-insert-state-exit-hook
+        #'org-appear-manual-stop
+          nil
+          t))))
+#+end_src
+** ORG SUPERSTAR
+[[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
+#+begin_src emacs-lisp
+  (use-package org-superstar
+    :after org
+    :hook (org-mode . (lambda () (org-superstar-mode t)))
+    :config
+      (setq org-superstar-item-bullet-alist
+        '((?+ . ?✸)
+          (?* . ?•)
+          (?- . ?●))))
+#+end_src
+** ORG AUTO TANGLE
+[[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] automatically tangles files that have =#+auto_tangle: t= in them.
+
+#+begin_src emacs-lisp
+(use-package org-auto-tangle
+  :defer t
+  :after org
+  :diminish
+  :hook (org-mode . org-auto-tangle-mode))
+#+end_src
+** ORG MODERN
+[[https://github.com/minad/org-modern][It]] prettifies almost everything.
+If you don't use the same font as me then you need to edit ~org-modern-label~'s height.
+#+begin_src emacs-lisp
+(use-package org-modern
+  :defer t
+  :after org
+  :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :custom-face
+    (org-modern-label ((t (:height 1.2))))
+  :custom
+    (org-modern-star nil)
+    (org-modern-list nil)
+    (org-modern-table nil))
+#+end_src
+
+But it doesn't work well with =org-indent-mode= which indents text to headers.
+Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
+#+begin_src emacs-lisp
+(use-package org-modern-indent
+  :defer t
+  :after org
+  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
+  :init (add-hook 'org-modern-hook #'org-modern-indent-mode t))
+#+end_src
+** ORG YT
+It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.
+#+begin_src emacs-lisp
+(quelpa '(org-yt :fetcher github :repo "TobiasZawada/org-yt"))
+(use-package org-yt
+  :ensure nil
+  :after org
+  :config
+    (require 'org-yt)
+
+    (defun org-image-link (protocol link _description)
+      "Interpret LINK as base64-encoded image data."
+      (cl-assert (string-match "\\`img" protocol) nil
+                 "Expected protocol type starting with img")
+      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+        (cl-assert buf nil
+                   "Download of image \"%s\" failed." link)
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (re-search-forward "\r?\n\r?\n")
+          (buffer-substring-no-properties (point) (point-max)))))
+
+    (org-link-set-parameters
+     "imghttp"
+     :image-data-fun #'org-image-link)
+
+    (org-link-set-parameters
+     "imghttps"
+     :image-data-fun #'org-image-link))
+#+end_src
+** TOC
+Table of contents after after typing =:toc:= in header
+#+begin_src emacs-lisp
+(use-package toc-org
+  :defer t
+  :after org
+  :commands toc-org-enable
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
+#+end_src
+** NOTES
+Here are some functions that make using org mode notes easier.
+
+#+begin_src emacs-lisp
+(defun custom/org-notes-dired ()
+  "Opens org-directory in Dired."
+  (interactive)
+  (dired org-directory))
+
+(defun custom/org-roam-notes-dired ()
+  "Opens org-roam-directory in Dired."
+  (interactive)
+  (dired org-roam-directory))
+
+(defun custom/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
 #+end_src
 * PANDOC :ARCHIVE:
 #+begin_src emacs-lisp
@@ -1497,10 +1525,8 @@ A whole lot of other stuff
 * PROJECTILE
 [[https://github.com/bbatsov/projectile][Projectile]] is a project interaction library for Emacs.
 NOTE that many projectile commands do not work if you have set "fish" as the ~shell-file-name~ for Emacs. I had initially set "fish" as the "shell-file-name" in the Vterm section of this config, but oddly enough I changed it to "bin/sh" and projectile now works as expected, and Vterm still uses "fish" because my default user "sh" on my Linux system is "fish".
-
 #+begin_src emacs-lisp
 (use-package projectile
-  :defer t
   :diminish projectile-mode
   :custom
     (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
@@ -1510,7 +1536,6 @@ NOTE that many projectile commands do not work if you have set "fish" as the ~sh
     ("C-c p" . projectile-command-map))
 
 (use-package counsel-projectile
-  :defer t
   :after projectile
   :config
     (counsel-projectile-mode 1))
@@ -1519,12 +1544,10 @@ NOTE that many projectile commands do not work if you have set "fish" as the ~sh
 Adding rainbow coloring to parentheses.
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
-  :defer t
   :after prog-mode)
 #+end_src
 * RAINBOW MODE
-Display the actual color as a background for any hex color value (ex. #ffffff). The code block below enables rainbow-mode in all programming modes (prog-mode) as well as org-mode, which is why rainbow works in this document.
-
+It Displays the actual color as a background for any hex color value (ex. #ffffff).
 #+begin_src emacs-lisp
 (use-package rainbow-mode
   :diminish
@@ -1563,15 +1586,17 @@ Some modes that don't belong anywhere are made smaller including compiling relat
   :defer t
   :after prog-mode
   :config
-    (evil-define-key 'normal 'prog-mode-map (kbd "g r") 'quickrun-region)
+    (evil-define-key 'normal prog-mode-map (kbd "g r") 'quickrun-region)
     (add-to-list 'display-buffer-alist
                  '("*quickrun*"
                    (display-buffer-at-bottom)
                    (window-height . 5))))
 #+end_src
 ** FLYCHECK
-Install =luacheck= from your Linux distro's repositories for flycheck to work correctly with lua files. Install =python-pylint= for flycheck to work with python files. Haskell works with flycheck as long as =haskell-ghc= or =haskell-stack-ghc= is installed. For more information on language support for flycheck, [[https://www.flycheck.org/en/latest/languages.html][read this]].
-
+Install =luacheck= from your Linux distro's repositories for flycheck to work correctly with lua files.
+Install =python-pylint= for flycheck to work with python files.
+Haskell works with flycheck as long as =haskell-ghc= or =haskell-stack-ghc= is installed.
+For more information on language support for flycheck, [[https://www.flycheck.org/en/latest/languages.html][read this]].
 #+begin_src emacs-lisp
 (use-package flycheck
   :after prog-mode
@@ -1581,7 +1606,6 @@ Install =luacheck= from your Linux distro's repositories for flycheck to work co
 #+end_src
 ** LANGUAGE SUPPORT
 Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM, AWK, C, C++, Fortran, Icon, IDL (CORBA), IDLWAVE, Java, Javascript, M4, Makefiles, Metafont, Modula2, Object Pascal, Objective-C, Octave, Pascal, Perl, Pike, PostScript, Prolog, Python, Ruby, Simula, SQL, Tcl, Verilog, and VHDL. Other languages will require additional modes.
-
 #+begin_src emacs-lisp
 (use-package lua-mode
   :defer t)
@@ -1699,10 +1723,8 @@ This remaps specified major modes to its tree-sitter counterparts
 #+end_src
 ** Eshell
 Eshell is an Emacs 'shell' that is written in Elisp.
-
 #+begin_src emacs-lisp
 (use-package eshell
-  :defer t
   :custom
     (eshell-directory-name "~/.config/eshell/")
     (eshell-rc-script "~/.config/eshell/profile")    ;; your profile for eshell; like a bashrc for eshell.
@@ -1721,7 +1743,6 @@ Eshell is an Emacs 'shell' that is written in Elisp.
     (eat-eshell-mode))
 
 (use-package eshell-toggle
-  :defer t
   :custom
     (eshell-toggle-size-fraction 3)
     (eshell-toggle-use-projectile-root t)
@@ -1798,14 +1819,13 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
 * SUDO EDIT
 [[https://github.com/nflath/sudo-edit][sudo-edit]] lets you open files with sudo privileges or switch over to editing with sudo privileges if we initially opened the file without such privileges.
 #+begin_src emacs-lisp
-(use-package sudo-edit
-  :defer t)
+(use-package sudo-edit)
 #+end_src
 * THEME
 I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
 #+begin_src emacs-lisp
 (use-package doom-themes
-  :ensure t
+  :demand
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -1821,7 +1841,7 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
     (doom-themes-org-config))
 (use-package ewal-doom-themes)
 (use-package ewal
-  :ensure t
+  :demand
   :config
     (set-face-attribute 'line-number-current-line nil
       :foreground (ewal-load-color 'comment)
@@ -1846,6 +1866,7 @@ It shows you available keybindings, the default ones and the ones you create.
 #+begin_src emacs-lisp
 (use-package which-key
   :diminish
+  :demand
   :custom
     (which-key-side-window-location 'bottom)
     (which-key-sort-order #'which-key-key-order-alpha)
@@ -1867,8 +1888,7 @@ It shows you available keybindings, the default ones and the ones you create.
 ** BUFFER-MOVE
 This allows to easily move windows (splits) around.
 #+begin_src emacs-lisp
-(use-package buffer-move
-  :defer t)
+(use-package buffer-move)
 #+end_src
 ** WINDOW CLOSE FUNCTIONS
 These functions move to window on specified side and close it
@@ -1900,8 +1920,7 @@ These functions move to window on specified side and close it
 * WRITEROOM
 [[https://github.com/joostkremers/writeroom-mode][Writeroom-mode]] makes a nice writing experience by making big margins and hiding almost everything
 #+begin_src emacs-lisp
-(use-package writeroom-mode
-  :defer t)
+(use-package writeroom-mode)
 #+end_src
 * CREDITS
 - DistroTube with his [[https://farside.link/invidious/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][Emacs Configuration videos]]

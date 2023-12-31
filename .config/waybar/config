@@ -43,7 +43,7 @@
     },
 
     "persistent-workspaces": {
-      "*": 2, // 2 workspaces by default on every monitor
+      "*": 5, // 2 workspaces by default on every monitor
       // "1": [],
       // "2": [],
       // "3": [],

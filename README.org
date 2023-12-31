@@ -32,7 +32,7 @@ After that you can execute the script from terminal or by pressing =Super+ALT+R=
 
 Stuff to rice [10/11]:
 - [X] foot
-- [X] rofi (FIXME power menu needs recoloring)
+- [X] rofi
 - [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
 - [ ] gtk4
 - [X] emacs
@@ -54,7 +54,7 @@ Another way to manage this conveniently is to install [[https://www.gnu.org/soft
 1. Move cloned repo into =~/.repo-name=.
 2. Backup your =~/.config= and delete everything inside if necessary.
 3. Then inside that directory do =stow .=
-This will link all files autmatically to its corrensponding places
+This will link all files automatically to its corrensponding places
 * UNMAINTAINED :ARCHIVE:
 ** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
 - Dracula [[file:screenshots/bspwm/dracula.png]]

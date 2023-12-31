@@ -81,17 +81,18 @@ Most of the stuff will get redirected here.")
                 outline-mode-hook
                 eat-mode-hook
                 compilation-mode-hook
+                Custom-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (defun quit-window (&optional kill window)
- "Quit WINDOW, deleting it, and kill its buffer.
+  "Quit WINDOW, deleting it, and kill its buffer.
 WINDOW must be a live window and defaults to the selected one.
 The buffer is killed instead of being buried.
 This function ignores the information stored in WINDOW's `quit-restore' window parameter."
- (interactive "P")
- (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
- (quit-restore-window window 'kill))
+  (interactive "P")
+  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
+  (quit-restore-window window 'kill))
 
 ;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
@@ -104,6 +105,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 ;; Make ESC quit prompts immediately
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; make utf-8 the coding system
+(prefer-coding-system 'utf-8)
 
 ;; Initialize package sources
 (require 'package)
@@ -125,17 +129,20 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
    (package-install 'use-package))
 
 (require 'use-package)
-(setq use-package-always-ensure t
-      use-package-verbose t)
+(setq use-package-verbose t
+      use-package-always-defer t) ; packages by default will be lazy loaded, like the will have defer: t
 
 (use-package quelpa
+  :demand
   :custom
     (quelpa-dir (concat user-share-emacs-directory "quelpa/"))
     (quelpa-checkout-melpa-p nil))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
     ;; (quelpa-packages-dir (concat quelpa-dir "packages/")))
-(use-package quelpa-use-package :after quelpa)
+(use-package quelpa-use-package
+  :demand
+  :after quelpa)
 
 ;;(defun custom/evil-hook ()
 ;;  (dolist (mode '(custom-mode
@@ -151,6 +158,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 
 (use-package evil
+  :demand
   :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil
@@ -163,10 +171,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
 
 (use-package evil-collection
+  :demand
   :after evil
   :config
     ;; Do not uncomment this unless you want to specify each and every mode
@@ -175,12 +185,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
-
-(use-package ibuffer
-  :defer t
-  :config
-    (evil-collection-define-key 'normal 'ibuffer-mode-map
-      "l" 'ibuffer-visit-buffer))
 
 (use-package general
   :config
@@ -219,6 +223,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "a g p" '(pong :wk "Pong")
     "a g s" '(snake :wk "Snake")
     "a g t" '(tetris :wk "Tetris")
+    "a e" '(:ignore t :wk "Emoji")
+    "a e +" '(emoji-zoom-increase :wk "Zoom in")
+    "a e -" '(emoji-zoom-decrease :wk "Zoom out")
+    "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
+    "a e d" '(emoji-describe :wk "Describe")
+    "a e e" '(emoji-insert :wk "Insert")
+    "a e i" '(emoji-insert :wk "Insert")
+    "a e l" '(emoji-list :wk "List")
+    "a e r" '(emoji-recent :wk "Recent")
+    "a e s" '(emoji-search :wk "Search")
     "a z" '(zone :wk "Zone"))
 
   (custom/leader-keys
@@ -487,12 +501,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "w" '(:ignore t :wk "Windows")
     ;; Window splits
     "w c" '(evil-window-delete :wk "Close window")
-    "w C" '(:ingore t :wk "Close on side")
-    "w C h" '(custom/close-left-window :wk "Left")
-    "w C j" '(custom/close-down-window :wk "Down")
-    "w C k" '(custom/close-up-window :wk "Up")
-    "w C l" '(custom/close-right-window :wk "Right")
     "w n" '(evil-window-new :wk "New window")
+    "w q" '(:ingore t :wk "Close on side")
+    "w q h" '(custom/close-left-window :wk "Left")
+    "w q j" '(custom/close-down-window :wk "Down")
+    "w q k" '(custom/close-up-window :wk "Up")
+    "w q l" '(custom/close-right-window :wk "Right")
     "w s" '(evil-window-split :wk "Horizontal split window")
     "w v" '(evil-window-vsplit :wk "Vertical split window")
     ;; Window motions
@@ -515,21 +529,19 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(use-package nerd-icons :defer t)
+
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
 
 (use-package all-the-icons-dired
-  :defer t
   :after dired
   :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
 
 (use-package all-the-icons-ibuffer
-  :defer t
   :after ibuffer
   :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
-
-(use-package nerd-icons :defer t)
 
 (use-package all-the-icons-ivy-rich
   :after ivy
@@ -552,7 +564,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :hook (company-mode . company-box-mode))
 
 (use-package dashboard
-  :ensure t
+  :demand
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
     (dashboard-startup-banner "~/.cache/wal/emacs.svg")
@@ -576,12 +588,11 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package dired
   :ensure nil
-  :defer t
   :init
     (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-la --group-directories-first")
+    (dired-listing-switches "-lah --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
   :config
     (evil-collection-define-key 'normal 'dired-mode-map
@@ -589,7 +600,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       "l" 'dired-find-file))
 
 (use-package dired-open
-  :defer t
   :after dired
   :config
     (setq dired-open-extensions '(("gif" . "swaiymg")
@@ -599,11 +609,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                                   ("mp4" . "mpv"))))
 
 (use-package diredfl
-  :defer t
   :after dired)
 
 (use-package dired-ranger
-  :defer t
   :after dired
   :config
     (evil-collection-define-key 'normal 'dired-mode-map
@@ -624,26 +632,15 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 
-(use-package tldr
-  :defer t
-  :init
-    (setq tldr-directory-path (concat user-share-emacs-directory "tldr/")))
+(use-package tldr)
 
 (use-package doom-modeline
-  :ensure t
+  :demand
   :init (doom-modeline-mode 1)
   :custom
     (doom-modeline-battery t))
 
-(use-package emojify
-  :defer t
-  :custom
-    (emojify-emojis-dir (concat user-share-emacs-directory "emojis"))
-  :config
-    (global-emojify-mode 1))
-
 (use-package elfeed
-  :defer t
   :custom
     (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
     (elfeed-search-filter "@6-months-ago"))
@@ -658,8 +655,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :height 100
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-  :family "CodeNewRoman Nerd Font Mono"
-  :height 90
+  :family "JetBrainsMono NFM Mono"
+  :height 80
   :weight 'medium)
 (set-face-attribute 'fixed-pitch-serif nil
   :inherit 'fixed-pitch
@@ -682,6 +679,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; (setq-default line-spacing 0.12)
 
 (use-package ligature
+  :after prog-mode
   :config
     (ligature-set-ligatures 't '("www"))
     ;; Enable ligatures in programming modes
@@ -698,12 +696,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (global-ligature-mode 't))
 
 (use-package mixed-pitch
-  :defer t
-  :hook
-  (org-mode . mixed-pitch-mode))
+  :hook (org-mode . mixed-pitch-mode)
+  :config
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
 
 (use-package minesweeper
-  :defer t
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
 
@@ -721,14 +720,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision))
 
 (use-package imenu-list
-  :defer t
   :custom
     (imenu-list-focus-after-activation t
      imenu-list-auto-resize t))
 
 (use-package ivy
-  :ensure t
-  :demand t
+  :demand
   :diminish
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
@@ -789,10 +786,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (ivy-prescient-mode 1))
 
 (use-package swiper
-  :ensure t)
+  :demand)
 
 (use-package hl-todo
-  :defer t
   :hook ((org-mode . hl-todo-mode)
          (prog-mode . hl-todo-mode))
   :custom
@@ -805,11 +801,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ("NOTE"       success bold)
       ("DEPRECATED" font-lock-doc-face bold))))
 
-(use-package lorem-ipsum
-  :defer t)
+(use-package lorem-ipsum)
 
 (use-package neotree
-  :defer t
   :custom
     (neo-smart-open t)
     (neo-show-hidden-files t)
@@ -827,75 +821,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                 (make-local-variable 'auto-hscroll-mode)
                 (setq auto-hscroll-mode nil)))))
 
-(use-package evil-org
-  :diminish
-  :defer t
-  :after org
-  :init
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
-      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line))
-
-    ;; In tables pressing RET doesn't follow links.
-    ;; I fix that
-    (defun custom/org-return-follow-link ()
-      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
-      (interactive)
-      (if (org-in-regexp org-link-any-re 1)
-          (org-open-at-point)
-          (org-return)))
-
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
-
-    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
-    ;; Setting RETURN key in org-mode to follow links
-    (setq org-return-follows-link t))
-
-;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-;; Otherwise, org-tempo is broken when you try to <s TAB...
-(add-hook 'org-mode-hook (lambda ()
-           (setq-local electric-pair-inhibit-predicate
-                   `(lambda (c)
-                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-
-(require 'org-tempo)
-
-(use-package company-org-block
-  :defer t
-  :after org
-  :custom
-    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
-  :hook ((org-mode . (lambda ()
-                       (setq-local company-backends '(company-org-block))
-                       (company-mode +1)))))
-
-(use-package org-appear
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-appear-mode t)
-  :custom
-    (org-appear-trigger 'manual)
-    (org-appear-autolinks t)
-  :config
-    (add-hook 'org-mode-hook (lambda ()
-      (add-hook 'evil-insert-state-entry-hook
-        #'org-appear-manual-start
-        nil
-        t)
-      (add-hook 'evil-insert-state-exit-hook
-        #'org-appear-manual-stop
-          nil
-          t))))
-
 (use-package org-roam
-  :ensure t
+  :demand
+  :after org
   :init
     (setq org-roam-v2-ack t
           org-roam-directory "~/org-roam")
@@ -930,90 +858,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;;   :defer t
 ;;   :after org-roam-ui)
 
-(use-package org-superstar
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-superstar-mode t)
-  :config
-    (setq org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
-
-(use-package org-auto-tangle
-  :defer t
-  :after org
-  :diminish
-  :hook (org-mode . org-auto-tangle-mode))
-
-(use-package org-modern
-  :defer t
-  :after org
-  :init (add-hook 'org-mode-hook 'org-modern-mode t)
-  :custom-face
-    (org-modern-label ((t (:height 1.2))))
-  :custom
-    (org-modern-star nil)
-    (org-modern-list nil)
-    (org-modern-table nil))
-
-(use-package org-modern-indent
-  :defer t
-  :after org
-  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-modern-hook 'org-modern-indent-mode t))
-
-;; (use-package org-yt
-;;   :defer t
-;;   :after org
-;;   :config
-;;     (require 'org-yt)
-
-;;     (defun org-image-link (protocol link _description)
-;;       "Interpret LINK as base64-encoded image data."
-;;       (cl-assert (string-match "\\`img" protocol) nil
-;;                  "Expected protocol type starting with img")
-;;       (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-;;         (cl-assert buf nil
-;;                    "Download of image \"%s\" failed." link)
-;;         (with-current-buffer buf
-;;           (goto-char (point-min))
-;;           (re-search-forward "\r?\n\r?\n")
-;;           (buffer-substring-no-properties (point) (point-max)))))
-
-;;     (org-link-set-parameters
-;;      "imghttp"
-;;      :image-data-fun #'org-image-link)
-
-;;     (org-link-set-parameters
-;;      "imghttps"
-;;      :image-data-fun #'org-image-link))
-
-(use-package toc-org
-  :defer t
-  :after org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
-
-(defun custom/org-notes-dired ()
-  "Opens org-directory in Dired."
-  (interactive)
-  (dired org-directory))
-
-(defun custom/org-roam-notes-dired ()
-  "Opens org-roam-directory in Dired."
-  (interactive)
-  (dired org-roam-directory))
-
-(defun custom/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file which
-do not already have one."
-  (interactive)
-  (org-map-entries 'org-id-get-create))
-
 (use-package org
-  :defer t
-  :init (add-hook 'org-mode-hook 'org-indent-mode t)
+  :hook
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+    (org-mode . (lambda () (org-indent-mode t)))
+  :bind
+    ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1052,9 +902,11 @@ do not already have one."
         "YES(y)"
         "NO(n)")))
     (org-capture-templates
-     '(("t" "Todo" entry (file "~/org-roam/agenda.org")
+     '(("t" "Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %?\n %a")
-       ("s" "School Todo" entry (file "~/org-roam/agenda.org")
+       ("T" "Repetable Todo" entry (file "~/org-roam/agenda.org")
+        "* TODO %?\n %a")
+       ("s" "School Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %? :school:\n %i")))
     (org-agenda-include-all-todo nil)
     (org-agenda-skip-scheduled-if-done t)
@@ -1091,22 +943,51 @@ do not already have one."
     (org-edit-src-content-indentation 0)
     (org-export-preserve-breaks t)
     (org-export-with-properties t)
+    (org-startup-folded 'overview)
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
                    (display-buffer-at-bottom)
                    (window-height . 12)))
-   
     (add-to-list 'display-buffer-alist
                  '("*Org Select*"
                    (display-buffer-at-bottom)
                    (window-height . 12)))
-   
     (add-to-list 'display-buffer-alist
                  '("*Org Links*"
                    (display-buffer-at-bottom)
                    (window-height . 1)))
-   
+
+     ;; My attempt to create new time keyword STARTED
+     ;; which would signify the time at which somehting was started
+     ;; (defvar org-started-string "STARTED:"
+     ;;   "String to mark started entries.")
+     ;; (defconst org-element-started-keyword "STARTED:"
+     ;;   "Keyword used to mark started TODO entries.")
+     ;; (defconst org-started-time-regexp
+     ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
+     ;;   "Matches the STARTED keyword together with a time stamp.")
+     ;; (defcustom org-started-keep-when-no-todo nil
+     ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
+     ;;   :group 'org-todo
+     ;;   :group 'org-keywords
+     ;;   :version "24.4"
+     ;;   :package-version '(Org . "8.0")
+     ;;   :type 'boolean)
+     ;; (defconst org-all-time-keywords
+     ;;   (mapcar (lambda (w) (substring w 0 -1))
+     ;;           (list org-scheduled-string org-deadline-string
+     ;;                 org-clock-string org-closed-string org-started-string))
+     ;;   "List of time keywords.")
+     ;; (defconst org-keyword-time-regexp
+     ;;   (concat "\\<"
+     ;;           (regexp-opt
+     ;;            (list org-scheduled-string org-deadline-string org-closed-string
+     ;;                  org-clock-string org-started-string)
+     ;;            t)
+     ;;           " *[[<]\\([^]>]+\\)[]>]")
+     ;;   "Matches any of the 5 keywords, together with the time stamp.")
+
     (defun custom/org-resize-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
@@ -1116,10 +997,10 @@ do not already have one."
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil)
-   
+
     (defvar custom/org-bold-symbol "*"
       "Default symbol for `custom/org-format-in-region' function.")
-   
+
     (defun custom/org-format-in-region (&optional symbol)
       "Add symbols before and after the selected text."
       (interactive)
@@ -1131,11 +1012,7 @@ do not already have one."
           (insert symbol)
           (goto-char (region-beginning))
           (insert symbol)))
-      (deactivate-mark))
-  :bind
-    ([remap org-insert-heading-respect-content] . org-meta-return)
-  :hook
-    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t))))
+      (deactivate-mark)))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1147,6 +1024,154 @@ do not already have one."
 (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 
+(use-package evil-org
+  :after org
+  :init
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys)
+    (with-eval-after-load 'evil-maps
+      (define-key evil-motion-state-map (kbd "SPC") nil)
+      (define-key evil-motion-state-map (kbd "RET") nil)
+      (define-key evil-motion-state-map (kbd "TAB") nil)
+      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
+      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-h") 'org-metaleft)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-j") 'org-metadown)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-k") 'org-metaup)
+      (evil-define-key 'normal 'org-mode-map (kbd "M-l") 'org-metaright))
+
+    ;; In tables pressing RET doesn't follow links.
+    ;; I fix that
+    (defun custom/org-return-follow-link ()
+      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
+      (interactive)
+      (if (org-in-regexp org-link-any-re 1)
+          (org-open-at-point)
+          (org-return)))
+
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
+
+    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
+    ;; Setting RETURN key in org-mode to follow links
+    (setq org-return-follows-link t))
+
+;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+;; Otherwise, org-tempo is broken when you try to <s TAB...
+(add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+(require 'org-tempo)
+
+(use-package company-org-block
+  :defer t
+  :after org
+  :custom
+    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
+  :hook ((org-mode . (lambda ()
+                       (setq-local company-backends '(company-org-block))
+                       (company-mode +1)))))
+
+(use-package org-appear
+  :after org
+  :hook (org-mode . (lambda () (org-appear-mode t)))
+  :custom
+    (org-appear-trigger 'manual)
+    (org-appear-autolinks t)
+  :config
+    (add-hook 'org-mode-hook (lambda ()
+      (add-hook 'evil-insert-state-entry-hook
+        #'org-appear-manual-start
+        nil
+        t)
+      (add-hook 'evil-insert-state-exit-hook
+        #'org-appear-manual-stop
+          nil
+          t))))
+
+(use-package org-superstar
+  :after org
+  :hook (org-mode . (lambda () (org-superstar-mode t)))
+  :config
+    (setq org-superstar-item-bullet-alist
+      '((?+ . ?✸)
+        (?* . ?•)
+        (?- . ?●))))
+
+(use-package org-auto-tangle
+  :defer t
+  :after org
+  :diminish
+  :hook (org-mode . org-auto-tangle-mode))
+
+(use-package org-modern
+  :defer t
+  :after org
+  :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :custom-face
+    (org-modern-label ((t (:height 1.2))))
+  :custom
+    (org-modern-star nil)
+    (org-modern-list nil)
+    (org-modern-table nil))
+
+(use-package org-modern-indent
+  :defer t
+  :after org
+  :quelpa (:fetcher github :repo "jdtsmith/org-modern-indent")
+  :init (add-hook 'org-modern-hook #'org-modern-indent-mode t))
+
+(quelpa '(org-yt :fetcher github :repo "TobiasZawada/org-yt"))
+(use-package org-yt
+  :ensure nil
+  :after org
+  :config
+    (require 'org-yt)
+
+    (defun org-image-link (protocol link _description)
+      "Interpret LINK as base64-encoded image data."
+      (cl-assert (string-match "\\`img" protocol) nil
+                 "Expected protocol type starting with img")
+      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+        (cl-assert buf nil
+                   "Download of image \"%s\" failed." link)
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (re-search-forward "\r?\n\r?\n")
+          (buffer-substring-no-properties (point) (point-max)))))
+
+    (org-link-set-parameters
+     "imghttp"
+     :image-data-fun #'org-image-link)
+
+    (org-link-set-parameters
+     "imghttps"
+     :image-data-fun #'org-image-link))
+
+(use-package toc-org
+  :defer t
+  :after org
+  :commands toc-org-enable
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
+
+(defun custom/org-notes-dired ()
+  "Opens org-directory in Dired."
+  (interactive)
+  (dired org-directory))
+
+(defun custom/org-roam-notes-dired ()
+  "Opens org-roam-directory in Dired."
+  (interactive)
+  (dired org-roam-directory))
+
+(defun custom/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
+
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
   :config
@@ -1155,7 +1180,6 @@ do not already have one."
 (use-package evil-smartparens :after smartparens)
 
 (use-package projectile
-  :defer t
   :diminish projectile-mode
   :custom
     (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
@@ -1165,13 +1189,11 @@ do not already have one."
     ("C-c p" . projectile-command-map))
 
 (use-package counsel-projectile
-  :defer t
   :after projectile
   :config
     (counsel-projectile-mode 1))
 
 (use-package rainbow-delimiters
-  :defer t
   :after prog-mode)
 
 (use-package rainbow-mode
@@ -1201,7 +1223,7 @@ do not already have one."
   :defer t
   :after prog-mode
   :config
-    (evil-define-key 'normal 'prog-mode-map (kbd "g r") 'quickrun-region)
+    (evil-define-key 'normal prog-mode-map (kbd "g r") 'quickrun-region)
     (add-to-list 'display-buffer-alist
                  '("*quickrun*"
                    (display-buffer-at-bottom)
@@ -1298,7 +1320,6 @@ If not then copy c++ makefile and put it in the current directory"
 (add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
 
 (use-package eshell
-  :defer t
   :custom
     (eshell-directory-name "~/.config/eshell/")
     (eshell-rc-script "~/.config/eshell/profile")    ;; your profile for eshell; like a bashrc for eshell.
@@ -1317,7 +1338,6 @@ If not then copy c++ makefile and put it in the current directory"
     (eat-eshell-mode))
 
 (use-package eshell-toggle
-  :defer t
   :custom
     (eshell-toggle-size-fraction 3)
     (eshell-toggle-use-projectile-root t)
@@ -1363,11 +1383,10 @@ If not then copy c++ makefile and put it in the current directory"
                   (reusable-frames . visible)
                   (window-height . 0.4))))
 
-(use-package sudo-edit
-  :defer t)
+(use-package sudo-edit)
 
 (use-package doom-themes
-  :ensure t
+  :demand
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -1383,7 +1402,7 @@ If not then copy c++ makefile and put it in the current directory"
     (doom-themes-org-config))
 (use-package ewal-doom-themes)
 (use-package ewal
-  :ensure t
+  :demand
   :config
     (set-face-attribute 'line-number-current-line nil
       :foreground (ewal-load-color 'comment)
@@ -1402,6 +1421,7 @@ If not then copy c++ makefile and put it in the current directory"
 
 (use-package which-key
   :diminish
+  :demand
   :custom
     (which-key-side-window-location 'bottom)
     (which-key-sort-order #'which-key-key-order-alpha)
@@ -1419,8 +1439,7 @@ If not then copy c++ makefile and put it in the current directory"
   :config
     (which-key-mode 1))
 
-(use-package buffer-move
-  :defer t)
+(use-package buffer-move)
 
 (defun custom/close-down-window ()
   "Goes down the window and closes it"
@@ -1446,5 +1465,4 @@ If not then copy c++ makefile and put it in the current directory"
   (evil-window-right 1)
   (evil-window-delete))
 
-(use-package writeroom-mode
-  :defer t)
+(use-package writeroom-mode)

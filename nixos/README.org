@@ -4,7 +4,8 @@
 
 * Table of Contents :toc:
 - [[#main-configuration][Main configuration]]
-  - [[#booting][Booting]]
+  - [[#importing-unstable-channel][Importing unstable channel]]
+  - [[#boot][Boot]]
   - [[#networking][Networking]]
   - [[#locales][Locales]]
   - [[#graphical-environment][Graphical environment]]
@@ -14,7 +15,6 @@
   - [[#fonts][Fonts]]
   - [[#xdg-desktop-portal][XDG Desktop Portal]]
   - [[#polkit][Polkit]]
-  - [[#automatic-garbage-collector][Automatic garbage collector]]
   - [[#os-version][OS Version]]
 - [[#sddm-themes][SDDM themes]]
   - [[#sugar-dark][Sugar Dark]]
@@ -22,11 +22,9 @@
 - [[#cp-p][cp-p]]
 
 * Main configuration
-** Booting
-*** Importing unstable channel
+** Importing unstable channel
 I import unstable package channel to use with some bledding-edge software (like hyprland).
 I can then install unstable packages with =unstable.package=.
-
 
 #+begin_src nix :tangle configuration.nix
 { config, pkgs, ... }:
@@ -58,11 +56,11 @@ You should use =hardware-configuration.nix= of your own.
 
 
 #+end_src
-
-*** Actual boot configuration
+** Boot
 Then we have bootloader configuration. I use GRUB since systemd-boot didn't work.
 #+begin_src nix :tangle configuration.nix
 boot = {
+  tmp.cleanOnBoot = true;
   loader.efi.canTouchEfiVariables = true;
 
   loader.grub = {
@@ -82,7 +80,7 @@ boot = {
       #   sha256 = "1cf0gd7gziw1j6kilhihpdlna6j1hhvpsgaxsmsqckjmc7igixls";
       # };
   };
-     
+
 
 #+end_src
 
@@ -99,18 +97,28 @@ The default kernel is latest lts kernel. I change that to zen kernel.
 
 #+end_src
 
-I turn on =nix-command= and =flakes= and idk where to put it
+I turn on =nix-command= and =flakes= and automatci garbage collector.
+Idk where to put it
 #+begin_src nix :tangle configuration.nix
-nix.settings.experimental-features = [ "nix-command" "flakes" ];
+nix = {
+   settings.experimental-features = [ "nix-command" "flakes" ];
+   settings.auto-optimise-store = true;
+   gc = {
+     automatic = true;
+     dates = "2d";
+     options = "-d";
+   };
+ };
 #+end_src
-
 ** Networking
 I set my hostname, enable networkmanager and disable firewall.
 Just in case I also enable bluetooth.
 #+begin_src nix :tangle configuration.nix
-networking.hostName = "lenovo-nixos";
-networking.networkmanager.enable = true;
-networking.firewall.enable = false;
+networking = {
+  hostName = "lenovo-nixos";
+  networkmanager.enable = true;
+  firewall.enable = false;
+};
 
 hardware.bluetooth.enable = true;
 
@@ -172,7 +180,6 @@ services.xserver = {
 
   #+end_src
 
-Here I enable stuff in one block since you can do that.
 I enable hyprland which installs necessary packages and sets up desktop entry in display manager.
 I also enable =light= which lets me change screen brightness.
 #+begin_src nix :tangle configuration.nix
@@ -252,7 +259,6 @@ environment.etc."xdg/user-dirs.defaults".text = ''
 '';
 
 #+end_src
-
 ** Packages
 I disable flatpak since I don't want it. Then I install a lot of packages.
 #+begin_src nix :tangle configuration.nix
@@ -296,7 +302,7 @@ environment.systemPackages = with pkgs; [
   unzip
 
   # for sddm
-  libsForQt5.qt5.qtquickcontrols2  
+  libsForQt5.qt5.qtquickcontrols2
   libsForQt5.qt5.qtgraphicaleffects
 
   # desktop
@@ -357,7 +363,7 @@ environment.systemPackages = with pkgs; [
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
-  
+
   # android
   android-tools
   unstable.scrcpy
@@ -406,7 +412,6 @@ I set Emacs as as =$EDITOR=
 services.emacs.defaultEditor = true;
 
 #+end_src
-
 ** Fonts
 I install nerd fonts. Istead of installing all fonts you can specify which ones you want.
 #+begin_src nix :tangle configuration.nix
@@ -417,7 +422,6 @@ fonts.fonts = with pkgs; [
 ];
 
 #+end_src
-
 ** XDG Desktop Portal
 I set it up to work with hyprland
 #+begin_src nix :tangle configuration.nix
@@ -431,7 +435,6 @@ xdg.portal = {
 };
 
 #+end_src
-
 ** Polkit
 I set up =gnome-polkit=.
 #+begin_src nix :tangle configuration.nix
@@ -456,19 +459,6 @@ systemd = {
 };
 
 #+end_src
-
-** Automatic garbage collector
-#+begin_src nix
-nix = {
-   settings.auto-optimise-store = true;
-   gc = {
-     automatic = true;
-     dates = "2d";
-     options = "-d";
-   };
- };
-
-#+end_src
 ** OS Version
 Initially I set it up on 23.05 but active stable version now is 23.11
 #+begin_src nix :tangle configuration.nix
@@ -488,7 +478,6 @@ system = {
 
 }
 #+end_src
-
 * SDDM themes
 ** Sugar Dark
 #+begin_src nix :tangle sddm-sugar-dark.nix

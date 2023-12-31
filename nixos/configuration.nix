@@ -20,6 +20,7 @@ imports =
   ];
 
 boot = {
+  tmp.cleanOnBoot = true;
   loader.efi.canTouchEfiVariables = true;
 
   loader.grub = {
@@ -45,11 +46,21 @@ supportedFilesystems = [ "ntfs" ];
 kernelPackages = pkgs.unstable.linuxKernel.packages.linux_zen;
 };
 
-nix.settings.experimental-features = [ "nix-command" "flakes" ];
+nix = {
+   settings.experimental-features = [ "nix-command" "flakes" ];
+   settings.auto-optimise-store = true;
+   gc = {
+     automatic = true;
+     dates = "2d";
+     options = "-d";
+   };
+ };
 
-networking.hostName = "lenovo-nixos";
-networking.networkmanager.enable = true;
-networking.firewall.enable = false;
+networking = {
+  hostName = "lenovo-nixos";
+  networkmanager.enable = true;
+  firewall.enable = false;
+};
 
 hardware.bluetooth.enable = true;
 
@@ -188,7 +199,7 @@ environment.systemPackages = with pkgs; [
   unzip
 
   # for sddm
-  libsForQt5.qt5.qtquickcontrols2  
+  libsForQt5.qt5.qtquickcontrols2
   libsForQt5.qt5.qtgraphicaleffects
 
   # desktop
@@ -249,7 +260,7 @@ environment.systemPackages = with pkgs; [
   python311Packages.inotify-simple
   python311Packages.psutil
   python311Packages.python-daemon
-  
+
   # android
   android-tools
   unstable.scrcpy
