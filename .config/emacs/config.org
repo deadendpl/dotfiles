@@ -1143,6 +1143,10 @@ Here I'm improving it as much as I can.
         (kbd "M-j") 'org-metadown
         (kbd "M-k") 'org-metaup
         (kbd "M-l") 'org-metaright
+        (kbd "M-S-h") 'org-shiftmetaleft
+        (kbd "M-S-j") 'org-shiftmetadown
+        (kbd "M-S-k") 'org-shiftmetaup
+        (kbd "M-S-l") 'org-shiftmetaright
         (kbd "M-<return>") 'org-return))
 
     ;; In tables pressing RET doesn't follow links.
