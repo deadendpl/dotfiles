@@ -66,7 +66,7 @@ use {
 -- themes
   use { 'Mofiqul/dracula.nvim', as = "dracula"}
   use { "catppuccin/nvim", as = "catppuccin" }
-  use { 'AlphaTechnolog/pywal.nvim', as = 'pywal' }
+  use { 'uZer/pywal16.nvim', as = 'pywal16' }
 
 -- dashboard
   use {
@@ -168,7 +168,7 @@ local mocha = require("catppuccin.palettes").get_palette "mocha"
 
 require('lualine').setup {
   options = {
-    theme = 'pywal',
+    theme = 'pywal16-nvim',
   }
 }
 
@@ -281,8 +281,8 @@ require('orgmode').setup({
 --  org_default_notes_file = '~/Dropbox/org/refile.org',
 })
 
-local pywal = require('pywal')
-pywal.setup()
+local pywal16 = require('pywal16')
+pywal16.setup()
 
 end)
 #+END_SRC

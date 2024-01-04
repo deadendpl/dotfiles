@@ -25,23 +25,10 @@ Most of the stuff will get redirected here.")
 
 (setq-default visible-bell nil ;; Set up the visible bell
               inhibit-startup-message nil ; default emacs startup message
-              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
-              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
               recentf-max-saved-items nil ; infinite amount of entries in recentf file
               recentf-auto-cleanup 'never ; not cleaning recentf file
-              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
-              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
-              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-              save-place-file (concat user-share-emacs-directory "places")
-              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-              multisession-directory (concat user-share-emacs-directory "multisession")
-              transient-history-file (concat user-share-emacs-directory "transient/history.el")
               initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
               initial-scratch-message nil ; deleting scratch buffer message
               scroll-conservatively 1000 ; Scroll one line at a time
@@ -49,7 +36,20 @@ Most of the stuff will get redirected here.")
               tab-always-indent nil
               vc-follow-symlinks t ; Enable follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
-              standard-indent 2) ; indenting set to 2
+              standard-indent 2 ; indenting set to 2
+              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
+              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
+              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
+              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+              save-place-file (concat user-share-emacs-directory "places")
+              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
+              multisession-directory (concat user-share-emacs-directory "multisession")
+              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
 
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
@@ -129,6 +129,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
    (package-install 'use-package))
 
 (require 'use-package)
+
 (setq use-package-verbose t
       use-package-always-ensure t ; packages by default will be lazy loaded, like they will have defer: t
       use-package-always-defer t) ; packages by default will be lazy loaded, like they will have defer: t
@@ -270,7 +271,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   (custom/leader-keys
     "d" '(:ignore t :wk "Dired")
     "d d" '(dired :wk "Open dired")
-    "d h" '((lambda () (interactive) (dired "~/")) :wk "Open home directory")
+    "d h" '(custom/dired-go-to-home :wk "Open home directory")
     "d j" '(dired-jump :wk "Dired jump to current")
     "d n" '(neotree-dir :wk "Open directory in neotree")
     "d p" '(peep-dired :wk "Peep-dired")
@@ -584,14 +585,24 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                        ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
+    (evil-collection-dashboard-setup)
     (evil-collection-define-key 'normal 'dashboard-mode-map
       "j" 'widget-forward
       "k" 'widget-backward
-      "l" 'dashboard-return)
-  :bind
-    (:map dashboard-mode-map
-      ([remap dashboard-next-line] . 'widget-forward)
-      ([remap dashboard-previous-line] . 'widget-backward)))
+      "l" 'dashboard-return))
+  ;; :bind
+    ;; (:map dashboard-mode-map
+    ;;   ([remap dashboard-next-line] . 'widget-forward)
+    ;;   ([remap dashboard-previous-line] . 'widget-backward)))
+
+(use-package dirvish
+  :init (dirvish-override-dired-mode)
+  :custom
+    (dirvish-cache-dir (concat user-share-emacs-directory "dirvish"))
+    (dirvish-attributes '(collapse git-msg file-time file-size))
+  :config
+    (evil-collection-define-key 'normal 'dirvish-mode-map
+      "q"  'dirvish-quit))
 
 (use-package dired
   :ensure nil
@@ -602,21 +613,29 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (dired-listing-switches "-lah --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
   :config
+    (defun custom/dired-go-to-home ()
+      (interactive)
+      "Spawns `dired' in user's home directory."
+      (dired "~/"))
     (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-up-directory
-      "l" 'dired-find-file))
+      [remap evil-yank] 'dired-ranger-copy
+      "gh" 'custom/dired-go-to-home
+      ;; "q"  'dirvish-quit
+      "p"  'dired-ranger-paste
+      "h"  'dired-up-directory
+      "l"  'dired-find-file))
 
-(use-package dired-open
-  :after dired
-  :config
-    (setq dired-open-extensions '(("gif" . "swaiymg")
-                                  ("jpg" . "swaiymg")
-                                  ("png" . "swaiymg")
-                                  ("mkv" . "mpv")
-                                  ("mp4" . "mpv"))))
+;; (use-package dired-open
+;;   :after dired
+;;   :config
+;;     (setq dired-open-extensions '(("gif" . "swaiymg")
+;;                                   ("jpg" . "swaiymg")
+;;                                   ("png" . "swaiymg")
+;;                                   ("mkv" . "mpv")
+;;                                   ("mp4" . "mpv"))))
 
-(use-package diredfl
-  :after dired)
+;; (use-package diredfl
+;;   :after dired)
 
 (use-package dired-ranger
   :after dired
@@ -624,10 +643,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-collection-define-key 'normal 'dired-mode-map
       [remap evil-yank] 'dired-ranger-copy
       "p" 'dired-ranger-paste))
-
-;; (use-package dirvish
-;;   :config
-;;   (dirvish-override-dired-mode))
 
 (use-package helpful
   :custom
@@ -649,7 +664,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package elfeed
   :custom
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://arne.me/articles/atom.xml"))
     (elfeed-search-filter "@6-months-ago"))
 
 (set-face-attribute 'default nil
@@ -729,7 +744,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package imenu-list
   :custom
     (imenu-list-focus-after-activation t
-     imenu-list-auto-resize t))
+     imenu-list-auto-resize t)
+  :config
+    (evil-collection-imenu-list-setup)
+    (evil-collection-define-key 'normal 'imenu-list-major-mode-map
+      "j" 'forward-button
+      "k" 'backward-button))
 
 (use-package ivy
   :demand
@@ -752,9 +772,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ("C-k" . ivy-previous-line)
       ("C-d" . ivy-reverse-i-search-kill))
   :custom
-    (ivy-use-virtual-buffers t
-     ivy-count-format "(%d/%d) "
-     enable-recursive-minibuffers t)
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "(%d/%d) ")
+    (enable-recursive-minibuffers t)
   :config
     (ivy-mode))
 
@@ -783,7 +803,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
 
 (use-package ivy-prescient
-  :after counsel
+  :demand
+  :after ivy
   :custom
     (ivy-prescient-enable-filtering nil)
     ;; Here are commands that I don't want to get sorted
@@ -835,12 +856,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       (define-key evil-motion-state-map (kbd "SPC") nil)
       (define-key evil-motion-state-map (kbd "RET") nil)
       (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
-      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-h") 'org-metaleft)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-j") 'org-metadown)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-k") 'org-metaup)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-l") 'org-metaright))
+      (evil-define-key 'normal org-mode-map
+        "gj" 'evil-next-visual-line
+        "gk" 'evil-previous-visual-line
+        (kbd "M-h") 'org-metaleft
+        (kbd "M-j") 'org-metadown
+        (kbd "M-k") 'org-metaup
+        (kbd "M-l") 'org-metaright
+        (kbd "M-<return>") 'org-return))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
@@ -867,6 +890,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
 (require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 
 (use-package company-org-block
   :defer t
@@ -917,7 +942,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :init (add-hook 'org-modern-hook #'org-modern-indent-mode t))
 
 (use-package org-roam
-  :demand
   :after org
   :init
     (setq org-roam-v2-ack t
@@ -930,32 +954,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
          :target (file+head "${slug}.org"
                             "#+title: ${title}\n#+date: %U\n")
          :unnarrowed t)))
-  :bind
-    (("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n i" . org-roam-node-insert))
   :config
     (org-roam-setup)
     (evil-collection-org-roam-setup)
     (require 'org-roam-export))
 
-;; (use-package org-roam-ui
-;;   :defer t
-;;   :after org-roam)
-
-;; (use-package simple-httpd
-;;   :defer t
-;;   :after org-roam-ui)
-;; (use-package websocket
-;;   :defer t
-;;   :after org-roam-ui)
-;; (use-package f
-;;   :defer t
-;;   :after org-roam-ui)
-
 (use-package org-superstar
   :after org
   :hook (org-mode . (lambda () (org-superstar-mode t)))
+  :custom
+    (org-superstar-remove-leading-stars t)
   :config
     (setq org-superstar-item-bullet-alist
       '((?+ . ?✸)
@@ -1014,8 +1022,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
     (org-mode . (lambda () (org-indent-mode t)))
-  :bind
-    ([remap org-insert-heading-respect-content] . org-meta-return)
+  ;; :bind
+  ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1060,19 +1068,28 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
         "* TODO %?\n %a")
        ("s" "School Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %? :school:\n %i")))
+    ;; =========== org agenda ===========
+    (org-agenda-prefix-format
+     '((agenda . " %?-12t% s")
+       (todo . " %-12:c")
+       (tags . " %-12:c")
+       (search . " %-12:c")))
     (org-agenda-include-all-todo nil)
+    (org-agenda-start-day "+0d")
+    (org-agenda-span 3)
+    (org-agenda-hide-tags-regexp ".*")
     (org-agenda-skip-scheduled-if-done t)
     (org-agenda-skip-deadline-if-done t)
+    (org-agenda-skip-timestamp-if-done t)
     (org-agenda-columns-add-appointments-to-effort-sum t)
-    (org-agenda-custom-commands nil)
+    ;; (org-agenda-custom-commands nil)
     (org-agenda-default-appointment-duration 60)
     (org-agenda-mouse-1-follows-link t)
     (org-agenda-skip-unavailable-files t)
-    (org-agenda-use-time-grid t)
+    (org-agenda-use-time-grid nil)
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
-    (org-hide-emphasis-markers t)
     (org-pretty-entities t)
     (org-startup-with-inline-images t)
     (org-cycle-inline-images-display t)
@@ -1094,7 +1111,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
     (org-export-preserve-breaks t)
-    (org-export-with-properties t)
+    ;; (org-export-with-properties t)
     (org-startup-folded 'overview)
   :config
     (add-to-list 'display-buffer-alist
@@ -1109,6 +1126,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                  '("*Org Links*"
                    (display-buffer-at-bottom)
                    (window-height . 1)))
+    (add-to-list 'display-buffer-alist
+                 '("*Org Babel Results*"
+                   (display-buffer-at-bottom)))
 
      ;; My attempt to create new time keyword STARTED
      ;; which would signify the time at which somehting was started
@@ -1215,9 +1235,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (add-to-list 'display-buffer-alist
              '("*Async Shell Command*"
                (display-buffer-at-bottom)
-               (window-height . 12)
-               (switch-to-buffer-other-window "*Async Shell Command*")))
+               (window-height . 12)))
 
+;; Moving focus to async-shell-command after executing it and setting it to normal mode
+(add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
 (evil-set-initial-state 'shell-mode 'normal)
 (evil-define-key 'normal shell-mode-map (kbd "q") 'quit-window)
 
@@ -1258,7 +1279,9 @@ If not then copy c++ makefile and put it in the current directory"
 
 (use-package bug-hunter :defer t)
 
-(use-package lorem-ipsum)
+(use-package lorem-ipsum
+  :custom
+    (lorem-ipsum-sentence-separator " "))
 
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -1321,9 +1344,6 @@ If not then copy c++ makefile and put it in the current directory"
   :custom
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
-
-;; Moving focus to async-shell-command after executing it ans setting it to normal mode
-(add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
 
 (use-package eshell
   :custom

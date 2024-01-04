@@ -1,0 +1,54 @@
+#+TITLE: Termux Document
+#+description: A whole bunch of configuration and whatnot for Termux
+#+auto_tangle: t
+
+* Deployment
+#+begin_src sh :tangle deploy.sh :shebang #!/usr/bin/env bash
+termux-setup-storage
+pkg install emacs sqlite fish eza git openssh
+chsh -s fish
+#+end_src
+* Shell
+#+begin_src sh :tangle .config/fish/config.fish
+export TERM=xterm-256color
+
+# apt
+alias pinst='pkg install'
+alias ppu='pkg purge'
+alias pautopu='pkg autopurge'
+alias pup='pkg update && pkg upgrade'
+alias pupd='pkg update'
+alias pupg='pkg upgrade'
+alias pinstalled='pkg list --installed'
+alias psearch='pkg search'
+
+alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
+#+end_src
+* Emacs
+#+PROPERTY: header-args :tangle .config/emacs/init.el
+Probably the most important thing here since I initially wanted to edit org mode files with it on my phone.
+Orgro is good viewer but that's it.
+Orgzly is agenda focused app but that's it.
+Only Emacs brings real power.
+
+This will be kind of a copy of my PC Emacs config with some stuff cut out.
+** Some modes turned on or off
+#+begin_src emacs-lisp
+(scroll-bar-mode -1)                 ; Disable visible scrollbar
+(tool-bar-mode -1)                   ; Disable the toolbar
+(tooltip-mode -1)                    ; Disable tooltips
+(menu-bar-mode -1)                   ; Disable the menu bar
+(set-fringe-mode 10)                 ; Give some breathing room
+(global-auto-revert-mode t)          ; Automatically show changes if the file has changed
+(global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
+(global-display-line-numbers-mode t) ; Line numbers
+(delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
+(electric-pair-mode 0)               ; Turns off automatic parens pairing
+(electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
+(column-number-mode 1)               ; Column number in modeline
+(fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
+(save-place-mode 1)                  ; Saving last place in file
+(set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
+(display-battery-mode 1)             ; Setting battery percentage in modeline
+(indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
+#+end_src

@@ -4,6 +4,11 @@
 * TABLE OF CONTENTS :toc:noexport:
 - [[#todo-list][TODO list]]
   - [[#look-if-this-will-bring-any-use-to-me][look if this will bring any use to me]]
+  - [[#parsing--h-options-from-cli-utils][parsing =-h= options from cli utils]]
+  - [[#no-littering][no littering]]
+  - [[#evil-surround][evil surround]]
+  - [[#org-super-agenda][org-super-agenda]]
+  - [[#compile-command][compile command]]
 - [[#sane-defaults-and-other][SANE DEFAULTS (and other)]]
   - [[#some-modes-turned-on-and-off][Some modes turned on and off]]
   - [[#uncluttering-user-emacs-directory-and-other][Uncluttering user-emacs-directory and other]]
@@ -20,7 +25,6 @@
 - [[#company][COMPANY]]
 - [[#dashboard][DASHBOARD]]
 - [[#dired][DIRED]]
-  - [[#dirvish][DIRVISH]]
 - [[#docs][DOCS]]
   - [[#helpful][HELPFUL]]
   - [[#tldr][TLDR]]
@@ -85,6 +89,11 @@
 
 * TODO TODO list
 ** look if [[https://github.com/alhassy/org-special-block-extras][this]] will bring any use to me
+** [[https://github.com/andykuszyk/noman.el][parsing =-h= options from cli utils]]
+** [[https://github.com/emacscollective/no-littering][no littering]]
+** [[https://github.com/emacs-evil/evil-surround][evil surround]]
+** [[https://github.com/alphapapa/org-super-agenda][org-super-agenda]]
+** [[https://www.masteringemacs.org/article/compiling-running-scripts-emacs][compile command]]
 * SANE DEFAULTS (and other)
 Here are some tweaks that idk where to put
 ** Some modes turned on and off
@@ -119,23 +128,10 @@ Most of the stuff will get redirected here.")
 
 (setq-default visible-bell nil ;; Set up the visible bell
               inhibit-startup-message nil ; default emacs startup message
-              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
-              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
               recentf-max-saved-items nil ; infinite amount of entries in recentf file
               recentf-auto-cleanup 'never ; not cleaning recentf file
-              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
-              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
-              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-              save-place-file (concat user-share-emacs-directory "places")
-              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-              multisession-directory (concat user-share-emacs-directory "multisession")
-              transient-history-file (concat user-share-emacs-directory "transient/history.el")
               initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
               initial-scratch-message nil ; deleting scratch buffer message
               scroll-conservatively 1000 ; Scroll one line at a time
@@ -143,9 +139,22 @@ Most of the stuff will get redirected here.")
               tab-always-indent nil
               vc-follow-symlinks t ; Enable follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
-              standard-indent 2) ; indenting set to 2
+              standard-indent 2 ; indenting set to 2
+              auto-revert-interval 1
+              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
+              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
+              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
+              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+              save-place-file (concat user-share-emacs-directory "places")
+              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
+              multisession-directory (concat user-share-emacs-directory "multisession")
+              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
 #+end_src
-
 ** Line numbers off in some modes
 #+begin_src emacs-lisp
 ;; turn off line numbers in certain modes
@@ -181,9 +190,7 @@ Most of the stuff will get redirected here.")
                 Custom-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
 #+end_src
-
 ** Quitting stuff
 With this =quit-window= which is used by most single use modes to quit kills the mode's buffer so it won't clutter Emacs
 #+begin_src emacs-lisp
@@ -212,6 +219,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 ;; make utf-8 the coding system
 (prefer-coding-system 'utf-8)
+
+(defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
+  "Create parent directory if not exists while visiting file."
+  (unless (file-exists-p filename)
+    (let ((dir (file-name-directory filename)))
+      (unless (file-exists-p dir)
+        (make-directory dir t)))))
 #+end_src
 * PACKAGE MANAGEMENT SETUP
 ** Normal packages
@@ -240,7 +254,7 @@ Default package management using =package.el=
 #+end_src
 
 Use-package will lazy-load packages by default.
-I have =use-package-always-ensure= because otherwise pacakges didn't want to download with =use-package-always-defer=.
+I have =use-package-always-ensure= because otherwise packages didn't want to download with =use-package-always-defer=.
 #+begin_src emacs-lisp
 (setq use-package-verbose t
       use-package-always-ensure t ; packages by default will be lazy loaded, like they will have defer: t
@@ -303,7 +317,7 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
 #+end_src
 
-[[https://github.com/emacs-evil/evil-collection][Evill collection]] has preconfigured evil keybindings for some essential emacs packages.
+[[https://github.com/emacs-evil/evil-collection][Evil collection]] has preconfigured evil keybindings for some essential emacs packages.
 #+begin_src emacs-lisp
 (use-package evil-collection
   :demand
@@ -317,7 +331,7 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
     (evil-collection-init))
 #+end_src
 
-[[https://github.com/redguardtoo/evil-nerd-commenter][Evil nerd commenter]] is convenient comeenting thing
+[[https://github.com/redguardtoo/evil-nerd-commenter][Evil nerd commenter]] is convenient commenting thing
 #+begin_src emacs-lisp
 (use-package evil-nerd-commenter
   :after evil)
@@ -403,7 +417,7 @@ This is a big list.
   (custom/leader-keys
     "d" '(:ignore t :wk "Dired")
     "d d" '(dired :wk "Open dired")
-    "d h" '((lambda () (interactive) (dired "~/")) :wk "Open home directory")
+    "d h" '(custom/dired-go-to-home :wk "Open home directory")
     "d j" '(dired-jump :wk "Dired jump to current")
     "d n" '(neotree-dir :wk "Open directory in neotree")
     "d p" '(peep-dired :wk "Peep-dired")
@@ -726,16 +740,32 @@ This is a big list.
                        ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
+    (evil-collection-dashboard-setup)
     (evil-collection-define-key 'normal 'dashboard-mode-map
       "j" 'widget-forward
       "k" 'widget-backward
-      "l" 'dashboard-return)
-  :bind
-    (:map dashboard-mode-map
-      ([remap dashboard-next-line] . 'widget-forward)
-      ([remap dashboard-previous-line] . 'widget-backward)))
+      "l" 'dashboard-return))
+  ;; :bind
+    ;; (:map dashboard-mode-map
+    ;;   ([remap dashboard-next-line] . 'widget-forward)
+    ;;   ([remap dashboard-previous-line] . 'widget-backward)))
 #+end_src
 * DIRED
+[[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
++I don't currently use that since it displays all files as buffers and doesn't kill them.+
+It kills the buffers when =dirvish-quit= is called or when you enter the file.
+#+begin_src emacs-lisp
+(use-package dirvish
+  :init (dirvish-override-dired-mode)
+  :custom
+    (dirvish-cache-dir (concat user-share-emacs-directory "dirvish"))
+    (dirvish-attributes '(collapse git-msg file-time file-size))
+  :config
+    (evil-collection-define-key 'normal 'dirvish-mode-map
+      "q"  'dirvish-quit))
+#+end_src
+
+I still do some configurations because dirvish still at its core uses dired and its keybindings.
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
@@ -746,21 +776,29 @@ This is a big list.
     (dired-listing-switches "-lah --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
   :config
+    (defun custom/dired-go-to-home ()
+      (interactive)
+      "Spawns `dired' in user's home directory."
+      (dired "~/"))
     (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-up-directory
-      "l" 'dired-find-file))
+      [remap evil-yank] 'dired-ranger-copy
+      "gh" 'custom/dired-go-to-home
+      ;; "q"  'dirvish-quit
+      "p"  'dired-ranger-paste
+      "h"  'dired-up-directory
+      "l"  'dired-find-file))
 
-(use-package dired-open
-  :after dired
-  :config
-    (setq dired-open-extensions '(("gif" . "swaiymg")
-                                  ("jpg" . "swaiymg")
-                                  ("png" . "swaiymg")
-                                  ("mkv" . "mpv")
-                                  ("mp4" . "mpv"))))
+;; (use-package dired-open
+;;   :after dired
+;;   :config
+;;     (setq dired-open-extensions '(("gif" . "swaiymg")
+;;                                   ("jpg" . "swaiymg")
+;;                                   ("png" . "swaiymg")
+;;                                   ("mkv" . "mpv")
+;;                                   ("mp4" . "mpv"))))
 
-(use-package diredfl
-  :after dired)
+;; (use-package diredfl
+;;   :after dired)
 
 (use-package dired-ranger
   :after dired
@@ -768,14 +806,6 @@ This is a big list.
     (evil-collection-define-key 'normal 'dired-mode-map
       [remap evil-yank] 'dired-ranger-copy
       "p" 'dired-ranger-paste))
-#+end_src
-** TODO DIRVISH
-[[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
-I don't currently use that since it displays all files as buffers and doesn't kill them.
-#+begin_src emacs-lisp
-;; (use-package dirvish
-;;   :config
-;;   (dirvish-override-dired-mode))
 #+end_src
 * DOCS
 ** HELPFUL
@@ -819,7 +849,7 @@ Though Emacs 29 has some emoji support.
 #+begin_src emacs-lisp
 (use-package elfeed
   :custom
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://arne.me/articles/atom.xml"))
     (elfeed-search-filter "@6-months-ago"))
 #+end_src
 * FONTS
@@ -929,7 +959,12 @@ A Git Porcelain inside Emacs
 (use-package imenu-list
   :custom
     (imenu-list-focus-after-activation t
-     imenu-list-auto-resize t))
+     imenu-list-auto-resize t)
+  :config
+    (evil-collection-imenu-list-setup)
+    (evil-collection-define-key 'normal 'imenu-list-major-mode-map
+      "j" 'forward-button
+      "k" 'backward-button))
 #+end_src
 * IVY (COUNSEL)
 Both are completion frameworks that make your life easier when doing M-x for example.
@@ -955,9 +990,9 @@ Both are completion frameworks that make your life easier when doing M-x for exa
       ("C-k" . ivy-previous-line)
       ("C-d" . ivy-reverse-i-search-kill))
   :custom
-    (ivy-use-virtual-buffers t
-     ivy-count-format "(%d/%d) "
-     enable-recursive-minibuffers t)
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "(%d/%d) ")
+    (enable-recursive-minibuffers t)
   :config
     (ivy-mode))
 
@@ -989,7 +1024,8 @@ Both are completion frameworks that make your life easier when doing M-x for exa
 [[https://github.com/radian-software/prescient.el][Prescient]] adds rememebring and filtering to ivy choices which is convenient.
 #+begin_src emacs-lisp
 (use-package ivy-prescient
-  :after counsel
+  :demand
+  :after ivy
   :custom
     (ivy-prescient-enable-filtering nil)
     ;; Here are commands that I don't want to get sorted
@@ -1100,12 +1136,14 @@ Here I'm improving it as much as I can.
       (define-key evil-motion-state-map (kbd "SPC") nil)
       (define-key evil-motion-state-map (kbd "RET") nil)
       (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map (kbd "g j") 'evil-next-visual-line)
-      (evil-define-key 'normal org-mode-map (kbd "g k") 'evil-previous-visual-line)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-h") 'org-metaleft)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-j") 'org-metadown)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-k") 'org-metaup)
-      (evil-define-key 'normal 'org-mode-map (kbd "M-l") 'org-metaright))
+      (evil-define-key 'normal org-mode-map
+        "gj" 'evil-next-visual-line
+        "gk" 'evil-previous-visual-line
+        (kbd "M-h") 'org-metaleft
+        (kbd "M-j") 'org-metadown
+        (kbd "M-k") 'org-metaup
+        (kbd "M-l") 'org-metaright
+        (kbd "M-<return>") 'org-return))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
@@ -1149,6 +1187,8 @@ Org-tempo is a module within org that can be enabled. It allows for '<s' followe
 
 #+begin_src emacs-lisp
 (require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 #+end_src
 ** COMPANY SUPPORT
 #+begin_src emacs-lisp
@@ -1184,7 +1224,6 @@ It's set up so it will display markers when entering insert mode.
 #+end_src
 ** ORG AUTO TANGLE
 [[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] automatically tangles files that have =#+auto_tangle: t= in them.
-
 #+begin_src emacs-lisp
 (use-package org-auto-tangle
   :defer t
@@ -1220,7 +1259,6 @@ Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package t
 [[https://www.orgroam.com/][Org roam]] is nice wiki-like note management thing. Reminds me of [[https://obsidian.md][Obsidian]].
 #+begin_src emacs-lisp
 (use-package org-roam
-  :demand
   :after org
   :init
     (setq org-roam-v2-ack t
@@ -1233,44 +1271,27 @@ Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package t
          :target (file+head "${slug}.org"
                             "#+title: ${title}\n#+date: %U\n")
          :unnarrowed t)))
-  :bind
-    (("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n i" . org-roam-node-insert))
   :config
     (org-roam-setup)
     (evil-collection-org-roam-setup)
     (require 'org-roam-export))
 #+end_src
-#+begin_src emacs-lisp
-;; (use-package org-roam-ui
-;;   :defer t
-;;   :after org-roam)
-
-;; (use-package simple-httpd
-;;   :defer t
-;;   :after org-roam-ui)
-;; (use-package websocket
-;;   :defer t
-;;   :after org-roam-ui)
-;; (use-package f
-;;   :defer t
-;;   :after org-roam-ui)
-#+end_src
 ** ORG SUPERSTAR
 [[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
 #+begin_src emacs-lisp
-  (use-package org-superstar
-    :after org
-    :hook (org-mode . (lambda () (org-superstar-mode t)))
-    :config
-      (setq org-superstar-item-bullet-alist
-        '((?+ . ?✸)
-          (?* . ?•)
-          (?- . ?●))))
+(use-package org-superstar
+  :after org
+  :hook (org-mode . (lambda () (org-superstar-mode t)))
+  :custom
+    (org-superstar-remove-leading-stars t)
+  :config
+    (setq org-superstar-item-bullet-alist
+      '((?+ . ?✸)
+        (?* . ?•)
+        (?- . ?●))))
 #+end_src
 ** ORG YT
-It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.
++It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.+
 #+begin_src emacs-lisp
 (quelpa '(org-yt :fetcher github :repo "TobiasZawada/org-yt"))
 (use-package org-yt
@@ -1334,8 +1355,8 @@ A whole lot of other stuff
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
     (org-mode . (lambda () (org-indent-mode t)))
-  :bind
-    ([remap org-insert-heading-respect-content] . org-meta-return)
+  ;; :bind
+  ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1380,19 +1401,28 @@ A whole lot of other stuff
         "* TODO %?\n %a")
        ("s" "School Todo" entry (file "~/org-roam/nonagenda.org")
         "* TODO %? :school:\n %i")))
+    ;; =========== org agenda ===========
+    (org-agenda-prefix-format
+     '((agenda . " %?-12t% s")
+       (todo . " %-12:c")
+       (tags . " %-12:c")
+       (search . " %-12:c")))
     (org-agenda-include-all-todo nil)
+    (org-agenda-start-day "+0d")
+    (org-agenda-span 3)
+    (org-agenda-hide-tags-regexp ".*")
     (org-agenda-skip-scheduled-if-done t)
     (org-agenda-skip-deadline-if-done t)
+    (org-agenda-skip-timestamp-if-done t)
     (org-agenda-columns-add-appointments-to-effort-sum t)
-    (org-agenda-custom-commands nil)
+    ;; (org-agenda-custom-commands nil)
     (org-agenda-default-appointment-duration 60)
     (org-agenda-mouse-1-follows-link t)
     (org-agenda-skip-unavailable-files t)
-    (org-agenda-use-time-grid t)
+    (org-agenda-use-time-grid nil)
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
-    (org-hide-emphasis-markers t)
     (org-pretty-entities t)
     (org-startup-with-inline-images t)
     (org-cycle-inline-images-display t)
@@ -1414,7 +1444,7 @@ A whole lot of other stuff
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
     (org-export-preserve-breaks t)
-    (org-export-with-properties t)
+    ;; (org-export-with-properties t)
     (org-startup-folded 'overview)
   :config
     (add-to-list 'display-buffer-alist
@@ -1429,6 +1459,9 @@ A whole lot of other stuff
                  '("*Org Links*"
                    (display-buffer-at-bottom)
                    (window-height . 1)))
+    (add-to-list 'display-buffer-alist
+                 '("*Org Babel Results*"
+                   (display-buffer-at-bottom)))
 
      ;; My attempt to create new time keyword STARTED
      ;; which would signify the time at which somehting was started
@@ -1585,9 +1618,10 @@ Some modes that don't belong anywhere are made smaller including compiling relat
 (add-to-list 'display-buffer-alist
              '("*Async Shell Command*"
                (display-buffer-at-bottom)
-               (window-height . 12)
-               (switch-to-buffer-other-window "*Async Shell Command*")))
+               (window-height . 12)))
 
+;; Moving focus to async-shell-command after executing it and setting it to normal mode
+(add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
 (evil-set-initial-state 'shell-mode 'normal)
 (evil-define-key 'normal shell-mode-map (kbd "q") 'quit-window)
 #+end_src
@@ -1652,12 +1686,14 @@ If I'll not forget about it then probably I will get the most use out of [[https
 #+end_src
 ** LOREM IPSUM GENERATOR
 #+begin_src emacs-lisp
-(use-package lorem-ipsum)
+(use-package lorem-ipsum
+  :custom
+    (lorem-ipsum-sentence-separator " "))
 #+end_src
 ** TREESITTER
 Emacs from version 29 supports tree-sitter.
 Tree-sitter is fast parser and smart syntax highlighter for languages.
-You need to have ~tree-sitter~ pacakge installed on your system.
+You need to have ~tree-sitter~ package installed on your system.
 #+begin_src emacs-lisp
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -1737,9 +1773,6 @@ This remaps specified major modes to its tree-sitter counterparts
   :custom
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
-
-;; Moving focus to async-shell-command after executing it ans setting it to normal mode
-(add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
 #+end_src
 ** Eshell
 Eshell is an Emacs 'shell' that is written in Elisp.

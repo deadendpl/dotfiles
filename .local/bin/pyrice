@@ -18,6 +18,7 @@ wpg-tile() {
   wallpaper_path=$(realpath "$wallpaper_path")
 
   wpg --backend haishoku -s "$wallpaper_path"
+  # wal --cols16 --backend haishoku -i "$wallpaper_path"
   killall swaybg
   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 }
