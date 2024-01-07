@@ -1,8 +1,10 @@
+(setq browse-url-browser-function 'browse-url-xdg-open)
+
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-(global-display-line-numbers-mode t) ; Line numbers
+;; (global-display-line-numbers-mode t) ; Line numbers
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
@@ -150,7 +152,8 @@ Most of the stuff will get redirected here.")
       ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
-    (define-key evil-insert-state-map (kbd "c-h") 'evil-delete-backward-char-and-join)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (define-key evil-normal-state-map (kbd "C-s") 'save-buffer) ;; for quick save
     (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
 
@@ -165,8 +168,7 @@ Most of the stuff will get redirected here.")
     (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
     (evil-collection-init))
 
-(use-package evil-nerd-commenter
-  :after evil)
+(use-package evil-nerd-commenter :after evil)
 
 (use-package general
   :config
@@ -184,7 +186,8 @@ Most of the stuff will get redirected here.")
     "." '(find-file :wk "Find file")
     "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
     "u" '(universal-argument :wk "Universal argument")
-    "x" '(execute-extended-command :wk "M-x"))
+    "x" '(execute-extended-command :wk "M-x")
+    "q" '(kill-emacs :wk "Exit Emacs")) ;; easy quitting
 
   (custom/leader-keys
     "TAB" '(:ignore t :wk "Spacing/Indent")
@@ -677,19 +680,7 @@ Most of the stuff will get redirected here.")
     (evil-collection-org-roam-setup)
     (require 'org-roam-export))
 
-(use-package org-superstar
-  :after org
-  :hook (org-mode . (lambda () (org-superstar-mode t)))
-  :custom
-    (org-superstar-remove-leading-stars t)
-  :config
-    (setq org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
-
 (use-package toc-org
-  :defer t
   :after org
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
@@ -711,171 +702,174 @@ Most of the stuff will get redirected here.")
 
 (use-package org
   :hook
-    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    (org-mode . (lambda () (org-indent-mode t)))
+  (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+  (org-mode . (lambda () (org-indent-mode t)))
   ;; :bind
   ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
-    ;; setting size of headers
-    (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
-    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
-    (org-agenda-date-today ((t (:height 1.3))))
+  ;; setting size of headers
+  (org-document-title ((t (:inherit outline-1 :height 1.7))))
+  (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+  (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+  (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+  (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+  (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+  (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+  (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+  (org-agenda-date-today ((t (:height 1.3))))
   :custom
-    (org-directory "~/org/")
-    (org-agenda-files (list (concat org-roam-directory "/agenda.org")(concat org-roam-directory "/nonagenda.org")(concat org-roam-directory "/phone.org")))
-    (org-todo-keywords
-     '((sequence
-        "TODO(t)"  ; A task that needs doing & is ready to do
-        "PROJ(p)"  ; A project, which usually contains other tasks
-        "LOOP(r)"  ; A recurring task
-        "STRT(s)"  ; A task that is in progress
-        "WAIT(w)"  ; Something external is holding up this task
-        "HOLD(h)"  ; This task is paused/on hold because of me
-        "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-        "|"
-        "DONE(d)"  ; Task successfully completed
-        "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-       (sequence
-        "[ ](T)"   ; A task that needs doing
-        "[-](S)"   ; Task is in progress
-        "[?](W)"   ; Task is being held up or paused
-        "|"
-        "[X](D)")  ; Task was completed
-       (sequence
-        "|"
-        "OKAY(o)"
-        "YES(y)"
-        "NO(n)")))
-    (org-capture-templates
-     '(("t" "Todo" entry (file "~/org-roam/nonagenda.org")
-        "* TODO %?\n %a")
-       ("T" "Repetable Todo" entry (file "~/org-roam/agenda.org")
-        "* TODO %?\n %a")
-       ("s" "School Todo" entry (file "~/org-roam/nonagenda.org")
-        "* TODO %? :school:\n %i")))
-    ;; =========== org agenda ===========
-    (org-agenda-prefix-format
-     '((agenda . " %?-12t% s")
-       (todo . " %-12:c")
-       (tags . " %-12:c")
-       (search . " %-12:c")))
-    (org-agenda-include-all-todo nil)
-    (org-agenda-start-day "+0d")
-    (org-agenda-span 3)
-    (org-agenda-hide-tags-regexp ".*")
-    (org-agenda-skip-scheduled-if-done t)
-    (org-agenda-skip-deadline-if-done t)
-    (org-agenda-skip-timestamp-if-done t)
-    (org-agenda-columns-add-appointments-to-effort-sum t)
-    ;; (org-agenda-custom-commands nil)
-    (org-agenda-default-appointment-duration 60)
-    (org-agenda-mouse-1-follows-link t)
-    (org-agenda-skip-unavailable-files t)
-    (org-agenda-use-time-grid nil)
-    (org-insert-heading-respect-content nil)
-    (org-hide-emphasis-markers t)
-    (org-hide-leading-stars t)
-    (org-pretty-entities t)
-    (org-startup-with-inline-images t)
-    (org-cycle-inline-images-display t)
-    (org-display-remote-inline-images 'download)
-    (org-image-actual-width nil)
-    (org-list-allow-alphabetical t)
-    (org-ellipsis " •")
-    (org-agenda-window-setup 'current-window)
-    (org-fontify-quote-and-verse-blocks t)
-    (org-agenda-block-separator 8411)
-    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
-    (org-preview-latex-default-process 'dvisvgm)
-    (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-    (org-return-follows-link t)
-    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
-    (org-export-backends (quote (ascii html icalendar latex odt md)))
-    (org-tags-column 0)
-    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
-    (org-confirm-babel-evaluate nil)
-    (org-edit-src-content-indentation 0)
-    (org-export-preserve-breaks t)
-    ;; (org-export-with-properties t)
-    (org-startup-folded 'overview)
+  (org-directory "~/org-roam/")
+  (org-todo-keywords
+   '((sequence
+      "TODO(t)"  ; A task that needs doing & is ready to do
+      "PROJ(p)"  ; A project, which usually contains other tasks
+      "LOOP(r)"  ; A recurring task
+      "STRT(s)"  ; A task that is in progress
+      "WAIT(w)"  ; Something external is holding up this task
+      "HOLD(h)"  ; This task is paused/on hold because of me
+      "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+      "|"
+      "DONE(d)"  ; Task successfully completed
+      "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+     (sequence
+      "[ ](T)"   ; A task that needs doing
+      "[-](S)"   ; Task is in progress
+      "[?](W)"   ; Task is being held up or paused
+      "|"
+      "[X](D)")  ; Task was completed
+     (sequence
+      "|"
+      "OKAY(o)"
+      "YES(y)"
+      "NO(n)")))
+  (org-capture-templates ;; need to rework this since my agenda structure changed
+   '(("t" "Todo" entry (file "~/org-roam/agenda-inbox.org")
+      "* TODO %?\n %a")))
+  ;; =========== org agenda ===========
+  (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "agenda-inbox.org" org-roam-directory)))
+  (org-agenda-prefix-format ;; format at which tasks are displayed
+   '((agenda . " %i ")
+     (todo . "%c %-12:c")
+     (tags . "%c %-12:c")
+     (search . "%c %-12:c")))
+  (org-agenda-category-icon-alist ;; icons for categories
+   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 0.8)) nil nil :ascent center)
+     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 0.8)) nil nil :ascent center)
+     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 0.8)) nil nil :ascent center)))
+  (org-agenda-include-all-todo nil)
+  (org-agenda-start-day "+0d")
+  (org-agenda-span 3)
+  (org-agenda-hide-tags-regexp ".*")
+  (org-agenda-skip-scheduled-if-done t)
+  (org-agenda-skip-deadline-if-done t)
+  (org-agenda-skip-timestamp-if-done t)
+  (org-agenda-columns-add-appointments-to-effort-sum t)
+  ;; (org-agenda-custom-commands nil)
+  (org-agenda-default-appointment-duration 60)
+  (org-agenda-mouse-1-follows-link t)
+  (org-agenda-skip-unavailable-files t)
+  (org-agenda-use-time-grid nil)
+  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
+  (org-refile-use-outline-path nil)
+  (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
+  (org-insert-heading-respect-content nil)
+  (org-hide-emphasis-markers t)
+  (org-hide-leading-stars t)
+  (org-pretty-entities t)
+  (org-startup-with-inline-images t)
+  (org-cycle-inline-images-display t)
+  (org-display-remote-inline-images 'download)
+  (org-image-actual-width nil)
+  (org-list-allow-alphabetical t)
+  (org-ellipsis " •")
+  (org-agenda-window-setup 'current-window)
+  (org-fontify-quote-and-verse-blocks t)
+  (org-agenda-block-separator 8411)
+  (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+  (org-preview-latex-default-process 'dvisvgm)
+  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+  (org-return-follows-link t)
+  (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+  (org-export-backends (quote (ascii html icalendar latex odt md)))
+  (org-tags-column 0)
+  (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+  (org-confirm-babel-evaluate nil)
+  (org-edit-src-content-indentation 0)
+  (org-export-preserve-breaks t)
+  ;; (org-export-with-properties t)
+  (org-startup-folded 'overview)
   :config
-    (add-to-list 'display-buffer-alist
-                 '("*Agenda Commands*"
-                   (display-buffer-at-bottom)
-                   (window-height . 12)))
-    (add-to-list 'display-buffer-alist
-                 '("*Org Select*"
-                   (display-buffer-at-bottom)
-                   (window-height . 12)))
-    (add-to-list 'display-buffer-alist
-                 '("*Org Links*"
-                   (display-buffer-at-bottom)
-                   (window-height . 1)))
-    (add-to-list 'display-buffer-alist
-                 '("*Org Babel Results*"
-                   (display-buffer-at-bottom)))
+  (add-to-list 'display-buffer-alist
+               '("*Agenda Commands*"
+                 (display-buffer-at-bottom)
+                 (window-height . 12)))
+  (add-to-list 'display-buffer-alist
+               '("*Org Select*"
+                 (display-buffer-at-bottom)
+                 (window-height . 12)))
+  (add-to-list 'display-buffer-alist
+               '("*Org Links*"
+                 (display-buffer-at-bottom)
+                 (window-height . 1)))
+  (add-to-list 'display-buffer-alist
+               '("*Org Babel Results*"
+                 (display-buffer-at-bottom)))
 
-     ;; My attempt to create new time keyword STARTED
-     ;; which would signify the time at which somehting was started
-     ;; (defvar org-started-string "STARTED:"
-     ;;   "String to mark started entries.")
-     ;; (defconst org-element-started-keyword "STARTED:"
-     ;;   "Keyword used to mark started TODO entries.")
-     ;; (defconst org-started-time-regexp
-     ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
-     ;;   "Matches the STARTED keyword together with a time stamp.")
-     ;; (defcustom org-started-keep-when-no-todo nil
-     ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
-     ;;   :group 'org-todo
-     ;;   :group 'org-keywords
-     ;;   :version "24.4"
-     ;;   :package-version '(Org . "8.0")
-     ;;   :type 'boolean)
-     ;; (defconst org-all-time-keywords
-     ;;   (mapcar (lambda (w) (substring w 0 -1))
-     ;;           (list org-scheduled-string org-deadline-string
-     ;;                 org-clock-string org-closed-string org-started-string))
-     ;;   "List of time keywords.")
-     ;; (defconst org-keyword-time-regexp
-     ;;   (concat "\\<"
-     ;;           (regexp-opt
-     ;;            (list org-scheduled-string org-deadline-string org-closed-string
-     ;;                  org-clock-string org-started-string)
-     ;;            t)
-     ;;           " *[[<]\\([^]>]+\\)[]>]")
-     ;;   "Matches any of the 5 keywords, together with the time stamp.")
+  ;; My attempt to create new time keyword STARTED
+  ;; which would signify the time at which somehting was started
+  ;; (defvar org-started-string "STARTED:"
+  ;;   "String to mark started entries.")
+  ;; (defconst org-element-started-keyword "STARTED:"
+  ;;   "Keyword used to mark started TODO entries.")
+  ;; (defconst org-started-time-regexp
+  ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
+  ;;   "Matches the STARTED keyword together with a time stamp.")
+  ;; (defcustom org-started-keep-when-no-todo nil
+  ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
+  ;;   :group 'org-todo
+  ;;   :group 'org-keywords
+  ;;   :version "24.4"
+  ;;   :package-version '(Org . "8.0")
+  ;;   :type 'boolean)
+  ;; (defconst org-all-time-keywords
+  ;;   (mapcar (lambda (w) (substring w 0 -1))
+  ;;           (list org-scheduled-string org-deadline-string
+  ;;                 org-clock-string org-closed-string org-started-string))
+  ;;   "List of time keywords.")
+  ;; (defconst org-keyword-time-regexp
+  ;;   (concat "\\<"
+  ;;           (regexp-opt
+  ;;            (list org-scheduled-string org-deadline-string org-closed-string
+  ;;                  org-clock-string org-started-string)
+  ;;            t)
+  ;;           " *[[<]\\([^]>]+\\)[]>]")
+  ;;   "Matches any of the 5 keywords, together with the time stamp.")
 
-    (defun custom/org-resize-latex-overlays ()
-      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
-      (cl-loop for o in (car (overlay-lists))
-               if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
-               do (plist-put (cdr (overlay-get o 'display))
-                             :scale (expt text-scale-mode-step
-                                          text-scale-mode-amount))))
-    (plist-put org-format-latex-options :foreground nil)
-    (plist-put org-format-latex-options :background nil)
+  (defun custom/org-resize-latex-overlays ()
+    "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
+    (cl-loop for o in (car (overlay-lists))
+             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+             do (plist-put (cdr (overlay-get o 'display))
+                           :scale (expt text-scale-mode-step
+                                        text-scale-mode-amount))))
+  (plist-put org-format-latex-options :foreground nil)
+  (plist-put org-format-latex-options :background nil)
 
-    (defvar custom/org-bold-symbol "*"
-      "Default symbol for `custom/org-format-in-region' function.")
+  (defvar custom/org-bold-symbol "*"
+    "Default symbol for `custom/org-format-in-region' function.")
 
-    (defun custom/org-format-in-region (&optional symbol)
-      "Add symbols before and after the selected text."
-      (interactive)
-      (setq symbol (or symbol
-                       (read-string "Enter symbol: " custom/org-bold-symbol)))
-      (when (region-active-p)
-        (save-excursion
-          (goto-char (region-end))
-          (insert symbol)
-          (goto-char (region-beginning))
-          (insert symbol)))
-      (deactivate-mark)))
+  (defun custom/org-format-in-region (&optional symbol)
+    "Add symbols before and after the selected text."
+    (interactive)
+    (setq symbol (or symbol
+                     (read-string "Enter symbol: " custom/org-bold-symbol)))
+    (when (region-active-p)
+      (save-excursion
+        (goto-char (region-end))
+        (insert symbol)
+        (goto-char (region-beginning))
+        (insert symbol)))
+    (deactivate-mark)))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -909,8 +903,7 @@ Most of the stuff will get redirected here.")
 (load-theme real-theme t)
 
 (use-package which-key
-  :diminish
-  :demand
+  ;; :defer 10
   :custom
     (which-key-side-window-location 'bottom)
     (which-key-sort-order #'which-key-key-order-alpha)

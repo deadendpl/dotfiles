@@ -3,6 +3,7 @@
 clipboard_cmd="cb paste 0"
 
 bookmark="$($clipboard_cmd)"
+pkill cb
 file="$HOME/Documents/bookmarks"
 
 if grep -q "^$bookmark$" "$file"; then
