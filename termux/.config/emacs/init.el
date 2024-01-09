@@ -187,7 +187,7 @@ Most of the stuff will get redirected here.")
     "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
     "u" '(universal-argument :wk "Universal argument")
     "x" '(execute-extended-command :wk "M-x")
-    "q" '(kill-emacs :wk "Exit Emacs")) ;; easy quitting
+    "q" '(evil-quit :wk "Exit Emacs")) ;; easy quitting
 
   (custom/leader-keys
     "TAB" '(:ignore t :wk "Spacing/Indent")
