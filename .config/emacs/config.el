@@ -10,7 +10,7 @@
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 (column-number-mode 1)               ; Column number in modeline
-(fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
+;; (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
 (set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
 (display-battery-mode 1)             ; Setting battery percentage in modeline
@@ -39,6 +39,7 @@ Most of the stuff will get redirected here.")
               standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
               display-line-numbers-type 'relative
+              use-short-answers t
               ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
               recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
               bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
@@ -207,316 +208,310 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config
   (general-evil-setup)
 
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer custom/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+;; set up 'SPC' as the global leader key
+(general-create-definer custom/leader-keys
+  :states '(normal insert visual emacs)
+  :keymaps 'override
+  :prefix "SPC" ;; set leader
+  :global-prefix "M-SPC") ;; access leader in insert mode
 
-  (custom/leader-keys
-    "SPC" '(projectile-find-file :wk "Find file in project")
-    "." '(find-file :wk "Find file")
-    "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
-    "u" '(universal-argument :wk "Universal argument")
-    "x" '(execute-extended-command :wk "M-x"))
+(custom/leader-keys
+  "SPC" '(projectile-find-file :wk "Find file in project")
+  "." '(find-file :wk "Find file")
+  "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
+  "u" '(universal-argument :wk "Universal argument")
+  "x" '(execute-extended-command :wk "M-x"))
 
-  (custom/leader-keys
-    "TAB" '(:ignore t :wk "Spacing/Indent")
-    "TAB TAB" '(evilnc-comment-or-uncomment-lines :wk "Un/Comment lines")
-    "TAB SPC" '(untabify :wk "Untabify")
-    "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
+(custom/leader-keys
+  "TAB" '(:ignore t :wk "Spacing/Indent")
+  "TAB TAB" '(evilnc-comment-or-uncomment-lines :wk "Un/Comment lines")
+  "TAB SPC" '(untabify :wk "Untabify")
+  "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
 
-  (custom/leader-keys
-    "RET" '(bookmark-jump :wk "Go to bookmark"))
+(custom/leader-keys
+  "RET" '(bookmark-jump :wk "Go to bookmark"))
 
-  (custom/leader-keys
-    "a" '(:ignore t :wk "Amusement")
-    "a b" '(animate-birthday-present :wk "Birthday")
-    "a d" '(dissociated-press :wk "Dissoctation")
-    "a g" '(:ignore t :wk "Games")
-    "a g b" '(bubbles :wk "Bubbles")
-    "a g m" '(minesweeper :wk "Minesweeper")
-    "a g p" '(pong :wk "Pong")
-    "a g s" '(snake :wk "Snake")
-    "a g t" '(tetris :wk "Tetris")
-    "a e" '(:ignore t :wk "Emoji")
-    "a e +" '(emoji-zoom-increase :wk "Zoom in")
-    "a e -" '(emoji-zoom-decrease :wk "Zoom out")
-    "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
-    "a e d" '(emoji-describe :wk "Describe")
-    "a e e" '(emoji-insert :wk "Insert")
-    "a e i" '(emoji-insert :wk "Insert")
-    "a e l" '(emoji-list :wk "List")
-    "a e r" '(emoji-recent :wk "Recent")
-    "a e s" '(emoji-search :wk "Search")
-    "a z" '(zone :wk "Zone"))
+(custom/leader-keys
+  "a" '(:ignore t :wk "Amusement")
+  "a b" '(animate-birthday-present :wk "Birthday")
+  "a d" '(dissociated-press :wk "Dissoctation")
+  "a g" '(:ignore t :wk "Games")
+  "a g b" '(bubbles :wk "Bubbles")
+  "a g m" '(minesweeper :wk "Minesweeper")
+  "a g p" '(pong :wk "Pong")
+  "a g s" '(snake :wk "Snake")
+  "a g t" '(tetris :wk "Tetris")
+  "a e" '(:ignore t :wk "Emoji")
+  "a e +" '(emoji-zoom-increase :wk "Zoom in")
+  "a e -" '(emoji-zoom-decrease :wk "Zoom out")
+  "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
+  "a e d" '(emoji-describe :wk "Describe")
+  "a e e" '(emoji-insert :wk "Insert")
+  "a e i" '(emoji-insert :wk "Insert")
+  "a e l" '(emoji-list :wk "List")
+  "a e r" '(emoji-recent :wk "Recent")
+  "a e s" '(emoji-search :wk "Search")
+  "a z" '(zone :wk "Zone"))
 
-  (custom/leader-keys
-    "b" '(:ignore t :wk "Bookmarks/Buffers")
-    "b b" '(counsel-ibuffer :wk "Switch to buffer")
-    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-    "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
-    "b d" '(bookmark-delete :wk "Delete bookmark")
-    "b f" '(scratch-buffer :wk "Scratch buffer")
-    "b i" '(ibuffer :wk "Ibuffer")
-    "b k" '(kill-current-buffer :wk "Kill current buffer")
-    "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-    "b l" '(list-bookmarks :wk "List bookmarks")
-    "b m" '(bookmark-set :wk "Set bookmark")
-    "b n" '(next-buffer :wk "Next buffer")
-    "b p" '(previous-buffer :wk "Previous buffer")
-    "b r" '(revert-buffer :wk "Reload buffer")
-    "b R" '(rename-buffer :wk "Rename buffer")
-    "b s" '(basic-save-buffer :wk "Save buffer")
-    "b S" '(save-some-buffers :wk "Save multiple buffers")
-    "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
+(custom/leader-keys
+  "b" '(:ignore t :wk "Bookmarks/Buffers")
+  "b b" '(counsel-ibuffer :wk "Switch to buffer")
+  "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+  "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
+  "b d" '(bookmark-delete :wk "Delete bookmark")
+  "b f" '(scratch-buffer :wk "Scratch buffer")
+  "b i" '(ibuffer :wk "Ibuffer")
+  "b k" '(kill-current-buffer :wk "Kill current buffer")
+  "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+  "b l" '(list-bookmarks :wk "List bookmarks")
+  "b m" '(bookmark-set :wk "Set bookmark")
+  "b n" '(next-buffer :wk "Next buffer")
+  "b p" '(previous-buffer :wk "Previous buffer")
+  "b r" '(revert-buffer :wk "Reload buffer")
+  "b R" '(rename-buffer :wk "Rename buffer")
+  "b s" '(basic-save-buffer :wk "Save buffer")
+  "b S" '(save-some-buffers :wk "Save multiple buffers")
+  "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
 
-  (custom/leader-keys
-    "c" '(:ignore t :wk "Compiling")
-    "c c" '(compile :wk "Compile")
-    "c r" '(recompile :wk "Recompile"))
+(custom/leader-keys
+  "c" '(:ignore t :wk "Compiling")
+  "c c" '(compile :wk "Compile")
+  "c r" '(recompile :wk "Recompile"))
 
-  (custom/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d d" '(dired :wk "Open dired")
-    "d h" '(custom/dired-go-to-home :wk "Open home directory")
-    "d j" '(dired-jump :wk "Dired jump to current")
-    "d n" '(neotree-dir :wk "Open directory in neotree")
-    "d p" '(peep-dired :wk "Peep-dired")
-    "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
+(custom/leader-keys
+  "d" '(:ignore t :wk "Dired")
+  "d d" '(dired :wk "Open dired")
+  "d h" '(custom/dired-go-to-home :wk "Open home directory")
+  "d j" '(dired-jump :wk "Dired jump to current")
+  "d n" '(neotree-dir :wk "Open directory in neotree")
+  "d p" '(peep-dired :wk "Peep-dired")
+  "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
-  (custom/leader-keys
-    "e" '(:ignore t :wk "Eshell/Evaluate")
-    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "e d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "e e" '(eval-expression :wk "Evaluate and elisp expression")
-    "e h" '(counsel-esh-history :which-key "Eshell history")
-    "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "e r" '(eval-region :wk "Evaluate elisp in region")
-    "e R" '(eww-reload :which-key "Reload current page in EWW")
-    "e s" '(eshell :which-key "Eshell")
-    "e w" '(eww :which-key "EWW emacs web wowser"))
+(custom/leader-keys
+  "e" '(:ignore t :wk "Eshell/Evaluate")
+  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
+  "e e" '(eval-expression :wk "Evaluate and elisp expression")
+  "e h" '(counsel-esh-history :which-key "Eshell history")
+  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+  "e r" '(eval-region :wk "Evaluate elisp in region")
+  "e R" '(eww-reload :which-key "Reload current page in EWW")
+  "e s" '(eshell :which-key "Eshell")
+  "e w" '(eww :which-key "EWW emacs web wowser"))
 
-  (custom/leader-keys
-    "f" '(:ignore t :wk "Files")
-    "f c" '((lambda () (interactive)
-              (find-file "~/.config/emacs/config.org"))
-            :wk "Open emacs config.org")
-    "f e" '((lambda () (interactive)
-              (dired user-emacs-directory))
-            :wk "Open user-emacs-directory in dired")
-    "f E" '((lambda () (interactive)
-              (dired user-share-emacs-directory))
-            :wk "Open user-share-emacs-directory in dired")
-    "f d" '(find-grep-dired :wk "Search for string in files in DIR")
-    "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
-    "f i" '((lambda () (interactive)
-              (find-file "~/.config/emacs/init.el"))
-            :wk "Open emacs init.el")
-    "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
-    "f l" '(counsel-locate :wk "Locate a file")
-    "f p" '(counsel-find-file (user-emacs-directory) :wk "Config directory")
-    "f r" '(counsel-recentf :wk "Find recent files")
-    "f u" '(sudo-edit-find-file :wk "Sudo find file")
-    "f U" '(sudo-edit :wk "Sudo edit file"))
+(custom/leader-keys
+  "f" '(:ignore t :wk "Files")
+  "f c" '((lambda () (interactive)
+            (find-file "~/.config/emacs/config.org"))
+          :wk "Open emacs config.org")
+  "f e" '((lambda () (interactive)
+            (dired user-emacs-directory))
+          :wk "Open user-emacs-directory in dired")
+  "f E" '((lambda () (interactive)
+            (dired user-share-emacs-directory))
+          :wk "Open user-share-emacs-directory in dired")
+  "f d" '(find-grep-dired :wk "Search for string in files in DIR")
+  "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
+  "f i" '((lambda () (interactive)
+            (find-file "~/.config/emacs/init.el"))
+          :wk "Open emacs init.el")
+  "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
+  "f l" '(counsel-locate :wk "Locate a file")
+  "f p" '(counsel-find-file (user-emacs-directory) :wk "Config directory")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
 
-  (custom/leader-keys
-    "g" '(:ignore t :wk "Git")
-    "g /" '(magit-displatch :wk "Magit dispatch")
-    "g ." '(magit-file-displatch :wk "Magit file dispatch")
-    "g b" '(magit-branch-checkout :wk "Switch branch")
-    "g c" '(:ignore t :wk "Create")
-    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-    "g c c" '(magit-commit-create :wk "Create commit")
-    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-    "g C" '(magit-clone :wk "Clone repo")
-    "g f" '(:ignore t :wk "Find")
-    "g f c" '(magit-show-commit :wk "Show commit")
-    "g f f" '(magit-find-file :wk "Magit find file")
-    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-    "g F" '(magit-fetch :wk "Git fetch")
-    "g g" '(magit-status :wk "Magit status")
-    "g i" '(magit-init :wk "Initialize git repo")
-    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-    "g r" '(vc-revert :wk "Git revert file")
-    "g s" '(magit-stage-file :wk "Git stage file")
-    "g t" '(git-timemachine :wk "Git time machine")
-    "g u" '(magit-stage-file :wk "Git unstage file"))
+(custom/leader-keys
+  "g" '(:ignore t :wk "Git")
+  "g /" '(magit-displatch :wk "Magit dispatch")
+  "g ." '(magit-file-displatch :wk "Magit file dispatch")
+  "g b" '(magit-branch-checkout :wk "Switch branch")
+  "g c" '(:ignore t :wk "Create")
+  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+  "g c c" '(magit-commit-create :wk "Create commit")
+  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+  "g C" '(magit-clone :wk "Clone repo")
+  "g f" '(:ignore t :wk "Find")
+  "g f c" '(magit-show-commit :wk "Show commit")
+  "g f f" '(magit-find-file :wk "Magit find file")
+  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+  "g F" '(magit-fetch :wk "Git fetch")
+  "g g" '(magit-status :wk "Magit status")
+  "g i" '(magit-init :wk "Initialize git repo")
+  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+  "g r" '(vc-revert :wk "Git revert file")
+  "g s" '(magit-stage-file :wk "Git stage file")
+  "g t" '(git-timemachine :wk "Git time machine")
+  "g u" '(magit-stage-file :wk "Git unstage file"))
 
-  (custom/leader-keys
-    "h" '(:ignore t :wk "Help")
-    "h a" '(counsel-apropos :wk "Apropos")
-    "h b" '(describe-bindings :wk "Describe bindings")
-    "h c" '(describe-char :wk "Describe character under cursor")
-    "h d" '(:ignore t :wk "Emacs documentation")
-    "h d a" '(about-emacs :wk "About Emacs")
-    "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
-    "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
-    "h d m" '(info-emacs-manual :wk "The Emacs manual")
-    "h d n" '(view-emacs-news :wk "View Emacs news")
-    "h d o" '(describe-distribution :wk "How to obtain Emacs")
-    "h d p" '(view-emacs-problems :wk "View Emacs problems")
-    "h d t" '(view-emacs-todo :wk "View Emacs todo")
-    "h d w" '(describe-no-warranty :wk "Describe no warranty")
-    "h e" '(view-echo-area-messages :wk "View echo area messages")
-    "h f" '(describe-function :wk "Describe function")
-    "h F" '(describe-face :wk "Describe face")
-    "h g" '(describe-gnu-project :wk "Describe GNU Project")
-    "h h" '(helpful-at-point :wk "Describe at point")
-    "h i" '(info :wk "Info")
-    "h I" '(describe-input-method :wk "Describe input method")
-    "h k" '(describe-key :wk "Describe key")
-    "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
-    "h L" '(describe-language-environment :wk "Describe language environment")
-    "h m" '(describe-mode :wk "Describe mode")
-    "h M" '(describe-keymap :wk "Describe keymap")
-    "h p" '(describe-package :wk "Describe package")
-    "h r" '(:ignore t :wk "Reload")
-    "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
-    "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
-    "h t" '(load-theme :wk "Load theme")
-    "h v" '(describe-variable :wk "Describe variable")
-    "h w" '(where-is :wk "Prints keybinding for command if set")
-    "h x" '(describe-command :wk "Display full documentation for command"))
+(custom/leader-keys
+  "h" '(:ignore t :wk "Help")
+  "h a" '(counsel-apropos :wk "Apropos")
+  "h b" '(describe-bindings :wk "Describe bindings")
+  "h c" '(describe-char :wk "Describe character under cursor")
+  "h d" '(:ignore t :wk "Emacs documentation")
+  "h d a" '(about-emacs :wk "About Emacs")
+  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+  "h d m" '(info-emacs-manual :wk "The Emacs manual")
+  "h d n" '(view-emacs-news :wk "View Emacs news")
+  "h d o" '(describe-distribution :wk "How to obtain Emacs")
+  "h d p" '(view-emacs-problems :wk "View Emacs problems")
+  "h d t" '(view-emacs-todo :wk "View Emacs todo")
+  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+  "h e" '(view-echo-area-messages :wk "View echo area messages")
+  "h f" '(describe-function :wk "Describe function")
+  "h F" '(describe-face :wk "Describe face")
+  "h g" '(describe-gnu-project :wk "Describe GNU Project")
+  "h h" '(helpful-at-point :wk "Describe at point")
+  "h i" '(info :wk "Info")
+  "h I" '(describe-input-method :wk "Describe input method")
+  "h k" '(describe-key :wk "Describe key")
+  "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
+  "h L" '(describe-language-environment :wk "Describe language environment")
+  "h m" '(describe-mode :wk "Describe mode")
+  "h M" '(describe-keymap :wk "Describe keymap")
+  "h p" '(describe-package :wk "Describe package")
+  "h r" '(:ignore t :wk "Reload")
+  "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
+  "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
+  "h t" '(load-theme :wk "Load theme")
+  "h v" '(describe-variable :wk "Describe variable")
+  "h w" '(where-is :wk "Prints keybinding for command if set")
+  "h x" '(describe-command :wk "Display full documentation for command"))
 
-  (custom/leader-keys
-    "m" '(:ignore t :wk "Org")
-    "m a" '(org-agenda :wk "Org agenda")
-    "m b" '(:ignore t :wk "Tables")
-    "m b -" '(org-table-insert-hline :wk "Insert hline in table")
-    "m b a" '(org-table-align :wk "Align table")
-    "m b b" '(org-table-blank-field :wk "Make blank field")
-    "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
-    "m b e" '(org-table-edit-field :wk "Edit field")
-    "m b f" '(org-table-edit-formulas :wk "Edit formulas")
-    "m b h" '(org-table-field-info :wk "Field info")
-    "m b s" '(org-table-sort-lines :wk "Sort lines")
-    "m b r" '(org-table-recalculate :wk "Recalculate")
-    "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
-    "m b d" '(:ignore t :wk "delete")
-    "m b d c" '(org-table-delete-column :wk "Delete column")
-    "m b d r" '(org-table-kill-row :wk "Delete row")
-    "m b i" '(:ignore t :wk "insert")
-    "m b i c" '(org-table-insert-column :wk "Insert column")
-    "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
-    "m b i r" '(org-table-insert-row :wk "Insert row")
-    "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
-    "m c" '(org-capture :wk "Capture")
-    "m d" '(:ignore t :wk "Date/deadline")
-    "m d d" '(org-deadline :wk "Org deadline")
-    "m d s" '(org-schedule :wk "Org schedule")
-    "m d t" '(org-time-stamp :wk "Org time stamp")
-    "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
-    "m e" '(org-export-dispatch :wk "Org export dispatch")
-    "m f" '(:ignore t :wk "Fonts")
-    "m f b" '((lambda () (interactive) (custom/org-format-in-region "*")) :wk "Bold in region")
-    "m f c" '((lambda () (interactive) (custom/org-format-in-region "~")) :wk "Code in region")
-    "m f C" '((lambda () (interactive) (custom/org-format-in-region "=")) :wk "Verbatim in region")
-    "m f i" '((lambda () (interactive) (custom/org-format-in-region "/")) :wk "Italic in region")
-    "m f l" '((lambda () (interactive) (custom/org-format-in-region "$")) :wk "Latex in region")
-    "m f u" '((lambda () (interactive) (custom/org-format-in-region "_")) :wk "Underline in region")
-    "m f -" '((lambda () (interactive) (custom/org-format-in-region "+")) :wk "Strike through in region")
-    "m i" '(org-toggle-item :wk "Org toggle item")
-    "m I" '(:ignore t :wk "IDs")
-    "m I c" '(org-id-get-create :wk "Create ID")
-    "m l" '(:ignore t :wk "Link")
-    "m l l" '(org-insert-link :wk "Insert link")
-    "m l i" '(org-roam-node-insert :wk "Insert roam link")
-    "m p" '(:ignore t :wk "Priority")
-    "m p d" '(org-priority-down :wk "Down")
-    "m p p" '(org-priority :wk "Set priority")
-    "m p u" '(org-priority-down :wk "Up")
-    "m q" '(org-set-tags-command :wk "Set tag")
-    "m s" '(:ignore t :wk "Tree/Subtree")
-    "m s a" '(org-toggle-archive-tag :wk "Archive tag")
-    "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
-    "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
-    "m s d" '(org-cut-subtree :wk "Cut subtree")
-    "m s h" '(org-promote-subtree :wk "Promote subtree")
-    "m s j" '(org-move-subtree-down :wk "Move subtree down")
-    "m s k" '(org-move-subtree-up :wk "Move subtree up")
-    "m s l" '(org-demote-subtree :wk "Demote subtree")
-    "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
-    "m s r" '(org-refile :wk "Refile")
-    "m s s" '(org-sparse-tree :wk "Sparse tree")
-    "m s A" '(org-archive-subtree :wk "Archive subtree")
-    "m s N" '(widen :wk "Widen")
-    "m s S" '(org-sort :wk "Sort")
-    "m t" '(org-todo :wk "Org todo")
-    "m B" '(org-babel-tangle :wk "Org babel tangle")
-    "m T" '(org-todo-list :wk "Org todo list"))
+(custom/leader-keys
+  "m" '(:ignore t :wk "Org")
+  "m a" '(org-agenda :wk "Org agenda")
+  "m b" '(:ignore t :wk "Tables")
+  "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  "m b a" '(org-table-align :wk "Align table")
+  "m b b" '(org-table-blank-field :wk "Make blank field")
+  "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
+  "m b e" '(org-table-edit-field :wk "Edit field")
+  "m b f" '(org-table-edit-formulas :wk "Edit formulas")
+  "m b h" '(org-table-field-info :wk "Field info")
+  "m b s" '(org-table-sort-lines :wk "Sort lines")
+  "m b r" '(org-table-recalculate :wk "Recalculate")
+  "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
+  "m b d" '(:ignore t :wk "delete")
+  "m b d c" '(org-table-delete-column :wk "Delete column")
+  "m b d r" '(org-table-kill-row :wk "Delete row")
+  "m b i" '(:ignore t :wk "insert")
+  "m b i c" '(org-table-insert-column :wk "Insert column")
+  "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
+  "m b i r" '(org-table-insert-row :wk "Insert row")
+  "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
+  "m c" '(org-capture :wk "Capture")
+  "m d" '(:ignore t :wk "Date/deadline")
+  "m d d" '(org-deadline :wk "Org deadline")
+  "m d s" '(org-schedule :wk "Org schedule")
+  "m d t" '(org-time-stamp :wk "Org time stamp")
+  "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
+  "m e" '(org-export-dispatch :wk "Org export dispatch")
+  "m f" '(:ignore t :wk "Fonts")
+  "m f b" '((lambda () (interactive) (custom/org-format-in-region "*")) :wk "Bold in region")
+  "m f c" '((lambda () (interactive) (custom/org-format-in-region "~")) :wk "Code in region")
+  "m f C" '((lambda () (interactive) (custom/org-format-in-region "=")) :wk "Verbatim in region")
+  "m f i" '((lambda () (interactive) (custom/org-format-in-region "/")) :wk "Italic in region")
+  "m f l" '((lambda () (interactive) (custom/org-format-in-region "$")) :wk "Latex in region")
+  "m f u" '((lambda () (interactive) (custom/org-format-in-region "_")) :wk "Underline in region")
+  "m f -" '((lambda () (interactive) (custom/org-format-in-region "+")) :wk "Strike through in region")
+  "m i" '(org-toggle-item :wk "Org toggle item")
+  "m I" '(:ignore t :wk "IDs")
+  "m I c" '(org-id-get-create :wk "Create ID")
+  "m l" '(:ignore t :wk "Link")
+  "m l l" '(org-insert-link :wk "Insert link")
+  "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  "m p" '(:ignore t :wk "Priority")
+  "m p d" '(org-priority-down :wk "Down")
+  "m p p" '(org-priority :wk "Set priority")
+  "m p u" '(org-priority-down :wk "Up")
+  "m q" '(org-set-tags-command :wk "Set tag")
+  "m s" '(:ignore t :wk "Tree/Subtree")
+  "m s a" '(org-toggle-archive-tag :wk "Archive tag")
+  "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
+  "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
+  "m s d" '(org-cut-subtree :wk "Cut subtree")
+  "m s h" '(org-promote-subtree :wk "Promote subtree")
+  "m s j" '(org-move-subtree-down :wk "Move subtree down")
+  "m s k" '(org-move-subtree-up :wk "Move subtree up")
+  "m s l" '(org-demote-subtree :wk "Demote subtree")
+  "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
+  "m s r" '(org-refile :wk "Refile")
+  "m s s" '(org-sparse-tree :wk "Sparse tree")
+  "m s A" '(org-archive-subtree :wk "Archive subtree")
+  "m s N" '(widen :wk "Widen")
+  "m s S" '(org-sort :wk "Sort")
+  "m t" '(org-todo :wk "Org todo")
+  "m B" '(org-babel-tangle :wk "Org babel tangle")
+  "m T" '(org-todo-list :wk "Org todo list"))
 
-  (custom/leader-keys
-    "M" '(:ignore t :wk "MarkDown")
-    "M f" '(:ignore t :wk "Fonts")
-    "M f b" '(markdown-insert-bold :wk "Bold in region")
-    "M l" '(:ignore t :wk "Link")
-    "M l l" '(markdown-insert-link :wk "Insert link"))
+(custom/leader-keys
+  "n" '(:ignore t :wk "Notes")
+  "n d" '(:ignore t :wk "Dired")
+  "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
+  "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n o" '(:ignore t :wk "Obsidian")
+  "n o c" '(obsidian-capture :wk "Create note")
+  "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+  "n o f" '(obsidian-tag-find :wk "Find by tag")
+  "n o j" '(obsidian-jump :wk "Jump to note")
+  "n o m" '(obsidian-move-file :wk "Move note/file")
+  "n o r" '(obsidian-update :wk "Update")
+  "n o /" '(obsidian-search :wk "Search")
+  "n o ?" '(obsidian-hydra/body :wk "Everything")
+  "n r" '(:ignore t :wk "Org Roam")
+  "n r a" '(:ignore t :wk "Alias")
+  "n r a a" '(org-roam-alias-add :wk "Add alias")
+  "n r a r" '(org-roam-alias-remove :wk "Remove alias")
+  "n r d" '(:ignore t :wk "Roam dailies")
+  "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
+  "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+  "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+  "n r f" '(org-roam-node-find :wk "Find note")
+  "n r i" '(org-roam-node-insert :wk "Insert note")
+  "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  "n r r" '(:ignore t :wk "References")
+  "n r r a" '(org-roam-ref-add :wk "Add reference")
+  "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
 
-  (custom/leader-keys
-    "n" '(:ignore t :wk "Notes")
-    "n d" '(:ignore t :wk "Dired")
-    "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
-    "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-    "n o" '(:ignore t :wk "Obsidian")
-    "n o c" '(obsidian-capture :wk "Create note")
-    "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
-    "n o f" '(obsidian-tag-find :wk "Find by tag")
-    "n o j" '(obsidian-jump :wk "Jump to note")
-    "n o m" '(obsidian-move-file :wk "Move note/file")
-    "n o r" '(obsidian-update :wk "Update")
-    "n o /" '(obsidian-search :wk "Search")
-    "n o ?" '(obsidian-hydra/body :wk "Everything")
-    "n r" '(:ignore t :wk "Org Roam")
-    "n r a" '(:ignore t :wk "Alias")
-    "n r a a" '(org-roam-alias-add :wk "Add alias")
-    "n r a r" '(org-roam-alias-remove :wk "Remove alias")
-    "n r d" '(:ignore t :wk "Roam dailies")
-    "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
-    "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
-    "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-    "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-    "n r f" '(org-roam-node-find :wk "Find note")
-    "n r i" '(org-roam-node-insert :wk "Insert note")
-    "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-    "n r r" '(:ignore t :wk "References")
-    "n r r a" '(org-roam-ref-add :wk "Add reference")
-    "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
+(custom/leader-keys
+  "o" '(:ignore t :wk "Open")
+  "o d" '(dashboard-open :wk "Dashboard")
+  "o e" '(elfeed :wk "Elfeed RSS")
+  "o f" '(make-frame :wk "Open buffer in new frame")
+  "o F" '(select-frame-by-name :wk "Select frame by name"))
 
-  (custom/leader-keys
-    "o" '(:ignore t :wk "Open")
-    "o d" '(dashboard-open :wk "Dashboard")
-    "o e" '(elfeed :wk "Elfeed RSS")
-    "o f" '(make-frame :wk "Open buffer in new frame")
-    "o F" '(select-frame-by-name :wk "Select frame by name"))
+(custom/leader-keys
+  "p" '(projectile-command-map :wk "Projectile"))
 
-  (custom/leader-keys
-    "p" '(projectile-command-map :wk "Projectile"))
+(custom/leader-keys
+  "s" '(:ignore t :wk "Search")
+  "s d" '(dictionary-search :wk "Search dictionary")
+  "s m" '(man :wk "Man pages")
+  "s t" '(tldr :wk "Lookup TLDR docs for a command")
+  "s w" '(woman :wk "Similar to man but doesn't require man"))
 
-  (custom/leader-keys
-    "s" '(:ignore t :wk "Search")
-    "s d" '(dictionary-search :wk "Search dictionary")
-    "s m" '(man :wk "Man pages")
-    "s t" '(tldr :wk "Lookup TLDR docs for a command")
-    "s w" '(woman :wk "Similar to man but doesn't require man"))
+(custom/leader-keys
+  "t" '(:ignore t :wk "Toggle")
+  "t d" '(toggle-debug-on-error :wk "Debug on error")
+  "t e" '(eshell-toggle :wk "Eshell")
+  "t f" '(flycheck-mode :wk "Flycheck")
+  "t i" '(imenu-list-smart-toggle :wk "Imenu list")
+  "t l" '(display-line-numbers-mode :wk "Line numbers")
+  "t n" '(neotree-toggle :wk "Neotree")
+  "t r" '(rainbow-mode :wk "Rainbow mode")
+  "t t" '(visual-line-mode :wk "Word Wrap")
+  "t v" '(vterm-toggle :wk "Vterm")
+  "t z" '(writeroom-mode :wk "Zen mode"))
 
-  (custom/leader-keys
-    "t" '(:ignore t :wk "Toggle")
-    "t d" '(toggle-debug-on-error :wk "Debug on error")
-    "t e" '(eshell-toggle :wk "Eshell")
-    "t f" '(flycheck-mode :wk "Flycheck")
-    "t i" '(imenu-list-smart-toggle :wk "Imenu list")
-    "t l" '(display-line-numbers-mode :wk "Line numbers")
-    "t n" '(neotree-toggle :wk "Neotree")
-    "t r" '(rainbow-mode :wk "Rainbow mode")
-    "t t" '(visual-line-mode :wk "Word Wrap")
-    "t v" '(vterm-toggle :wk "Vterm")
-    "t z" '(writeroom-mode :wk "Zen mode"))
-
-  (custom/leader-keys
-    "w" '(:ignore t :wk "Windows")
+(custom/leader-keys
+    "W" '(custom/hydra-window/body :wk "Windows hydra")
     ;; Window splits
+    "w" '(:ingore t :wk "Windows")
     "w c" '(evil-window-delete :wk "Close window")
     "w n" '(evil-window-new :wk "New window")
     "w q" '(:ingore t :wk "Close on side")
@@ -539,14 +534,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     "w L" '(buf-move-right :wk "Buffer move right"))
 )
 
-;; text resizing
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C-+") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
-(use-package nerd-icons :defer t)
+(use-package nerd-icons)
 
 (use-package all-the-icons
   :ensure t
@@ -664,11 +658,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 
-(use-package tldr)
-
 (use-package doom-modeline
   :demand
-  :init (doom-modeline-mode 1)
+  :init
+    (doom-modeline-mode 1)
   :custom
     (doom-modeline-battery t))
 
@@ -739,7 +732,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-set-initial-state 'minesweeper-mode 'emacs))
 
 (use-package magit
-  :defer t
   :custom
     (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
     (magit-bury-buffer-function 'magit-restore-window-configuration))
@@ -786,7 +778,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (ivy-count-format "(%d/%d) ")
     (enable-recursive-minibuffers t)
   :config
-    (ivy-mode))
+    (ivy-mode)
+    ;; preview of faces
+    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
 
 (use-package ivy-rich
   :after ivy
@@ -823,9 +817,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (prescient-persist-mode 1)
     (ivy-prescient-mode 1))
 
-(use-package swiper
-  :demand)
-
 (use-package hl-todo
   :hook ((org-mode . hl-todo-mode)
          (prog-mode . hl-todo-mode))
@@ -838,24 +829,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ("REVIEW"     font-lock-keyword-face bold)
       ("NOTE"       success bold)
       ("DEPRECATED" font-lock-doc-face bold))))
-
-(use-package neotree
-  :custom
-    (neo-smart-open t)
-    (neo-show-hidden-files t)
-    (neo-window-width 35)
-    (neo-window-fixed-size nil)
-    (inhibit-compacting-font-caches t)
-    (projectile-switch-project-action 'neotree-projectile-action)
-  :config
-    ;; truncate long file names in neotree
-    (add-hook 'neo-after-create-hook
-          #'(lambda (_)
-              (with-current-buffer (get-buffer neo-buffer-name)
-                (setq truncate-lines t)
-                (setq word-wrap nil)
-                (make-local-variable 'auto-hscroll-mode)
-                (setq auto-hscroll-mode nil)))))
 
 (use-package evil-org
   :after org
@@ -908,7 +881,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 
 (use-package company-org-block
-  :defer t
   :after org
   :custom
     (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
@@ -934,13 +906,11 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
           t))))
 
 (use-package org-auto-tangle
-  :defer t
   :after org
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package org-modern
-  :defer t
   :after org
   :init (add-hook 'org-mode-hook 'org-modern-mode t)
   :custom-face
@@ -971,7 +941,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config
     (org-roam-setup)
     (evil-collection-org-roam-setup)
-    (require 'org-roam-export))
+    (require 'org-roam-export)
+    (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3))))
 
 (use-package org-superstar
   :after org
@@ -1012,7 +983,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      :image-data-fun #'org-image-link))
 
 (use-package toc-org
-  :defer t
   :after org
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
@@ -1034,173 +1004,175 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package org
   :hook
-  (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-  (org-mode . (lambda () (org-indent-mode t)))
-  ;; :bind
-  ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
+    (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+    (org-mode . (lambda () (org-indent-mode t)))
+    ;; :bind
+    ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
   :custom-face
-  ;; setting size of headers
-  (org-document-title ((t (:inherit outline-1 :height 1.7))))
-  (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-  (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-  (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-  (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-  (org-level-5 ((t (:inherit outline-5 :height 1.3))))
-  (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-  (org-level-7 ((t (:inherit outline-5 :height 1.1))))
-  (org-agenda-date-today ((t (:height 1.3))))
+    ;; setting size of headers
+    (org-document-title ((t (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-agenda-date-today ((t (:height 1.3))))
   :custom
-  (org-directory "~/org-roam/")
-  (org-todo-keywords
-   '((sequence
-      "TODO(t)"  ; A task that needs doing & is ready to do
-      "PROJ(p)"  ; A project, which usually contains other tasks
-      "LOOP(r)"  ; A recurring task
-      "STRT(s)"  ; A task that is in progress
-      "WAIT(w)"  ; Something external is holding up this task
-      "HOLD(h)"  ; This task is paused/on hold because of me
-      "IDEA(i)"  ; An unconfirmed and unapproved task or notion
-      "|"
-      "DONE(d)"  ; Task successfully completed
-      "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
-     (sequence
-      "[ ](T)"   ; A task that needs doing
-      "[-](S)"   ; Task is in progress
-      "[?](W)"   ; Task is being held up or paused
-      "|"
-      "[X](D)")  ; Task was completed
-     (sequence
-      "|"
-      "OKAY(o)"
-      "YES(y)"
-      "NO(n)")))
-  (org-capture-templates ;; need to rework this since my agenda structure changed
-   '(("t" "Todo" entry (file "~/org-roam/agenda-inbox.org")
-      "* TODO %?\n %a")))
-  ;; =========== org agenda ===========
-  (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "agenda-inbox.org" org-roam-directory)))
-  (org-agenda-prefix-format ;; format at which tasks are displayed
-   '((agenda . " %i ")
-     (todo . "%c %-12:c")
-     (tags . "%c %-12:c")
-     (search . "%c %-12:c")))
-  (org-agenda-category-icon-alist ;; icons for categories
-   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 0.8)) nil nil :ascent center)
-     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 0.8)) nil nil :ascent center)
-     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 0.8)) nil nil :ascent center)))
-  (org-agenda-include-all-todo nil)
-  (org-agenda-start-day "+0d")
-  (org-agenda-span 3)
-  (org-agenda-hide-tags-regexp ".*")
-  (org-agenda-skip-scheduled-if-done t)
-  (org-agenda-skip-deadline-if-done t)
-  (org-agenda-skip-timestamp-if-done t)
-  (org-agenda-columns-add-appointments-to-effort-sum t)
-  ;; (org-agenda-custom-commands nil)
-  (org-agenda-default-appointment-duration 60)
-  (org-agenda-mouse-1-follows-link t)
-  (org-agenda-skip-unavailable-files t)
-  (org-agenda-use-time-grid nil)
-  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
-  (org-refile-use-outline-path nil)
-  (org-insert-heading-respect-content nil)
-  (org-hide-emphasis-markers t)
-  (org-hide-leading-stars t)
-  (org-pretty-entities t)
-  (org-startup-with-inline-images t)
-  (org-cycle-inline-images-display t)
-  (org-display-remote-inline-images 'download)
-  (org-image-actual-width nil)
-  (org-list-allow-alphabetical t)
-  (org-ellipsis " •")
-  (org-agenda-window-setup 'current-window)
-  (org-fontify-quote-and-verse-blocks t)
-  (org-agenda-block-separator 8411)
-  (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (org-return-follows-link t)
-  (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
-  (org-export-backends (quote (ascii html icalendar latex odt md)))
-  (org-tags-column 0)
-  (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
-  (org-confirm-babel-evaluate nil)
-  (org-edit-src-content-indentation 0)
-  (org-export-preserve-breaks t)
-  ;; (org-export-with-properties t)
-  (org-startup-folded 'overview)
+    (org-directory "~/org-roam/")
+    (org-todo-keywords
+     '((sequence
+        "TODO(t)"  ; A task that needs doing & is ready to do
+        "PROJ(p)"  ; A project, which usually contains other tasks
+        "LOOP(r)"  ; A recurring task
+        "STRT(s)"  ; A task that is in progress
+        "WAIT(w)"  ; Something external is holding up this task
+        "HOLD(h)"  ; This task is paused/on hold because of me
+        "IDEA(i)"  ; An unconfirmed and unapproved task or notion
+        "|"
+        "DONE(d)"  ; Task successfully completed
+        "KILL(k)") ; Task was cancelled, aborted or is no longer applicable
+       (sequence
+        "[ ](T)"   ; A task that needs doing
+        "[-](S)"   ; Task is in progress
+        "[?](W)"   ; Task is being held up or paused
+        "|"
+        "[X](D)")  ; Task was completed
+       (sequence
+        "|"
+        "OKAY(o)"
+        "YES(y)"
+        "NO(n)")))
+    (org-capture-templates ;; need to rework this since my agenda structure changed
+     '(("t" "Todo" entry (file "~/org-roam/agenda-inbox.org")
+        "* TODO %?\n %a")))
+    ;; =========== org agenda ===========
+    (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "agenda-inbox.org" org-roam-directory)))
+    (org-agenda-prefix-format ;; format at which tasks are displayed
+     '((agenda . " %i ")
+       (todo . " %i ")
+       (tags . "%c %-12:c")
+       (search . "%c %-12:c")))
+    (org-agenda-category-icon-alist ;; icons for categories
+     `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
+       ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
+       ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)))
+    (org-agenda-include-all-todo nil)
+    (org-agenda-start-day "+0d")
+    (org-agenda-span 3)
+    (org-agenda-hide-tags-regexp ".*")
+    (org-agenda-skip-scheduled-if-done t)
+    (org-agenda-skip-deadline-if-done t)
+    (org-agenda-skip-timestamp-if-done t)
+    (org-agenda-columns-add-appointments-to-effort-sum t)
+    ;; (org-agenda-custom-commands nil)
+    (org-agenda-default-appointment-duration 60)
+    (org-agenda-mouse-1-follows-link t)
+    (org-agenda-skip-unavailable-files t)
+    (org-agenda-use-time-grid nil)
+    (org-agenda-block-separator 8411)
+    (org-agenda-window-setup 'current-window)
+    (org-refile-targets '((org-agenda-files :maxlevel . 1)))
+    (org-refile-use-outline-path nil)
+    (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
+    (org-insert-heading-respect-content nil)
+    (org-hide-emphasis-markers t)
+    (org-hide-leading-stars t)
+    (org-pretty-entities t)
+    (org-startup-with-inline-images t)
+    (org-cycle-inline-images-display t)
+    (org-display-remote-inline-images 'download)
+    (org-image-actual-width nil)
+    (org-list-allow-alphabetical t)
+    (org-ellipsis " •")
+    (org-fontify-quote-and-verse-blocks t)
+    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+    (org-preview-latex-default-process 'dvisvgm)
+    (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-return-follows-link t)
+    (org-tags-column 0)
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-confirm-babel-evaluate nil)
+    (org-edit-src-content-indentation 0)
+    (org-export-preserve-breaks t)
+    (org-export-allow-bind-keywords t)
+    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    ;; (org-export-with-properties t)
+    (org-startup-folded 'overview)
   :config
-  (add-to-list 'display-buffer-alist
-               '("*Agenda Commands*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-  (add-to-list 'display-buffer-alist
-               '("*Org Select*"
-                 (display-buffer-at-bottom)
-                 (window-height . 12)))
-  (add-to-list 'display-buffer-alist
-               '("*Org Links*"
-                 (display-buffer-at-bottom)
-                 (window-height . 1)))
-  (add-to-list 'display-buffer-alist
-               '("*Org Babel Results*"
-                 (display-buffer-at-bottom)))
+    (add-to-list 'display-buffer-alist
+                 '("*Agenda Commands*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (add-to-list 'display-buffer-alist
+                 '("*Org Select*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (add-to-list 'display-buffer-alist
+                 '("*Org Links*"
+                   (display-buffer-at-bottom)
+                   (window-height . 1)))
+    (add-to-list 'display-buffer-alist
+                 '("*Org Babel Results*"
+                   (display-buffer-at-bottom)))
 
-  ;; My attempt to create new time keyword STARTED
-  ;; which would signify the time at which somehting was started
-  ;; (defvar org-started-string "STARTED:"
-  ;;   "String to mark started entries.")
-  ;; (defconst org-element-started-keyword "STARTED:"
-  ;;   "Keyword used to mark started TODO entries.")
-  ;; (defconst org-started-time-regexp
-  ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
-  ;;   "Matches the STARTED keyword together with a time stamp.")
-  ;; (defcustom org-started-keep-when-no-todo nil
-  ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
-  ;;   :group 'org-todo
-  ;;   :group 'org-keywords
-  ;;   :version "24.4"
-  ;;   :package-version '(Org . "8.0")
-  ;;   :type 'boolean)
-  ;; (defconst org-all-time-keywords
-  ;;   (mapcar (lambda (w) (substring w 0 -1))
-  ;;           (list org-scheduled-string org-deadline-string
-  ;;                 org-clock-string org-closed-string org-started-string))
-  ;;   "List of time keywords.")
-  ;; (defconst org-keyword-time-regexp
-  ;;   (concat "\\<"
-  ;;           (regexp-opt
-  ;;            (list org-scheduled-string org-deadline-string org-closed-string
-  ;;                  org-clock-string org-started-string)
-  ;;            t)
-  ;;           " *[[<]\\([^]>]+\\)[]>]")
-  ;;   "Matches any of the 5 keywords, together with the time stamp.")
+    ;; My attempt to create new time keyword STARTED
+    ;; which would signify the time at which somehting was started
+    ;; (defvar org-started-string "STARTED:"
+    ;;   "String to mark started entries.")
+    ;; (defconst org-element-started-keyword "STARTED:"
+    ;;   "Keyword used to mark started TODO entries.")
+    ;; (defconst org-started-time-regexp
+    ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
+    ;;   "Matches the STARTED keyword together with a time stamp.")
+    ;; (defcustom org-started-keep-when-no-todo nil
+    ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
+    ;;   :group 'org-todo
+    ;;   :group 'org-keywords
+    ;;   :version "24.4"
+    ;;   :package-version '(Org . "8.0")
+    ;;   :type 'boolean)
+    ;; (defconst org-all-time-keywords
+    ;;   (mapcar (lambda (w) (substring w 0 -1))
+    ;;           (list org-scheduled-string org-deadline-string
+    ;;                 org-clock-string org-closed-string org-started-string))
+    ;;   "List of time keywords.")
+    ;; (defconst org-keyword-time-regexp
+    ;;   (concat "\\<"
+    ;;           (regexp-opt
+    ;;            (list org-scheduled-string org-deadline-string org-closed-string
+    ;;                  org-clock-string org-started-string)
+    ;;            t)
+    ;;           " *[[<]\\([^]>]+\\)[]>]")
+    ;;   "Matches any of the 5 keywords, together with the time stamp.")
 
-  (defun custom/org-resize-latex-overlays ()
-    "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
-    (cl-loop for o in (car (overlay-lists))
-             if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
-             do (plist-put (cdr (overlay-get o 'display))
-                           :scale (expt text-scale-mode-step
-                                        text-scale-mode-amount))))
-  (plist-put org-format-latex-options :foreground nil)
-  (plist-put org-format-latex-options :background nil)
+    (defun custom/org-resize-latex-overlays ()
+      "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
+      (cl-loop for o in (car (overlay-lists))
+               if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
+               do (plist-put (cdr (overlay-get o 'display))
+                             :scale (expt text-scale-mode-step
+                                          text-scale-mode-amount))))
+    (plist-put org-format-latex-options :foreground nil)
+    (plist-put org-format-latex-options :background nil)
 
-  (defvar custom/org-bold-symbol "*"
-    "Default symbol for `custom/org-format-in-region' function.")
+    (defvar custom/org-bold-symbol "*"
+      "Default symbol for `custom/org-format-in-region' function.")
 
-  (defun custom/org-format-in-region (&optional symbol)
-    "Add symbols before and after the selected text."
-    (interactive)
-    (setq symbol (or symbol
-                     (read-string "Enter symbol: " custom/org-bold-symbol)))
-    (when (region-active-p)
-      (save-excursion
-        (goto-char (region-end))
-        (insert symbol)
-        (goto-char (region-beginning))
-        (insert symbol)))
-    (deactivate-mark)))
+    (defun custom/org-format-in-region (&optional symbol)
+      "Add symbols before and after the selected text."
+      (interactive)
+      (setq symbol (or symbol
+                       (read-string "Enter symbol: " custom/org-bold-symbol)))
+      (when (region-active-p)
+        (save-excursion
+          (goto-char (region-end))
+          (insert symbol)
+          (goto-char (region-beginning))
+          (insert symbol)))
+      (deactivate-mark)))
 
 (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1253,15 +1225,23 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                (display-buffer-at-bottom)
                (window-height . 12)))
 
-;; Moving focus to async-shell-command after executing it and setting it to normal mode
-(add-hook 'shell-mode-hook '(lambda () (switch-to-buffer-other-window "*Async Shell Command*")))
-(evil-set-initial-state 'shell-mode 'normal)
-(evil-define-key 'normal shell-mode-map (kbd "q") 'quit-window)
+(defadvice async-shell-command (after shell-command activate)
+  "Advises `async-shell-command' to move to it's buffer after activation,
+set its' evil state to normal and to bind 'q' to `quit-window'"
+  (switch-to-buffer-other-window "*Async Shell Command*")
+  (evil-change-state 'normal)
+  (evil-local-set-key 'normal (kbd "q") 'quit-window))
 
-(add-hook 'compilation-mode-hook '(lambda () (switch-to-buffer-other-window "*compilation*")))
+(evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
+
+(defadvice compile (before ad-compile-smart activate)
+  "Advises `compile' so it sets the argument COMINT to t."
+  (ad-set-arg 1 t))
+(defadvice compile (after ad-compile-smart activate)
+  "Advises `compile' so it moves to the compilation buffer."
+  (switch-to-buffer-other-window "*compilation*"))
 
 (use-package quickrun
-  :defer t
   :after prog-mode
   :config
     (evil-define-key 'normal prog-mode-map (kbd "g r") 'quickrun-region)
@@ -1276,10 +1256,23 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :diminish
   :init (global-flycheck-mode))
 
-(use-package lua-mode
-  :defer t)
-(use-package nix-mode
-  :defer t)
+(use-package eglot
+  :ensure nil
+  :after prog-mode
+  :custom
+  (eglot-autoshutdown t))
+
+(use-package flycheck-eglot
+  :after eglot)
+
+(add-hook 'css-ts-mode-hook 'eglot-ensure)
+(add-hook 'python-ts-mode-hook 'eglot-ensure)
+(add-hook 'bash-ts-mode-hook 'eglot-ensure)
+(add-hook 'c++-ts-mode-hook 'eglot-ensure)
+(add-hook 'mhtml-mode-hook 'eglot-ensure)
+
+(use-package lua-mode)
+(use-package nix-mode)
 
 ;; (defun custom/cpp-makefile ()
 ;;   "Checks for `c++-ts-mode'. Then checks for existence of Makefile.
@@ -1293,7 +1286,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
-(use-package bug-hunter :defer t)
+(use-package bug-hunter)
 
 (use-package lorem-ipsum
   :custom
@@ -1304,7 +1297,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
      (c "https://github.com/tree-sitter/tree-sitter-c")
      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-     (css "https://github.com/tree-sitter/tree-sitter-css")))
+     (css "https://github.com/tree-sitter/tree-sitter-css")
      ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
      ;; (go "https://github.com/tree-sitter/tree-sitter-go")
      ;; (html "https://github.com/tree-sitter/tree-sitter-html")
@@ -1312,7 +1305,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      ;; (json "https://github.com/tree-sitter/tree-sitter-json")
      ;; (make "https://github.com/alemuller/tree-sitter-make")
      ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-     ;; (python "https://github.com/tree-sitter/tree-sitter-python")
+     (python "https://github.com/tree-sitter/tree-sitter-python")))
      ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
      ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
      ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
@@ -1326,6 +1319,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
  '((c-or-c++-mode . c-or-c++-ts-mode)
    (c++-mode . c++-ts-mode)
    (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)
    (sh-mode . bash-ts-mode)))
 
 (use-package autoinsert
@@ -1335,14 +1329,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (auto-insert-query nil)
   :config
     (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
+    (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
     (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp")))
 
 (use-package yasnippet
-  :defer t
-  :after prog-mode)
+  :after eglot
+  :config (yas-global-mode))
 
 (use-package yasnippet-snippets
-  :defer t
   :after yasnippet)
 
 ;; This is for html snippets
@@ -1392,7 +1386,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (eshell-syntax-highlighting-global-mode +1))
 
 (use-package eat
-  :defer t
   :after eshell)
 
 (use-package vterm
@@ -1459,7 +1452,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
 (load-theme real-theme t)
 
-(add-to-list 'default-frame-alist '(alpha-background . 80)) ; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
 (use-package which-key
   :diminish
@@ -1506,5 +1499,61 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   (interactive)
   (evil-window-right 1)
   (evil-window-delete))
+
+(use-package windresize)
+(use-package hydra)
+;; All-in-one window managment. Makes use of some custom functions,
+;; `ace-window' (for swapping), `windmove' (could probably be replaced
+;; by evil?) and `windresize'.
+;; inspired by https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/init.org#hydra
+
+(defhydra custom/hydra-window (:hint nil)
+   "
+Movement      ^Split^            ^Switch^        ^Resize^
+----------------------------------------------------------------
+_h_          _/_ vertical      _b_uffer        _<left>_  
+_l_          _-_ horizontal    _f_ind file     _<down>_  
+_k_          _m_aximize        _s_wap          _<up>_    
+_j_          _c_lose           _[_backward     _<right>_ 
+_q_uit        _e_qualize        _]_forward      ^
+^             ^               _K_ill            ^
+^             ^                 ^               ^
+"
+   ;; Movement
+   ("h" windmove-left)
+   ("j" windmove-down)
+   ("k" windmove-up)
+   ("l" windmove-right)
+
+   ;; Split/manage
+   ("-" evil-window-split)
+   ("/" evil-window-vsplit)
+   ("c" evil-window-delete)
+   ("d" evil-window-delete)
+   ("m" delete-other-windows)
+   ("e" balance-windows)
+
+   ;; Window switching
+   ("H" buf-move-left)
+   ("J" buf-move-down)
+   ("K" buf-move-up)
+   ("L" buf-move-right)
+
+   ;; Switch
+   ("b" counsel-ibuffer)
+   ("f" counsel-switch-buffersel-find-file)
+   ("P" project-find-file)
+   ("s" ace-swap-window)
+   ("[" previous-buffer)
+   ("]" next-buffer)
+   ("K" kill-this-buffer)
+
+   ;; Resize
+   ("<left>" windresize-left)
+   ("<right>" windresize-right)
+   ("<down>" windresize-down)
+   ("<up>" windresize-up)
+
+   ("q" nil))
 
 (use-package writeroom-mode)

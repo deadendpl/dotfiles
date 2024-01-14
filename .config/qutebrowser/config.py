@@ -150,5 +150,3 @@ config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
 config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 870444FF', mode='insert')
 config.bind('pw', 'spawn --userscript qute-keepassxc --key 870444FF', mode='normal')
 config.bind('gr', 'config-source', mode='normal')
-
-config.set('content.blocking.enabled', True, '*.ecosia.org/*')

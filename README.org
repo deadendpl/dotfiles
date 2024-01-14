@@ -3,7 +3,6 @@
 
 * WARNING:
 This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP nixos config. Dependencies might not be available for other distros.
-
 * PYWAL with hyprland
 I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android
 
@@ -30,7 +29,7 @@ Install dependencies from =install/dependencies/hypr/pywal.txt= with =yay=.
 At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
-Stuff to rice [10/11]:
+Software riced with pywal [11/12]:
 - [X] foot
 - [X] rofi
 - [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
@@ -42,7 +41,7 @@ Stuff to rice [10/11]:
 - [X] nvim
 - [X] hyprland
 - [X] zathura
-
+- [X] sioyek
 * INSTALLING
 ** DEPENDENCIES
 Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.

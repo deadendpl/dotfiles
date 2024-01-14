@@ -58,8 +58,8 @@ sudo pacman -S --noconfirm hyprland \
                            file-roller \
                            p7zip \
                            unrar \
-                           zathura \
-                           zathura-pdf-mupdf \
+                           # zathura \
+                           # zathura-pdf-mupdf \
                            neovim \
                            gammastep \
                            lolcat \
@@ -112,6 +112,7 @@ yay -S --noconfirm networkmanager-dmenu-git \
                    rofi-lbonn-wayland-git \
                    pokemonsay-newgenerations-git \
                    fortune-mod-vimtips \
+                   sioyek \
                    # krabby-bin \
                    # dracula-gtk-theme
                    # catppuccin-gtk-theme-mocha
@@ -170,6 +171,7 @@ sudo bash ./install.sh
 cd ../
 rm -rf grub_gtg
 
-xdg-mime default org.pwmt.zathura.desktop application/pdf
+xdg-mime default sioyek.desktop application/pdf
+xdg-mime default sioyek.desktop application/epub+zip
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 xdg-mime default pcmanfm.desktop inode/directory

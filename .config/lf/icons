@@ -377,3 +377,4 @@ Vagrantfile             
 
 # other formats
 *.pdf   
+*.epub  
