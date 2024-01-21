@@ -1,7 +1,7 @@
 # -*- mode: sh -*-
 if status is-interactive
   function fish_greeting
-    fortune | pokemonsay
+    echo "Why won't you do it in eshell?" | pokemonsay
   end
   starship init fish | source
 end
@@ -55,7 +55,7 @@ end
 alias psearch='yay -F'
 alias porphan='yay -Qtdq'
 alias pclean='yay --noconfirm -Sc && porphan | yay --noconfirm -Rns -'
-alias listaur="yay -Qqem"
+alias listaur='yay -Qqem'
 
 # nix
 alias ninst='nix-env -iA'
@@ -86,13 +86,13 @@ alias swaylock='~/.cache/wal/swaylock.sh'
 alias pi='ping wp.pl'
 
 if set -q INSIDE_EMACS
-    or set -q NVIM
-    fish_default_key_bindings
+  or set -q NVIM
+  fish_default_key_bindings
 else
-    fish_vi_key_bindings
-    set fish_cursor_replace_one underscore
-    set fish_cursor_insert line
-    if string match -rq 'wezterm|foot|tmux' -- $TERM
-        set fish_vi_force_cursor true
-    end
+  fish_vi_key_bindings
+  set fish_cursor_replace_one underscore
+  set fish_cursor_insert line
+  if string match -rq 'wezterm|foot|tmux' -- $TERM
+    set fish_vi_force_cursor true
+  end
 end

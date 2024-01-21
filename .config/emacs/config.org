@@ -11,6 +11,7 @@
 - [[#sane-defaults-and-other][SANE DEFAULTS (and other)]]
   - [[#some-modes-turned-on-and-off][Some modes turned on and off]]
   - [[#uncluttering-user-emacs-directory-and-other][Uncluttering user-emacs-directory and other]]
+  - [[#other-variables][Other variables]]
   - [[#line-numbers-off-in-some-modes][Line numbers off in some modes]]
   - [[#quitting-stuff][Quitting stuff]]
   - [[#other][Other]]
@@ -20,26 +21,30 @@
 - [[#evil-and-keybindings][EVIL AND KEYBINDINGS]]
   - [[#evil-setup][EVIL SETUP]]
   - [[#actual-keybindings][ACTUAL KEYBINDINGS]]
-- [[#all-the-icons][ALL-THE-ICONS]]
-- [[#company][COMPANY]]
+- [[#appearance][APPEARANCE]]
+  - [[#fonts][FONTS]]
+  - [[#highlight-todo][HIGHLIGHT TODO]]
+  - [[#icons][ICONS]]
+  - [[#rainbow-delimiters][RAINBOW DELIMITERS]]
+  - [[#rainbow-mode][RAINBOW MODE]]
+  - [[#theme][THEME]]
+- [[#completion][COMPLETION]]
+  - [[#company][COMPANY]]
+  - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#dashboard][DASHBOARD]]
 - [[#dired][DIRED]]
 - [[#docs][DOCS]]
   - [[#helpful][HELPFUL]]
   - [[#tldr][TLDR]]
+  - [[#which-key][WHICH-KEY]]
 - [[#doom-modeline][DOOM-MODELINE]]
 - [[#emojis][EMOJIS]]
 - [[#elfeed][ELFEED]]
-- [[#fonts][FONTS]]
-  - [[#setting-fonts][Setting fonts]]
-  - [[#enabling-programming-ligatures][Enabling programming ligatures]]
-  - [[#mixed-pitch][Mixed Pitch]]
 - [[#games][GAMES]]
   - [[#minesweeper][MINESWEEPER]]
+  - [[#tetris][TETRIS]]
 - [[#git-stuff][GIT STUFF]]
 - [[#imenu-list][IMENU LIST]]
-- [[#ivy-counsel][IVY (COUNSEL)]]
-- [[#highlight-todo][HIGHLIGHT TODO]]
 - [[#markdown][MARKDOWN]]
 - [[#neotree][NEOTREE]]
 - [[#obsidian][OBSIDIAN]]
@@ -60,8 +65,6 @@
 - [[#parenthesis][PARENTHESIS]]
 - [[#perspective][PERSPECTIVE]]
 - [[#projectile][PROJECTILE]]
-- [[#rainbow-delimiters][RAINBOW DELIMITERS]]
-- [[#rainbow-mode][RAINBOW MODE]]
 - [[#real-programming][REAL PROGRAMMING]]
   - [[#compiling][COMPILING]]
   - [[#quick-evaluation][QUICK EVALUATION]]
@@ -79,8 +82,6 @@
   - [[#vterm-toggle][Vterm-Toggle]]
 - [[#system-packages][SYSTEM PACKAGES]]
 - [[#sudo-edit][SUDO EDIT]]
-- [[#theme][THEME]]
-- [[#which-key][WHICH-KEY]]
 - [[#windowbuffer-management][WINDOW/BUFFER MANAGEMENT]]
   - [[#buffer-move][BUFFER-MOVE]]
   - [[#window-close-functions][WINDOW CLOSE FUNCTIONS]]
@@ -116,7 +117,6 @@ Here are some tweaks that idk where to put
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 #+end_src
-
 ** Uncluttering user-emacs-directory and other
 #+begin_src emacs-lisp
 ;; This folder is for everything that clutters user-emacs-directory
@@ -126,6 +126,21 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
+(setq-default recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
+              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
+              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
+              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+              save-place-file (concat user-share-emacs-directory "places")
+              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
+              multisession-directory (concat user-share-emacs-directory "multisession")
+              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
+#+end_src
+** Other variables
+#+begin_src emacs-lisp
 (setq-default visible-bell nil ;; Set up the visible bell
               inhibit-startup-message nil ; default emacs startup message
               recentf-max-saved-items nil ; infinite amount of entries in recentf file
@@ -142,20 +157,11 @@ Most of the stuff will get redirected here.")
               standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
               display-line-numbers-type 'relative
-              use-short-answers t
+              use-short-answers t ; replace yes-no prompts with y-n
+              fast-but-imprecise-scrolling t ; fast scrolling
+              inhibit-compacting-font-caches t
+              sentence-end-double-space nil) ; sentences end with 1 space
               ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
-              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
-              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
-              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
-              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-              save-place-file (concat user-share-emacs-directory "places")
-              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-              multisession-directory (concat user-share-emacs-directory "multisession")
-              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
 #+end_src
 ** Line numbers off in some modes
 #+begin_src emacs-lisp
@@ -190,6 +196,7 @@ Most of the stuff will get redirected here.")
                 eat-mode-hook
                 compilation-mode-hook
                 Custom-mode-hook
+                tetris-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
@@ -373,238 +380,238 @@ This is a big list.
 #+end_src
 *** Amusement
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "a" '(:ignore t :wk "Amusement")
-    "a b" '(animate-birthday-present :wk "Birthday")
-    "a d" '(dissociated-press :wk "Dissoctation")
-    "a g" '(:ignore t :wk "Games")
-    "a g b" '(bubbles :wk "Bubbles")
-    "a g m" '(minesweeper :wk "Minesweeper")
-    "a g p" '(pong :wk "Pong")
-    "a g s" '(snake :wk "Snake")
-    "a g t" '(tetris :wk "Tetris")
-    "a e" '(:ignore t :wk "Emoji")
-    "a e +" '(emoji-zoom-increase :wk "Zoom in")
-    "a e -" '(emoji-zoom-decrease :wk "Zoom out")
-    "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
-    "a e d" '(emoji-describe :wk "Describe")
-    "a e e" '(emoji-insert :wk "Insert")
-    "a e i" '(emoji-insert :wk "Insert")
-    "a e l" '(emoji-list :wk "List")
-    "a e r" '(emoji-recent :wk "Recent")
-    "a e s" '(emoji-search :wk "Search")
-    "a z" '(zone :wk "Zone"))
+(custom/leader-keys
+  "a" '(:ignore t :wk "Amusement")
+  "a b" '(animate-birthday-present :wk "Birthday")
+  "a d" '(dissociated-press :wk "Dissoctation")
+  "a g" '(:ignore t :wk "Games")
+  "a g b" '(bubbles :wk "Bubbles")
+  "a g m" '(minesweeper :wk "Minesweeper")
+  "a g p" '(pong :wk "Pong")
+  "a g s" '(snake :wk "Snake")
+  "a g t" '(tetris :wk "Tetris")
+  "a e" '(:ignore t :wk "Emoji")
+  "a e +" '(emoji-zoom-increase :wk "Zoom in")
+  "a e -" '(emoji-zoom-decrease :wk "Zoom out")
+  "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
+  "a e d" '(emoji-describe :wk "Describe")
+  "a e e" '(emoji-insert :wk "Insert")
+  "a e i" '(emoji-insert :wk "Insert")
+  "a e l" '(emoji-list :wk "List")
+  "a e r" '(emoji-recent :wk "Recent")
+  "a e s" '(emoji-search :wk "Search")
+  "a z" '(zone :wk "Zone"))
 #+end_src
 *** Bookmarks/Buffers
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "b" '(:ignore t :wk "Bookmarks/Buffers")
-    "b b" '(counsel-ibuffer :wk "Switch to buffer")
-    "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-    "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
-    "b d" '(bookmark-delete :wk "Delete bookmark")
-    "b f" '(scratch-buffer :wk "Scratch buffer")
-    "b i" '(ibuffer :wk "Ibuffer")
-    "b k" '(kill-current-buffer :wk "Kill current buffer")
-    "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-    "b l" '(list-bookmarks :wk "List bookmarks")
-    "b m" '(bookmark-set :wk "Set bookmark")
-    "b n" '(next-buffer :wk "Next buffer")
-    "b p" '(previous-buffer :wk "Previous buffer")
-    "b r" '(revert-buffer :wk "Reload buffer")
-    "b R" '(rename-buffer :wk "Rename buffer")
-    "b s" '(basic-save-buffer :wk "Save buffer")
-    "b S" '(save-some-buffers :wk "Save multiple buffers")
-    "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
+(custom/leader-keys
+  "b" '(:ignore t :wk "Bookmarks/Buffers")
+  "b b" '(counsel-ibuffer :wk "Switch to buffer")
+  "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
+  "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
+  "b d" '(bookmark-delete :wk "Delete bookmark")
+  "b f" '(scratch-buffer :wk "Scratch buffer")
+  "b i" '(ibuffer :wk "Ibuffer")
+  "b k" '(kill-current-buffer :wk "Kill current buffer")
+  "b K" '(kill-some-buffers :wk "Kill multiple buffers")
+  "b l" '(list-bookmarks :wk "List bookmarks")
+  "b m" '(bookmark-set :wk "Set bookmark")
+  "b n" '(next-buffer :wk "Next buffer")
+  "b p" '(previous-buffer :wk "Previous buffer")
+  "b r" '(revert-buffer :wk "Reload buffer")
+  "b R" '(rename-buffer :wk "Rename buffer")
+  "b s" '(basic-save-buffer :wk "Save buffer")
+  "b S" '(save-some-buffers :wk "Save multiple buffers")
+  "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
 #+end_src
 *** Compiling
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "c" '(:ignore t :wk "Compiling")
-    "c c" '(compile :wk "Compile")
-    "c r" '(recompile :wk "Recompile"))
+(custom/leader-keys
+  "c" '(:ignore t :wk "Compiling")
+  "c c" '(compile :wk "Compile")
+  "c r" '(recompile :wk "Recompile"))
 #+end_src
 *** Dired
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "d d" '(dired :wk "Open dired")
-    "d h" '(custom/dired-go-to-home :wk "Open home directory")
-    "d j" '(dired-jump :wk "Dired jump to current")
-    "d n" '(neotree-dir :wk "Open directory in neotree")
-    "d p" '(peep-dired :wk "Peep-dired")
-    "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
+(custom/leader-keys
+  "d" '(:ignore t :wk "Dired")
+  "d d" '(dired :wk "Open dired")
+  "d h" '(custom/dired-go-to-home :wk "Open home directory")
+  "d j" '(dired-jump :wk "Dired jump to current")
+  "d n" '(neotree-dir :wk "Open directory in neotree")
+  "d p" '(peep-dired :wk "Peep-dired")
+  "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 #+end_src
 *** Eshell/Evaluate
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "e" '(:ignore t :wk "Eshell/Evaluate")
-    "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-    "e d" '(eval-defun :wk "Evaluate defun containing or after point")
-    "e e" '(eval-expression :wk "Evaluate and elisp expression")
-    "e h" '(counsel-esh-history :which-key "Eshell history")
-    "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-    "e r" '(eval-region :wk "Evaluate elisp in region")
-    "e R" '(eww-reload :which-key "Reload current page in EWW")
-    "e s" '(eshell :which-key "Eshell")
-    "e w" '(eww :which-key "EWW emacs web wowser"))
+(custom/leader-keys
+  "e" '(:ignore t :wk "Eshell/Evaluate")
+  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
+  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
+  "e e" '(eval-expression :wk "Evaluate and elisp expression")
+  "e h" '(counsel-esh-history :which-key "Eshell history")
+  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
+  "e r" '(eval-region :wk "Evaluate elisp in region")
+  "e R" '(eww-reload :which-key "Reload current page in EWW")
+  "e s" '(eshell :which-key "Eshell")
+  "e w" '(eww :which-key "EWW emacs web wowser"))
 #+end_src
 *** Files
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "f" '(:ignore t :wk "Files")
-    "f c" '((lambda () (interactive)
-              (find-file "~/.config/emacs/config.org"))
-            :wk "Open emacs config.org")
-    "f e" '((lambda () (interactive)
-              (dired user-emacs-directory))
-            :wk "Open user-emacs-directory in dired")
-    "f E" '((lambda () (interactive)
-              (dired user-share-emacs-directory))
-            :wk "Open user-share-emacs-directory in dired")
-    "f d" '(find-grep-dired :wk "Search for string in files in DIR")
-    "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
-    "f i" '((lambda () (interactive)
-              (find-file "~/.config/emacs/init.el"))
-            :wk "Open emacs init.el")
-    "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
-    "f l" '(counsel-locate :wk "Locate a file")
-    "f p" '(counsel-find-file (user-emacs-directory) :wk "Config directory")
-    "f r" '(counsel-recentf :wk "Find recent files")
-    "f u" '(sudo-edit-find-file :wk "Sudo find file")
-    "f U" '(sudo-edit :wk "Sudo edit file"))
+(custom/leader-keys
+  "f" '(:ignore t :wk "Files")
+  "f c" '((lambda () (interactive)
+            (find-file "~/.config/emacs/config.org"))
+          :wk "Open emacs config.org")
+  "f e" '((lambda () (interactive)
+            (dired user-emacs-directory))
+          :wk "Open user-emacs-directory in dired")
+  "f E" '((lambda () (interactive)
+            (dired user-share-emacs-directory))
+          :wk "Open user-share-emacs-directory in dired")
+  "f d" '(find-grep-dired :wk "Search for string in files in DIR")
+  "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
+  "f i" '((lambda () (interactive)
+            (find-file "~/.config/emacs/init.el"))
+          :wk "Open emacs init.el")
+  "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
+  "f l" '(counsel-locate :wk "Locate a file")
+  "f p" '(counsel-find-file (user-emacs-directory) :wk "Config directory")
+  "f r" '(counsel-recentf :wk "Find recent files")
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit file"))
 #+end_src
 *** Git
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "g" '(:ignore t :wk "Git")
-    "g /" '(magit-displatch :wk "Magit dispatch")
-    "g ." '(magit-file-displatch :wk "Magit file dispatch")
-    "g b" '(magit-branch-checkout :wk "Switch branch")
-    "g c" '(:ignore t :wk "Create")
-    "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-    "g c c" '(magit-commit-create :wk "Create commit")
-    "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-    "g C" '(magit-clone :wk "Clone repo")
-    "g f" '(:ignore t :wk "Find")
-    "g f c" '(magit-show-commit :wk "Show commit")
-    "g f f" '(magit-find-file :wk "Magit find file")
-    "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-    "g F" '(magit-fetch :wk "Git fetch")
-    "g g" '(magit-status :wk "Magit status")
-    "g i" '(magit-init :wk "Initialize git repo")
-    "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-    "g r" '(vc-revert :wk "Git revert file")
-    "g s" '(magit-stage-file :wk "Git stage file")
-    "g t" '(git-timemachine :wk "Git time machine")
-    "g u" '(magit-stage-file :wk "Git unstage file"))
+(custom/leader-keys
+  "g" '(:ignore t :wk "Git")
+  "g /" '(magit-displatch :wk "Magit dispatch")
+  "g ." '(magit-file-displatch :wk "Magit file dispatch")
+  "g b" '(magit-branch-checkout :wk "Switch branch")
+  "g c" '(:ignore t :wk "Create")
+  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
+  "g c c" '(magit-commit-create :wk "Create commit")
+  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
+  "g C" '(magit-clone :wk "Clone repo")
+  "g f" '(:ignore t :wk "Find")
+  "g f c" '(magit-show-commit :wk "Show commit")
+  "g f f" '(magit-find-file :wk "Magit find file")
+  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
+  "g F" '(magit-fetch :wk "Git fetch")
+  "g g" '(magit-status :wk "Magit status")
+  "g i" '(magit-init :wk "Initialize git repo")
+  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
+  "g r" '(vc-revert :wk "Git revert file")
+  "g s" '(magit-stage-file :wk "Git stage file")
+  "g t" '(git-timemachine :wk "Git time machine")
+  "g u" '(magit-stage-file :wk "Git unstage file"))
 #+end_src
 *** Help/Docs
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "h" '(:ignore t :wk "Help")
-    "h a" '(counsel-apropos :wk "Apropos")
-    "h b" '(describe-bindings :wk "Describe bindings")
-    "h c" '(describe-char :wk "Describe character under cursor")
-    "h d" '(:ignore t :wk "Emacs documentation")
-    "h d a" '(about-emacs :wk "About Emacs")
-    "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
-    "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
-    "h d m" '(info-emacs-manual :wk "The Emacs manual")
-    "h d n" '(view-emacs-news :wk "View Emacs news")
-    "h d o" '(describe-distribution :wk "How to obtain Emacs")
-    "h d p" '(view-emacs-problems :wk "View Emacs problems")
-    "h d t" '(view-emacs-todo :wk "View Emacs todo")
-    "h d w" '(describe-no-warranty :wk "Describe no warranty")
-    "h e" '(view-echo-area-messages :wk "View echo area messages")
-    "h f" '(describe-function :wk "Describe function")
-    "h F" '(describe-face :wk "Describe face")
-    "h g" '(describe-gnu-project :wk "Describe GNU Project")
-    "h h" '(helpful-at-point :wk "Describe at point")
-    "h i" '(info :wk "Info")
-    "h I" '(describe-input-method :wk "Describe input method")
-    "h k" '(describe-key :wk "Describe key")
-    "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
-    "h L" '(describe-language-environment :wk "Describe language environment")
-    "h m" '(describe-mode :wk "Describe mode")
-    "h M" '(describe-keymap :wk "Describe keymap")
-    "h p" '(describe-package :wk "Describe package")
-    "h r" '(:ignore t :wk "Reload")
-    "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
-    "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
-    "h t" '(load-theme :wk "Load theme")
-    "h v" '(describe-variable :wk "Describe variable")
-    "h w" '(where-is :wk "Prints keybinding for command if set")
-    "h x" '(describe-command :wk "Display full documentation for command"))
+(custom/leader-keys
+  "h" '(:ignore t :wk "Help")
+  "h a" '(counsel-describe-symbol :wk "Apropos")
+  "h b" '(describe-bindings :wk "Describe bindings")
+  "h c" '(describe-char :wk "Describe character under cursor")
+  "h d" '(:ignore t :wk "Emacs documentation")
+  "h d a" '(about-emacs :wk "About Emacs")
+  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
+  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
+  "h d m" '(info-emacs-manual :wk "The Emacs manual")
+  "h d n" '(view-emacs-news :wk "View Emacs news")
+  "h d o" '(describe-distribution :wk "How to obtain Emacs")
+  "h d p" '(view-emacs-problems :wk "View Emacs problems")
+  "h d t" '(view-emacs-todo :wk "View Emacs todo")
+  "h d w" '(describe-no-warranty :wk "Describe no warranty")
+  "h e" '(view-echo-area-messages :wk "View echo area messages")
+  "h f" '(describe-function :wk "Describe function")
+  "h F" '(describe-face :wk "Describe face")
+  "h g" '(describe-gnu-project :wk "Describe GNU Project")
+  "h h" '(helpful-at-point :wk "Describe at point")
+  "h i" '(info :wk "Info")
+  "h I" '(describe-input-method :wk "Describe input method")
+  "h k" '(describe-key :wk "Describe key")
+  "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
+  "h L" '(describe-language-environment :wk "Describe language environment")
+  "h m" '(describe-mode :wk "Describe mode")
+  "h M" '(describe-keymap :wk "Describe keymap")
+  "h p" '(describe-package :wk "Describe package")
+  "h r" '(:ignore t :wk "Reload")
+  "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
+  "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
+  "h t" '(load-theme :wk "Load theme")
+  "h v" '(describe-variable :wk "Describe variable")
+  "h w" '(where-is :wk "Prints keybinding for command if set")
+  "h x" '(describe-command :wk "Display full documentation for command"))
 #+end_src
 *** Org
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "m" '(:ignore t :wk "Org")
-    "m a" '(org-agenda :wk "Org agenda")
-    "m b" '(:ignore t :wk "Tables")
-    "m b -" '(org-table-insert-hline :wk "Insert hline in table")
-    "m b a" '(org-table-align :wk "Align table")
-    "m b b" '(org-table-blank-field :wk "Make blank field")
-    "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
-    "m b e" '(org-table-edit-field :wk "Edit field")
-    "m b f" '(org-table-edit-formulas :wk "Edit formulas")
-    "m b h" '(org-table-field-info :wk "Field info")
-    "m b s" '(org-table-sort-lines :wk "Sort lines")
-    "m b r" '(org-table-recalculate :wk "Recalculate")
-    "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
-    "m b d" '(:ignore t :wk "delete")
-    "m b d c" '(org-table-delete-column :wk "Delete column")
-    "m b d r" '(org-table-kill-row :wk "Delete row")
-    "m b i" '(:ignore t :wk "insert")
-    "m b i c" '(org-table-insert-column :wk "Insert column")
-    "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
-    "m b i r" '(org-table-insert-row :wk "Insert row")
-    "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
-    "m c" '(org-capture :wk "Capture")
-    "m d" '(:ignore t :wk "Date/deadline")
-    "m d d" '(org-deadline :wk "Org deadline")
-    "m d s" '(org-schedule :wk "Org schedule")
-    "m d t" '(org-time-stamp :wk "Org time stamp")
-    "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
-    "m e" '(org-export-dispatch :wk "Org export dispatch")
-    "m f" '(:ignore t :wk "Fonts")
-    "m f b" '((lambda () (interactive) (custom/org-format-in-region "*")) :wk "Bold in region")
-    "m f c" '((lambda () (interactive) (custom/org-format-in-region "~")) :wk "Code in region")
-    "m f C" '((lambda () (interactive) (custom/org-format-in-region "=")) :wk "Verbatim in region")
-    "m f i" '((lambda () (interactive) (custom/org-format-in-region "/")) :wk "Italic in region")
-    "m f l" '((lambda () (interactive) (custom/org-format-in-region "$")) :wk "Latex in region")
-    "m f u" '((lambda () (interactive) (custom/org-format-in-region "_")) :wk "Underline in region")
-    "m f -" '((lambda () (interactive) (custom/org-format-in-region "+")) :wk "Strike through in region")
-    "m i" '(org-toggle-item :wk "Org toggle item")
-    "m I" '(:ignore t :wk "IDs")
-    "m I c" '(org-id-get-create :wk "Create ID")
-    "m l" '(:ignore t :wk "Link")
-    "m l l" '(org-insert-link :wk "Insert link")
-    "m l i" '(org-roam-node-insert :wk "Insert roam link")
-    "m p" '(:ignore t :wk "Priority")
-    "m p d" '(org-priority-down :wk "Down")
-    "m p p" '(org-priority :wk "Set priority")
-    "m p u" '(org-priority-down :wk "Up")
-    "m q" '(org-set-tags-command :wk "Set tag")
-    "m s" '(:ignore t :wk "Tree/Subtree")
-    "m s a" '(org-toggle-archive-tag :wk "Archive tag")
-    "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
-    "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
-    "m s d" '(org-cut-subtree :wk "Cut subtree")
-    "m s h" '(org-promote-subtree :wk "Promote subtree")
-    "m s j" '(org-move-subtree-down :wk "Move subtree down")
-    "m s k" '(org-move-subtree-up :wk "Move subtree up")
-    "m s l" '(org-demote-subtree :wk "Demote subtree")
-    "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
-    "m s r" '(org-refile :wk "Refile")
-    "m s s" '(org-sparse-tree :wk "Sparse tree")
-    "m s A" '(org-archive-subtree :wk "Archive subtree")
-    "m s N" '(widen :wk "Widen")
-    "m s S" '(org-sort :wk "Sort")
-    "m t" '(org-todo :wk "Org todo")
-    "m B" '(org-babel-tangle :wk "Org babel tangle")
-    "m T" '(org-todo-list :wk "Org todo list"))
+(custom/leader-keys
+  "m" '(:ignore t :wk "Org")
+  "m a" '(org-agenda :wk "Org agenda")
+  "m b" '(:ignore t :wk "Tables")
+  "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  "m b a" '(org-table-align :wk "Align table")
+  "m b b" '(org-table-blank-field :wk "Make blank field")
+  "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
+  "m b e" '(org-table-edit-field :wk "Edit field")
+  "m b f" '(org-table-edit-formulas :wk "Edit formulas")
+  "m b h" '(org-table-field-info :wk "Field info")
+  "m b s" '(org-table-sort-lines :wk "Sort lines")
+  "m b r" '(org-table-recalculate :wk "Recalculate")
+  "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
+  "m b d" '(:ignore t :wk "delete")
+  "m b d c" '(org-table-delete-column :wk "Delete column")
+  "m b d r" '(org-table-kill-row :wk "Delete row")
+  "m b i" '(:ignore t :wk "insert")
+  "m b i c" '(org-table-insert-column :wk "Insert column")
+  "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
+  "m b i r" '(org-table-insert-row :wk "Insert row")
+  "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
+  "m c" '(org-capture :wk "Capture")
+  "m d" '(:ignore t :wk "Date/deadline")
+  "m d d" '(org-deadline :wk "Org deadline")
+  "m d s" '(org-schedule :wk "Org schedule")
+  "m d t" '(org-time-stamp :wk "Org time stamp")
+  "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
+  "m e" '(org-export-dispatch :wk "Org export dispatch")
+  "m f" '(:ignore t :wk "Fonts")
+  "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
+  "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
+  "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
+  "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
+  "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
+  "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
+  "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
+  "m i" '(org-toggle-item :wk "Org toggle item")
+  "m I" '(:ignore t :wk "IDs")
+  "m I c" '(org-id-get-create :wk "Create ID")
+  "m l" '(:ignore t :wk "Link")
+  "m l l" '(org-insert-link :wk "Insert link")
+  "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  "m p" '(:ignore t :wk "Priority")
+  "m p d" '(org-priority-down :wk "Down")
+  "m p p" '(org-priority :wk "Set priority")
+  "m p u" '(org-priority-down :wk "Up")
+  "m q" '(org-set-tags-command :wk "Set tag")
+  "m s" '(:ignore t :wk "Tree/Subtree")
+  "m s a" '(org-toggle-archive-tag :wk "Archive tag")
+  "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
+  "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
+  "m s d" '(org-cut-subtree :wk "Cut subtree")
+  "m s h" '(org-promote-subtree :wk "Promote subtree")
+  "m s j" '(org-move-subtree-down :wk "Move subtree down")
+  "m s k" '(org-move-subtree-up :wk "Move subtree up")
+  "m s l" '(org-demote-subtree :wk "Demote subtree")
+  "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
+  "m s r" '(org-refile :wk "Refile")
+  "m s s" '(org-sparse-tree :wk "Sparse tree")
+  "m s A" '(org-archive-subtree :wk "Archive subtree")
+  "m s N" '(widen :wk "Widen")
+  "m s S" '(org-sort :wk "Sort")
+  "m t" '(org-todo :wk "Org todo")
+  "m B" '(org-babel-tangle :wk "Org babel tangle")
+  "m T" '(org-todo-list :wk "Org todo list"))
 #+end_src
 *** Markdown :ARCHIVE:
 #+begin_src emacs-lisp
@@ -617,101 +624,101 @@ This is a big list.
 #+end_src
 *** Notes
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "n" '(:ignore t :wk "Notes")
-    "n d" '(:ignore t :wk "Dired")
-    "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
-    "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-    "n o" '(:ignore t :wk "Obsidian")
-    "n o c" '(obsidian-capture :wk "Create note")
-    "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
-    "n o f" '(obsidian-tag-find :wk "Find by tag")
-    "n o j" '(obsidian-jump :wk "Jump to note")
-    "n o m" '(obsidian-move-file :wk "Move note/file")
-    "n o r" '(obsidian-update :wk "Update")
-    "n o /" '(obsidian-search :wk "Search")
-    "n o ?" '(obsidian-hydra/body :wk "Everything")
-    "n r" '(:ignore t :wk "Org Roam")
-    "n r a" '(:ignore t :wk "Alias")
-    "n r a a" '(org-roam-alias-add :wk "Add alias")
-    "n r a r" '(org-roam-alias-remove :wk "Remove alias")
-    "n r d" '(:ignore t :wk "Roam dailies")
-    "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
-    "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
-    "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-    "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-    "n r f" '(org-roam-node-find :wk "Find note")
-    "n r i" '(org-roam-node-insert :wk "Insert note")
-    "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-    "n r r" '(:ignore t :wk "References")
-    "n r r a" '(org-roam-ref-add :wk "Add reference")
-    "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
+(custom/leader-keys
+  "n" '(:ignore t :wk "Notes")
+  "n d" '(:ignore t :wk "Dired")
+  "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
+  "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n o" '(:ignore t :wk "Obsidian")
+  "n o c" '(obsidian-capture :wk "Create note")
+  "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+  "n o f" '(obsidian-tag-find :wk "Find by tag")
+  "n o j" '(obsidian-jump :wk "Jump to note")
+  "n o m" '(obsidian-move-file :wk "Move note/file")
+  "n o r" '(obsidian-update :wk "Update")
+  "n o /" '(obsidian-search :wk "Search")
+  "n o ?" '(obsidian-hydra/body :wk "Everything")
+  "n r" '(:ignore t :wk "Org Roam")
+  "n r a" '(:ignore t :wk "Alias")
+  "n r a a" '(org-roam-alias-add :wk "Add alias")
+  "n r a r" '(org-roam-alias-remove :wk "Remove alias")
+  "n r d" '(:ignore t :wk "Roam dailies")
+  "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
+  "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+  "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+  "n r f" '(org-roam-node-find :wk "Find note")
+  "n r i" '(org-roam-node-insert :wk "Insert note")
+  "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  "n r r" '(:ignore t :wk "References")
+  "n r r a" '(org-roam-ref-add :wk "Add reference")
+  "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
 #+end_src
 *** Opening
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "o" '(:ignore t :wk "Open")
-    "o d" '(dashboard-open :wk "Dashboard")
-    "o e" '(elfeed :wk "Elfeed RSS")
-    "o f" '(make-frame :wk "Open buffer in new frame")
-    "o F" '(select-frame-by-name :wk "Select frame by name"))
+(custom/leader-keys
+  "o" '(:ignore t :wk "Open")
+  "o d" '(dashboard-open :wk "Dashboard")
+  "o e" '(elfeed :wk "Elfeed RSS")
+  "o f" '(make-frame :wk "Open buffer in new frame")
+  "o F" '(select-frame-by-name :wk "Select frame by name"))
 #+end_src
 *** Project
 Here is only 1 keybinding because projectile has keybindings setup.
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "p" '(projectile-command-map :wk "Projectile"))
+(custom/leader-keys
+  "p" '(projectile-command-map :wk "Projectile"))
 #+end_src
 *** Searching
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "s" '(:ignore t :wk "Search")
-    "s d" '(dictionary-search :wk "Search dictionary")
-    "s m" '(man :wk "Man pages")
-    "s t" '(tldr :wk "Lookup TLDR docs for a command")
-    "s w" '(woman :wk "Similar to man but doesn't require man"))
+(custom/leader-keys
+  "s" '(:ignore t :wk "Search")
+  "s d" '(dictionary-search :wk "Search dictionary")
+  "s m" '(man :wk "Man pages")
+  "s t" '(tldr :wk "Lookup TLDR docs for a command")
+  "s w" '(woman :wk "Similar to man but doesn't require man"))
 #+end_src
 *** Toggling
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "t" '(:ignore t :wk "Toggle")
-    "t d" '(toggle-debug-on-error :wk "Debug on error")
-    "t e" '(eshell-toggle :wk "Eshell")
-    "t f" '(flycheck-mode :wk "Flycheck")
-    "t i" '(imenu-list-smart-toggle :wk "Imenu list")
-    "t l" '(display-line-numbers-mode :wk "Line numbers")
-    "t n" '(neotree-toggle :wk "Neotree")
-    "t r" '(rainbow-mode :wk "Rainbow mode")
-    "t t" '(visual-line-mode :wk "Word Wrap")
-    "t v" '(vterm-toggle :wk "Vterm")
-    "t z" '(writeroom-mode :wk "Zen mode"))
+(custom/leader-keys
+  "t" '(:ignore t :wk "Toggle")
+  "t d" '(toggle-debug-on-error :wk "Debug on error")
+  "t e" '(eshell-toggle :wk "Eshell")
+  "t f" '(flycheck-mode :wk "Flycheck")
+  "t i" '(imenu-list-smart-toggle :wk "Imenu list")
+  "t l" '(display-line-numbers-mode :wk "Line numbers")
+  "t n" '(neotree-toggle :wk "Neotree")
+  "t r" '(rainbow-mode :wk "Rainbow mode")
+  "t t" '(visual-line-mode :wk "Word Wrap")
+  "t v" '(vterm-toggle :wk "Vterm")
+  "t z" '(writeroom-mode :wk "Zen mode"))
 #+end_src
 *** Windows
 #+begin_src emacs-lisp
-  (custom/leader-keys
-    "W" '(custom/hydra-window/body :wk "Windows hydra")
-    ;; Window splits
-    "w" '(:ingore t :wk "Windows")
-    "w c" '(evil-window-delete :wk "Close window")
-    "w n" '(evil-window-new :wk "New window")
-    "w q" '(:ingore t :wk "Close on side")
-    "w q h" '(custom/close-left-window :wk "Left")
-    "w q j" '(custom/close-down-window :wk "Down")
-    "w q k" '(custom/close-up-window :wk "Up")
-    "w q l" '(custom/close-right-window :wk "Right")
-    "w s" '(evil-window-split :wk "Horizontal split window")
-    "w v" '(evil-window-vsplit :wk "Vertical split window")
-    ;; Window motions
-    "w h" '(evil-window-left :wk "Window left")
-    "w j" '(evil-window-down :wk "Window down")
-    "w k" '(evil-window-up :wk "Window up")
-    "w l" '(evil-window-right :wk "Window right")
-    "w w" '(evil-window-next :wk "Go to next window")
-    ;; Move Windows
-    "w H" '(buf-move-left :wk "Buffer move left")
-    "w J" '(buf-move-down :wk "Buffer move down")
-    "w K" '(buf-move-up :wk "Buffer move up")
-    "w L" '(buf-move-right :wk "Buffer move right"))
+(custom/leader-keys
+  "W" '(custom/hydra-window/body :wk "Windows hydra")
+  ;; Window splits
+  "w" '(:ingore t :wk "Windows")
+  "w c" '(evil-window-delete :wk "Close window")
+  "w n" '(evil-window-new :wk "New window")
+  "w q" '(:ingore t :wk "Close on side")
+  "w q h" '(custom/close-left-window :wk "Left")
+  "w q j" '(custom/close-down-window :wk "Down")
+  "w q k" '(custom/close-up-window :wk "Up")
+  "w q l" '(custom/close-right-window :wk "Right")
+  "w s" '(evil-window-split :wk "Horizontal split window")
+  "w v" '(evil-window-vsplit :wk "Vertical split window")
+  ;; Window motions
+  "w h" '(evil-window-left :wk "Window left")
+  "w j" '(evil-window-down :wk "Window down")
+  "w k" '(evil-window-up :wk "Window up")
+  "w l" '(evil-window-right :wk "Window right")
+  "w w" '(evil-window-next :wk "Go to next window")
+  ;; Move Windows
+  "w H" '(buf-move-left :wk "Buffer move left")
+  "w J" '(buf-move-down :wk "Buffer move down")
+  "w K" '(buf-move-up :wk "Buffer move up")
+  "w L" '(buf-move-right :wk "Buffer move right"))
 )
 #+end_src
 *** Text resizing
@@ -722,7 +729,91 @@ Here is only 1 keybinding because projectile has keybindings setup.
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
-* ALL-THE-ICONS
+* APPEARANCE
+** FONTS
+*** Setting fonts
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil
+  :font "JetBrainsMono NFM"
+  :height 90
+  :weight 'medium)
+(set-face-attribute 'variable-pitch nil
+  :family "Ubuntu Nerd Font"
+  :height 100
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+  :family "JetBrainsMono NFM Mono"
+  :height 80
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch-serif nil
+  :inherit 'fixed-pitch
+  :slant 'italic)
+
+;; Makes commented text and keywords italics.
+;; This is working in emacsclient but not emacs.
+;; Your font must have an italic face available.
+(set-face-attribute 'font-lock-comment-face nil
+  :slant 'italic)
+;; (set-face-attribute 'font-lock-keyword-face nil
+;;   :slant 'italic)
+
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right, idk why
+;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
+
+;; Uncomment the following line if line spacing needs adjusting.
+;; (setq-default line-spacing 0.12)
+#+end_src
+*** Enabling programming ligatures
+Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so called /programming ligatures/ that are essentailly nice math symbols for cominations of symbols.
+[[https://github.com/mickeynp/ligature.el][ligature.el]] allows us in emacs to use them.
+#+begin_src emacs-lisp
+(use-package ligature
+  :after prog-mode
+  :config
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
+                                     ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
+                                     "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
+                                     "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
+                                     "/=" "/==" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
+                                     "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
+                                     "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
+                                     "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
+                                     "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
+                                     "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
+    (global-ligature-mode 't))
+#+end_src
+*** Mixed Pitch
+[[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
+I turn that mode in Org Mode.
+#+begin_src emacs-lisp
+(use-package mixed-pitch
+  :hook (org-mode . mixed-pitch-mode)
+  :config
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
+#+end_src
+** HIGHLIGHT TODO
+Adding highlights to TODO and related words.
+#+begin_src emacs-lisp
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+         (prog-mode . hl-todo-mode))
+  :custom
+    (hl-todo-highlight-punctuation ":")
+    (hl-todo-keyword-faces
+    `(("TODO"       warning bold)
+      ("FIXME"      error bold)
+      ("HACK"       font-lock-constant-face bold)
+      ("REVIEW"     font-lock-keyword-face bold)
+      ("NOTE"       success bold)
+      ("DEPRECATED" font-lock-doc-face bold))))
+#+end_src
+** ICONS
 [[https://github.com/domtronn/all-the-icons.el][All the icons]] and [[https://github.com/rainstormstudio/nerd-icons.el][nerd icons]]
 #+begin_src emacs-lisp
 (use-package nerd-icons)
@@ -743,7 +834,61 @@ Here is only 1 keybinding because projectile has keybindings setup.
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 #+end_src
-* COMPANY
+** RAINBOW DELIMITERS
+Adding rainbow coloring to parentheses.
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :after prog-mode)
+#+end_src
+** RAINBOW MODE
+It displays the actual color as a background for any hex color value (ex. #ffffff).
+#+begin_src emacs-lisp
+(use-package rainbow-mode
+  :diminish
+  :hook org-mode prog-mode)
+#+end_src
+** THEME
+I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :demand
+  :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    (doom-themes-neotree-config)
+    ;; or for treemacs users
+    ;;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    ;;(doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+(use-package ewal-doom-themes :demand)
+(use-package ewal
+  :demand
+  :config
+    (set-face-attribute 'line-number-current-line nil
+      :foreground (ewal-load-color 'comment)
+      :inherit 'default)
+    (set-face-attribute 'line-number nil
+      :foreground (ewal--get-base-color 'green)
+      :inherit 'default))
+
+(defvar real-theme nil
+  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+
+(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
+(load-theme real-theme t)
+#+end_src
+
+With Emacs 29, true transparency has been added.
+#+begin_src emacs-lisp
+(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
+#+end_src
+* COMPLETION
+** COMPANY
 [[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. Completion will start automatically after you type a few letters. Use M-n and M-p to select, <return> to complete or <tab> to complete the common part.
 #+begin_src emacs-lisp
 (use-package company
@@ -762,6 +907,76 @@ Here is only 1 keybinding because projectile has keybindings setup.
   :diminish
   :hook (company-mode . company-box-mode))
 #+end_src
+** IVY (COUNSEL)
+Both are completion frameworks that make your life easier when doing M-x for example.
+#+begin_src emacs-lisp
+(use-package ivy
+  :demand
+  :diminish
+  :bind
+  ;; ivy-resume resumes the last Ivy-based completion.
+    (("C-c C-r" . ivy-resume)
+     ("C-x B" . ivy-switch-buffer-other-window)
+     ("C-s" . swiper)
+    :map ivy-minibuffer-map
+      ("TAB" . ivy-alt-done)
+      ("C-l" . ivy-alt-done)
+      ("C-j" . ivy-next-line)
+      ("C-k" . ivy-previous-line)
+    :map ivy-switch-buffer-map
+      ("C-k" . ivy-previous-line)
+      ("C-l" . ivy-done)
+      ("C-d" . ivy-switch-buffer-kill)
+    :map ivy-reverse-i-search-map
+      ("C-k" . ivy-previous-line)
+      ("C-d" . ivy-reverse-i-search-kill))
+  :custom
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "(%d/%d) ")
+    (enable-recursive-minibuffers t)
+  :config
+    (ivy-mode)
+    ;; preview of faces
+    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
+
+(use-package ivy-rich
+  :after ivy
+  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+  :custom
+    (ivy-virtual-abbreviate 'full
+     ivy-rich-switch-buffer-align-virtual-buffer t
+     ivy-rich-path-style 'abbrev)
+  :config
+    (ivy-set-display-transformer 'ivy-switch-buffer
+                                 'ivy-rich-switch-buffer-transformer))
+
+(use-package counsel
+  :after ivy
+  :diminish
+  :bind
+    (("M-x" . counsel-M-x)
+     ("C-x b" . counsel-ibuffer)
+     ("C-x C-f" . counsel-find-file)
+      :map minibuffer-local-map
+        ("C-r" . 'counsel-minibuffer-history))
+  :config
+    (counsel-mode)
+    (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
+#+end_src
+
+[[https://github.com/radian-software/prescient.el][Prescient]] adds rememebring and filtering to ivy choices which is convenient.
+#+begin_src emacs-lisp
+(use-package ivy-prescient
+  :demand
+  :after ivy
+  :custom
+    (ivy-prescient-enable-filtering nil)
+    ;; Here are commands that I don't want to get sorted
+    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
+  :config
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
+#+end_src
 * DASHBOARD
 [[https://github.com/emacs-dashboard/emacs-dashboard][Dashboard]] is nice and extensible dahboard.
 #+begin_src emacs-lisp
@@ -769,13 +984,17 @@ Here is only 1 keybinding because projectile has keybindings setup.
   :demand
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner "~/.cache/wal/emacs.svg")
-    (dashboard-banner-logo-title "Welcome to Church of Emacs!")
+    (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
+    (dashboard-banner-logo-title
+"You still refuse to accept my god-hood?
+Keep your own god!
+In fact, this might be a good time to pray to him.
+For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (dashboard-center-content t)
     (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items '((recents  . 5)
-                       (bookmarks . 5)
-                       (projects . 5)
+    (dashboard-items '(;; (recents  . 5)
+                       ;; (bookmarks . 5)
+                       ;; (projects . 5)
                        (agenda . 5)))
                        ;; (registers . 5)
   :config
@@ -849,21 +1068,46 @@ I still do some configurations because dirvish still at its core uses dired and 
 #+end_src
 * DOCS
 ** HELPFUL
-This makes emacs documentation look pretty
+[[https://github.com/Wilfred/helpful][This]] makes emacs documentation look pretty
 #+begin_src emacs-lisp
 (use-package helpful
   :custom
     (counsel-describe-function-function #'helpful-callable)
     (counsel-describe-variable-function #'helpful-variable)
+    (counsel-describe-symbol-function #'helpful-symbol)
   :bind
     ([remap describe-function] . counsel-describe-function)
     ([remap describe-command] . helpful-command)
+    ([remap describe-symbol] . helpful-symbol)
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 #+end_src
 ** TLDR :ARCHIVE:
 #+begin_src emacs-lisp
 (use-package tldr)
+#+end_src
+** WHICH-KEY
+[[https://github.com/justbur/emacs-which-key][It]] shows you available keybindings, the default ones and the ones you create.
+#+begin_src emacs-lisp
+(use-package which-key
+  :diminish
+  :demand
+  :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order #'which-key-key-order-alpha)
+    (which-key-sort-uppercase-first nil)
+    (which-key-add-column-padding 1)
+    (which-key-max-display-columns nil)
+    (which-key-min-display-lines 6)
+    (which-key-side-window-slot -10)
+    (which-key-side-window-max-height 0.25)
+    (which-key-idle-delay 0.8)
+    (which-key-max-description-length nil)
+    (which-key-allow-imprecise-window-fit nil)
+    (which-key-separator "  ")
+    (which-key-idle-delay 0.5)
+  :config
+    (which-key-mode 1))
 #+end_src
 * DOOM-MODELINE
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
@@ -887,79 +1131,12 @@ Though Emacs 29 has some emoji support.
     (global-emojify-mode 1))
 #+end_src
 * ELFEED
+[[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
 #+begin_src emacs-lisp
 (use-package elfeed
   :custom
     (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://arne.me/articles/atom.xml"))
     (elfeed-search-filter "@6-months-ago"))
-#+end_src
-* FONTS
-** Setting fonts
-#+begin_src emacs-lisp
-(set-face-attribute 'default nil
-  :font "JetBrainsMono NFM"
-  :height 90
-  :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-  :family "Ubuntu Nerd Font"
-  ;; :font "GoMono Nerd Font"
-  :height 100
-  :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-  :family "JetBrainsMono NFM Mono"
-  :height 80
-  :weight 'medium)
-(set-face-attribute 'fixed-pitch-serif nil
-  :inherit 'fixed-pitch
-  :slant 'italic)
-
-;; Makes commented text and keywords italics.
-;; This is working in emacsclient but not emacs.
-;; Your font must have an italic face available.
-(set-face-attribute 'font-lock-comment-face nil
-  :slant 'italic)
-;; (set-face-attribute 'font-lock-keyword-face nil
-;;   :slant 'italic)
-
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right, idk why
-;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
-
-;; Uncomment the following line if line spacing needs adjusting.
-;; (setq-default line-spacing 0.12)
-#+end_src
-** Enabling programming ligatures
-Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so called /programming ligatures/ that are essentailly nice math symbols for cominations of symbols.
-[[https://github.com/mickeynp/ligature.el][ligature.el]] allows us in emacs to use them.
-#+begin_src emacs-lisp
-(use-package ligature
-  :after prog-mode
-  :config
-    (ligature-set-ligatures 't '("www"))
-    ;; Enable ligatures in programming modes
-    (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
-                                     ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
-                                     "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
-                                     "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
-                                     "/=" "/==" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
-                                     "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
-                                     "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
-                                     "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
-                                     "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
-                                     "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
-    (global-ligature-mode 't))
-#+end_src
-** Mixed Pitch
-[[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
-I turn that mode in Org Mode.
-#+begin_src emacs-lisp
-(use-package mixed-pitch
-  :hook (org-mode . mixed-pitch-mode)
-  :config
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
 #+end_src
 * GAMES
 ** MINESWEEPER
@@ -971,6 +1148,14 @@ I turn that mode in Org Mode.
 (use-package minesweeper
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
+#+end_src
+** TETRIS
+Tetris is built-in.
+#+begin_src emacs-lisp
+(use-package tetris
+  :ensure nil
+  :config
+    (evil-set-initial-state 'tetris-mode 'insert))
 #+end_src
 * GIT STUFF
 [[https://magit.vc/][Magit]] is the best git client in emacs and probably ever
@@ -990,8 +1175,9 @@ A Git Porcelain inside Emacs
   :after git-timemachine
   :hook (evil-normalize-keymaps . git-timemachine-hook)
   :config
-    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
-    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision))
+    (evil-define-key 'normal git-timemachine-mode-map
+      (kbd "C-j") 'git-timemachine-show-previous-revision
+      (kbd "C-k") 'git-timemachine-show-next-revision))
 #+end_src
 * IMENU LIST
 [[https://github.com/bmag/imenu-list][imenu-list]] is basically TOC as its own buffer
@@ -1002,95 +1188,9 @@ A Git Porcelain inside Emacs
      imenu-list-auto-resize t)
   :config
     (evil-collection-imenu-list-setup)
-    (evil-collection-define-key 'normal 'imenu-list-major-mode-map
+    (evil-define-key 'normal imenu-list-major-mode-map
       "j" 'forward-button
       "k" 'backward-button))
-#+end_src
-* IVY (COUNSEL)
-Both are completion frameworks that make your life easier when doing M-x for example.
-#+begin_src emacs-lisp
-(use-package ivy
-  :demand
-  :diminish
-  :bind
-  ;; ivy-resume resumes the last Ivy-based completion.
-    (("C-c C-r" . ivy-resume)
-     ("C-x B" . ivy-switch-buffer-other-window)
-     ("C-s" . swiper)
-    :map ivy-minibuffer-map
-      ("TAB" . ivy-alt-done)
-      ("C-l" . ivy-alt-done)
-      ("C-j" . ivy-next-line)
-      ("C-k" . ivy-previous-line)
-    :map ivy-switch-buffer-map
-      ("C-k" . ivy-previous-line)
-      ("C-l" . ivy-done)
-      ("C-d" . ivy-switch-buffer-kill)
-    :map ivy-reverse-i-search-map
-      ("C-k" . ivy-previous-line)
-      ("C-d" . ivy-reverse-i-search-kill))
-  :custom
-    (ivy-use-virtual-buffers t)
-    (ivy-count-format "(%d/%d) ")
-    (enable-recursive-minibuffers t)
-  :config
-    (ivy-mode)
-    ;; preview of faces
-    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
-
-(use-package ivy-rich
-  :after ivy
-  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
-  :custom
-    (ivy-virtual-abbreviate 'full
-     ivy-rich-switch-buffer-align-virtual-buffer t
-     ivy-rich-path-style 'abbrev)
-  :config
-    (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer))
-
-(use-package counsel
-  :after ivy
-  :diminish
-  :bind
-    (("M-x" . counsel-M-x)
-     ("C-x b" . counsel-ibuffer)
-     ("C-x C-f" . counsel-find-file)
-      :map minibuffer-local-map
-        ("C-r" . 'counsel-minibuffer-history))
-  :config
-    (counsel-mode)
-    (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
-#+end_src
-
-[[https://github.com/radian-software/prescient.el][Prescient]] adds rememebring and filtering to ivy choices which is convenient.
-#+begin_src emacs-lisp
-(use-package ivy-prescient
-  :demand
-  :after ivy
-  :custom
-    (ivy-prescient-enable-filtering nil)
-    ;; Here are commands that I don't want to get sorted
-    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
-  :config
-    (prescient-persist-mode 1)
-    (ivy-prescient-mode 1))
-#+end_src
-* HIGHLIGHT TODO
-Adding highlights to TODO and related words.
-#+begin_src emacs-lisp
-(use-package hl-todo
-  :hook ((org-mode . hl-todo-mode)
-         (prog-mode . hl-todo-mode))
-  :custom
-    (hl-todo-highlight-punctuation ":")
-    (hl-todo-keyword-faces
-    `(("TODO"       warning bold)
-      ("FIXME"      error bold)
-      ("HACK"       font-lock-constant-face bold)
-      ("REVIEW"     font-lock-keyword-face bold)
-      ("NOTE"       success bold)
-      ("DEPRECATED" font-lock-doc-face bold))))
 #+end_src
 * MARKDOWN :ARCHIVE:
 I'm trying to improve markdown
@@ -1175,32 +1275,35 @@ Here I'm improving it as much as I can.
       (evil-define-key 'normal org-mode-map
         "gj" 'evil-next-visual-line
         "gk" 'evil-previous-visual-line
+        (kbd "C-j") 'org-next-visible-heading
+        (kbd "C-k") 'org-previous-visible-heading
+        (kbd "C-S-J") 'org-forward-heading-same-level
+        (kbd "C-S-K") 'org-backward-heading-same-level
         (kbd "M-h") 'org-metaleft
         (kbd "M-j") 'org-metadown
         (kbd "M-k") 'org-metaup
         (kbd "M-l") 'org-metaright
-        (kbd "M-S-h") 'org-shiftmetaleft
-        (kbd "M-S-j") 'org-shiftmetadown
-        (kbd "M-S-k") 'org-shiftmetaup
-        (kbd "M-S-l") 'org-shiftmetaright
+        (kbd "M-H") 'org-shiftmetaleft
+        (kbd "M-J") 'org-shiftmetadown
+        (kbd "M-K") 'org-shiftmetaup
+        (kbd "M-L") 'org-shiftmetaright
         (kbd "M-<return>") 'org-return))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
-    (defun custom/org-return-follow-link ()
-      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
+    (defun custom/org-good-return ()
+      "`org-return' that allows for following links in table."
       (interactive)
-      (if (org-in-regexp org-link-any-re 1)
-          (org-open-at-point)
-          (org-return)))
+      (if (org-at-table-p)
+          (if (org-in-regexp org-link-any-re 1)
+              (org-open-at-point)
+            (org-return))
+        (org-return))))
 
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
 
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     ;; Setting RETURN key in org-mode to follow links
-    (setq org-return-follows-link t))
+    ;; (setq org-return-follows-link t)
 
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
@@ -1246,7 +1349,7 @@ It's set up so it will display markers when entering insert mode.
 #+begin_src emacs-lisp
 (use-package org-appear
   :after org
-  :hook (org-mode . (lambda () (org-appear-mode t)))
+  :hook (org-mode . org-appear-mode)
   :custom
     (org-appear-trigger 'manual)
     (org-appear-autolinks t)
@@ -1275,7 +1378,8 @@ If you don't use the same font as me then you need to edit ~org-modern-label~'s 
 #+begin_src emacs-lisp
 (use-package org-modern
   :after org
-  :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :hook (org-mode . org-modern-mode)
   :custom-face
     (org-modern-label ((t (:height 1.2))))
   :custom
@@ -1286,11 +1390,12 @@ If you don't use the same font as me then you need to edit ~org-modern-label~'s 
 
 But it doesn't work well with =org-indent-mode= which indents text to headers.
 Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
+Each time I open org file it shows error but it works.
 #+begin_src emacs-lisp
 (use-package org-modern-indent
   :after org
   :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-modern-hook #'org-modern-indent-mode t))
+  :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
 #+end_src
 ** ORG ROAM
 [[https://www.orgroam.com/][Org roam]] is nice wiki-like note management thing. Reminds me of [[https://obsidian.md][Obsidian]].
@@ -1312,18 +1417,20 @@ Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package t
     (org-roam-setup)
     (evil-collection-org-roam-setup)
     (require 'org-roam-export)
-    (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3))))
+    ;; if the file is dailie then increase text's size automatically
+    (require 'org-roam-dailies)
+    (add-hook 'org-roam-find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3)))))
 #+end_src
 ** ORG SUPERSTAR
 [[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
 #+begin_src emacs-lisp
 (use-package org-superstar
   :after org
-  :hook (org-mode . (lambda () (org-superstar-mode t)))
+  ;; :hook (org-mode . (lambda () (org-superstar-mode t)))
+  :hook (org-mode . org-superstar-mode)
   :custom
     (org-superstar-remove-leading-stars t)
-  :config
-    (setq org-superstar-item-bullet-alist
+    (org-superstar-item-bullet-alist
       '((?+ . ?✸)
         (?* . ?•)
         (?- . ?●))))
@@ -1331,10 +1438,9 @@ Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package t
 ** ORG YT
 +It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.+
 #+begin_src emacs-lisp
-(quelpa '(org-yt :fetcher github :repo "TobiasZawada/org-yt"))
 (use-package org-yt
-  :ensure nil
   :after org
+  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
   :config
     (require 'org-yt)
 
@@ -1367,7 +1473,7 @@ Table of contents after after typing =:toc:= in header
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 ** NOTES
-Here are some functions that make using org mode notes easier.
+Here are some functions.
 #+begin_src emacs-lisp
 (defun custom/org-notes-dired ()
   "Opens org-directory in Dired."
@@ -1390,9 +1496,12 @@ A whole lot of other stuff
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    (org-mode . (lambda () (org-indent-mode t)))
-    ;; :bind
-    ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
+    (org-mode . org-indent-mode)
+    ;; after refiling and archiving tasks agenda files aren't saves, I fix that
+    (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
+    (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
+    :bind
+      ([remap org-return] . custom/org-good-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1464,19 +1573,23 @@ A whole lot of other stuff
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
+    (org-html-validation-link nil)
     (org-pretty-entities t)
     (org-startup-with-inline-images t)
     (org-cycle-inline-images-display t)
+    (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
     (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
-    (org-ellipsis " •")
+    ;; (org-ellipsis " •")
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
     (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
     (org-return-follows-link t)
+    (org-M-RET-may-split-line nil)
+    (org-insert-heading-respect-content t)
     (org-tags-column 0)
     (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
     (org-confirm-babel-evaluate nil)
@@ -1541,33 +1654,17 @@ A whole lot of other stuff
                              :scale (expt text-scale-mode-step
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
-    (plist-put org-format-latex-options :background nil)
+    (plist-put org-format-latex-options :background nil))
 
-    (defvar custom/org-bold-symbol "*"
-      "Default symbol for `custom/org-format-in-region' function.")
+;; (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
+;;   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
+;;   (let ((result (apply orig-func args)))
+;;     (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
+;;       (evil-insert-state))
+;;     result))
 
-    (defun custom/org-format-in-region (&optional symbol)
-      "Add symbols before and after the selected text."
-      (interactive)
-      (setq symbol (or symbol
-                       (read-string "Enter symbol: " custom/org-bold-symbol)))
-      (when (region-active-p)
-        (save-excursion
-          (goto-char (region-end))
-          (insert symbol)
-          (goto-char (region-beginning))
-          (insert symbol)))
-      (deactivate-mark)))
-
-(defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
-  "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
-  (let ((result (apply orig-func args)))
-    (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
-      (evil-insert-state))
-    result))
-
-(advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
-(advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+;; (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+;; (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 #+end_src
 * PANDOC :ARCHIVE:
 #+begin_src emacs-lisp
@@ -1629,25 +1726,24 @@ NOTE that many projectile commands do not work if you have set "fish" as the ~sh
   :config
     (counsel-projectile-mode 1))
 #+end_src
-* RAINBOW DELIMITERS
-Adding rainbow coloring to parentheses.
-#+begin_src emacs-lisp
-(use-package rainbow-delimiters
-  :after prog-mode)
-#+end_src
-* RAINBOW MODE
-It displays the actual color as a background for any hex color value (ex. #ffffff).
-#+begin_src emacs-lisp
-(use-package rainbow-mode
-  :diminish
-  :hook org-mode prog-mode)
-#+end_src
 * REAL PROGRAMMING
 ** COMPILING
 Some modes that don't belong anywhere are made smaller including compiling related ones.
 #+begin_src emacs-lisp
 (add-to-list 'display-buffer-alist
-             '("*(Backtrace|Compile-log|Messages|Warnings)*"
+             '("*Messages*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Compile-log*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Backtrace*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Warnings*"
                (display-buffer-at-bottom)
                (window-height . 12)))
 (add-to-list 'display-buffer-alist
@@ -1673,6 +1769,9 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   (ad-set-arg 1 t))
 (defadvice compile (after ad-compile-smart activate)
   "Advises `compile' so it moves to the compilation buffer."
+  (switch-to-buffer-other-window "*compilation*"))
+(defadvice recompile (after compile-command activate)
+  "Advises `recompile' so it moves to the compilation buffer."
   (switch-to-buffer-other-window "*compilation*"))
 #+end_src
 ** QUICK EVALUATION
@@ -1718,7 +1817,7 @@ With this major modes automatically turn on eglot.
 (add-hook 'python-ts-mode-hook 'eglot-ensure)
 (add-hook 'bash-ts-mode-hook 'eglot-ensure)
 (add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'mhtml-mode-hook 'eglot-ensure)
+(add-hook 'html-mode-hook 'eglot-ensure)
 #+end_src
 ** LANGUAGE SUPPORT
 Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM, AWK, C, C++, Fortran, Icon, IDL (CORBA), IDLWAVE, Java, Javascript, M4, Makefiles, Metafont, Modula2, Object Pascal, Objective-C, Octave, Pascal, Perl, Pike, PostScript, Prolog, Python, Ruby, Simula, SQL, Tcl, Verilog, and VHDL. Other languages will require additional modes.
@@ -1844,9 +1943,9 @@ Eshell is an Emacs 'shell' that is written in Elisp.
 #+begin_src emacs-lisp
 (use-package eshell
   :custom
-    (eshell-directory-name "~/.config/eshell/")
-    (eshell-rc-script "~/.config/eshell/profile")    ;; your profile for eshell; like a bashrc for eshell.
-    (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
+    (eshell-directory-name (concat user-emacs-directory "eshell"))
+    (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell.
+    (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell.
     (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
     (eshell-last-dir-ring-file-name (concat user-share-emacs-directory "eshell-lastdir"))
     (eshell-history-size 5000)
@@ -1854,18 +1953,18 @@ Eshell is an Emacs 'shell' that is written in Elisp.
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
-    ;; (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
+    ;; (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less"))
     ;; :config
     ;; (evil-set-initial-state 'eshell-mode 'emacs)
   :config
     (eat-eshell-mode))
 
-(use-package eshell-toggle
-  :custom
-    (eshell-toggle-size-fraction 3)
-    (eshell-toggle-use-projectile-root t)
-    (eshell-toggle-run-command nil)
-    (eshell-toggle-init-function #'eshell-toggle-init-eshell))
+;; (use-package eshell-toggle
+;;   :custom
+;;     (eshell-toggle-size-fraction 3)
+;;     (eshell-toggle-use-projectile-root nil)
+;;     (eshell-toggle-run-command nil)
+;;     (eshell-toggle-init-function #'eshell-toggle-init-eshell))
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -1881,18 +1980,14 @@ Probably the most comfy terminal experience in Emacs
 #+end_src
 ** Vterm
 Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x ansi-term= and =M-x vterm=.
-
 #+begin_src emacs-lisp
 (use-package vterm
-  :defer t
   :config
     (setq shell-file-name "/bin/bash"
           vterm-max-scrollback 5000))
-    ;; (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 #+end_src
 ** Vterm-Toggle
 [[https://github.com/jixiuf/vterm-toggle][vterm-toggle]] toggles the vterm buffer at the bottom of the screen
-
 #+begin_src emacs-lisp
 (use-package vterm-toggle
   :after vterm
@@ -1938,69 +2033,6 @@ Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell 
 #+begin_src emacs-lisp
 (use-package sudo-edit)
 #+end_src
-* THEME
-I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
-#+begin_src emacs-lisp
-(use-package doom-themes
-  :demand
-  :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-    ;; Enable custom neotree theme (all-the-icons must be installed!)
-    (doom-themes-neotree-config)
-    ;; or for treemacs users
-    ;;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-    ;;(doom-themes-treemacs-config)
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config))
-(use-package ewal-doom-themes :demand)
-(use-package ewal
-  :demand
-  :config
-    (set-face-attribute 'line-number-current-line nil
-      :foreground (ewal-load-color 'comment)
-      :inherit 'default)
-    (set-face-attribute 'line-number nil
-      :foreground (ewal--get-base-color 'green)
-      :inherit 'default))
-
-(defvar real-theme nil
-  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
-
-(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
-(load-theme real-theme t)
-#+end_src
-
-With Emacs 29, true transparency has been added.
-#+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
-#+end_src
-* WHICH-KEY
-It shows you available keybindings, the default ones and the ones you create.
-#+begin_src emacs-lisp
-(use-package which-key
-  :diminish
-  :demand
-  :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order #'which-key-key-order-alpha)
-    (which-key-sort-uppercase-first nil)
-    (which-key-add-column-padding 1)
-    (which-key-max-display-columns nil)
-    (which-key-min-display-lines 6)
-    (which-key-side-window-slot -10)
-    (which-key-side-window-max-height 0.25)
-    (which-key-idle-delay 0.8)
-    (which-key-max-description-length nil)
-    (which-key-allow-imprecise-window-fit nil)
-    (which-key-separator "  ")
-    (which-key-idle-delay 0.5)
-  :config
-    (which-key-mode 1))
-#+end_src
 * WINDOW/BUFFER MANAGEMENT
 ** BUFFER-MOVE
 This allows to easily move windows (splits) around.
@@ -2035,6 +2067,7 @@ These functions move to window on specified side and close it
   (evil-window-delete))
 #+end_src
 ** BIG HYDRA
+I stole it from somewhere and edited it.
 #+begin_src emacs-lisp
 (use-package windresize)
 (use-package hydra)

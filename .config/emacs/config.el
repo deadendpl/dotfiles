@@ -23,6 +23,19 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
+(setq-default recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
+              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
+              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
+              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
+              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
+              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
+              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
+              save-place-file (concat user-share-emacs-directory "places")
+              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
+              multisession-directory (concat user-share-emacs-directory "multisession")
+              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
+
 (setq-default visible-bell nil ;; Set up the visible bell
               inhibit-startup-message nil ; default emacs startup message
               recentf-max-saved-items nil ; infinite amount of entries in recentf file
@@ -39,20 +52,11 @@ Most of the stuff will get redirected here.")
               standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
               display-line-numbers-type 'relative
-              use-short-answers t
+              use-short-answers t ; replace yes-no prompts with y-n
+              fast-but-imprecise-scrolling t ; fast scrolling
+              inhibit-compacting-font-caches t
+              sentence-end-double-space nil) ; sentences end with 1 space
               ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-              recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
-              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
-              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
-              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
-              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-              save-place-file (concat user-share-emacs-directory "places")
-              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-              multisession-directory (concat user-share-emacs-directory "multisession")
-              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
 
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
@@ -85,6 +89,7 @@ Most of the stuff will get redirected here.")
                 eat-mode-hook
                 compilation-mode-hook
                 Custom-mode-hook
+                tetris-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -347,7 +352,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
-  "h a" '(counsel-apropos :wk "Apropos")
+  "h a" '(counsel-describe-symbol :wk "Apropos")
   "h b" '(describe-bindings :wk "Describe bindings")
   "h c" '(describe-char :wk "Describe character under cursor")
   "h d" '(:ignore t :wk "Emacs documentation")
@@ -411,13 +416,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
   "m e" '(org-export-dispatch :wk "Org export dispatch")
   "m f" '(:ignore t :wk "Fonts")
-  "m f b" '((lambda () (interactive) (custom/org-format-in-region "*")) :wk "Bold in region")
-  "m f c" '((lambda () (interactive) (custom/org-format-in-region "~")) :wk "Code in region")
-  "m f C" '((lambda () (interactive) (custom/org-format-in-region "=")) :wk "Verbatim in region")
-  "m f i" '((lambda () (interactive) (custom/org-format-in-region "/")) :wk "Italic in region")
-  "m f l" '((lambda () (interactive) (custom/org-format-in-region "$")) :wk "Latex in region")
-  "m f u" '((lambda () (interactive) (custom/org-format-in-region "_")) :wk "Underline in region")
-  "m f -" '((lambda () (interactive) (custom/org-format-in-region "+")) :wk "Strike through in region")
+  "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
+  "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
+  "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
+  "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
+  "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
+  "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
+  "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
   "m i" '(org-toggle-item :wk "Org toggle item")
   "m I" '(:ignore t :wk "IDs")
   "m I c" '(org-id-get-create :wk "Create ID")
@@ -509,29 +514,29 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "t z" '(writeroom-mode :wk "Zen mode"))
 
 (custom/leader-keys
-    "W" '(custom/hydra-window/body :wk "Windows hydra")
-    ;; Window splits
-    "w" '(:ingore t :wk "Windows")
-    "w c" '(evil-window-delete :wk "Close window")
-    "w n" '(evil-window-new :wk "New window")
-    "w q" '(:ingore t :wk "Close on side")
-    "w q h" '(custom/close-left-window :wk "Left")
-    "w q j" '(custom/close-down-window :wk "Down")
-    "w q k" '(custom/close-up-window :wk "Up")
-    "w q l" '(custom/close-right-window :wk "Right")
-    "w s" '(evil-window-split :wk "Horizontal split window")
-    "w v" '(evil-window-vsplit :wk "Vertical split window")
-    ;; Window motions
-    "w h" '(evil-window-left :wk "Window left")
-    "w j" '(evil-window-down :wk "Window down")
-    "w k" '(evil-window-up :wk "Window up")
-    "w l" '(evil-window-right :wk "Window right")
-    "w w" '(evil-window-next :wk "Go to next window")
-    ;; Move Windows
-    "w H" '(buf-move-left :wk "Buffer move left")
-    "w J" '(buf-move-down :wk "Buffer move down")
-    "w K" '(buf-move-up :wk "Buffer move up")
-    "w L" '(buf-move-right :wk "Buffer move right"))
+  "W" '(custom/hydra-window/body :wk "Windows hydra")
+  ;; Window splits
+  "w" '(:ingore t :wk "Windows")
+  "w c" '(evil-window-delete :wk "Close window")
+  "w n" '(evil-window-new :wk "New window")
+  "w q" '(:ingore t :wk "Close on side")
+  "w q h" '(custom/close-left-window :wk "Left")
+  "w q j" '(custom/close-down-window :wk "Down")
+  "w q k" '(custom/close-up-window :wk "Up")
+  "w q l" '(custom/close-right-window :wk "Right")
+  "w s" '(evil-window-split :wk "Horizontal split window")
+  "w v" '(evil-window-vsplit :wk "Vertical split window")
+  ;; Window motions
+  "w h" '(evil-window-left :wk "Window left")
+  "w j" '(evil-window-down :wk "Window down")
+  "w k" '(evil-window-up :wk "Window up")
+  "w l" '(evil-window-right :wk "Window right")
+  "w w" '(evil-window-next :wk "Go to next window")
+  ;; Move Windows
+  "w H" '(buf-move-left :wk "Buffer move left")
+  "w J" '(buf-move-down :wk "Buffer move down")
+  "w K" '(buf-move-up :wk "Buffer move up")
+  "w L" '(buf-move-right :wk "Buffer move right"))
 )
 
 (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -539,6 +544,75 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+
+(set-face-attribute 'default nil
+  :font "JetBrainsMono NFM"
+  :height 90
+  :weight 'medium)
+(set-face-attribute 'variable-pitch nil
+  :family "Ubuntu Nerd Font"
+  :height 100
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+  :family "JetBrainsMono NFM Mono"
+  :height 80
+  :weight 'medium)
+(set-face-attribute 'fixed-pitch-serif nil
+  :inherit 'fixed-pitch
+  :slant 'italic)
+
+;; Makes commented text and keywords italics.
+;; This is working in emacsclient but not emacs.
+;; Your font must have an italic face available.
+(set-face-attribute 'font-lock-comment-face nil
+  :slant 'italic)
+;; (set-face-attribute 'font-lock-keyword-face nil
+;;   :slant 'italic)
+
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right, idk why
+;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
+
+;; Uncomment the following line if line spacing needs adjusting.
+;; (setq-default line-spacing 0.12)
+
+(use-package ligature
+  :after prog-mode
+  :config
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
+                                     ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
+                                     "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
+                                     "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
+                                     "/=" "/==" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
+                                     "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
+                                     "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
+                                     "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
+                                     "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
+                                     "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
+    (global-ligature-mode 't))
+
+(use-package mixed-pitch
+  :hook (org-mode . mixed-pitch-mode)
+  :config
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
+
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+         (prog-mode . hl-todo-mode))
+  :custom
+    (hl-todo-highlight-punctuation ":")
+    (hl-todo-keyword-faces
+    `(("TODO"       warning bold)
+      ("FIXME"      error bold)
+      ("HACK"       font-lock-constant-face bold)
+      ("REVIEW"     font-lock-keyword-face bold)
+      ("NOTE"       success bold)
+      ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package nerd-icons)
 
@@ -558,6 +632,47 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
+(use-package rainbow-delimiters
+  :after prog-mode)
+
+(use-package rainbow-mode
+  :diminish
+  :hook org-mode prog-mode)
+
+(use-package doom-themes
+  :demand
+  :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (all-the-icons must be installed!)
+    (doom-themes-neotree-config)
+    ;; or for treemacs users
+    ;;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    ;;(doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))
+(use-package ewal-doom-themes :demand)
+(use-package ewal
+  :demand
+  :config
+    (set-face-attribute 'line-number-current-line nil
+      :foreground (ewal-load-color 'comment)
+      :inherit 'default)
+    (set-face-attribute 'line-number nil
+      :foreground (ewal--get-base-color 'green)
+      :inherit 'default))
+
+(defvar real-theme nil
+  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
+
+(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
+(load-theme real-theme t)
+
+(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
+
 (use-package company
   :defer 2
   :diminish
@@ -574,17 +689,85 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :diminish
   :hook (company-mode . company-box-mode))
 
+(use-package ivy
+  :demand
+  :diminish
+  :bind
+  ;; ivy-resume resumes the last Ivy-based completion.
+    (("C-c C-r" . ivy-resume)
+     ("C-x B" . ivy-switch-buffer-other-window)
+     ("C-s" . swiper)
+    :map ivy-minibuffer-map
+      ("TAB" . ivy-alt-done)
+      ("C-l" . ivy-alt-done)
+      ("C-j" . ivy-next-line)
+      ("C-k" . ivy-previous-line)
+    :map ivy-switch-buffer-map
+      ("C-k" . ivy-previous-line)
+      ("C-l" . ivy-done)
+      ("C-d" . ivy-switch-buffer-kill)
+    :map ivy-reverse-i-search-map
+      ("C-k" . ivy-previous-line)
+      ("C-d" . ivy-reverse-i-search-kill))
+  :custom
+    (ivy-use-virtual-buffers t)
+    (ivy-count-format "(%d/%d) ")
+    (enable-recursive-minibuffers t)
+  :config
+    (ivy-mode)
+    ;; preview of faces
+    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
+
+(use-package ivy-rich
+  :after ivy
+  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+  :custom
+    (ivy-virtual-abbreviate 'full
+     ivy-rich-switch-buffer-align-virtual-buffer t
+     ivy-rich-path-style 'abbrev)
+  :config
+    (ivy-set-display-transformer 'ivy-switch-buffer
+                                 'ivy-rich-switch-buffer-transformer))
+
+(use-package counsel
+  :after ivy
+  :diminish
+  :bind
+    (("M-x" . counsel-M-x)
+     ("C-x b" . counsel-ibuffer)
+     ("C-x C-f" . counsel-find-file)
+      :map minibuffer-local-map
+        ("C-r" . 'counsel-minibuffer-history))
+  :config
+    (counsel-mode)
+    (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
+
+(use-package ivy-prescient
+  :demand
+  :after ivy
+  :custom
+    (ivy-prescient-enable-filtering nil)
+    ;; Here are commands that I don't want to get sorted
+    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
+  :config
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1))
+
 (use-package dashboard
   :demand
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner "~/.cache/wal/emacs.svg")
-    (dashboard-banner-logo-title "Welcome to Church of Emacs!")
+    (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
+    (dashboard-banner-logo-title
+"You still refuse to accept my god-hood?
+Keep your own god!
+In fact, this might be a good time to pray to him.
+For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (dashboard-center-content t)
     (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items '((recents  . 5)
-                       (bookmarks . 5)
-                       (projects . 5)
+    (dashboard-items '(;; (recents  . 5)
+                       ;; (bookmarks . 5)
+                       ;; (projects . 5)
                        (agenda . 5)))
                        ;; (registers . 5)
   :config
@@ -652,11 +835,33 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :custom
     (counsel-describe-function-function #'helpful-callable)
     (counsel-describe-variable-function #'helpful-variable)
+    (counsel-describe-symbol-function #'helpful-symbol)
   :bind
     ([remap describe-function] . counsel-describe-function)
     ([remap describe-command] . helpful-command)
+    ([remap describe-symbol] . helpful-symbol)
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
+
+(use-package which-key
+  :diminish
+  :demand
+  :custom
+    (which-key-side-window-location 'bottom)
+    (which-key-sort-order #'which-key-key-order-alpha)
+    (which-key-sort-uppercase-first nil)
+    (which-key-add-column-padding 1)
+    (which-key-max-display-columns nil)
+    (which-key-min-display-lines 6)
+    (which-key-side-window-slot -10)
+    (which-key-side-window-max-height 0.25)
+    (which-key-idle-delay 0.8)
+    (which-key-max-description-length nil)
+    (which-key-allow-imprecise-window-fit nil)
+    (which-key-separator "  ")
+    (which-key-idle-delay 0.5)
+  :config
+    (which-key-mode 1))
 
 (use-package doom-modeline
   :demand
@@ -670,66 +875,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://arne.me/articles/atom.xml"))
     (elfeed-search-filter "@6-months-ago"))
 
-(set-face-attribute 'default nil
-  :font "JetBrainsMono NFM"
-  :height 90
-  :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-  :family "Ubuntu Nerd Font"
-  ;; :font "GoMono Nerd Font"
-  :height 100
-  :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-  :family "JetBrainsMono NFM Mono"
-  :height 80
-  :weight 'medium)
-(set-face-attribute 'fixed-pitch-serif nil
-  :inherit 'fixed-pitch
-  :slant 'italic)
-
-;; Makes commented text and keywords italics.
-;; This is working in emacsclient but not emacs.
-;; Your font must have an italic face available.
-(set-face-attribute 'font-lock-comment-face nil
-  :slant 'italic)
-;; (set-face-attribute 'font-lock-keyword-face nil
-;;   :slant 'italic)
-
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right, idk why
-;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
-
-;; Uncomment the following line if line spacing needs adjusting.
-;; (setq-default line-spacing 0.12)
-
-(use-package ligature
-  :after prog-mode
-  :config
-    (ligature-set-ligatures 't '("www"))
-    ;; Enable ligatures in programming modes
-    (ligature-set-ligatures 'prog-mode '("www" "**" "***" "**/" "*>" "*/" "\\\\" "\\\\\\" "{-" "::"
-                                     ":::" ":=" "!!" "!=" "!==" "-}" "----" "-->" "->" "->>"
-                                     "-<" "-<<" "-~" "#{" "#[" "##" "###" "####" "#(" "#?" "#_"
-                                     "#_(" ".-" ".=" ".." "..<" "..." "?=" "??" ";;" "/*" "/**"
-                                     "/=" "/==" "/>" "//" "///" "&&" "||" "||=" "|=" "|>" "^=" "$>"
-                                     "++" "+++" "+>" "=:=" "==" "===" "==>" "=>" "=>>" "<="
-                                     "=<<" "=/=" ">-" ">=" ">=>" ">>" ">>-" ">>=" ">>>" "<*"
-                                     "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
-                                     "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
-                                     "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
-    (global-ligature-mode 't))
-
-(use-package mixed-pitch
-  :hook (org-mode . mixed-pitch-mode)
-  :config
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
-
 (use-package minesweeper
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
+
+(use-package tetris
+  :ensure nil
+  :config
+    (evil-set-initial-state 'tetris-mode 'insert))
 
 (use-package magit
   :custom
@@ -740,8 +893,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :after git-timemachine
   :hook (evil-normalize-keymaps . git-timemachine-hook)
   :config
-    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
-    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision))
+    (evil-define-key 'normal git-timemachine-mode-map
+      (kbd "C-j") 'git-timemachine-show-previous-revision
+      (kbd "C-k") 'git-timemachine-show-next-revision))
 
 (use-package imenu-list
   :custom
@@ -749,86 +903,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      imenu-list-auto-resize t)
   :config
     (evil-collection-imenu-list-setup)
-    (evil-collection-define-key 'normal 'imenu-list-major-mode-map
+    (evil-define-key 'normal imenu-list-major-mode-map
       "j" 'forward-button
       "k" 'backward-button))
-
-(use-package ivy
-  :demand
-  :diminish
-  :bind
-  ;; ivy-resume resumes the last Ivy-based completion.
-    (("C-c C-r" . ivy-resume)
-     ("C-x B" . ivy-switch-buffer-other-window)
-     ("C-s" . swiper)
-    :map ivy-minibuffer-map
-      ("TAB" . ivy-alt-done)
-      ("C-l" . ivy-alt-done)
-      ("C-j" . ivy-next-line)
-      ("C-k" . ivy-previous-line)
-    :map ivy-switch-buffer-map
-      ("C-k" . ivy-previous-line)
-      ("C-l" . ivy-done)
-      ("C-d" . ivy-switch-buffer-kill)
-    :map ivy-reverse-i-search-map
-      ("C-k" . ivy-previous-line)
-      ("C-d" . ivy-reverse-i-search-kill))
-  :custom
-    (ivy-use-virtual-buffers t)
-    (ivy-count-format "(%d/%d) ")
-    (enable-recursive-minibuffers t)
-  :config
-    (ivy-mode)
-    ;; preview of faces
-    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
-
-(use-package ivy-rich
-  :after ivy
-  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
-  :custom
-    (ivy-virtual-abbreviate 'full
-     ivy-rich-switch-buffer-align-virtual-buffer t
-     ivy-rich-path-style 'abbrev)
-  :config
-    (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer))
-
-(use-package counsel
-  :after ivy
-  :diminish
-  :bind
-    (("M-x" . counsel-M-x)
-     ("C-x b" . counsel-ibuffer)
-     ("C-x C-f" . counsel-find-file)
-      :map minibuffer-local-map
-        ("C-r" . 'counsel-minibuffer-history))
-  :config
-    (counsel-mode)
-    (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
-
-(use-package ivy-prescient
-  :demand
-  :after ivy
-  :custom
-    (ivy-prescient-enable-filtering nil)
-    ;; Here are commands that I don't want to get sorted
-    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
-  :config
-    (prescient-persist-mode 1)
-    (ivy-prescient-mode 1))
-
-(use-package hl-todo
-  :hook ((org-mode . hl-todo-mode)
-         (prog-mode . hl-todo-mode))
-  :custom
-    (hl-todo-highlight-punctuation ":")
-    (hl-todo-keyword-faces
-    `(("TODO"       warning bold)
-      ("FIXME"      error bold)
-      ("HACK"       font-lock-constant-face bold)
-      ("REVIEW"     font-lock-keyword-face bold)
-      ("NOTE"       success bold)
-      ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package evil-org
   :after org
@@ -842,32 +919,35 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       (evil-define-key 'normal org-mode-map
         "gj" 'evil-next-visual-line
         "gk" 'evil-previous-visual-line
+        (kbd "C-j") 'org-next-visible-heading
+        (kbd "C-k") 'org-previous-visible-heading
+        (kbd "C-S-J") 'org-forward-heading-same-level
+        (kbd "C-S-K") 'org-backward-heading-same-level
         (kbd "M-h") 'org-metaleft
         (kbd "M-j") 'org-metadown
         (kbd "M-k") 'org-metaup
         (kbd "M-l") 'org-metaright
-        (kbd "M-S-h") 'org-shiftmetaleft
-        (kbd "M-S-j") 'org-shiftmetadown
-        (kbd "M-S-k") 'org-shiftmetaup
-        (kbd "M-S-l") 'org-shiftmetaright
+        (kbd "M-H") 'org-shiftmetaleft
+        (kbd "M-J") 'org-shiftmetadown
+        (kbd "M-K") 'org-shiftmetaup
+        (kbd "M-L") 'org-shiftmetaright
         (kbd "M-<return>") 'org-return))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
-    (defun custom/org-return-follow-link ()
-      "If point is on a link, open it. Otherwise, insert a newline.\nIt's used only for following links in tables by pressing RET."
+    (defun custom/org-good-return ()
+      "`org-return' that allows for following links in table."
       (interactive)
-      (if (org-in-regexp org-link-any-re 1)
-          (org-open-at-point)
-          (org-return)))
+      (if (org-at-table-p)
+          (if (org-in-regexp org-link-any-re 1)
+              (org-open-at-point)
+            (org-return))
+        (org-return))))
 
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (local-set-key (kbd "RET") 'custom/org-return-follow-link)))
 
     ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
     ;; Setting RETURN key in org-mode to follow links
-    (setq org-return-follows-link t))
+    ;; (setq org-return-follows-link t)
 
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
@@ -890,7 +970,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package org-appear
   :after org
-  :hook (org-mode . (lambda () (org-appear-mode t)))
+  :hook (org-mode . org-appear-mode)
   :custom
     (org-appear-trigger 'manual)
     (org-appear-autolinks t)
@@ -912,7 +992,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package org-modern
   :after org
-  :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
+  :hook (org-mode . org-modern-mode)
   :custom-face
     (org-modern-label ((t (:height 1.2))))
   :custom
@@ -923,7 +1004,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package org-modern-indent
   :after org
   :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-modern-hook #'org-modern-indent-mode t))
+  :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
 
 (use-package org-roam
   :after org
@@ -942,23 +1023,24 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (org-roam-setup)
     (evil-collection-org-roam-setup)
     (require 'org-roam-export)
-    (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3))))
+    ;; if the file is dailie then increase text's size automatically
+    (require 'org-roam-dailies)
+    (add-hook 'org-roam-find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3)))))
 
 (use-package org-superstar
   :after org
-  :hook (org-mode . (lambda () (org-superstar-mode t)))
+  ;; :hook (org-mode . (lambda () (org-superstar-mode t)))
+  :hook (org-mode . org-superstar-mode)
   :custom
     (org-superstar-remove-leading-stars t)
-  :config
-    (setq org-superstar-item-bullet-alist
+    (org-superstar-item-bullet-alist
       '((?+ . ?✸)
         (?* . ?•)
         (?- . ?●))))
 
-(quelpa '(org-yt :fetcher github :repo "TobiasZawada/org-yt"))
 (use-package org-yt
-  :ensure nil
   :after org
+  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
   :config
     (require 'org-yt)
 
@@ -1005,9 +1087,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    (org-mode . (lambda () (org-indent-mode t)))
-    ;; :bind
-    ;;   ([remap org-insert-heading-respect-content] . org-meta-return)
+    (org-mode . org-indent-mode)
+    ;; after refiling and archiving tasks agenda files aren't saves, I fix that
+    (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
+    (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
+    :bind
+      ([remap org-return] . custom/org-good-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1079,19 +1164,23 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (org-insert-heading-respect-content nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
+    (org-html-validation-link nil)
     (org-pretty-entities t)
     (org-startup-with-inline-images t)
     (org-cycle-inline-images-display t)
+    (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
     (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
-    (org-ellipsis " •")
+    ;; (org-ellipsis " •")
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
     (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
     (org-return-follows-link t)
+    (org-M-RET-may-split-line nil)
+    (org-insert-heading-respect-content t)
     (org-tags-column 0)
     (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
     (org-confirm-babel-evaluate nil)
@@ -1156,33 +1245,17 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                              :scale (expt text-scale-mode-step
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
-    (plist-put org-format-latex-options :background nil)
+    (plist-put org-format-latex-options :background nil))
 
-    (defvar custom/org-bold-symbol "*"
-      "Default symbol for `custom/org-format-in-region' function.")
+;; (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
+;;   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
+;;   (let ((result (apply orig-func args)))
+;;     (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
+;;       (evil-insert-state))
+;;     result))
 
-    (defun custom/org-format-in-region (&optional symbol)
-      "Add symbols before and after the selected text."
-      (interactive)
-      (setq symbol (or symbol
-                       (read-string "Enter symbol: " custom/org-bold-symbol)))
-      (when (region-active-p)
-        (save-excursion
-          (goto-char (region-end))
-          (insert symbol)
-          (goto-char (region-beginning))
-          (insert symbol)))
-      (deactivate-mark)))
-
-(defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
-  "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
-  (let ((result (apply orig-func args)))
-    (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
-      (evil-insert-state))
-    result))
-
-(advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
-(advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+;; (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
+;; (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
@@ -1205,15 +1278,20 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :config
     (counsel-projectile-mode 1))
 
-(use-package rainbow-delimiters
-  :after prog-mode)
-
-(use-package rainbow-mode
-  :diminish
-  :hook org-mode prog-mode)
-
 (add-to-list 'display-buffer-alist
-             '("*(Backtrace|Compile-log|Messages|Warnings)*"
+             '("*Messages*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Compile-log*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Backtrace*"
+               (display-buffer-at-bottom)
+               (window-height . 12)))
+(add-to-list 'display-buffer-alist
+             '("*Warnings*"
                (display-buffer-at-bottom)
                (window-height . 12)))
 (add-to-list 'display-buffer-alist
@@ -1239,6 +1317,9 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   (ad-set-arg 1 t))
 (defadvice compile (after ad-compile-smart activate)
   "Advises `compile' so it moves to the compilation buffer."
+  (switch-to-buffer-other-window "*compilation*"))
+(defadvice recompile (after compile-command activate)
+  "Advises `recompile' so it moves to the compilation buffer."
   (switch-to-buffer-other-window "*compilation*"))
 
 (use-package quickrun
@@ -1269,7 +1350,7 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (add-hook 'python-ts-mode-hook 'eglot-ensure)
 (add-hook 'bash-ts-mode-hook 'eglot-ensure)
 (add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'mhtml-mode-hook 'eglot-ensure)
+(add-hook 'html-mode-hook 'eglot-ensure)
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1357,9 +1438,9 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 
 (use-package eshell
   :custom
-    (eshell-directory-name "~/.config/eshell/")
-    (eshell-rc-script "~/.config/eshell/profile")    ;; your profile for eshell; like a bashrc for eshell.
-    (eshell-aliases-file "~/.config/eshell/aliases") ;; sets an aliases file for the eshell.
+    (eshell-directory-name (concat user-emacs-directory "eshell"))
+    (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell.
+    (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell.
     (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
     (eshell-last-dir-ring-file-name (concat user-share-emacs-directory "eshell-lastdir"))
     (eshell-history-size 5000)
@@ -1367,18 +1448,18 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
-    ;; (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less")))
+    ;; (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less"))
     ;; :config
     ;; (evil-set-initial-state 'eshell-mode 'emacs)
   :config
     (eat-eshell-mode))
 
-(use-package eshell-toggle
-  :custom
-    (eshell-toggle-size-fraction 3)
-    (eshell-toggle-use-projectile-root t)
-    (eshell-toggle-run-command nil)
-    (eshell-toggle-init-function #'eshell-toggle-init-eshell))
+;; (use-package eshell-toggle
+;;   :custom
+;;     (eshell-toggle-size-fraction 3)
+;;     (eshell-toggle-use-projectile-root nil)
+;;     (eshell-toggle-run-command nil)
+;;     (eshell-toggle-init-function #'eshell-toggle-init-eshell))
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -1389,11 +1470,9 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   :after eshell)
 
 (use-package vterm
-  :defer t
   :config
     (setq shell-file-name "/bin/bash"
           vterm-max-scrollback 5000))
-    ;; (add-hook 'vterm-mode-hook (lambda () (setq evil-default-state 'emacs))))
 
 (use-package vterm-toggle
   :after vterm
@@ -1419,60 +1498,6 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
                   (window-height . 0.4))))
 
 (use-package sudo-edit)
-
-(use-package doom-themes
-  :demand
-  :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-    ;; Enable custom neotree theme (all-the-icons must be installed!)
-    (doom-themes-neotree-config)
-    ;; or for treemacs users
-    ;;(setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-    ;;(doom-themes-treemacs-config)
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config))
-(use-package ewal-doom-themes :demand)
-(use-package ewal
-  :demand
-  :config
-    (set-face-attribute 'line-number-current-line nil
-      :foreground (ewal-load-color 'comment)
-      :inherit 'default)
-    (set-face-attribute 'line-number nil
-      :foreground (ewal--get-base-color 'green)
-      :inherit 'default))
-
-(defvar real-theme nil
-  "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
-
-(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
-(load-theme real-theme t)
-
-(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
-
-(use-package which-key
-  :diminish
-  :demand
-  :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order #'which-key-key-order-alpha)
-    (which-key-sort-uppercase-first nil)
-    (which-key-add-column-padding 1)
-    (which-key-max-display-columns nil)
-    (which-key-min-display-lines 6)
-    (which-key-side-window-slot -10)
-    (which-key-side-window-max-height 0.25)
-    (which-key-idle-delay 0.8)
-    (which-key-max-description-length nil)
-    (which-key-allow-imprecise-window-fit nil)
-    (which-key-separator "  ")
-    (which-key-idle-delay 0.5)
-  :config
-    (which-key-mode 1))
 
 (use-package buffer-move)
 

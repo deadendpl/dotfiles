@@ -1,0 +1,27 @@
+alias vim find-file $1
+
+alias man batman $*
+alias ip ip -color=auto $*
+alias grep grep --color=auto $*
+alias cllr clear && l $*
+alias clr clear $*
+alias l exa --all --long --header --icons --git --group-directories-first --color-scale $*
+alias nclean sudo nix-collect-garbage -d $*
+alias nup sudo nixos-rebuild switch $*
+alias yinst yay -S $*
+alias listaur yay -Qqem $*
+alias pclean yay -Sc && porphan $*
+alias porphan yay -Qtdq $*
+alias psearch yay -Ss $*
+alias pinstalled yay -Q $*
+alias pup yay -Syu $*
+alias ppu yay -Rs $*
+alias pinst yay -S $*
+alias asearch apt search $*
+alias ainstalled apt list --installed $*
+alias aupg sudo apt upgrade $*
+alias aupd sudo apt update $*
+alias aup sudo apt update && sudo apt upgrade $*
+alias aautopu sudo apt autopurge $*
+alias apu sudo apt purge $*
+alias ainst sudo apt install $*
