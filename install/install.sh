@@ -72,6 +72,7 @@ sudo pacman -S --noconfirm hyprland \
                            foot \
                            networkmanager \
                            qutebrowser \
+                           python-adblock \
                            mpv \
                            mpv-mpris \
                            polkit-gnome \
@@ -134,7 +135,8 @@ wpg-install.sh -g
 yay -S --noconfirm appimagelauncher-bin \
                    keepassxc \
                    syncthing \
-                   gnome-disk-utility
+                   gnome-disk-utility \
+                   freefilesync
                    # syncthing-gtk
 
 touchpad_conf='Section "InputClass"

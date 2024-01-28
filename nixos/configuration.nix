@@ -206,7 +206,7 @@ environment.systemPackages = with pkgs; [
   unstable.hyprland
   unstable.hyprpicker
   foot
-  mako
+  # mako
   unstable.neovim
   unstable.waybar
   rofi-wayland
@@ -224,8 +224,8 @@ environment.systemPackages = with pkgs; [
   swaybg
   swayimg
   swaynotificationcenter
-  swaylock
-  swaylock-fancy
+  # swaylock
+  # swaylock-fancy
   gnome.file-roller
   papirus-icon-theme
   dracula-theme
@@ -246,6 +246,7 @@ environment.systemPackages = with pkgs; [
   gammastep
   pcmanfm
   light
+  freefilesync
   syncthing
   libnotify
   keepassxc
@@ -257,16 +258,17 @@ environment.systemPackages = with pkgs; [
 
   # qutebrowser
   unstable.qutebrowser
-  python311Packages.inotify-simple
-  python311Packages.psutil
-  python311Packages.python-daemon
+  # python311Packages.inotify-simple
+  # python311Packages.psutil
+  # python311Packages.python-daemon
 
   # android
   android-tools
-  unstable.scrcpy
+  # unstable.scrcpy
 
-  # for latex in emacs
-  #texlive.combined.scheme-medium
+  # latex in emacs
+  # texliveMedium
+  # perl5.38.2-LaTeXML
   emacs29
   # this is for installing elisp packages from nix repos instead of normal elisp repos
   # (pkgs.emacsWithPackagesFromUsePackage {

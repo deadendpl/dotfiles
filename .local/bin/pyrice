@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# wal-tile() {
-#   wal -n -i "$@"
-#   killall swaybg
-#   swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
-# }
-
 wpg-tile() {
   local wallpaper_path="$1"
 
@@ -19,8 +13,6 @@ wpg-tile() {
 
   wpg --backend haishoku -n -s "$wallpaper_path"
   wal --cols16 --backend haishoku -ne -i "$wallpaper_path"
-  killall swaybg
-  swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 }
 
 file-line-change() {
@@ -54,6 +46,8 @@ file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import
 # zathura
 file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
+killall swaybg
+swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 $HOME/.config/scripts/hypr/waybar-start.sh
 swaync-client -rs
 swaync-client -R

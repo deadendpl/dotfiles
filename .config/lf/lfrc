@@ -1,7 +1,4 @@
 # -*- mode: conf-unix -*-
-# sixel support
-set sixel true
-
 # showing hidden files
 set hidden!
 
@@ -119,6 +116,9 @@ set previewer ctpv
 set cleaner ctpvclear
 &ctpv -s $id
 &ctpvquit $id
+
+# sixel support
+set sixel true
 
 # setting exa for details
 # cmd on-select &{{

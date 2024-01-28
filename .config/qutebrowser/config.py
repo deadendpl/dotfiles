@@ -126,9 +126,9 @@ c.scrolling.smooth = False
 c.scrolling.bar = "overlay"
 
 # custom bindings
-bindings = {
-  "<Ctrl-Shift-l>": "spawn --userscript bitwarden.py",
-}
+# bindings = {
+#   "<Ctrl-Shift-l>": "spawn --userscript bitwarden.py",
+# }
 
 # theme
 config.source('qutewal.py')
@@ -140,8 +140,9 @@ c.tabs.last_close = "close"
 c.auto_save.session = True
 
 c.content.default_encoding = "utf-8"
+c.content.blocking.method = "both"
 
-c.editor.command = ["emacsclient", "-c", "-a", '"nvim"', "{}"]
+c.editor.command = ["emacsclient", "-c", "-a", "'nvim'", "{}"]
 
 c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"
 
@@ -150,3 +151,4 @@ config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
 config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 870444FF', mode='insert')
 config.bind('pw', 'spawn --userscript qute-keepassxc --key 870444FF', mode='normal')
 config.bind('gr', 'config-source', mode='normal')
+config.bind('cn', 'clear-messages', mode='normal')

@@ -87,7 +87,7 @@ alias pi='ping wp.pl'
 
 if set -q INSIDE_EMACS
   or set -q NVIM
-  fish_default_key_bindings
+    fish_default_key_bindings
 else
   fish_vi_key_bindings
   set fish_cursor_replace_one underscore

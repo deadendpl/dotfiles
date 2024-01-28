@@ -38,6 +38,7 @@ Most of the stuff will get redirected here.")
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
+              fast-but-imprecise-scrolling t
               ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
               recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
               bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
@@ -546,20 +547,26 @@ Most of the stuff will get redirected here.")
   :custom
     (ivy-use-virtual-buffers t)
     (ivy-count-format "(%d/%d) ")
+    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
     (enable-recursive-minibuffers t)
   :config
-    (ivy-mode))
+    (ivy-mode)
+    ;; preview of faces
+    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
 
 (use-package ivy-rich
   :after ivy
-  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+  :init (ivy-rich-mode 1)
   :custom
-    (ivy-virtual-abbreviate 'full
-     ivy-rich-switch-buffer-align-virtual-buffer t
-     ivy-rich-path-style 'abbrev)
+    (ivy-virtual-abbreviate 'full)
+    (ivy-rich-switch-buffer-align-virtual-buffer t)
+    (ivy-rich-path-style 'abbrev)
   :config
-    (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer))
+    ;; this is obsolete, under it there's a rewrite
+    ;; (ivy-set-display-transformer 'ivy-switch-buffer
+    ;;                              'ivy-rich-switch-buffer-transformer)
+    (ivy-configure 'ivy-switch-buffer
+      :display-transformer-fn 'ivy-rich-switch-buffer-transformer))
 
 (use-package counsel
   :after ivy
@@ -578,9 +585,10 @@ Most of the stuff will get redirected here.")
   :demand
   :after ivy
   :custom
+    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
     (ivy-prescient-enable-filtering nil)
     ;; Here are commands that I don't want to get sorted
-    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer))
+    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
   :config
     (prescient-persist-mode 1)
     (ivy-prescient-mode 1))
@@ -672,10 +680,11 @@ Most of the stuff will get redirected here.")
   :after org
   :init
     (setq org-roam-v2-ack t
-          org-roam-directory "~/storage/shared/org-roam")
+          org-roam-directory "~/org-roam")
   :custom
     (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
     (org-roam-dailies-directory "journals/")
+    (org-roam-node-display-template "${title} ${tags}")
     (org-roam-capture-templates
       '(("d" "default" plain "%?"
          :target (file+head "${slug}.org"
@@ -730,7 +739,7 @@ Most of the stuff will get redirected here.")
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
-    (org-directory "~/org-roam/")
+    (org-directory "~/storage/shaerd/org-roam/")
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do

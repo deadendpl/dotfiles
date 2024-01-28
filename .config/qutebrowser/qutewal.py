@@ -339,6 +339,11 @@ if os.path.isfile(colors_absolute):
     # Type: QtColor
     c.colors.webpage.bg = foreground
 
+    c.colors.contextmenu.disabled.fg = cursor
+    c.colors.contextmenu.menu.bg = background
+    c.colors.contextmenu.menu.fg = foreground
+    c.colors.contextmenu.selected.bg = blue
+
     if qutewal_dynamic_loading or bool(os.getenv('QUTEWAL_DYNAMIC_LOADING')):
         import signal
         import subprocess

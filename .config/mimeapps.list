@@ -33,5 +33,7 @@ application/xhtml+xml=org.qutebrowser.qutebrowser.desktop
 application/x-xpinstall=org.qutebrowser.qutebrowser.desktop
 application/json=org.qutebrowser.qutebrowser.desktop
 
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop
+
 text/plain=emacsclient.desktop
 inode/directory=pcmanfm.desktop

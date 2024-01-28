@@ -322,7 +322,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
           :wk "Open emacs init.el")
   "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
   "f l" '(counsel-locate :wk "Locate a file")
-  "f p" '(counsel-find-file (user-emacs-directory) :wk "Config directory")
+  "f p" '((lambda () (interactive) (counsel-find-file (user-emacs-directory))) :wk "Config directory")
   "f r" '(counsel-recentf :wk "Find recent files")
   "f u" '(sudo-edit-find-file :wk "Sudo find file")
   "f U" '(sudo-edit :wk "Sudo edit file"))
@@ -510,7 +510,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "t n" '(neotree-toggle :wk "Neotree")
   "t r" '(rainbow-mode :wk "Rainbow mode")
   "t t" '(visual-line-mode :wk "Word Wrap")
-  "t v" '(vterm-toggle :wk "Vterm")
+  "t v" '(vterm :wk "Vterm")
   "t z" '(writeroom-mode :wk "Zen mode"))
 
 (custom/leader-keys
@@ -597,6 +597,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package mixed-pitch
   :hook (org-mode . mixed-pitch-mode)
   :config
+    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
@@ -712,6 +713,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :custom
     (ivy-use-virtual-buffers t)
     (ivy-count-format "(%d/%d) ")
+    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
     (enable-recursive-minibuffers t)
   :config
     (ivy-mode)
@@ -720,14 +722,17 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package ivy-rich
   :after ivy
-  :init (ivy-rich-mode 1) ;; this gets us descriptions in M-x.
+  :init (ivy-rich-mode 1)
   :custom
-    (ivy-virtual-abbreviate 'full
-     ivy-rich-switch-buffer-align-virtual-buffer t
-     ivy-rich-path-style 'abbrev)
+    (ivy-virtual-abbreviate 'full)
+    (ivy-rich-switch-buffer-align-virtual-buffer t)
+    (ivy-rich-path-style 'abbrev)
   :config
-    (ivy-set-display-transformer 'ivy-switch-buffer
-                                 'ivy-rich-switch-buffer-transformer))
+    ;; this is obsolete, under it there's a rewrite
+    ;; (ivy-set-display-transformer 'ivy-switch-buffer
+    ;;                              'ivy-rich-switch-buffer-transformer)
+    (ivy-configure 'ivy-switch-buffer
+      :display-transformer-fn 'ivy-rich-switch-buffer-transformer))
 
 (use-package counsel
   :after ivy
@@ -746,6 +751,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :demand
   :after ivy
   :custom
+    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
     (ivy-prescient-enable-filtering nil)
     ;; Here are commands that I don't want to get sorted
     (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
@@ -845,7 +851,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 (use-package which-key
   :diminish
-  :demand
+  :defer 5
   :custom
     (which-key-side-window-location 'bottom)
     (which-key-sort-order #'which-key-key-order-alpha)
@@ -931,7 +937,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         (kbd "M-J") 'org-shiftmetadown
         (kbd "M-K") 'org-shiftmetaup
         (kbd "M-L") 'org-shiftmetaright
-        (kbd "M-<return>") 'org-return))
+        (kbd "M-<return>") 'org-meta-return))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
@@ -1014,6 +1020,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
   :custom
     (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
     (org-roam-dailies-directory "journals/")
+    (org-roam-node-display-template "${title} ${tags}")
     (org-roam-capture-templates
       '(("d" "default" plain "%?"
          :target (file+head "${slug}.org"
@@ -1130,7 +1137,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         "YES(y)"
         "NO(n)")))
     (org-capture-templates ;; need to rework this since my agenda structure changed
-     '(("t" "Todo" entry (file "~/org-roam/agenda-inbox.org")
+     '(("t" "Todo" entry (file "agenda-inbox.org")
         "* TODO %?\n %a")))
     ;; =========== org agenda ===========
     (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "agenda-inbox.org" org-roam-directory)))
@@ -1176,17 +1183,20 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
     (org-preview-latex-default-process 'dvisvgm)
+    (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
     (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
     (org-return-follows-link t)
     (org-M-RET-may-split-line nil)
     (org-insert-heading-respect-content t)
     (org-tags-column 0)
-    (org-babel-load-languages '((emacs-lisp . t) (shell . t)))
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C++ . t)))
+    (org-babel-C++-compiler "g++")
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
     (org-export-preserve-breaks t)
     (org-export-allow-bind-keywords t)
+    (org-export-with-toc nil)
     (org-export-backends (quote (ascii html icalendar latex odt md)))
     ;; (org-export-with-properties t)
     (org-startup-folded 'overview)
@@ -1246,6 +1256,9 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
     (plist-put org-format-latex-options :background nil))
+
+;; it's for html source block syntax highlighting
+(use-package htmlize)
 
 ;; (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
 ;;   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
@@ -1473,29 +1486,6 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   :config
     (setq shell-file-name "/bin/bash"
           vterm-max-scrollback 5000))
-
-(use-package vterm-toggle
-  :after vterm
-  :custom
-    (vterm-toggle-fullscreen-p nil)
-    (vterm-toggle-scope 'project)
-  :config
-  ;; When running programs in Vterm and in 'normal' mode, make sure that ESC
-  ;; kills the program as it would in most standard terminal programs.
-  (evil-define-key 'normal vterm-mode-map (kbd "<escape>") 'vterm--self-insert)
-  (add-to-list 'display-buffer-alist
-               '((lambda (buffer-or-name _)
-                     (let ((buffer (get-buffer buffer-or-name)))
-                       (with-current-buffer buffer
-                         (or (equal major-mode 'vterm-mode)
-                             (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
-                  (display-buffer-reuse-window display-buffer-at-bottom)
-                  ;;(display-buffer-reuse-window display-buffer-in-direction)
-                  ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                  ;;(direction . bottom)
-                  ;;(dedicated . t) ;dedicated is supported in emacs27
-                  (reusable-frames . visible)
-                  (window-height . 0.4))))
 
 (use-package sudo-edit)
 
