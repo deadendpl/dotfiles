@@ -887,6 +887,8 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
     ;;(doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
+
+(unless (termux-p)
 (use-package ewal-doom-themes :demand)
 (use-package ewal
   :demand
@@ -897,11 +899,15 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
     (set-face-attribute 'line-number nil
       :foreground (ewal--get-base-color 'green)
       :inherit 'default))
+)
 
 (defvar real-theme nil
   "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
-(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
+(if (termux-p)
+    (setq real-theme 'doom-dracula) ;; for termux
+  (setq real-theme 'ewal-doom-one)) ;; for PC
+
 (load-theme real-theme t)
 #+end_src
 
