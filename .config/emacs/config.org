@@ -811,6 +811,7 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 [[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
 I turn that mode in Org Mode.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package mixed-pitch
   :hook (org-mode . mixed-pitch-mode)
   :config
@@ -818,6 +819,7 @@ I turn that mode in Org Mode.
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
     (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
+)
 #+end_src
 ** HIGHLIGHT TODO
 Adding highlights to TODO and related words.
