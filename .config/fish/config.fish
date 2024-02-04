@@ -2,6 +2,7 @@
 
 if set -q TERMUX_VERSION
   set fish_greeting
+  export TERM=xterm-256color
 else
   if status is-interactive
     function fish_greeting
