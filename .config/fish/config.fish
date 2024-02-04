@@ -1,7 +1,13 @@
 # -*- mode: sh -*-
-if status is-interactive
-  function fish_greeting
-    echo "Why won't you do it in eshell?" | pokemonsay
+
+if set -q TERMUX_VERSION
+  set fish_greeting
+  export TERM=xterm-256color
+else
+  if status is-interactive
+    function fish_greeting
+      echo "Why won't you do it in eshell?" | pokemonsay
+    end
   end
   starship init fish | source
 end
@@ -13,7 +19,6 @@ set PATH ~/.local/bin $PATH
 set EDITOR emacsclient -t -a "nvim"
 set VISUAL emacsclient -c -a "emacs"
 
-set fish_greeting
 # fish_vi_key_bindings
 
 # going to last directory from lf
@@ -44,18 +49,29 @@ alias aupg='sudo apt upgrade'
 alias ainstalled='apt list --installed'
 alias asearch='apt search'
 
-# pacman and yay
-alias pinst='yay -S'
-alias ppu='yay -Rs'
-alias pup='yay -Syu'
-alias pinstalled='yay -Q'
-function pinsearch
-  yay -Q | grep $argv
+# pacman and yay on Arch/pkg on Termux
+if set -q TERMUX_VERSION
+  alias pinst='pkg install'
+  alias ppu='pkg uninstall'
+  alias pautopu='pkg autoclean'
+  alias pup='pkg upgrade'
+  alias pupd='pkg update'
+  alias pupg='pkg upgrade'
+  alias pinstalled='pkg list --installed'
+  alias psearch='pkg search'
+else
+  alias pinst='yay -S'
+  alias ppu='yay -Rs'
+  alias pup='yay -Syu'
+  alias pinstalled='yay -Q'
+  function pinsearch
+    yay -Q | grep $argv
+  end
+  alias psearch='yay -F'
+  alias porphan='yay -Qtdq'
+  alias pclean='yay --noconfirm -Sc && porphan | yay --noconfirm -Rns -'
+  alias listaur='yay -Qqem'
 end
-alias psearch='yay -F'
-alias porphan='yay -Qtdq'
-alias pclean='yay --noconfirm -Sc && porphan | yay --noconfirm -Rns -'
-alias listaur='yay -Qqem'
 
 # nix
 alias ninst='nix-env -iA'
@@ -65,7 +81,7 @@ alias nclean='sudo nix-collect-garbage -d'
 # other
 alias cp='cp -v'
 alias connect='nmcli device wifi connect'
-alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
+alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
 alias lf='lfcd'
 alias cp='cp-p'
 alias clr='clear'
