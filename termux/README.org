@@ -198,8 +198,8 @@ set -gx EDITOR 'emacsclient -c -t -a "nvim"'
 
 # apt
 alias pinst='pkg install'
-alias ppu='pkg purge'
-alias pautopu='pkg autopurge'
+alias ppu='pkg uninstall'
+alias pautopu='pkg autoclean'
 alias pup='pkg upgrade'
 alias pupd='pkg update'
 alias pupg='pkg upgrade'
