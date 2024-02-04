@@ -1007,6 +1007,7 @@ Both are completion frameworks that make your life easier when doing M-x for exa
 * DASHBOARD
 [[https://github.com/emacs-dashboard/emacs-dashboard][Dashboard]] is nice and extensible dahboard.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package dashboard
   ;; :demand
   :custom
@@ -1035,12 +1036,14 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     ;; (:map dashboard-mode-map
     ;;   ([remap dashboard-next-line] . 'widget-forward)
     ;;   ([remap dashboard-previous-line] . 'widget-backward)))
+)
 #+end_src
 * DIRED
 [[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
 +I don't currently use that since it displays all files as buffers and doesn't kill them.+
 It kills the buffers when =dirvish-quit= is called or when you enter the file.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package dirvish
   :init (dirvish-override-dired-mode)
   :custom
@@ -1049,6 +1052,7 @@ It kills the buffers when =dirvish-quit= is called or when you enter the file.
   :config
     (evil-collection-define-key 'normal 'dirvish-mode-map
       "q"  'dirvish-quit))
+)
 #+end_src
 
 I still do some configurations because dirvish still at its core uses dired and its keybindings.
@@ -1116,6 +1120,7 @@ I still do some configurations because dirvish still at its core uses dired and 
 ** WHICH-KEY
 [[https://github.com/justbur/emacs-which-key][It]] shows you available keybindings, the default ones and the ones you create.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package which-key
   :diminish
   :defer 5
@@ -1135,6 +1140,7 @@ I still do some configurations because dirvish still at its core uses dired and 
     (which-key-idle-delay 0.5)
   :config
     (which-key-mode 1))
+)
 #+end_src
 * DOOM-MODELINE
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
@@ -1160,10 +1166,12 @@ Though Emacs 29 has some emoji support.
 * ELFEED
 [[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package elfeed
   :custom
     (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
     (elfeed-search-filter "@6-months-ago"))
+)
 #+end_src
 * GAMES
 ** MINESWEEPER
@@ -1172,17 +1180,21 @@ Though Emacs 29 has some emoji support.
 - Mark a square with m.
 - Reveal all the neighbors of a square by pressing c.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package minesweeper
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
+)
 #+end_src
 ** TETRIS
 Tetris is built-in.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package tetris
   :ensure nil
   :config
     (evil-set-initial-state 'tetris-mode 'insert))
+)
 #+end_src
 * GIT STUFF
 [[https://magit.vc/][Magit]] is the best git client in emacs and probably ever
@@ -1403,6 +1415,7 @@ It's set up so it will display markers when entering insert mode.
 [[https://github.com/minad/org-modern][It]] prettifies almost everything.
 If you don't use the same font as me then you need to edit ~org-modern-label~'s height.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package org-modern
   :after org
   ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
@@ -1413,16 +1426,19 @@ If you don't use the same font as me then you need to edit ~org-modern-label~'s 
     (org-modern-star nil)
     (org-modern-list nil)
     (org-modern-table nil))
+)
 #+end_src
 
 But it doesn't work well with =org-indent-mode= which indents text to headers.
 Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
 Each time I open org file it shows error but it works.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package org-modern-indent
   :after org
   :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
   :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
+)
 #+end_src
 ** ORG ROAM
 [[https://www.orgroam.com/][Org roam]] is nice wiki-like note management thing. Reminds me of [[https://obsidian.md][Obsidian]].
@@ -1430,8 +1446,10 @@ Each time I open org file it shows error but it works.
 (use-package org-roam
   :after org
   :init
-    (setq org-roam-v2-ack t
-          org-roam-directory "~/org-roam")
+    (setq org-roam-v2-ack t)
+    (if (termux-p)
+        (setq org-roam-directory "~/storage/shared/org-roam")
+      (setq org-roam-directory "~/org-roam"))
   :custom
     (org-roam-db-location (expand-file-name "org/org-roam.db" user-share-emacs-directory))
     (org-roam-dailies-directory "journals/")
@@ -1455,6 +1473,7 @@ Each time I open org file it shows error but it works.
 ** ORG SUPERSTAR
 [[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package org-superstar
   :after org
   ;; :hook (org-mode . (lambda () (org-superstar-mode t)))
@@ -1465,10 +1484,12 @@ Each time I open org file it shows error but it works.
       '((?+ . ?✸)
         (?* . ?•)
         (?- . ?●))))
+)
 #+end_src
 ** ORG YT
 +It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.+
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package org-yt
   :after org
   :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
@@ -1494,6 +1515,7 @@ Each time I open org file it shows error but it works.
     (org-link-set-parameters
      "imghttps"
      :image-data-fun #'org-image-link))
+)
 #+end_src
 ** TOC
 Table of contents after after typing =:toc:= in header
@@ -1757,6 +1779,7 @@ A whole lot of other stuff
 [[https://github.com/bbatsov/projectile][Projectile]] is a project interaction library for Emacs.
 NOTE that many projectile commands do not work if you have set "fish" as the ~shell-file-name~ for Emacs. I had initially set "fish" as the "shell-file-name" in the Vterm section of this config, but oddly enough I changed it to "bin/sh" and projectile now works as expected, and Vterm still uses "fish" because my default user "sh" on my Linux system is "fish".
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package projectile
   :diminish projectile-mode
   :custom
@@ -1770,8 +1793,12 @@ NOTE that many projectile commands do not work if you have set "fish" as the ~sh
   :after projectile
   :config
     (counsel-projectile-mode 1))
+)
 #+end_src
 * REAL PROGRAMMING
+#+begin_src emacs-lisp
+(unless (termux-p)
+#+end_src
 ** COMPILING
 Some modes that don't belong anywhere are made smaller including compiling related ones.
 #+begin_src emacs-lisp
@@ -1974,14 +2001,19 @@ This remaps specified major modes to its tree-sitter counterparts
 ;;     (evil-collection-define-key 'normal 'mhtml-mode-map
 ;;       "TAB" 'emmet-expand-line))
 #+end_src
+#+begin_src emacs-lisp
+)
+#+end_src
 * SHELLS AND TERMINALS
 ** Shell
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package company-shell
   :after sh-mode
   :custom
     (add-to-list 'company-backends 'company-shell)
     (add-to-list 'company-backends 'company-shell-env))
+)
 #+end_src
 ** Eshell
 Eshell is an Emacs 'shell' that is written in Elisp.
@@ -2026,10 +2058,12 @@ Probably the most comfy terminal experience in Emacs
 ** Vterm
 Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x ansi-term= and =M-x vterm=.
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package vterm
   :config
     (setq shell-file-name "/bin/bash"
           vterm-max-scrollback 5000))
+)
 #+end_src
 ** Vterm-Toggle :ARCHIVE:
 [[https://github.com/jixiuf/vterm-toggle][vterm-toggle]] toggles the vterm buffer at the bottom of the screen
@@ -2173,7 +2207,9 @@ _q_uit        _e_qualize        _]_forward      ^
 * WRITEROOM
 [[https://github.com/joostkremers/writeroom-mode][Writeroom-mode]] makes a nice writing experience by making big margins and hiding almost everything
 #+begin_src emacs-lisp
+(unless (termux-p)
 (use-package writeroom-mode)
+)
 #+end_src
 * CREDITS
 - DistroTube with his [[https://farside.link/invidious/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][Emacs Configuration videos]]
