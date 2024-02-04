@@ -1576,7 +1576,7 @@ A whole lot of other stuff
     (org-list-dt ((t (:weight bold))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
-    (org-directory "~/org-roam/")
+    (org-directory org-roam-directory)
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
