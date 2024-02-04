@@ -106,7 +106,9 @@ I'll disable some stuff for Termux specifically so I create a function that chec
 #+end_src
 ** Some modes turned on and off
 #+begin_src emacs-lisp
-(unless (termux-p) (scroll-bar-mode -1))                 ; Disable visible scrollbar
+(unless (termux-p)
+  (if (fboundp 'scroll-bar-mode)
+      (scroll-bar-mode -1)))         ; Disable visible scrollbar
 (tool-bar-mode -1)                   ; Disable the toolbar
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
