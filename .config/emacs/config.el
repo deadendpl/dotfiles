@@ -23,18 +23,18 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq-default recentf-save-file (concat user-share-emacs-directory "recentf") ; recentf file put somewhere else
-              bookmark-default-file (concat user-share-emacs-directory "bookmarks") ; bookmarks file put somewhere else
-              elfeed-db-directory (concat user-share-emacs-directory "elfeed") ; elfeed cache? directory
-              auto-save-list-file-prefix (concat user-share-emacs-directory "auto-save-list/.saves-")
-              prescient-save-file (concat user-share-emacs-directory "var/prescient-save.el")
-              custom-file (concat user-share-emacs-directory "custom.el") ; custom settings that emacs autosets put into it's own file
+(setq-default recentf-save-file (expand-file-name "recentf" user-share-emacs-directory) ; recentf file put somewhere else
+              bookmark-default-file (expand-file-name "bookmarks" user-share-emacs-directory) ; bookmarks file put somewhere else
+              elfeed-db-directory (expand-file-name "elfeed" user-share-emacs-directory) ; elfeed cache? directory
+              auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" user-share-emacs-directory)
+              prescient-save-file (expand-file-name "var/prescient-save.el" user-share-emacs-directory)
+              custom-file (expand-file-name "custom.el" user-share-emacs-directory) ; custom settings that emacs autosets put into it's own file
               backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (concat user-share-emacs-directory "tramp") ; tramp file put somewhere else
-              save-place-file (concat user-share-emacs-directory "places")
-              url-configuration-directory (concat user-share-emacs-directory "url") ; cache from urls (eww)
-              multisession-directory (concat user-share-emacs-directory "multisession")
-              transient-history-file (concat user-share-emacs-directory "transient/history.el"))
+              tramp-persistency-file-name (expand-file-name "tramp" user-share-emacs-directory) ; tramp file put somewhere else
+              save-place-file (expand-file-name "places" user-share-emacs-directory)
+              url-configuration-directory (expand-file-name "url" user-share-emacs-directory) ; cache from urls (eww)
+              multisession-directory (expand-file-name "multisession" user-share-emacs-directory)
+              transient-history-file (expand-file-name "transient/history.el" user-share-emacs-directory))
 
 (setq-default visible-bell nil ;; Set up the visible bell
               inhibit-startup-message nil ; default emacs startup message
@@ -55,7 +55,8 @@ Most of the stuff will get redirected here.")
               use-short-answers t ; replace yes-no prompts with y-n
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
-              sentence-end-double-space nil) ; sentences end with 1 space
+              sentence-end-double-space nil ; sentences end with 1 space
+              create-lockfiles nil) ; no files wiht ".#"
               ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
 
 ;; turn off line numbers in certain modes
@@ -115,7 +116,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; make utf-8 the coding system
-(prefer-coding-system 'utf-8)
+(set-terminal-coding-system  'utf-8)
+(set-keyboard-coding-system  'utf-8)
+(set-language-environment    'utf-8)
+(set-selection-coding-system 'utf-8)
+(setq locale-coding-system   'utf-8)
+(prefer-coding-system        'utf-8)
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -127,8 +133,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; Initialize package sources
 (require 'package)
 
-(setq package-user-dir (concat user-share-emacs-directory "packages/")
-      package-gnupghome-dir (concat user-share-emacs-directory "gpg")
+(setq package-user-dir (expand-file-name "packages/" user-share-emacs-directory)
+      package-gnupghome-dir (expand-file-name "gpg" user-share-emacs-directory)
       package-async t
       package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("elpa" . "https://elpa.gnu.org/packages/")
@@ -151,12 +157,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package gcmh
   :demand
-  :config (gcmh-mode 1))
+  :custom
+    (gcmh-mode 1)
+    (gcmh-idle-delay 10)
+    (gcmh-high-cons-threshold (* 32 1024 1024))
+    (gc-cons-percentage 0.8))
 
 (use-package quelpa
   :demand
   :custom
-    (quelpa-dir (concat user-share-emacs-directory "quelpa/"))
+    (quelpa-dir (expand-file-name "quelpa/" user-share-emacs-directory))
     (quelpa-checkout-melpa-p nil))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
@@ -675,7 +685,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
 (use-package company
-  :defer 2
+  :after prog-mode
   :diminish
   :custom
     (company-begin-commands '(self-insert-command))
@@ -691,7 +701,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :hook (company-mode . company-box-mode))
 
 (use-package ivy
-  :demand
+  :defer 2
   :diminish
   :bind
   ;; ivy-resume resumes the last Ivy-based completion.
@@ -699,7 +709,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
      ("C-x B" . ivy-switch-buffer-other-window)
      ("C-s" . swiper)
     :map ivy-minibuffer-map
-      ("TAB" . ivy-alt-done)
+      ;; ("TAB" . ivy-alt-done)
       ("C-l" . ivy-alt-done)
       ("C-j" . ivy-next-line)
       ("C-k" . ivy-previous-line)
@@ -760,7 +770,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (ivy-prescient-mode 1))
 
 (use-package dashboard
-  :demand
+  ;; :demand
   :custom
     (initial-buffer-choice (lambda () (dashboard-open)))
     (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
@@ -771,10 +781,10 @@ In fact, this might be a good time to pray to him.
 For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (dashboard-center-content t)
     (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items '(;; (recents  . 5)
+    (dashboard-items nil) ;;'( (recents  . 5)
                        ;; (bookmarks . 5)
                        ;; (projects . 5)
-                       (agenda . 5)))
+                       ;; (agenda . 5))
                        ;; (registers . 5)
   :config
     (dashboard-setup-startup-hook)
@@ -791,7 +801,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package dirvish
   :init (dirvish-override-dired-mode)
   :custom
-    (dirvish-cache-dir (concat user-share-emacs-directory "dirvish"))
+    (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
     (dirvish-attributes '(collapse git-msg file-time file-size))
   :config
     (evil-collection-define-key 'normal 'dirvish-mode-map
@@ -803,7 +813,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-lah --group-directories-first")
+    (dired-listing-switches "-aHl --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
   :config
     (defun custom/dired-go-to-home ()
@@ -878,7 +888,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 (use-package elfeed
   :custom
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://arne.me/articles/atom.xml"))
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
     (elfeed-search-filter "@6-months-ago"))
 
 (use-package minesweeper
@@ -1018,14 +1028,17 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (setq org-roam-v2-ack t
           org-roam-directory "~/org-roam")
   :custom
-    (org-roam-db-location (concat user-share-emacs-directory "org/org-roam.db"))
+    (org-roam-db-location (expand-file-name "org/org-roam.db" user-share-emacs-directory))
     (org-roam-dailies-directory "journals/")
-    (org-roam-node-display-template "${title} ${tags}")
+    (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
     (org-roam-capture-templates
       '(("d" "default" plain "%?"
          :target (file+head "${slug}.org"
                             "#+title: ${title}\n#+date: %U\n")
          :unnarrowed t)))
+    (org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %?" :target
+        (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
   :config
     (org-roam-setup)
     (evil-collection-org-roam-setup)
@@ -1094,7 +1107,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    (org-mode . org-indent-mode)
+    ;; (org-mode . org-indent-mode)
     ;; after refiling and archiving tasks agenda files aren't saves, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
@@ -1110,6 +1123,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-level-5 ((t (:inherit outline-5 :height 1.3))))
     (org-level-6 ((t (:inherit outline-5 :height 1.2))))
     (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-list-dt ((t (:weight bold))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
     (org-directory "~/org-roam/")
@@ -1136,7 +1150,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         "OKAY(o)"
         "YES(y)"
         "NO(n)")))
-    (org-capture-templates ;; need to rework this since my agenda structure changed
+    (org-capture-templates
      '(("t" "Todo" entry (file "agenda-inbox.org")
         "* TODO %?\n %a")))
     ;; =========== org agenda ===========
@@ -1169,34 +1183,41 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-refile-use-outline-path nil)
     (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
     (org-insert-heading-respect-content nil)
+    ;; no new lines when doing M-return
+    (org-blank-before-new-entry nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
     (org-startup-with-inline-images t)
+    (org-startup-indented t)
     (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
     (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
+    ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
+    (org-log-into-drawer t)
     ;; (org-ellipsis " •")
     (org-fontify-quote-and-verse-blocks t)
-    (org-preview-latex-image-directory (concat user-share-emacs-directory "org/lateximg/"))
+    (org-preview-latex-image-directory (expand-file-name "org/lateximg/" user-share-emacs-directory))
     (org-preview-latex-default-process 'dvisvgm)
     (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-    (org-id-locations-file (concat user-share-emacs-directory "org/.org-id-locations"))
+    (org-id-locations-file (expand-file-name "org/.org-id-locations" user-share-emacs-directory))
     (org-return-follows-link t)
     (org-M-RET-may-split-line nil)
     (org-insert-heading-respect-content t)
     (org-tags-column 0)
-    (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C++ . t)))
+    (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
     (org-babel-C++-compiler "g++")
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
+    (org-src-preserve-indentation t)
     (org-export-preserve-breaks t)
     (org-export-allow-bind-keywords t)
     (org-export-with-toc nil)
+    (org-export-with-smart-quotes t)
     (org-export-backends (quote (ascii html icalendar latex odt md)))
     ;; (org-export-with-properties t)
     (org-startup-folded 'overview)
@@ -1280,7 +1301,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package projectile
   :diminish projectile-mode
   :custom
-    (projectile-known-projects-file (concat user-share-emacs-directory "projectile-bookmarks.eld"))
+    (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
     (projectile-switch-project-action #'projectile-dired)
   :config (projectile-mode)
   :bind-keymap
@@ -1419,7 +1440,7 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package autoinsert
   :hook (after-init . auto-insert-mode)
   :custom
-    (auto-insert-directory (concat user-emacs-directory "templates/"))
+    (auto-insert-directory (expand-file-name "templates/" user-emacs-directory))
     (auto-insert-query nil)
   :config
     (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
@@ -1451,11 +1472,11 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 
 (use-package eshell
   :custom
-    (eshell-directory-name (concat user-emacs-directory "eshell"))
+    (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
     (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell.
     (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell.
-    (eshell-history-file-name (concat user-share-emacs-directory "eshell-history"))
-    (eshell-last-dir-ring-file-name (concat user-share-emacs-directory "eshell-lastdir"))
+    (eshell-history-file-name (expand-file-name "eshell-history" user-share-emacs-directory))
+    (eshell-last-dir-ring-file-name (expand-file-name "eshell-lastdir" user-share-emacs-directory))
     (eshell-history-size 5000)
     (eshell-buffer-maximum-lines 5000)
     (eshell-hist-ignoredups t)

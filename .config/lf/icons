@@ -164,6 +164,7 @@ fi             # FILE
 *.sol           󰡪
 *.pem           
 *.doc           
+*.odt           
 *.asc           󰦝
 
 # file names (vim-devicons) (case-insensitive not supported in lf)
