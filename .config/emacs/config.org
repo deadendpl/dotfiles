@@ -112,7 +112,9 @@ I'll disable some stuff for Termux specifically so I create a function that chec
 (tool-bar-mode -1)                   ; Disable the toolbar
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
-(set-fringe-mode 10)                 ; Give some breathing room
+(unless (termux-p)
+  (if (fboundp 'set-fringe-mode)
+        (set-fringe-mode 10)))       ; Give some breathing room
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (global-display-line-numbers-mode t) ; Line numbers
