@@ -102,7 +102,7 @@ Here are some tweaks that idk where to put
 I'll disable some stuff for Termux specifically so I create a function that checks if I'm on Termux
 #+begin_src emacs-lisp
 (defun termux-p ()
-  (and (getenv "TERMUX_VERSION ")))
+  (and (getenv "TERMUX_VERSION")))
 #+end_src
 ** Some modes turned on and off
 #+begin_src emacs-lisp
