@@ -65,7 +65,7 @@ alias nclean='sudo nix-collect-garbage -d'
 # other
 alias cp='cp -v'
 alias connect='nmcli device wifi connect'
-alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
+alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
 alias lf='lfcd'
 alias cp='cp-p'
 alias clr='clear'
