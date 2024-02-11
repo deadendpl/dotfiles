@@ -13,6 +13,11 @@ if set -q TERMUX_VERSION
   alias pupg='pkg upgrade'
   alias pinstalled='pkg list --installed'
   alias psearch='pkg search'
+
+  alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
+  alias clr='clear'
+  alias cllr='clear && l'
+  alias v='emacsclient -c -a ""'
 else
   # normal config
   if status is-interactive
@@ -78,7 +83,6 @@ else
   alias nclean='sudo nix-collect-garbage -d'
 
   # other
-  alias cp='cp -v'
   alias connect='nmcli device wifi connect'
   alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
   alias lf='lfcd'

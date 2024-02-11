@@ -1084,6 +1084,10 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       '(("d" "default" plain "%?"
          :target (file+head "${slug}.org"
                             "#+title: ${title}\n#+date: %U\n")
+         :unnarrowed t)
+        ("g" "video game" plain "%?"
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n* Notes")
          :unnarrowed t)))
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
