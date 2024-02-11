@@ -1533,7 +1533,7 @@ Each time I open org file it shows error but it works.
          :unnarrowed t)
         ("g" "video game" plain "%?"
          :target (file+head "${slug}.org"
-                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n* Status\n* Notes")
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n* Notes")
          :unnarrowed t)))
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
