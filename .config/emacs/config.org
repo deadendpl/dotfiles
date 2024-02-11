@@ -1530,6 +1530,10 @@ Each time I open org file it shows error but it works.
       '(("d" "default" plain "%?"
          :target (file+head "${slug}.org"
                             "#+title: ${title}\n#+date: %U\n")
+         :unnarrowed t)
+        ("g" "video game" plain "%?"
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n* Status\n* Notes")
          :unnarrowed t)))
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
