@@ -50,21 +50,21 @@ Right = step_right 10
 Home = first_file
 End = last_file
 g = first_file
-G = last_file
+Shift+g = last_file
 
 
-P = prev_dir
-N = next_dir
+Shift+p = prev_dir
+Shift+n = next_dir
 Prior = prev_file
 Next = next_file
 p = prev_file
 n = next_file
-J = next_file
-K = prev_file
+Shift+j = next_file
+Shift+k = prev_file
 
 F2 = prev_frame
 F3 = next_frame
-O = prev_frame
+Shift+o = prev_frame
 o = next_frame
 
 F4 = animation
@@ -77,7 +77,7 @@ equal = zoom +10
 plus = zoom +10
 minus = zoom -10
 z = zoom optimal
-Z = zoom fit
+Shift+z = zoom fit
 0 = zoom real
 BackSpace = zoom reset
 
@@ -96,5 +96,3 @@ Escape = exit
 Return = exit
 F10 = exit
 q = exit
-
-# vim: filetype=dosini

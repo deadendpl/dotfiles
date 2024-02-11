@@ -384,12 +384,12 @@ bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
 
 # trying submaps to act as keychords
-# bind = SUPER, e, submap, emacs
-# submap = emacs
-# bind = ,e,exec,emacsclient -c -a "emacs"
-# bind = ,e,submap,reset
-# bind = ,d,exec,emacsclient -c -e "(dired nil)"
-# bind = ,d,submap,reset
-# bind=,escape,submap,reset
-# submap = reset
+bind = $mainMod, r, submap, reload/reset
+submap = reload/reset
+bind = ,w,exec,$script/hypr/waybar-start.sh
+bind = ,w,submap,reset
+bind = ,e,exec,$script/emacs.sh
+bind = ,e,submap,reset
+bind=,escape,submap,reset
+submap = reset
 #+END_SRC

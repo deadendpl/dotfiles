@@ -39,13 +39,12 @@ wpg-tile "$1"
 
 # waybar
 file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
-
 # qutebrowser
 file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
-
 # zathura
 file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
+# reloading bunch of stuff
 killall swaybg
 swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
 $HOME/.config/scripts/hypr/waybar-start.sh
@@ -54,3 +53,8 @@ swaync-client -R
 emacsclient --eval '(load-theme real-theme t)'
 
 notify-send "New rice applied"
+
+# I do it after notification confirmation because it takes more than a moment
+if pgrep "qutebrowser" > /dev/null; then
+  qutebrowser :config-source
+fi

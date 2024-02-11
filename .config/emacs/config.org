@@ -22,6 +22,7 @@
 - [[#evil-and-keybindings][EVIL AND KEYBINDINGS]]
   - [[#evil-setup][EVIL SETUP]]
   - [[#actual-keybindings][ACTUAL KEYBINDINGS]]
+  - [[#flashing][Flashing]]
 - [[#appearance][APPEARANCE]]
   - [[#fonts][FONTS]]
   - [[#highlight-todo][HIGHLIGHT TODO]]
@@ -34,6 +35,8 @@
   - [[#ivy-counsel][IVY (COUNSEL)]]
 - [[#dashboard][DASHBOARD]]
 - [[#dired][DIRED]]
+  - [[#dirvish][Dirvish]]
+  - [[#dired-1][Dired]]
 - [[#docs][DOCS]]
   - [[#helpful][HELPFUL]]
   - [[#tldr][TLDR]]
@@ -73,7 +76,7 @@
   - [[#lsp][LSP]]
   - [[#language-support][LANGUAGE SUPPORT]]
   - [[#languages][LANGUAGES]]
-  - [[#lorem-ipsum-generator][LOREM IPSUM GENERATOR]]
+- [[#lorem-ipsum-generator][LOREM IPSUM GENERATOR]]
   - [[#treesitter][TREESITTER]]
   - [[#templates][TEMPLATES]]
 - [[#shells-and-terminals][SHELLS AND TERMINALS]]
@@ -101,30 +104,33 @@ Here are some tweaks that idk where to put
 ** Termux check
 I'll disable some stuff for Termux specifically so I create a function that checks if I'm on Termux
 #+begin_src emacs-lisp
-(defun termux-p ()
+(defun custom/termux-p ()
+  "Checks if Emacs is running inside of Termux."
   (and (getenv "TERMUX_VERSION")))
 #+end_src
 ** Some modes turned on and off
+Those =fbound= are because Termux Emacs doesn't have some functions at all and that spitted out errors.
 #+begin_src emacs-lisp
-(unless (termux-p)
+(unless (custom/termux-p)
   (if (fboundp 'scroll-bar-mode)
       (scroll-bar-mode -1)))         ; Disable visible scrollbar
-(tool-bar-mode -1)                   ; Disable the toolbar
+(unless (custom/termux-p)
+  (if (fboundp 'tool-bar-mode)
+      (tool-bar-mode -1)))           ; Disable the toolbar
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
-(unless (termux-p)
+(unless (custom/termux-p)
   (if (fboundp 'set-fringe-mode)
         (set-fringe-mode 10)))       ; Give some breathing room
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-(global-display-line-numbers-mode t) ; Line numbers
+(add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 (column-number-mode 1)               ; Column number in modeline
 ;; (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
-(set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 #+end_src
@@ -152,30 +158,30 @@ Most of the stuff will get redirected here.")
 #+end_src
 ** Other variables
 #+begin_src emacs-lisp
-(setq-default visible-bell nil ;; Set up the visible bell
-              inhibit-startup-message nil ; default emacs startup message
-              recentf-max-saved-items nil ; infinite amount of entries in recentf file
-              recentf-auto-cleanup 'never ; not cleaning recentf file
-              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-              use-dialog-box nil ; turns off graphical dialog boxes
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-              initial-scratch-message nil ; deleting scratch buffer message
-              scroll-conservatively 1000 ; Scroll one line at a time
-              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-              tab-always-indent nil
-              vc-follow-symlinks t ; Enable follow symlinks
-              indent-tabs-mode nil ; use spaces instead of tabs for indenting
-              standard-indent 2 ; indenting set to 2
-              auto-revert-interval 1
-              display-line-numbers-type 'relative
-              use-short-answers t ; replace yes-no prompts with y-n
-              fast-but-imprecise-scrolling t ; fast scrolling
-              inhibit-compacting-font-caches t
-              sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil) ; no files wiht ".#"
-              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+(setq visible-bell nil ;; Set up the visible bell
+      inhibit-startup-message nil ; default emacs startup message
+      recentf-max-saved-items nil ; infinite amount of entries in recentf file
+      recentf-auto-cleanup 'never ; not cleaning recentf file
+      global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+      use-dialog-box nil ; turns off graphical dialog boxes
+      initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
+      initial-scratch-message nil ; deleting scratch buffer message
+      scroll-conservatively 1000 ; Scroll one line at a time
+      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+      tab-always-indent nil
+      vc-follow-symlinks t ; Enable follow symlinks
+      indent-tabs-mode nil ; use spaces instead of tabs for indenting
+      standard-indent 2 ; indenting set to 2
+      auto-revert-interval 1
+      display-line-numbers-type 'relative
+      use-short-answers t ; replace yes-no prompts with y-n
+      fast-but-imprecise-scrolling t ; fast scrolling
+      inhibit-compacting-font-caches t
+      sentence-end-double-space nil ; sentences end with 1 space
+      create-lockfiles nil) ; no files wiht ".#"
+      ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
 #+end_src
-** Line numbers off in some modes
+** Line numbers off in some modes :ARCHIVE:
 #+begin_src emacs-lisp
 ;; turn off line numbers in certain modes
 (dolist (mode '(neotree-mode-hook
@@ -245,6 +251,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (set-selection-coding-system 'utf-8)
 (setq locale-coding-system   'utf-8)
 (prefer-coding-system        'utf-8)
+(set-default-coding-systems  'utf-8)
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -342,6 +349,8 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
       ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
+    (if (custom/termux-p)
+        (define-key evil-normal-state-map (kbd "C-s") 'save-buffer)) ;; for quick save on termux
     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
     (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
@@ -366,6 +375,14 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
 (use-package evil-nerd-commenter
   :after evil)
 #+end_src
+
+[[https://github.com/emacs-evil/evil-surround][evil-surround]] lets you wrap text with any character conveniently.
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :demand
+  :after evil
+  :config (global-evil-surround-mode 1))
+#+end_src
 ** ACTUAL KEYBINDINGS
 [[https://github.com/noctuid/general.el][General]] lets you bind keybindings.
 This is a big list.
@@ -382,6 +399,10 @@ This is a big list.
     :keymaps 'override
     :prefix "SPC" ;; set leader
     :global-prefix "M-SPC") ;; access leader in insert mode
+
+  (if (custom/termux-p)
+    (custom/leader-keys
+      "q" '(evil-quit :wk "Quit Emacs")))
 
   (custom/leader-keys
     "SPC" '(projectile-find-file :wk "Find file in project")
@@ -460,7 +481,6 @@ This is a big list.
   "d h" '(custom/dired-go-to-home :wk "Open home directory")
   "d j" '(dired-jump :wk "Dired jump to current")
   "d n" '(neotree-dir :wk "Open directory in neotree")
-  "d p" '(peep-dired :wk "Peep-dired")
   "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 #+end_src
 *** Eshell/Evaluate
@@ -650,15 +670,15 @@ This is a big list.
   "n d" '(:ignore t :wk "Dired")
   "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
   "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-  "n o" '(:ignore t :wk "Obsidian")
-  "n o c" '(obsidian-capture :wk "Create note")
-  "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
-  "n o f" '(obsidian-tag-find :wk "Find by tag")
-  "n o j" '(obsidian-jump :wk "Jump to note")
-  "n o m" '(obsidian-move-file :wk "Move note/file")
-  "n o r" '(obsidian-update :wk "Update")
-  "n o /" '(obsidian-search :wk "Search")
-  "n o ?" '(obsidian-hydra/body :wk "Everything")
+  ;; "n o" '(:ignore t :wk "Obsidian")
+  ;; "n o c" '(obsidian-capture :wk "Create note")
+  ;; "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+  ;; "n o f" '(obsidian-tag-find :wk "Find by tag")
+  ;; "n o j" '(obsidian-jump :wk "Jump to note")
+  ;; "n o m" '(obsidian-move-file :wk "Move note/file")
+  ;; "n o r" '(obsidian-update :wk "Update")
+  ;; "n o /" '(obsidian-search :wk "Search")
+  ;; "n o ?" '(obsidian-hydra/body :wk "Everything")
   "n r" '(:ignore t :wk "Org Roam")
   "n r a" '(:ignore t :wk "Alias")
   "n r a a" '(org-roam-alias-add :wk "Add alias")
@@ -673,7 +693,10 @@ This is a big list.
   "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
   "n r r" '(:ignore t :wk "References")
   "n r r a" '(org-roam-ref-add :wk "Add reference")
-  "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
+  "n r r r" '(org-roam-ref-remove :wk "Remove reference")
+  "n r t" '(org-roam-tag-add :wk "Add tag")
+  "n r T" '(org-roam-tag-delete :wk "Remove tag")
+)
 #+end_src
 *** Opening
 #+begin_src emacs-lisp
@@ -750,6 +773,16 @@ Here is only 1 keybinding because projectile has keybindings setup.
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
+** Flashing
+When I do =C-u= or =C-d= I will get a flash at the current line
+#+begin_src emacs-lisp
+(defun custom/pulse-line (&rest _)
+  "Pulse the current line."
+  (pulse-momentary-highlight-one-line (point)))
+
+(dolist (command '(evil-scroll-up evil-scroll-down scroll-up-command scroll-down-command))
+  (advice-add command :after #'custom/pulse-line))
+#+end_src
 * APPEARANCE
 ** FONTS
 *** Setting fonts
@@ -811,14 +844,28 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 [[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
 I turn that mode in Org Mode.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package mixed-pitch
-  :hook (org-mode . mixed-pitch-mode)
-  :config
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
+(unless (custom/termux-p)
+  (use-package mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (dolist (faces '(;; org-level-1
+                     ;; org-level-2
+                     ;; org-level-3
+                     ;; org-level-4
+                     ;; org-level-5
+                     ;; org-level-6
+                     ;; org-level-7
+                     ;; org-level-8
+                     org-modern-tag
+                     org-property-value
+                     org-special-keyword
+                     org-drawer
+		           org-document-face))
+      (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer)
 )
 #+end_src
 ** HIGHLIGHT TODO
@@ -875,7 +922,7 @@ It displays the actual color as a background for any hex color value (ex. #fffff
 I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
 #+begin_src emacs-lisp
 (use-package doom-themes
-  :demand
+  ;; :demand
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -890,23 +937,23 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 
-(unless (termux-p)
-(use-package ewal-doom-themes :demand)
-(use-package ewal
-  :demand
-  :config
-    (set-face-attribute 'line-number-current-line nil
-      :foreground (ewal-load-color 'comment)
-      :inherit 'default)
-    (set-face-attribute 'line-number nil
-      :foreground (ewal--get-base-color 'green)
-      :inherit 'default))
+(unless (custom/termux-p)
+  (use-package ewal-doom-themes :demand)
+  (use-package ewal
+    :demand
+    :config
+      (set-face-attribute 'line-number-current-line nil
+        :foreground (ewal-load-color 'comment)
+        :inherit 'default)
+      (set-face-attribute 'line-number nil
+        :foreground (ewal--get-base-color 'green)
+        :inherit 'default))
 )
 
 (defvar real-theme nil
   "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
-(if (termux-p)
+(if (custom/termux-p)
     (setq real-theme 'doom-dracula) ;; for termux
   (setq real-theme 'ewal-doom-one)) ;; for PC
 
@@ -919,7 +966,8 @@ With Emacs 29, true transparency has been added.
 #+end_src
 * COMPLETION
 ** COMPANY
-[[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. Completion will start automatically after you type a few letters. Use M-n and M-p to select, <return> to complete or <tab> to complete the common part.
+[[https://company-mode.github.io/][Company]] is a text completion framework.
+Completion will start automatically after you type a few letters.
 #+begin_src emacs-lisp
 (use-package company
   :after prog-mode
@@ -930,7 +978,12 @@ With Emacs 29, true transparency has been added.
     (company-minimum-prefix-length 2)
     (company-show-numbers t)
     (company-tooltip-align-annotations 't)
-    (global-company-mode t))
+    (global-company-mode t)
+  :config
+    (add-hook 'prog-mode-hook (lambda ()
+				(setq-local company-idle-delay 0
+					    company-selection-wrap-around t
+					    company-minimum-prefix-length 1))))
 
 (use-package company-box
   :after company
@@ -964,6 +1017,7 @@ Both are completion frameworks that make your life easier when doing M-x for exa
     (ivy-use-virtual-buffers t)
     (ivy-count-format "(%d/%d) ")
     (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
+    (ivy-use-selectable-prompt t)
     (enable-recursive-minibuffers t)
   :config
     (ivy-mode)
@@ -1015,55 +1069,69 @@ Both are completion frameworks that make your life easier when doing M-x for exa
 * DASHBOARD
 [[https://github.com/emacs-dashboard/emacs-dashboard][Dashboard]] is nice and extensible dahboard.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package dashboard
-  ;; :demand
-  :custom
-    (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
-    (dashboard-banner-logo-title
+(unless (custom/termux-p)
+  (use-package dashboard
+    ;; :demand
+    :hook (dashboard-mode . (lambda () (with-current-buffer "*dashboard*" (emacs-lock-mode 'kill))))
+    :custom
+      (initial-buffer-choice (lambda () (dashboard-open)))
+      (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
+      (dashboard-banner-logo-title
 "You still refuse to accept my god-hood?
 Keep your own god!
 In fact, this might be a good time to pray to him.
 For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
-    (dashboard-center-content t)
-    (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items nil) ;;'( (recents  . 5)
-                       ;; (bookmarks . 5)
-                       ;; (projects . 5)
-                       ;; (agenda . 5))
-                       ;; (registers . 5)
-  :config
-    (dashboard-setup-startup-hook)
-    (evil-collection-dashboard-setup)
-    (evil-collection-define-key 'normal 'dashboard-mode-map
-      "j" 'widget-forward
-      "k" 'widget-backward
-      "l" 'dashboard-return))
-  ;; :bind
-    ;; (:map dashboard-mode-map
-    ;;   ([remap dashboard-next-line] . 'widget-forward)
-    ;;   ([remap dashboard-previous-line] . 'widget-backward)))
+      (dashboard-center-content t)
+      (dashboard-agenda-prefix-format " %i %s ")
+      (dashboard-items '((recents  . 5)))
+                         ;; (bookmarks . 5)
+                         ;; (projects . 5)
+                         ;; (agenda . 5)
+                         ;; (registers . 5)
+    :config
+      (dashboard-setup-startup-hook)
+      (evil-collection-dashboard-setup)
+      (evil-collection-define-key 'normal 'dashboard-mode-map
+        "j" 'widget-forward
+        "k" 'widget-backward
+        "l" 'dashboard-return))
 )
 #+end_src
 * DIRED
+** Dirvish
 [[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
 +I don't currently use that since it displays all files as buffers and doesn't kill them.+
 It kills the buffers when =dirvish-quit= is called or when you enter the file.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package dirvish
-  :init (dirvish-override-dired-mode)
-  :custom
-    (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
-    (dirvish-attributes '(collapse git-msg file-time file-size))
-  :config
-    (evil-collection-define-key 'normal 'dirvish-mode-map
-      "q"  'dirvish-quit))
+(unless (custom/termux-p)
+  (use-package dirvish
+    :init (dirvish-override-dired-mode t)
+    :custom
+      (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
+      (dirvish-attributes '(collapse git-msg file-time file-size))
+      (dirvish-default-layout '(1 0.15 0.5))
+    :config
+      (evil-collection-define-key 'normal 'dirvish-mode-map
+        "p" 'dirvish-yank-menu
+        "q" 'dirvish-quit)
+      (dirvish-define-preview eza (file)
+        "Use `eza' to generate directory preview."
+        :require ("eza") ; tell Dirvish to check if we have the executable
+        (when (file-directory-p file) ; we only interest in directories here
+          `(shell . ("eza" "-al" "--color=always" "--icons"
+                     "--group-directories-first" ,file))))
+      (add-to-list 'dirvish-preview-dispatchers 'eza)
+      ;; lines not wrapping
+      (add-hook 'dirvish-find-entry-hook
+          (lambda (&rest _) (setq-local truncate-lines t)))
+      ;; rebinds all dired commands to dirvish
+      ;; with dirvish-override-dired-mode it already moved dired commands to dirvish
+      ;; but it didn't toggle the dirvish window layout
+      (defalias 'dired 'dirvish))
 )
 #+end_src
-
-I still do some configurations because dirvish still at its core uses dired and its keybindings.
+** Dired
+I still do some configurations because dirvish at its core uses dired and its keybindings.
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
@@ -1071,8 +1139,9 @@ I still do some configurations because dirvish still at its core uses dired and 
     (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-aHl --group-directories-first")
+    (dired-listing-switches "-Hl --almost-all --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
+    (image-dired-dir (expand-file-name "image-dired" user-share-emacs-directory))
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
@@ -1081,7 +1150,6 @@ I still do some configurations because dirvish still at its core uses dired and 
     (evil-collection-define-key 'normal 'dired-mode-map
       [remap evil-yank] 'dired-ranger-copy
       "gh" 'custom/dired-go-to-home
-      ;; "q"  'dirvish-quit
       "p"  'dired-ranger-paste
       "h"  'dired-up-directory
       "l"  'dired-find-file))
@@ -1095,8 +1163,14 @@ I still do some configurations because dirvish still at its core uses dired and 
 ;;                                   ("mkv" . "mpv")
 ;;                                   ("mp4" . "mpv"))))
 
-;; (use-package diredfl
-;;   :after dired)
+(use-package diredfl
+  :after dired
+  :hook
+    ((dired-mode . diredfl-mode)
+     ;; highlight parent and directory preview as well
+     (dirvish-directory-view-mode . diredfl-mode))
+  :config
+    (set-face-attribute 'diredfl-dir-name nil :bold t))
 
 (use-package dired-ranger
   :after dired
@@ -1128,26 +1202,23 @@ I still do some configurations because dirvish still at its core uses dired and 
 ** WHICH-KEY
 [[https://github.com/justbur/emacs-which-key][It]] shows you available keybindings, the default ones and the ones you create.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package which-key
-  :diminish
-  :defer 5
-  :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order #'which-key-key-order-alpha)
-    (which-key-sort-uppercase-first nil)
-    (which-key-add-column-padding 1)
-    (which-key-max-display-columns nil)
-    (which-key-min-display-lines 6)
-    (which-key-side-window-slot -10)
-    (which-key-side-window-max-height 0.25)
-    (which-key-idle-delay 0.8)
-    (which-key-max-description-length nil)
-    (which-key-allow-imprecise-window-fit nil)
-    (which-key-separator "  ")
-    (which-key-idle-delay 0.5)
-  :config
-    (which-key-mode 1))
+(unless (custom/termux-p)
+  (use-package which-key
+    :diminish
+    :defer 5
+    :custom
+      (which-key-side-window-location 'bottom)
+      (which-key-sort-order #'which-key-key-order-alpha)
+      (which-key-sort-uppercase-first nil)
+      (which-key-add-column-padding 1)
+      (which-key-max-display-columns nil)
+      (which-key-min-display-lines 6)
+      (which-key-max-description-length nil)
+      (which-key-allow-imprecise-window-fit nil)
+      (which-key-separator "  ")
+      (which-key-idle-delay 0.5)
+    :config
+      (which-key-mode 1))
 )
 #+end_src
 * DOOM-MODELINE
@@ -1155,10 +1226,8 @@ I still do some configurations because dirvish still at its core uses dired and 
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :demand
-  :init
-    (doom-modeline-mode 1)
-  :custom
-    (doom-modeline-battery t))
+  :init (doom-modeline-mode 1)
+  :custom (doom-modeline-battery t))
 #+end_src
 * EMOJIS :ARCHIVE:
 [[https://github.com/iqbalansari/emacs-emojify][emojify]] enables support for unicode characters and emojis.
@@ -1174,30 +1243,30 @@ Though Emacs 29 has some emoji support.
 * ELFEED
 [[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package elfeed
-  :custom
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
-    (elfeed-search-filter "@6-months-ago"))
+(unless (custom/termux-p)
+  (use-package elfeed
+    :custom
+      (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
+      (elfeed-search-filter "@6-months-ago"))
 )
 #+end_src
 * GAMES
+#+begin_src emacs-lisp
+(unless (custom/termux-p)
+#+end_src
 ** MINESWEEPER
 - You move with the arrow keys, p/n/b/f, or C-p/C-n/C-b/C-f.
 - Reveal square with space, enter, or x.
 - Mark a square with m.
 - Reveal all the neighbors of a square by pressing c.
 #+begin_src emacs-lisp
-(unless (termux-p)
 (use-package minesweeper
   :config
     (evil-set-initial-state 'minesweeper-mode 'emacs))
-)
 #+end_src
 ** TETRIS
 Tetris is built-in.
 #+begin_src emacs-lisp
-(unless (termux-p)
 (use-package tetris
   :ensure nil
   :config
@@ -1347,11 +1416,6 @@ Here I'm improving it as much as I can.
             (org-return))
         (org-return))))
 
-
-    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
-    ;; Setting RETURN key in org-mode to follow links
-    ;; (setq org-return-follows-link t)
-
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
 (add-hook 'org-mode-hook (lambda ()
@@ -1423,17 +1487,17 @@ It's set up so it will display markers when entering insert mode.
 [[https://github.com/minad/org-modern][It]] prettifies almost everything.
 If you don't use the same font as me then you need to edit ~org-modern-label~'s height.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package org-modern
-  :after org
-  ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
-  :hook (org-mode . org-modern-mode)
-  :custom-face
-    (org-modern-label ((t (:height 1.2))))
-  :custom
-    (org-modern-star nil)
-    (org-modern-list nil)
-    (org-modern-table nil))
+(unless (custom/termux-p)
+  (use-package org-modern
+    :after org
+    ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
+    :hook (org-mode . org-modern-mode)
+    :custom-face
+      ;; (org-modern-label ((t (:height 1.2))))
+    :custom
+      (org-modern-star nil)
+      (org-modern-list nil)
+      (org-modern-table nil))
 )
 #+end_src
 
@@ -1441,11 +1505,11 @@ But it doesn't work well with =org-indent-mode= which indents text to headers.
 Thankfully there is a [[https://github.com/jdtsmith/org-modern-indent][package that fixes that]].
 Each time I open org file it shows error but it works.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package org-modern-indent
-  :after org
-  :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
+(unless (custom/termux-p)
+  (use-package org-modern-indent
+    :after org
+    :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
+    :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
 )
 #+end_src
 ** ORG ROAM
@@ -1455,7 +1519,7 @@ Each time I open org file it shows error but it works.
   :after org
   :init
     (setq org-roam-v2-ack t)
-    (if (termux-p)
+    (if (custom/termux-p)
         (setq org-roam-directory "~/storage/shared/org-roam")
       (setq org-roam-directory "~/org-roam"))
   :custom
@@ -1478,51 +1542,55 @@ Each time I open org file it shows error but it works.
     (require 'org-roam-dailies)
     (add-hook 'org-roam-find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3)))))
 #+end_src
+
+[[https://github.com/org-roam/org-roam-ui][org-roam-ui]] gives you nice webpage with obsidian looking graph of notes
+#+begin_src emacs-lisp
+;; (use-package org-roam-ui)
+#+end_src
 ** ORG SUPERSTAR
 [[https://github.com/integral-dw/org-superstar-mode][org-superstar-mode]] gives us pretty bullets instead of stars for headers.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package org-superstar
-  :after org
-  ;; :hook (org-mode . (lambda () (org-superstar-mode t)))
-  :hook (org-mode . org-superstar-mode)
-  :custom
-    (org-superstar-remove-leading-stars t)
-    (org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
+(unless (custom/termux-p)
+  (use-package org-superstar
+    :after org
+    :hook (org-mode . org-superstar-mode)
+    :custom
+      (org-superstar-remove-leading-stars t)
+      (org-superstar-item-bullet-alist
+        '((?+ . ?✸)
+          (?* . ?•)
+          (?- . ?●))))
 )
 #+end_src
 ** ORG YT
 +It's commented because it's not available in elisp repos and there isn't package manager for git repo packages that satisfies me.+
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package org-yt
-  :after org
-  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
-  :config
-    (require 'org-yt)
+(unless (custom/termux-p)
+  (use-package org-yt
+    :after org
+    :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
+    :config
+      (require 'org-yt)
 
-    (defun org-image-link (protocol link _description)
-      "Interpret LINK as base64-encoded image data."
-      (cl-assert (string-match "\\`img" protocol) nil
-                 "Expected protocol type starting with img")
-      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-        (cl-assert buf nil
-                   "Download of image \"%s\" failed." link)
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (re-search-forward "\r?\n\r?\n")
-          (buffer-substring-no-properties (point) (point-max)))))
+      (defun custom/org-image-link (protocol link _description)
+        "Interpret LINK as base64-encoded image data."
+        (cl-assert (string-match "\\`img" protocol) nil
+                   "Expected protocol type starting with img")
+        (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+          (cl-assert buf nil
+                     "Download of image \"%s\" failed." link)
+          (with-current-buffer buf
+            (goto-char (point-min))
+            (re-search-forward "\r?\n\r?\n")
+            (buffer-substring-no-properties (point) (point-max)))))
 
-    (org-link-set-parameters
-     "imghttp"
-     :image-data-fun #'org-image-link)
+      (org-link-set-parameters
+       "imghttp"
+       :image-data-fun #'custom/org-image-link)
 
-    (org-link-set-parameters
-     "imghttps"
-     :image-data-fun #'org-image-link))
+      (org-link-set-parameters
+       "imghttps"
+       :image-data-fun #'custom/org-image-link))
 )
 #+end_src
 ** TOC
@@ -1557,7 +1625,6 @@ A whole lot of other stuff
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    ;; (org-mode . org-indent-mode)
     ;; after refiling and archiving tasks agenda files aren't saves, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
@@ -1566,13 +1633,13 @@ A whole lot of other stuff
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.2))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.2))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.2))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.2))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.2))))
     (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.2))))
     (org-list-dt ((t (:weight bold))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
@@ -1632,23 +1699,18 @@ A whole lot of other stuff
     (org-refile-targets '((org-agenda-files :maxlevel . 1)))
     (org-refile-use-outline-path nil)
     (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
-    (org-insert-heading-respect-content nil)
-    ;; no new lines when doing M-return
-    (org-blank-before-new-entry nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
+    (org-image-actual-width nil)
     (org-startup-with-inline-images t)
-    (org-startup-indented t)
+    (org-startup-indented t) ;; use org-indent-mode at startup
     (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
-    (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
-    ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
-    (org-log-into-drawer t)
-    ;; (org-ellipsis " •")
+    (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (expand-file-name "org/lateximg/" user-share-emacs-directory))
     (org-preview-latex-default-process 'dvisvgm)
@@ -1656,11 +1718,11 @@ A whole lot of other stuff
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
     (org-id-locations-file (expand-file-name "org/.org-id-locations" user-share-emacs-directory))
     (org-return-follows-link t)
+    (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
     (org-M-RET-may-split-line nil)
     (org-insert-heading-respect-content t)
     (org-tags-column 0)
     (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
-    (org-babel-C++-compiler "g++")
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
     (org-src-preserve-indentation t)
@@ -1668,9 +1730,9 @@ A whole lot of other stuff
     (org-export-allow-bind-keywords t)
     (org-export-with-toc nil)
     (org-export-with-smart-quotes t)
-    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-export-backends '(ascii html icalendar latex odt md))
     ;; (org-export-with-properties t)
-    (org-startup-folded 'overview)
+    (org-startup-folded t)
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
@@ -1688,36 +1750,6 @@ A whole lot of other stuff
                  '("*Org Babel Results*"
                    (display-buffer-at-bottom)))
 
-    ;; My attempt to create new time keyword STARTED
-    ;; which would signify the time at which somehting was started
-    ;; (defvar org-started-string "STARTED:"
-    ;;   "String to mark started entries.")
-    ;; (defconst org-element-started-keyword "STARTED:"
-    ;;   "Keyword used to mark started TODO entries.")
-    ;; (defconst org-started-time-regexp
-    ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
-    ;;   "Matches the STARTED keyword together with a time stamp.")
-    ;; (defcustom org-started-keep-when-no-todo nil
-    ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
-    ;;   :group 'org-todo
-    ;;   :group 'org-keywords
-    ;;   :version "24.4"
-    ;;   :package-version '(Org . "8.0")
-    ;;   :type 'boolean)
-    ;; (defconst org-all-time-keywords
-    ;;   (mapcar (lambda (w) (substring w 0 -1))
-    ;;           (list org-scheduled-string org-deadline-string
-    ;;                 org-clock-string org-closed-string org-started-string))
-    ;;   "List of time keywords.")
-    ;; (defconst org-keyword-time-regexp
-    ;;   (concat "\\<"
-    ;;           (regexp-opt
-    ;;            (list org-scheduled-string org-deadline-string org-closed-string
-    ;;                  org-clock-string org-started-string)
-    ;;            t)
-    ;;           " *[[<]\\([^]>]+\\)[]>]")
-    ;;   "Matches any of the 5 keywords, together with the time stamp.")
-
     (defun custom/org-resize-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
@@ -1730,16 +1762,6 @@ A whole lot of other stuff
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
-
-;; (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
-;;   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
-;;   (let ((result (apply orig-func args)))
-;;     (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
-;;       (evil-insert-state))
-;;     result))
-
-;; (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
-;; (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
 #+end_src
 * PANDOC :ARCHIVE:
 #+begin_src emacs-lisp
@@ -1787,53 +1809,60 @@ A whole lot of other stuff
 [[https://github.com/bbatsov/projectile][Projectile]] is a project interaction library for Emacs.
 NOTE that many projectile commands do not work if you have set "fish" as the ~shell-file-name~ for Emacs. I had initially set "fish" as the "shell-file-name" in the Vterm section of this config, but oddly enough I changed it to "bin/sh" and projectile now works as expected, and Vterm still uses "fish" because my default user "sh" on my Linux system is "fish".
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package projectile
-  :diminish projectile-mode
-  :custom
-    (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
-    (projectile-switch-project-action #'projectile-dired)
-  :config (projectile-mode)
-  :bind-keymap
-    ("C-c p" . projectile-command-map))
+(unless (custom/termux-p)
+  (use-package projectile
+    :diminish projectile-mode
+    :custom
+      (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
+      (projectile-switch-project-action #'projectile-dired)
+    :config (projectile-mode)
+    :bind-keymap
+      ("C-c p" . projectile-command-map))
 
-(use-package counsel-projectile
-  :after projectile
-  :config
-    (counsel-projectile-mode 1))
+  (use-package counsel-projectile
+    :after projectile
+    :config (counsel-projectile-mode 1))
 )
 #+end_src
 * REAL PROGRAMMING
+This bit is not intended for Termux usage. That's why I I include =unless= statement here.
 #+begin_src emacs-lisp
-(unless (termux-p)
+(unless (custom/termux-p)
 #+end_src
 ** COMPILING
-Some modes that don't belong anywhere are made smaller including compiling related ones.
 #+begin_src emacs-lisp
-(add-to-list 'display-buffer-alist
-             '("*Messages*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Compile-log*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Backtrace*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Warnings*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*compilation*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Async Shell Command*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
+(use-package compile
+  :custom
+    (compilation-scroll-output t)
+  :config
+    (add-to-list 'display-buffer-alist
+                 '("*compilation*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (add-to-list 'display-buffer-alist
+                 '("*Compile-log*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (defadvice compile (before ad-compile-smart activate)
+      "Advises `compile' so it sets the argument COMINT to t."
+      (ad-set-arg 1 t))
+    (defadvice compile (after ad-compile-smart activate)
+      "Advises `compile' so it moves to the compilation buffer."
+      (switch-to-buffer-other-window "*compilation*"))
+    (defadvice recompile (after compile-command activate)
+      "Advises `recompile' so it moves to the compilation buffer."
+      (switch-to-buffer-other-window "*compilation*"))
+)
+
+
+(dolist (buffer '("*Messages*"
+                  "*Backtrace*"
+                  "*Warnings*"
+                  "*Async Shell Command*"))
+  (add-to-list 'display-buffer-alist
+               `(,buffer
+                 (display-buffer-at-bottom)
+                 (window-height . 12))))
 
 (defadvice async-shell-command (after shell-command activate)
   "Advises `async-shell-command' to move to it's buffer after activation,
@@ -1843,18 +1872,8 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   (evil-local-set-key 'normal (kbd "q") 'quit-window))
 
 (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
-
-(defadvice compile (before ad-compile-smart activate)
-  "Advises `compile' so it sets the argument COMINT to t."
-  (ad-set-arg 1 t))
-(defadvice compile (after ad-compile-smart activate)
-  "Advises `compile' so it moves to the compilation buffer."
-  (switch-to-buffer-other-window "*compilation*"))
-(defadvice recompile (after compile-command activate)
-  "Advises `recompile' so it moves to the compilation buffer."
-  (switch-to-buffer-other-window "*compilation*"))
 #+end_src
-** QUICK EVALUATION
+** QUICK EVALUATION :ARCHIVE:
 [[https://github.com/emacsorphanage/quickrun][quickrun]] lets you evaluate a buffer or region of text. It supports a lot of languages.
 #+begin_src emacs-lisp
 (use-package quickrun
@@ -1884,8 +1903,7 @@ For more information on language support for flycheck, [[https://www.flycheck.or
 (use-package eglot
   :ensure nil
   :after prog-mode
-  :custom
-  (eglot-autoshutdown t))
+  :custom (eglot-autoshutdown t))
 
 (use-package flycheck-eglot
   :after eglot)
@@ -1893,11 +1911,12 @@ For more information on language support for flycheck, [[https://www.flycheck.or
 
 With this major modes automatically turn on eglot.
 #+begin_src emacs-lisp
-(add-hook 'css-ts-mode-hook 'eglot-ensure)
-(add-hook 'python-ts-mode-hook 'eglot-ensure)
-(add-hook 'bash-ts-mode-hook 'eglot-ensure)
-(add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'html-mode-hook 'eglot-ensure)
+(dolist (mode '(css-ts-mode-hook
+                python-ts-mode-hook
+                bash-ts-mode-hook
+                c++-ts-mode-hook
+                html-ts-mode-hook))
+  (add-hook mode 'eglot-ensure))
 #+end_src
 ** LANGUAGE SUPPORT
 Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM, AWK, C, C++, Fortran, Icon, IDL (CORBA), IDLWAVE, Java, Javascript, M4, Makefiles, Metafont, Modula2, Object Pascal, Objective-C, Octave, Pascal, Perl, Pike, PostScript, Prolog, Python, Ruby, Simula, SQL, Tcl, Verilog, and VHDL. Other languages will require additional modes.
@@ -1917,9 +1936,11 @@ Here will probably be smaller or bigger functions and tweaks as time goes on to 
 ;;     (unless (file-exists-p "./Makefile")
 ;;       (copy-file (concat user-emacs-directory "templates/Makefile-cpp") "./Makefile"))))
 
+(add-hook 'c++-ts-mode-hook (lambda () (setq-local compile-command (concat "g++ " (buffer-name)))))
+
 ;; (add-hook 'find-file-hook 'custom/cpp-makefile)
 #+end_src
-*** ELISP
+*** Elisp
 #+begin_src emacs-lisp
 (defalias 'elisp-mode 'emacs-lisp-mode)
 #+end_src
@@ -1927,11 +1948,14 @@ If I'll not forget about it then probably I will get the most use out of [[https
 #+begin_src emacs-lisp
 (use-package bug-hunter)
 #+end_src
-** LOREM IPSUM GENERATOR
+*** Python
+#+begin_src emacs-lisp
+(add-hook 'python-ts-mode-hook (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
+#+end_src
+* LOREM IPSUM GENERATOR
 #+begin_src emacs-lisp
 (use-package lorem-ipsum
-  :custom
-    (lorem-ipsum-sentence-separator " "))
+  :custom (lorem-ipsum-sentence-separator " "))
 #+end_src
 ** TREESITTER
 Emacs from version 29 supports tree-sitter.
@@ -1941,7 +1965,7 @@ You need to have ~tree-sitter~ package installed on your system.
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
      ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-     (c "https://github.com/tree-sitter/tree-sitter-c")
+     ;; (c "https://github.com/tree-sitter/tree-sitter-c")
      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
      (css "https://github.com/tree-sitter/tree-sitter-css")
      ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
@@ -2015,12 +2039,12 @@ This remaps specified major modes to its tree-sitter counterparts
 * SHELLS AND TERMINALS
 ** Shell
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package company-shell
-  :after sh-mode
-  :custom
-    (add-to-list 'company-backends 'company-shell)
-    (add-to-list 'company-backends 'company-shell-env))
+(unless (custom/termux-p)
+  (use-package company-shell
+    :after sh-mode
+    :custom
+      (add-to-list 'company-backends 'company-shell)
+      (add-to-list 'company-backends 'company-shell-env))
 )
 #+end_src
 ** Eshell
@@ -2066,11 +2090,11 @@ Probably the most comfy terminal experience in Emacs
 ** Vterm
 Vterm is a terminal emulator within Emacs. The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x ansi-term= and =M-x vterm=.
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package vterm
-  :config
-    (setq shell-file-name "/bin/bash"
-          vterm-max-scrollback 5000))
+(unless (custom/termux-p)
+  (use-package vterm
+    :config
+      (setq shell-file-name "/bin/bash"
+            vterm-max-scrollback 5000))
 )
 #+end_src
 ** Vterm-Toggle :ARCHIVE:
@@ -2215,8 +2239,8 @@ _q_uit        _e_qualize        _]_forward      ^
 * WRITEROOM
 [[https://github.com/joostkremers/writeroom-mode][Writeroom-mode]] makes a nice writing experience by making big margins and hiding almost everything
 #+begin_src emacs-lisp
-(unless (termux-p)
-(use-package writeroom-mode)
+(unless (custom/termux-p)
+  (use-package writeroom-mode)
 )
 #+end_src
 * CREDITS

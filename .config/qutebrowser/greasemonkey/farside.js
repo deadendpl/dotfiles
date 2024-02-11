@@ -22,7 +22,9 @@
 // @match       *://*.medium.com/*
 // @match       *://reddit.com/*
 // @match       *://*.reddit.com/*
+// @match       *://stackoverflow.com/*
 // @match       *://twitter.com/*
+// @match       *://*.tiktok.com/*
 // @match       *://wikipedia.org/*
 // @match       *://*.wikipedia.org/*
 // @match       *://yahoo.com/*
@@ -61,22 +63,8 @@ switch (true) {
   site = [
     // lingva
     'lgv,https://farside.link/lingva',
-    'lgv,https://lingva.pussthecat.org',
-    'lgv,https://lingva.ml',
     // simplytranslate
-    'smp,https://farside.link/simplytranslate',
-    'smp,https://translate.tiekoetter.com',
-    'smp,https://translate.syncpundit.com',
-    'smp,https://translate.riverside.rocks',
-    'smp,https://translate.northboot.xyz',
-    'smp,https://translate.namazso.eu',
-    'smp,https://translate.josias.dev',
-    'smp,https://translate.bus-hit.me',
-    'smp,https://st.manerakai.com',
-    'smp,https://st.alefvanoon.xyz',
-    'smp,https://simplytranslate.pussthecat.org',
-    'smp,https://simplytranslate.org',
-    'smp,https://simplytranslate.esmailelbob.xyz'];
+    'smp,https://farside.link/simplytranslate'];
   break;
 
   // TODO bing mapquest moovit waze yandex
@@ -122,45 +110,9 @@ switch (true) {
     // 'srx,https://dynabyte.ca',
     // searxng
     'sng,https://farside.link/searxng',
-    // 'sng,https://swag.pw',
-    // 'sng,https://searxng.zackptg5.com',
-    // 'sng,https://searx.tiekoetter.com',
-    // 'sng,https://searx.prvcy.eu',
-    // 'sng,https://searx.mha.fi',
-    // 'sng,https://searx.jaska.cc',
-    // 'sng,https://searx.fmac.xyz',
-    // 'sng,https://searx.ebnar.xyz',
-    // 'sng,https://searx.be',
-    // 'sng,https://search.zzls.xyz',
-    // 'sng,https://search.vojkovic.xyz',
-    // 'sng,https://search.rabbit-company.com',
-    // 'sng,https://search.ononoki.org',
-    // 'sng,https://search.neet.works',
-    // 'sng,https://search.mdosch.de',
-    // 'sng,https://s.zhaocloud.net',
-    // 'sng,https://paulgo.io',
-    // 'sng,https://northboot.xyz',
-    // 'sng,https://etsi.me',
     // whoogle
-    'who,https://farside.link/whoogle',
-    // 'who,https://gowogle.voring.me',
-    // 'who,https://s.alefvanoon.xyz',
-    // 'who,https://search.sethforprivacy.com',
+    'who,https://farside.link/whoogle'];
     // yacy
-    //'ycy,https://farside.link/yacy',
-    'ycy,https://51.79.164.235:8443',
-    'ycy,https://58.179.103.130:49153',
-    'ycy,https://76.9.226.109:8444',
-    'ycy,https://78.55.177.108:8443',
-    'ycy,https://85.199.74.98:8443',
-    'ycy,https://93.190.202.83:8443',
-    'ycy,https://109.230.224.225:8443',
-    'ycy,https://162.210.6.138:8443',
-    'ycy,https://176.31.104.225:8448',
-    'ycy,https://185.243.10.140:8443',
-    'ycy,https://search.yacy.net',
-    'ycy,https://www.gumx.de:8091',
-    'ycy,https://yacy.iko.soy/'];
   break;
 
   case hostname.endsWith('imgur.com'):
@@ -210,83 +162,35 @@ switch (true) {
 
   site = [
     // libreddit
-    'lib,https://farside.link/libreddit',
-/*    'lib,https://libreddit.bus-hit.me',
-    'lib,https://libreddit.northboot.xyz',
-    'lib,https://libreddit.oxymagnesium.com',
-    'lib,https://libreddit.privacydev.net',
-    'lib,https://libreddit.pussthecat.org',
-    'lib,https://lr.4201337.xyz',
-    'lib,https://lr.artemislena.eu',
-    'lib,https://reddit.invak.id',
-    'lib,https://reddit.simo.sh',
-    'lib,https://reddit.smnz.de',
-    'lib,https://safereddit.com',
-    'lib,https://libreddit.albony.xyz' */];
-
-
-    /* teddit
-    'ted,https://farside.link/teddit',
-    'ted,https://teddit.zaggy.nl',
-    'ted,https://teddit.totaldarkness.net',
-    'ted,https://teddit.sethforprivacy.com',
-    'ted,https://teddit.pussthecat.org',
-    'ted,https://teddit.net',
-    'ted,https://teddit.namazso.eu',
-    'ted,https://teddit.froth.zone',
-    'ted,https://teddit.domain.glass',
-    'ted,https://teddit.bus-hit.me',
-    'ted,https://teddit.alefvanoon.xyz',
-    'ted,https://teddit.adminforge.de',
-    'ted,https://incogsnoo.com'];
-*/
+    'lib,https://farside.link/redlib'];
   break;
 
   case hostname.endsWith('twitter.com'):
 
   site = [
     // nitter
-    'nit,https://farside.link/nitter',
-/*    'nit,https://de.nttr.stream',
-    'nit,https://nttr.stream',
-    'nit,https://nitter.bus-hit.me',
-    'nit,https://nitter.sethforprivacy.com',
-    'nit,https://twitter.076.ne.jp',
-    'nit,https://nitter.ca',
-    'nit,https://n.hyperborea.cloud',
-    'nit,https://nitter.koyu.space',
-    'nit,https://nitter.grimneko.de',
-    'nit,https://twitter.censors.us',
-    'nit,https://nitter.it',
-    'nit,https://bird.trom.tf',
-    'nit,https://nitter.moomoo.me',
-    'nit,https://nitter.hu',
-    'nit,https://birdsite.xanny.family',
-    'nit,https://nitter.actionsack.com',
-    'nit,https://nitter.namazso.eu',
-    'nit,https://nitter.eu',
-    'nit,https://nitter.domain.glass',
-    'nit,https://nitter.unixfox.eu',
-    'nit,https://nitter.kavin.rocks',
-    'nit,https://nitter.1d4.us',
-    'nit,https://nitter.fdn.fr',
-    'nit,https://nitter.pussthecat.org',
-    'nit,https://nitter.42l.fr',
-    'nit,https://nitter.net' */];
+    'nit,https://farside.link/nitter'];
+  break;
+
+  case hostname.endsWith('tiktok.com'):
+
+  site = [
+    // proxitok
+    'tik,https://farside.link/proxitok'];
+  break;
+
+  case hostname.endsWith('stackoverflow.com'):
+
+  site = [
+    // anonymousoverflow
+    'sta,https://farside.link/anonymousoverflow'];
   break;
 
   case hostname.endsWith('wikipedia.org'):
 
   site = [
     // wikiless
-    'wik,https://farside.link/wikiless',
- /*   'wik,https://wikiless.sethforprivacy.com',
-    'wik,https://wikiless.org',
-    'wik,https://wikiless.northboot.xyz',
-    'wik,https://wikiless.lunar.icu',
-    'wik,https://wikiless.alefvanoon.xyz',
-    'wik,https://wiki.froth.zone',
-    'wik,https://wiki.604kph.xyz' */];
+    'wik,https://farside.link/wikiless'];
   break;
 
   case hostname.endsWith('goodreads.com'):
@@ -308,29 +212,8 @@ switch (true) {
   site = [
     // invidious
     'inv,https://farside.link/invidious',
-/*    'inv,https://yt.artemislena.eu',
-    'inv,https://youtube.076.ne.jp',
-    'inv,https://yewtu.be',
-    'inv,https://vid.puffyan.us',
-    'inv,https://tube.cthd.icu',
-    'inv,https://invidious.weblibre.org',
-    'inv,https://invidious.snopyta.org',
-    'inv,https://invidious.sethforprivacy.com',
-    'inv,https://invidious.osi.kr',
-    'inv,https://invidious.namazso.eu',
-    'inv,https://invidious.mutahar.rocks',
-    'inv,https://invidious.lunar.icu',
-    'inv,https://invidious.kavin.rocks',
-    'inv,https://invidious.flokinet.to',
-    'inv,https://invidious.esmailelbob.xyz',
-    'inv,https://invidious-us.kavin.rocks',
-    'inv,https://inv.riverside.rocks', */
     // piped
-    'pip,https://farside.link/piped',
-/*    'pip,https://piped.mint.lgbt',
-    'pip,https://piped.moomoo.me',
-    'pip,https://piped.tokhmi.xyz',
-    'pip,https://piped.kavin.rocks' */];
+    'pip,https://farside.link/piped'];
   break;
 };
 
@@ -418,6 +301,4 @@ if (!path) {
   path = pathname + url.search + url.hash;
 }
 
-//console.log( site + path )
-//alert('You are being redirected to ' + site + path + '. Enjoy your surf, Sir!')
 location.href = site + path;

@@ -21,8 +21,8 @@ image/x-portable-bitmap=swayimg.desktop
 image/x-portable-graymap=swayimg.desktop
 image/x-portable-pixmap=swayimg.desktop
 
-application/pdf=sioyek.desktop
-application/epub+zip=sioyek.desktop
+application/pdf=org.pwmt.zathura.desktop
+application/epub+zip=org.pwmt.zathura.desktop
 
 text/html=org.qutebrowser.qutebrowser.desktop
 text/xml=org.qutebrowser.qutebrowser.desktop

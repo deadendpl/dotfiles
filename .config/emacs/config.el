@@ -1,18 +1,27 @@
-(scroll-bar-mode -1)                 ; Disable visible scrollbar
-(tool-bar-mode -1)                   ; Disable the toolbar
+(defun custom/termux-p ()
+  "Checks if Emacs is running inside of Termux."
+  (and (getenv "TERMUX_VERSION")))
+
+(unless (custom/termux-p)
+  (if (fboundp 'scroll-bar-mode)
+      (scroll-bar-mode -1)))         ; Disable visible scrollbar
+(unless (custom/termux-p)
+  (if (fboundp 'tool-bar-mode)
+      (tool-bar-mode -1)))           ; Disable the toolbar
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
-(set-fringe-mode 10)                 ; Give some breathing room
+(unless (custom/termux-p)
+  (if (fboundp 'set-fringe-mode)
+        (set-fringe-mode 10)))       ; Give some breathing room
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-(global-display-line-numbers-mode t) ; Line numbers
+(add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird indenting that Emacs does by default.
 (column-number-mode 1)               ; Column number in modeline
 ;; (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
-(set-default-coding-systems 'utf-8)  ; Setting default conding to utf-8
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 
@@ -36,63 +45,28 @@ Most of the stuff will get redirected here.")
               multisession-directory (expand-file-name "multisession" user-share-emacs-directory)
               transient-history-file (expand-file-name "transient/history.el" user-share-emacs-directory))
 
-(setq-default visible-bell nil ;; Set up the visible bell
-              inhibit-startup-message nil ; default emacs startup message
-              recentf-max-saved-items nil ; infinite amount of entries in recentf file
-              recentf-auto-cleanup 'never ; not cleaning recentf file
-              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-              use-dialog-box nil ; turns off graphical dialog boxes
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-              initial-scratch-message nil ; deleting scratch buffer message
-              scroll-conservatively 1000 ; Scroll one line at a time
-              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-              tab-always-indent nil
-              vc-follow-symlinks t ; Enable follow symlinks
-              indent-tabs-mode nil ; use spaces instead of tabs for indenting
-              standard-indent 2 ; indenting set to 2
-              auto-revert-interval 1
-              display-line-numbers-type 'relative
-              use-short-answers t ; replace yes-no prompts with y-n
-              fast-but-imprecise-scrolling t ; fast scrolling
-              inhibit-compacting-font-caches t
-              sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil) ; no files wiht ".#"
-              ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
-
-;; turn off line numbers in certain modes
-(dolist (mode '(neotree-mode-hook
-                vterm-mode-hook
-                term-mode-hook
-                shell-mode-hook
-                Info-mode-hook
-                helpful-mode-hook
-                help-mode-hook
-                dashboard-mode-hook
-                dashboard-after-initialize-hook
-                dired-mode-hook
-                org-agenda-mode-hook
-                which-key-mode-hook
-                tldr-mode-hook
-                dictionary-mode-hook
-                Man-mode-hook
-                woman-mode-hook
-                ibuffer-mode-hook
-                elisp-refs-mode-hook
-                imenu-list-minor-mode-hook
-                imenu-list-major-mode-hook
-                imenu-list-after-jump-hook
-                imenu-list-update-hook
-                backtrace-revert-hook
-                backtrace-mode-hook
-                calendar-mode-hook
-                special-mode-hook
-                outline-mode-hook
-                eat-mode-hook
-                compilation-mode-hook
-                Custom-mode-hook
-                tetris-mode-hook
-                eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+(setq visible-bell nil ;; Set up the visible bell
+      inhibit-startup-message nil ; default emacs startup message
+      recentf-max-saved-items nil ; infinite amount of entries in recentf file
+      recentf-auto-cleanup 'never ; not cleaning recentf file
+      global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+      use-dialog-box nil ; turns off graphical dialog boxes
+      initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
+      initial-scratch-message nil ; deleting scratch buffer message
+      scroll-conservatively 1000 ; Scroll one line at a time
+      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+      tab-always-indent nil
+      vc-follow-symlinks t ; Enable follow symlinks
+      indent-tabs-mode nil ; use spaces instead of tabs for indenting
+      standard-indent 2 ; indenting set to 2
+      auto-revert-interval 1
+      display-line-numbers-type 'relative
+      use-short-answers t ; replace yes-no prompts with y-n
+      fast-but-imprecise-scrolling t ; fast scrolling
+      inhibit-compacting-font-caches t
+      sentence-end-double-space nil ; sentences end with 1 space
+      create-lockfiles nil) ; no files wiht ".#"
+      ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
 
 (defun quit-window (&optional kill window)
   "Quit WINDOW, deleting it, and kill its buffer.
@@ -122,6 +96,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (set-selection-coding-system 'utf-8)
 (setq locale-coding-system   'utf-8)
 (prefer-coding-system        'utf-8)
+(set-default-coding-systems  'utf-8)
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -201,6 +176,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
+    (if (custom/termux-p)
+        (define-key evil-normal-state-map (kbd "C-s") 'save-buffer)) ;; for quick save on termux
     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
     (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
     ;; (define-key evil-motion-state-map (kbd "/") 'swiper))
@@ -219,6 +196,11 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package evil-nerd-commenter
   :after evil)
 
+(use-package evil-surround
+  :demand
+  :after evil
+  :config (global-evil-surround-mode 1))
+
 (use-package general
   :config
   (general-evil-setup)
@@ -229,6 +211,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :keymaps 'override
   :prefix "SPC" ;; set leader
   :global-prefix "M-SPC") ;; access leader in insert mode
+
+(if (custom/termux-p)
+  (custom/leader-keys
+    "q" '(evil-quit :wk "Quit Emacs")))
 
 (custom/leader-keys
   "SPC" '(projectile-find-file :wk "Find file in project")
@@ -299,7 +285,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "d h" '(custom/dired-go-to-home :wk "Open home directory")
   "d j" '(dired-jump :wk "Dired jump to current")
   "d n" '(neotree-dir :wk "Open directory in neotree")
-  "d p" '(peep-dired :wk "Peep-dired")
   "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
 
 (custom/leader-keys
@@ -468,15 +453,15 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "n d" '(:ignore t :wk "Dired")
   "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
   "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
-  "n o" '(:ignore t :wk "Obsidian")
-  "n o c" '(obsidian-capture :wk "Create note")
-  "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
-  "n o f" '(obsidian-tag-find :wk "Find by tag")
-  "n o j" '(obsidian-jump :wk "Jump to note")
-  "n o m" '(obsidian-move-file :wk "Move note/file")
-  "n o r" '(obsidian-update :wk "Update")
-  "n o /" '(obsidian-search :wk "Search")
-  "n o ?" '(obsidian-hydra/body :wk "Everything")
+  ;; "n o" '(:ignore t :wk "Obsidian")
+  ;; "n o c" '(obsidian-capture :wk "Create note")
+  ;; "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
+  ;; "n o f" '(obsidian-tag-find :wk "Find by tag")
+  ;; "n o j" '(obsidian-jump :wk "Jump to note")
+  ;; "n o m" '(obsidian-move-file :wk "Move note/file")
+  ;; "n o r" '(obsidian-update :wk "Update")
+  ;; "n o /" '(obsidian-search :wk "Search")
+  ;; "n o ?" '(obsidian-hydra/body :wk "Everything")
   "n r" '(:ignore t :wk "Org Roam")
   "n r a" '(:ignore t :wk "Alias")
   "n r a a" '(org-roam-alias-add :wk "Add alias")
@@ -491,7 +476,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
   "n r r" '(:ignore t :wk "References")
   "n r r a" '(org-roam-ref-add :wk "Add reference")
-  "n r r r" '(org-roam-ref-remove :wk "Remove reference"))
+  "n r r r" '(org-roam-ref-remove :wk "Remove reference")
+  "n r t" '(org-roam-tag-add :wk "Add tag")
+  "n r T" '(org-roam-tag-delete :wk "Remove tag")
+)
 
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
@@ -555,6 +543,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(defun custom/pulse-line (&rest _)
+  "Pulse the current line."
+  (pulse-momentary-highlight-one-line (point)))
+
+(dolist (command '(evil-scroll-up evil-scroll-down scroll-up-command scroll-down-command))
+  (advice-add command :after #'custom/pulse-line))
+
 (set-face-attribute 'default nil
   :font "JetBrainsMono NFM"
   :height 90
@@ -604,13 +599,29 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                                      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
     (global-ligature-mode 't))
 
-(use-package mixed-pitch
-  :hook (org-mode . mixed-pitch-mode)
-  :config
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
-    (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer))
+(unless (custom/termux-p)
+  (use-package mixed-pitch
+    :hook (org-mode . mixed-pitch-mode)
+    :config
+    (dolist (faces '(;; org-level-1
+                     ;; org-level-2
+                     ;; org-level-3
+                     ;; org-level-4
+                     ;; org-level-5
+                     ;; org-level-6
+                     ;; org-level-7
+                     ;; org-level-8
+                     org-modern-tag
+                     org-property-value
+                     org-special-keyword
+                     org-drawer
+		           org-document-face))
+      (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-special-keyword)
+      ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-drawer)
+)
 
 (use-package hl-todo
   :hook ((org-mode . hl-todo-mode)
@@ -651,7 +662,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :hook org-mode prog-mode)
 
 (use-package doom-themes
-  :demand
+  ;; :demand
   :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -665,21 +676,27 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ;;(doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
-(use-package ewal-doom-themes :demand)
-(use-package ewal
-  :demand
-  :config
-    (set-face-attribute 'line-number-current-line nil
-      :foreground (ewal-load-color 'comment)
-      :inherit 'default)
-    (set-face-attribute 'line-number nil
-      :foreground (ewal--get-base-color 'green)
-      :inherit 'default))
+
+(unless (custom/termux-p)
+  (use-package ewal-doom-themes :demand)
+  (use-package ewal
+    :demand
+    :config
+      (set-face-attribute 'line-number-current-line nil
+        :foreground (ewal-load-color 'comment)
+        :inherit 'default)
+      (set-face-attribute 'line-number nil
+        :foreground (ewal--get-base-color 'green)
+        :inherit 'default))
+)
 
 (defvar real-theme nil
   "It represents theme to load at startup.\nIt will be loaded st startup with `load-theme' and restarted with SPC-h-r-t.")
 
-(setq real-theme 'ewal-doom-one) ;; NOTE THIS IS WHERE YOU SHOULD SET YOUR THEME
+(if (custom/termux-p)
+    (setq real-theme 'doom-dracula) ;; for termux
+  (setq real-theme 'ewal-doom-one)) ;; for PC
+
 (load-theme real-theme t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
@@ -693,7 +710,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (company-minimum-prefix-length 2)
     (company-show-numbers t)
     (company-tooltip-align-annotations 't)
-    (global-company-mode t))
+    (global-company-mode t)
+  :config
+    (add-hook 'prog-mode-hook (lambda ()
+				(setq-local company-idle-delay 0
+					    company-selection-wrap-around t
+					    company-minimum-prefix-length 1))))
 
 (use-package company-box
   :after company
@@ -724,6 +746,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (ivy-use-virtual-buffers t)
     (ivy-count-format "(%d/%d) ")
     (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
+    (ivy-use-selectable-prompt t)
     (enable-recursive-minibuffers t)
   :config
     (ivy-mode)
@@ -769,43 +792,60 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (prescient-persist-mode 1)
     (ivy-prescient-mode 1))
 
-(use-package dashboard
-  ;; :demand
-  :custom
-    (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
-    (dashboard-banner-logo-title
+(unless (custom/termux-p)
+  (use-package dashboard
+    ;; :demand
+    :hook (dashboard-mode . (lambda () (with-current-buffer "*dashboard*" (emacs-lock-mode 'kill))))
+    :custom
+      (initial-buffer-choice (lambda () (dashboard-open)))
+      (dashboard-startup-banner (expand-file-name "banner.txt" user-emacs-directory))
+      (dashboard-banner-logo-title
 "You still refuse to accept my god-hood?
 Keep your own god!
 In fact, this might be a good time to pray to him.
 For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
-    (dashboard-center-content t)
-    (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items nil) ;;'( (recents  . 5)
-                       ;; (bookmarks . 5)
-                       ;; (projects . 5)
-                       ;; (agenda . 5))
-                       ;; (registers . 5)
-  :config
-    (dashboard-setup-startup-hook)
-    (evil-collection-dashboard-setup)
-    (evil-collection-define-key 'normal 'dashboard-mode-map
-      "j" 'widget-forward
-      "k" 'widget-backward
-      "l" 'dashboard-return))
-  ;; :bind
-    ;; (:map dashboard-mode-map
-    ;;   ([remap dashboard-next-line] . 'widget-forward)
-    ;;   ([remap dashboard-previous-line] . 'widget-backward)))
+      (dashboard-center-content t)
+      (dashboard-agenda-prefix-format " %i %s ")
+      (dashboard-items '((recents  . 5)))
+                         ;; (bookmarks . 5)
+                         ;; (projects . 5)
+                         ;; (agenda . 5)
+                         ;; (registers . 5)
+    :config
+      (dashboard-setup-startup-hook)
+      (evil-collection-dashboard-setup)
+      (evil-collection-define-key 'normal 'dashboard-mode-map
+        "j" 'widget-forward
+        "k" 'widget-backward
+        "l" 'dashboard-return))
+)
 
-(use-package dirvish
-  :init (dirvish-override-dired-mode)
-  :custom
-    (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
-    (dirvish-attributes '(collapse git-msg file-time file-size))
-  :config
-    (evil-collection-define-key 'normal 'dirvish-mode-map
-      "q"  'dirvish-quit))
+(unless (custom/termux-p)
+  (use-package dirvish
+    :init (dirvish-override-dired-mode t)
+    :custom
+      (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
+      (dirvish-attributes '(collapse git-msg file-time file-size))
+      (dirvish-default-layout '(1 0.15 0.5))
+    :config
+      (evil-collection-define-key 'normal 'dirvish-mode-map
+        "p" 'dirvish-yank-menu
+        "q" 'dirvish-quit)
+      (dirvish-define-preview eza (file)
+        "Use `eza' to generate directory preview."
+        :require ("eza") ; tell Dirvish to check if we have the executable
+        (when (file-directory-p file) ; we only interest in directories here
+          `(shell . ("eza" "-al" "--color=always" "--icons"
+                     "--group-directories-first" ,file))))
+      (add-to-list 'dirvish-preview-dispatchers 'eza)
+      ;; lines not wrapping
+      (add-hook 'dirvish-find-entry-hook
+          (lambda (&rest _) (setq-local truncate-lines t)))
+      ;; rebinds all dired commands to dirvish
+      ;; with dirvish-override-dired-mode it already moved dired commands to dirvish
+      ;; but it didn't toggle the dirvish window layout
+      (defalias 'dired 'dirvish))
+)
 
 (use-package dired
   :ensure nil
@@ -813,8 +853,9 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (evil-collection-dired-setup)
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-aHl --group-directories-first")
+    (dired-listing-switches "-Hl --almost-all --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
+    (image-dired-dir (expand-file-name "image-dired" user-share-emacs-directory))
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
@@ -823,7 +864,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (evil-collection-define-key 'normal 'dired-mode-map
       [remap evil-yank] 'dired-ranger-copy
       "gh" 'custom/dired-go-to-home
-      ;; "q"  'dirvish-quit
       "p"  'dired-ranger-paste
       "h"  'dired-up-directory
       "l"  'dired-find-file))
@@ -837,8 +877,14 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 ;;                                   ("mkv" . "mpv")
 ;;                                   ("mp4" . "mpv"))))
 
-;; (use-package diredfl
-;;   :after dired)
+(use-package diredfl
+  :after dired
+  :hook
+    ((dired-mode . diredfl-mode)
+     ;; highlight parent and directory preview as well
+     (dirvish-directory-view-mode . diredfl-mode))
+  :config
+    (set-face-attribute 'diredfl-dir-name nil :bold t))
 
 (use-package dired-ranger
   :after dired
@@ -859,37 +905,38 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     ([remap describe-variable] . counsel-describe-variable)
     ([remap describe-key] . helpful-key))
 
-(use-package which-key
-  :diminish
-  :defer 5
-  :custom
-    (which-key-side-window-location 'bottom)
-    (which-key-sort-order #'which-key-key-order-alpha)
-    (which-key-sort-uppercase-first nil)
-    (which-key-add-column-padding 1)
-    (which-key-max-display-columns nil)
-    (which-key-min-display-lines 6)
-    (which-key-side-window-slot -10)
-    (which-key-side-window-max-height 0.25)
-    (which-key-idle-delay 0.8)
-    (which-key-max-description-length nil)
-    (which-key-allow-imprecise-window-fit nil)
-    (which-key-separator "  ")
-    (which-key-idle-delay 0.5)
-  :config
-    (which-key-mode 1))
+(unless (custom/termux-p)
+  (use-package which-key
+    :diminish
+    :defer 5
+    :custom
+      (which-key-side-window-location 'bottom)
+      (which-key-sort-order #'which-key-key-order-alpha)
+      (which-key-sort-uppercase-first nil)
+      (which-key-add-column-padding 1)
+      (which-key-max-display-columns nil)
+      (which-key-min-display-lines 6)
+      (which-key-max-description-length nil)
+      (which-key-allow-imprecise-window-fit nil)
+      (which-key-separator "  ")
+      (which-key-idle-delay 0.5)
+    :config
+      (which-key-mode 1))
+)
 
 (use-package doom-modeline
   :demand
-  :init
-    (doom-modeline-mode 1)
-  :custom
-    (doom-modeline-battery t))
+  :init (doom-modeline-mode 1)
+  :custom (doom-modeline-battery t))
 
-(use-package elfeed
-  :custom
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
-    (elfeed-search-filter "@6-months-ago"))
+(unless (custom/termux-p)
+  (use-package elfeed
+    :custom
+      (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
+      (elfeed-search-filter "@6-months-ago"))
+)
+
+(unless (custom/termux-p)
 
 (use-package minesweeper
   :config
@@ -899,6 +946,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
   :ensure nil
   :config
     (evil-set-initial-state 'tetris-mode 'insert))
+)
 
 (use-package magit
   :custom
@@ -960,11 +1008,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
             (org-return))
         (org-return))))
 
-
-    ;; Unmap keys in 'evil-maps if not done, (setq org-return-follows-link t) will not work
-    ;; Setting RETURN key in org-mode to follow links
-    ;; (setq org-return-follows-link t)
-
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
 (add-hook 'org-mode-hook (lambda ()
@@ -1006,27 +1049,33 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
   :diminish
   :hook (org-mode . org-auto-tangle-mode))
 
-(use-package org-modern
-  :after org
-  ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
-  :hook (org-mode . org-modern-mode)
-  :custom-face
-    (org-modern-label ((t (:height 1.2))))
-  :custom
-    (org-modern-star nil)
-    (org-modern-list nil)
-    (org-modern-table nil))
+(unless (custom/termux-p)
+  (use-package org-modern
+    :after org
+    ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
+    :hook (org-mode . org-modern-mode)
+    :custom-face
+      ;; (org-modern-label ((t (:height 1.2))))
+    :custom
+      (org-modern-star nil)
+      (org-modern-list nil)
+      (org-modern-table nil))
+)
 
-(use-package org-modern-indent
-  :after org
-  :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
-  :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
+(unless (custom/termux-p)
+  (use-package org-modern-indent
+    :after org
+    :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
+    :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
+)
 
 (use-package org-roam
   :after org
   :init
-    (setq org-roam-v2-ack t
-          org-roam-directory "~/org-roam")
+    (setq org-roam-v2-ack t)
+    (if (custom/termux-p)
+        (setq org-roam-directory "~/storage/shared/org-roam")
+      (setq org-roam-directory "~/org-roam"))
   :custom
     (org-roam-db-location (expand-file-name "org/org-roam.db" user-share-emacs-directory))
     (org-roam-dailies-directory "journals/")
@@ -1047,42 +1096,47 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (require 'org-roam-dailies)
     (add-hook 'org-roam-find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3)))))
 
-(use-package org-superstar
-  :after org
-  ;; :hook (org-mode . (lambda () (org-superstar-mode t)))
-  :hook (org-mode . org-superstar-mode)
-  :custom
-    (org-superstar-remove-leading-stars t)
-    (org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
+;; (use-package org-roam-ui)
 
-(use-package org-yt
-  :after org
-  :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
-  :config
-    (require 'org-yt)
+(unless (custom/termux-p)
+  (use-package org-superstar
+    :after org
+    :hook (org-mode . org-superstar-mode)
+    :custom
+      (org-superstar-remove-leading-stars t)
+      (org-superstar-item-bullet-alist
+        '((?+ . ?✸)
+          (?* . ?•)
+          (?- . ?●))))
+)
 
-    (defun org-image-link (protocol link _description)
-      "Interpret LINK as base64-encoded image data."
-      (cl-assert (string-match "\\`img" protocol) nil
-                 "Expected protocol type starting with img")
-      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-        (cl-assert buf nil
-                   "Download of image \"%s\" failed." link)
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (re-search-forward "\r?\n\r?\n")
-          (buffer-substring-no-properties (point) (point-max)))))
+(unless (custom/termux-p)
+  (use-package org-yt
+    :after org
+    :quelpa (org-yt :fetcher github :repo "TobiasZawada/org-yt")
+    :config
+      (require 'org-yt)
 
-    (org-link-set-parameters
-     "imghttp"
-     :image-data-fun #'org-image-link)
+      (defun custom/org-image-link (protocol link _description)
+        "Interpret LINK as base64-encoded image data."
+        (cl-assert (string-match "\\`img" protocol) nil
+                   "Expected protocol type starting with img")
+        (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+          (cl-assert buf nil
+                     "Download of image \"%s\" failed." link)
+          (with-current-buffer buf
+            (goto-char (point-min))
+            (re-search-forward "\r?\n\r?\n")
+            (buffer-substring-no-properties (point) (point-max)))))
 
-    (org-link-set-parameters
-     "imghttps"
-     :image-data-fun #'org-image-link))
+      (org-link-set-parameters
+       "imghttp"
+       :image-data-fun #'custom/org-image-link)
+
+      (org-link-set-parameters
+       "imghttps"
+       :image-data-fun #'custom/org-image-link))
+)
 
 (use-package toc-org
   :after org
@@ -1107,7 +1161,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    ;; (org-mode . org-indent-mode)
     ;; after refiling and archiving tasks agenda files aren't saves, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
@@ -1116,17 +1169,17 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-level-1 ((t (:inherit outline-1 :height 1.7))))
-    (org-level-2 ((t (:inherit outline-2 :height 1.6))))
-    (org-level-3 ((t (:inherit outline-3 :height 1.5))))
-    (org-level-4 ((t (:inherit outline-4 :height 1.4))))
-    (org-level-5 ((t (:inherit outline-5 :height 1.3))))
+    (org-level-1 ((t (:inherit outline-1 :height 1.2))))
+    (org-level-2 ((t (:inherit outline-2 :height 1.2))))
+    (org-level-3 ((t (:inherit outline-3 :height 1.2))))
+    (org-level-4 ((t (:inherit outline-4 :height 1.2))))
+    (org-level-5 ((t (:inherit outline-5 :height 1.2))))
     (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-7 ((t (:inherit outline-5 :height 1.1))))
+    (org-level-7 ((t (:inherit outline-5 :height 1.2))))
     (org-list-dt ((t (:weight bold))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
-    (org-directory "~/org-roam/")
+    (org-directory org-roam-directory)
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
@@ -1182,23 +1235,18 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-refile-targets '((org-agenda-files :maxlevel . 1)))
     (org-refile-use-outline-path nil)
     (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
-    (org-insert-heading-respect-content nil)
-    ;; no new lines when doing M-return
-    (org-blank-before-new-entry nil)
     (org-hide-emphasis-markers t)
     (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
+    (org-image-actual-width nil)
     (org-startup-with-inline-images t)
-    (org-startup-indented t)
+    (org-startup-indented t) ;; use org-indent-mode at startup
     (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
-    (org-image-actual-width nil)
     (org-list-allow-alphabetical t)
-    ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
-    (org-log-into-drawer t)
-    ;; (org-ellipsis " •")
+    (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (expand-file-name "org/lateximg/" user-share-emacs-directory))
     (org-preview-latex-default-process 'dvisvgm)
@@ -1206,11 +1254,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
     (org-id-locations-file (expand-file-name "org/.org-id-locations" user-share-emacs-directory))
     (org-return-follows-link t)
+    (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
     (org-M-RET-may-split-line nil)
     (org-insert-heading-respect-content t)
     (org-tags-column 0)
     (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
-    (org-babel-C++-compiler "g++")
     (org-confirm-babel-evaluate nil)
     (org-edit-src-content-indentation 0)
     (org-src-preserve-indentation t)
@@ -1218,9 +1266,9 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-export-allow-bind-keywords t)
     (org-export-with-toc nil)
     (org-export-with-smart-quotes t)
-    (org-export-backends (quote (ascii html icalendar latex odt md)))
+    (org-export-backends '(ascii html icalendar latex odt md))
     ;; (org-export-with-properties t)
-    (org-startup-folded 'overview)
+    (org-startup-folded t)
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
@@ -1238,36 +1286,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
                  '("*Org Babel Results*"
                    (display-buffer-at-bottom)))
 
-    ;; My attempt to create new time keyword STARTED
-    ;; which would signify the time at which somehting was started
-    ;; (defvar org-started-string "STARTED:"
-    ;;   "String to mark started entries.")
-    ;; (defconst org-element-started-keyword "STARTED:"
-    ;;   "Keyword used to mark started TODO entries.")
-    ;; (defconst org-started-time-regexp
-    ;;   (concat "\\<" org-started-string " *\\[\\([^]]+\\)\\]")
-    ;;   "Matches the STARTED keyword together with a time stamp.")
-    ;; (defcustom org-started-keep-when-no-todo nil
-    ;;   "Remove STARTED: time-stamp when switching back to a non-todo state?"
-    ;;   :group 'org-todo
-    ;;   :group 'org-keywords
-    ;;   :version "24.4"
-    ;;   :package-version '(Org . "8.0")
-    ;;   :type 'boolean)
-    ;; (defconst org-all-time-keywords
-    ;;   (mapcar (lambda (w) (substring w 0 -1))
-    ;;           (list org-scheduled-string org-deadline-string
-    ;;                 org-clock-string org-closed-string org-started-string))
-    ;;   "List of time keywords.")
-    ;; (defconst org-keyword-time-regexp
-    ;;   (concat "\\<"
-    ;;           (regexp-opt
-    ;;            (list org-scheduled-string org-deadline-string org-closed-string
-    ;;                  org-clock-string org-started-string)
-    ;;            t)
-    ;;           " *[[<]\\([^]>]+\\)[]>]")
-    ;;   "Matches any of the 5 keywords, together with the time stamp.")
-
     (defun custom/org-resize-latex-overlays ()
       "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
       (cl-loop for o in (car (overlay-lists))
@@ -1281,16 +1299,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
 
-;; (defun custom/org-insert-heading-or-item-and-switch-to-insert-state-advice (orig-func &rest args)
-;;   "Advice function to run org-insert-heading-respect-content or org-ctrl-c-ret and switch to insert state in the background."
-;;   (let ((result (apply orig-func args)))
-;;     (when (and (evil-normal-state-p) (derived-mode-p 'org-mode))
-;;       (evil-insert-state))
-;;     result))
-
-;; (advice-add 'org-insert-heading-respect-content :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
-;; (advice-add 'org-ctrl-c-ret :around #'custom/org-insert-heading-or-item-and-switch-to-insert-state-advice)
-
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
   :config
@@ -1298,44 +1306,55 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (require 'smartparens-config))
 (use-package evil-smartparens :after smartparens)
 
-(use-package projectile
-  :diminish projectile-mode
+(unless (custom/termux-p)
+  (use-package projectile
+    :diminish projectile-mode
+    :custom
+      (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
+      (projectile-switch-project-action #'projectile-dired)
+    :config (projectile-mode)
+    :bind-keymap
+      ("C-c p" . projectile-command-map))
+
+  (use-package counsel-projectile
+    :after projectile
+    :config (counsel-projectile-mode 1))
+)
+
+(unless (custom/termux-p)
+
+(use-package compile
   :custom
-    (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
-    (projectile-switch-project-action #'projectile-dired)
-  :config (projectile-mode)
-  :bind-keymap
-    ("C-c p" . projectile-command-map))
-
-(use-package counsel-projectile
-  :after projectile
+    (compilation-scroll-output t)
   :config
-    (counsel-projectile-mode 1))
+    (add-to-list 'display-buffer-alist
+                 '("*compilation*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (add-to-list 'display-buffer-alist
+                 '("*Compile-log*"
+                   (display-buffer-at-bottom)
+                   (window-height . 12)))
+    (defadvice compile (before ad-compile-smart activate)
+      "Advises `compile' so it sets the argument COMINT to t."
+      (ad-set-arg 1 t))
+    (defadvice compile (after ad-compile-smart activate)
+      "Advises `compile' so it moves to the compilation buffer."
+      (switch-to-buffer-other-window "*compilation*"))
+    (defadvice recompile (after compile-command activate)
+      "Advises `recompile' so it moves to the compilation buffer."
+      (switch-to-buffer-other-window "*compilation*"))
+)
 
-(add-to-list 'display-buffer-alist
-             '("*Messages*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Compile-log*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Backtrace*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Warnings*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*compilation*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
-(add-to-list 'display-buffer-alist
-             '("*Async Shell Command*"
-               (display-buffer-at-bottom)
-               (window-height . 12)))
+
+(dolist (buffer '("*Messages*"
+                  "*Backtrace*"
+                  "*Warnings*"
+                  "*Async Shell Command*"))
+  (add-to-list 'display-buffer-alist
+               `(,buffer
+                 (display-buffer-at-bottom)
+                 (window-height . 12))))
 
 (defadvice async-shell-command (after shell-command activate)
   "Advises `async-shell-command' to move to it's buffer after activation,
@@ -1346,25 +1365,6 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 
 (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
 
-(defadvice compile (before ad-compile-smart activate)
-  "Advises `compile' so it sets the argument COMINT to t."
-  (ad-set-arg 1 t))
-(defadvice compile (after ad-compile-smart activate)
-  "Advises `compile' so it moves to the compilation buffer."
-  (switch-to-buffer-other-window "*compilation*"))
-(defadvice recompile (after compile-command activate)
-  "Advises `recompile' so it moves to the compilation buffer."
-  (switch-to-buffer-other-window "*compilation*"))
-
-(use-package quickrun
-  :after prog-mode
-  :config
-    (evil-define-key 'normal prog-mode-map (kbd "g r") 'quickrun-region)
-    (add-to-list 'display-buffer-alist
-                 '("*quickrun*"
-                   (display-buffer-at-bottom)
-                   (window-height . 5))))
-
 (use-package flycheck
   :defer 1
   :after prog-mode
@@ -1374,17 +1374,17 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package eglot
   :ensure nil
   :after prog-mode
-  :custom
-  (eglot-autoshutdown t))
+  :custom (eglot-autoshutdown t))
 
 (use-package flycheck-eglot
   :after eglot)
 
-(add-hook 'css-ts-mode-hook 'eglot-ensure)
-(add-hook 'python-ts-mode-hook 'eglot-ensure)
-(add-hook 'bash-ts-mode-hook 'eglot-ensure)
-(add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'html-mode-hook 'eglot-ensure)
+(dolist (mode '(css-ts-mode-hook
+                python-ts-mode-hook
+                bash-ts-mode-hook
+                c++-ts-mode-hook
+                html-ts-mode-hook))
+  (add-hook mode 'eglot-ensure))
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1397,20 +1397,23 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 ;;     (unless (file-exists-p "./Makefile")
 ;;       (copy-file (concat user-emacs-directory "templates/Makefile-cpp") "./Makefile"))))
 
+(add-hook 'c++-ts-mode-hook (lambda () (setq-local compile-command (concat "g++ " (buffer-name)))))
+
 ;; (add-hook 'find-file-hook 'custom/cpp-makefile)
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
 (use-package bug-hunter)
 
+(add-hook 'python-ts-mode-hook (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
+
 (use-package lorem-ipsum
-  :custom
-    (lorem-ipsum-sentence-separator " "))
+  :custom (lorem-ipsum-sentence-separator " "))
 
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
      ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-     (c "https://github.com/tree-sitter/tree-sitter-c")
+     ;; (c "https://github.com/tree-sitter/tree-sitter-c")
      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
      (css "https://github.com/tree-sitter/tree-sitter-css")
      ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
@@ -1464,11 +1467,15 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 ;;     (evil-collection-define-key 'normal 'mhtml-mode-map
 ;;       "TAB" 'emmet-expand-line))
 
-(use-package company-shell
-  :after sh-mode
-  :custom
-    (add-to-list 'company-backends 'company-shell)
-    (add-to-list 'company-backends 'company-shell-env))
+)
+
+(unless (custom/termux-p)
+  (use-package company-shell
+    :after sh-mode
+    :custom
+      (add-to-list 'company-backends 'company-shell)
+      (add-to-list 'company-backends 'company-shell-env))
+)
 
 (use-package eshell
   :custom
@@ -1503,10 +1510,12 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package eat
   :after eshell)
 
-(use-package vterm
-  :config
-    (setq shell-file-name "/bin/bash"
-          vterm-max-scrollback 5000))
+(unless (custom/termux-p)
+  (use-package vterm
+    :config
+      (setq shell-file-name "/bin/bash"
+            vterm-max-scrollback 5000))
+)
 
 (use-package sudo-edit)
 
@@ -1592,4 +1601,6 @@ _q_uit        _e_qualize        _]_forward      ^
 
    ("q" nil))
 
-(use-package writeroom-mode)
+(unless (custom/termux-p)
+  (use-package writeroom-mode)
+)
