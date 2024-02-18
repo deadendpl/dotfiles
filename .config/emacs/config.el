@@ -67,6 +67,8 @@ Most of the stuff will get redirected here.")
       sentence-end-double-space nil ; sentences end with 1 space
       create-lockfiles nil) ; no files wiht ".#"
       ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+(if (custom/termux-p)
+  (setq browse-url-browser-function 'browse-url-xdg-open))
 
 (defun quit-window (&optional kill window)
   "Quit WINDOW, deleting it, and kill its buffer.
@@ -150,27 +152,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :demand
   :after quelpa)
 
-;;(defun custom/evil-hook ()
-;;  (dolist (mode '(custom-mode
-;;                  eshell-mode
-;;                  git-rebase-mode
-;;                  erc-mode
-;;                  circe-server-mode
-;;                  circe-chat-mode
-;;                  circe-query-mode
-;;                  sauron-mode
-;;                  term-mode))
-;;   (add-to-list 'evil-emacs-state-modes mode)))
-
 (use-package evil
   :demand
   :init
     (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
-          evil-want-keybinding nil
-          evil-want-C-u-scroll t
-          evil-vsplit-window-right t
-          evil-split-window-below t
-          evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
+          evil-want-keybinding nil)
+  :custom
+    (evil-want-C-u-scroll t)
+    (evil-vsplit-window-right t)
+    (evil-split-window-below t)
+    (evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
   :bind
     (:map evil-normal-state-map
       ([remap evil-search-forward] . 'swiper))
@@ -190,7 +181,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     ;; that evil-collection should works with.  The following line is here
     ;; for documentation purposes in case you need it.
     ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
-    (add-to-list 'evil-collection-mode-list 'help) ;; evilify help mode
+    (add-to-list 'evil-collection-mode-list 'helpful) ;; evilify help mode
     (evil-collection-init))
 
 (use-package evil-nerd-commenter
@@ -219,7 +210,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (custom/leader-keys
   "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
-  "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
+  ;; "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
   "u" '(universal-argument :wk "Universal argument")
   "x" '(execute-extended-command :wk "M-x"))
 
@@ -231,6 +222,24 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "RET" '(bookmark-jump :wk "Go to bookmark"))
+
+(custom/leader-keys
+  "=" '(:ignore t :wk "Tabs/Workspaces")
+  "= TAB" '(tab-next :wk "Next tab")
+  "= =" '(tab-bar-mode :wk "Enable/Disable")
+  "= 1" '((lambda () (interactive) (tab-select 1)) :wk "Tab 1")
+  "= 2" '((lambda () (interactive) (tab-select 2)) :wk "Tab 2")
+  "= 3" '((lambda () (interactive) (tab-select 3)) :wk "Tab 3")
+  "= 4" '((lambda () (interactive) (tab-select 4)) :wk "Tab 4")
+  "= 5" '((lambda () (interactive) (tab-select 5)) :wk "Tab 5")
+  "= 6" '((lambda () (interactive) (tab-select 6)) :wk "Tab 6")
+  "= 7" '((lambda () (interactive) (tab-select 7)) :wk "Tab 7")
+  "= 8" '((lambda () (interactive) (tab-select 8)) :wk "Tab 8")
+  "= 9" '((lambda () (interactive) (tab-select 9)) :wk "Tab 9")
+  "= 0" '((lambda () (interactive) (tab-select 0)) :wk "Tab 0")
+  "= t" '(tab-bar-new-tab :wk "New")
+  "= d" '(tab-bar-close-tab :wk "Close")
+  "= r" '(tab-rename :wk "Rename"))
 
 (custom/leader-keys
   "a" '(:ignore t :wk "Amusement")
@@ -450,9 +459,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n d" '(:ignore t :wk "Dired")
-  "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
-  "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
+  "n d" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
+  ;; "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
+  ;; "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
   ;; "n o" '(:ignore t :wk "Obsidian")
   ;; "n o c" '(obsidian-capture :wk "Create note")
   ;; "n o d" '((lambda () (interactive) (dired obsidian-directory)) :wk "Open notes in Dired")
@@ -478,7 +487,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "n r r a" '(org-roam-ref-add :wk "Add reference")
   "n r r r" '(org-roam-ref-remove :wk "Remove reference")
   "n r t" '(org-roam-tag-add :wk "Add tag")
-  "n r T" '(org-roam-tag-delete :wk "Remove tag")
+  "n r T" '(org-roam-tag-remove :wk "Remove tag")
 )
 
 (custom/leader-keys
@@ -518,10 +527,10 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "w c" '(evil-window-delete :wk "Close window")
   "w n" '(evil-window-new :wk "New window")
   "w q" '(:ingore t :wk "Close on side")
-  "w q h" '(custom/close-left-window :wk "Left")
-  "w q j" '(custom/close-down-window :wk "Down")
-  "w q k" '(custom/close-up-window :wk "Up")
-  "w q l" '(custom/close-right-window :wk "Right")
+  "w q h" '(custom/evil-close-left-window :wk "Left")
+  "w q j" '(custom/evil-close-down-window :wk "Down")
+  "w q k" '(custom/evil-close-up-window :wk "Up")
+  "w q l" '(custom/evil-close-right-window :wk "Right")
   "w s" '(evil-window-split :wk "Horizontal split window")
   "w v" '(evil-window-vsplit :wk "Vertical split window")
   ;; Window motions
@@ -547,7 +556,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "Pulse the current line."
   (pulse-momentary-highlight-one-line (point)))
 
-(dolist (command '(evil-scroll-up evil-scroll-down scroll-up-command scroll-down-command))
+(dolist (command '(evil-scroll-up
+                   evil-scroll-down
+                   evil-window-right
+                   evil-window-left
+                   evil-window-up
+                   evil-window-down
+                   scroll-up-command
+                   scroll-down-command))
   (advice-add command :after #'custom/pulse-line))
 
 (set-face-attribute 'default nil
@@ -615,7 +631,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                      org-property-value
                      org-special-keyword
                      org-drawer
-		           org-document-face))
+                           org-document-face))
       (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
       ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
       ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
@@ -653,6 +669,11 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package all-the-icons-ivy-rich
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
+
+(use-package doom-modeline
+  :demand
+  :init (doom-modeline-mode 1)
+  :custom (doom-modeline-battery t))
 
 (use-package rainbow-delimiters
   :after prog-mode)
@@ -713,9 +734,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (global-company-mode t)
   :config
     (add-hook 'prog-mode-hook (lambda ()
-				(setq-local company-idle-delay 0
-					    company-selection-wrap-around t
-					    company-minimum-prefix-length 1))))
+                                (setq-local company-idle-delay 0
+                                            company-selection-wrap-around t
+                                            company-minimum-prefix-length 1))))
 
 (use-package company-box
   :after company
@@ -924,11 +945,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       (which-key-mode 1))
 )
 
-(use-package doom-modeline
-  :demand
-  :init (doom-modeline-mode 1)
-  :custom (doom-modeline-battery t))
-
 (unless (custom/termux-p)
   (use-package elfeed
     :custom
@@ -1018,6 +1034,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
 
 (use-package company-org-block
   :after org
@@ -1060,10 +1077,8 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       (org-modern-star nil)
       (org-modern-list nil)
       (org-modern-table nil))
-)
 
-(unless (custom/termux-p)
-  (use-package org-modern-indent
+(use-package org-modern-indent
     :after org
     :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
     :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
@@ -1305,9 +1320,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
-  :config
-    ;; load default config
-    (require 'smartparens-config))
+  :config (require 'smartparens-config)) ;; load default config
 (use-package evil-smartparens :after smartparens)
 
 (unless (custom/termux-p)
@@ -1393,17 +1406,9 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package lua-mode)
 (use-package nix-mode)
 
-;; (defun custom/cpp-makefile ()
-;;   "Checks for `c++-ts-mode'. Then checks for existence of Makefile.
-;; If not then copy c++ makefile and put it in the current directory"
-;;   (interactive)
-;;   (if (eq major-mode 'c++-ts-mode)
-;;     (unless (file-exists-p "./Makefile")
-;;       (copy-file (concat user-emacs-directory "templates/Makefile-cpp") "./Makefile"))))
+(add-hook 'bash-ts-mode-hook (lambda () (setq-local compile-command (concat "bash " (buffer-name)))))
 
-(add-hook 'c++-ts-mode-hook (lambda () (setq-local compile-command (concat "g++ " (buffer-name)))))
-
-;; (add-hook 'find-file-hook 'custom/cpp-makefile)
+(add-hook 'c++-ts-mode-hook (lambda () (setq-local compile-command (concat "g++ " (buffer-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
@@ -1497,6 +1502,7 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
     ;; :config
     ;; (evil-set-initial-state 'eshell-mode 'emacs)
   :config
+    (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
     (eat-eshell-mode))
 
 ;; (use-package eshell-toggle
@@ -1525,25 +1531,25 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 
 (use-package buffer-move)
 
-(defun custom/close-down-window ()
+(defun custom/evil-close-down-window ()
   "Goes down the window and closes it"
   (interactive)
   (evil-window-down 1)
   (evil-window-delete))
 
-(defun custom/close-up-window ()
+(defun custom/evil-close-up-window ()
   "Goes up the window and closes it"
   (interactive)
   (evil-window-up 1)
   (evil-window-delete))
 
-(defun custom/close-left-window ()
+(defun custom/evil-close-left-window ()
   "Goes left the window and closes it"
   (interactive)
   (evil-window-left 1)
   (evil-window-delete))
 
-(defun custom/close-right-window ()
+(defun custom/evil-close-right-window ()
   "Goes right the window and closes it"
   (interactive)
   (evil-window-right 1)

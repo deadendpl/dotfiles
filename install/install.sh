@@ -113,13 +113,13 @@ yay -S --noconfirm networkmanager-dmenu-git \
                    rofi-lbonn-wayland-git \
                    pokemonsay-newgenerations-git \
                    fortune-mod-vimtips \
-                   sioyek \
+                   udiskie-dmenu-git
+                   # sioyek \
                    # krabby-bin \
                    # dracula-gtk-theme
                    # catppuccin-gtk-theme-mocha
                    # catppuccin-gtk-theme-latte
                    # bitwarden-rofi-git \
-                   # udiskie-dmenu-git
 
 yay -S --noconfirm pywal \
                    python-inotify-simple \
@@ -128,7 +128,9 @@ yay -S --noconfirm pywal \
                    python-daemon \
                    python-haishoku \
                    wpgtk \
-                   gtk-theme-flat-color-git
+                   gtk-theme-flat-color-git \
+		         qt5-styleplugins \
+			 qt6gtk2
 
 wpg-install.sh -g
 
@@ -172,6 +174,9 @@ sudo bash ./install.sh
 
 cd ../
 rm -rf grub_gtg
+
+sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
+sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\""
 
 xdg-mime default sioyek.desktop application/pdf
 xdg-mime default sioyek.desktop application/epub+zip

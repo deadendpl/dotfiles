@@ -152,15 +152,14 @@ yay -S --noconfirm networkmanager-dmenu-git \
                    rofi-lbonn-wayland-git \
                    pokemonsay-newgenerations-git \
                    fortune-mod-vimtips \
-                   sioyek \
+                   udiskie-dmenu-git
+                   # sioyek \
                    # krabby-bin \
                    # dracula-gtk-theme
                    # catppuccin-gtk-theme-mocha
                    # catppuccin-gtk-theme-latte
                    # bitwarden-rofi-git \
-                   # udiskie-dmenu-git
 #+end_src
-
 *** Pywal dependencies
 Pywal is like Material You from Android but on Linux
 #+begin_src sh
@@ -171,7 +170,9 @@ yay -S --noconfirm pywal \
                    python-daemon \
                    python-haishoku \
                    wpgtk \
-                   gtk-theme-flat-color-git
+                   gtk-theme-flat-color-git \
+		         qt5-styleplugins \
+			 qt6gtk2
 
 wpg-install.sh -g
 #+end_src
@@ -227,6 +228,11 @@ cd ../
 rm -rf grub_gtg
 #+end_src
 
+* QT apps follow GTK theme
+#+begin_src shell
+sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
+sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\""
+#+end_src
 * Setting defaults
 It sets some apps to be defaults for some files
 #+begin_src sh

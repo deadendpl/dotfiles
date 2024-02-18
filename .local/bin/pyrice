@@ -54,7 +54,7 @@ emacsclient --eval '(load-theme real-theme t)'
 
 notify-send "New rice applied"
 
-# I do it after notification confirmation because it takes more than a moment
+# I do it after notification confirmation because it takes few seconds
 if pgrep "qutebrowser" > /dev/null; then
-  qutebrowser :config-source
+  qutebrowser :config-source &
 fi

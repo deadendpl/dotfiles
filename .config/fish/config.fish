@@ -33,7 +33,6 @@ else
 
   set EDITOR emacsclient -t -a "nvim"
   set VISUAL emacsclient -c -a "emacs"
-
   # fish_vi_key_bindings
 
   # going to last directory from lf
