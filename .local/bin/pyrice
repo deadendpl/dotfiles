@@ -52,6 +52,10 @@ swaync-client -rs
 swaync-client -R
 emacsclient --eval '(load-theme real-theme t)'
 
+if [[ $(which pywalfox) ]]; then
+  pywalfox update
+fi
+
 notify-send "New rice applied"
 
 # I do it after notification confirmation because it takes few seconds

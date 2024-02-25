@@ -65,7 +65,8 @@ Most of the stuff will get redirected here.")
       fast-but-imprecise-scrolling t ; fast scrolling
       inhibit-compacting-font-caches t
       sentence-end-double-space nil ; sentences end with 1 space
-      create-lockfiles nil) ; no files wiht ".#"
+      create-lockfiles nil ; no files wiht ".#"
+      switch-to-buffer-obey-display-actions t) ; swtich-to-buffer will respect display-buffer-alist
       ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
 (if (custom/termux-p)
   (setq browse-url-browser-function 'browse-url-xdg-open))
@@ -134,6 +135,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package gcmh
   :demand
+  :diminish
   :custom
     (gcmh-mode 1)
     (gcmh-idle-delay 10)
@@ -145,6 +147,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :custom
     (quelpa-dir (expand-file-name "quelpa/" user-share-emacs-directory))
     (quelpa-checkout-melpa-p nil))
+    ;; (use-package-ensure-function 'quelpa))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
     ;; (quelpa-melpa-dir (concat quelpa-dir "melpa/"))
     ;; (quelpa-packages-dir (concat quelpa-dir "packages/")))
@@ -459,7 +462,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "n" '(:ignore t :wk "Notes")
-  "n d" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
   ;; "n d o" '(custom/org-notes-dired :wk "Open notes in Dired")
   ;; "n d r" '(custom/org-roam-notes-dired :wk "Open roam notes in Dired")
   ;; "n o" '(:ignore t :wk "Obsidian")
@@ -471,23 +473,24 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   ;; "n o r" '(obsidian-update :wk "Update")
   ;; "n o /" '(obsidian-search :wk "Search")
   ;; "n o ?" '(obsidian-hydra/body :wk "Everything")
-  "n r" '(:ignore t :wk "Org Roam")
-  "n r a" '(:ignore t :wk "Alias")
-  "n r a a" '(org-roam-alias-add :wk "Add alias")
-  "n r a r" '(org-roam-alias-remove :wk "Remove alias")
-  "n r d" '(:ignore t :wk "Roam dailies")
-  "n r d c" '(org-roam-dailies-capture-today :wk "Cature today")
-  "n r d t" '(org-roam-dailies-goto-today :wk "Go to today")
-  "n r d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-  "n r d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-  "n r f" '(org-roam-node-find :wk "Find note")
-  "n r i" '(org-roam-node-insert :wk "Insert note")
-  "n r l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-  "n r r" '(:ignore t :wk "References")
-  "n r r a" '(org-roam-ref-add :wk "Add reference")
-  "n r r r" '(org-roam-ref-remove :wk "Remove reference")
-  "n r t" '(org-roam-tag-add :wk "Add tag")
-  "n r T" '(org-roam-tag-remove :wk "Remove tag")
+  ;; "n" '(:ignore t :wk "Org Roam")
+  "n a" '(:ignore t :wk "Alias")
+  "n a a" '(org-roam-alias-add :wk "Add alias")
+  "n a r" '(org-roam-alias-remove :wk "Remove alias")
+  "n d" '(:ignore t :wk "Roam dailies")
+  "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
+  "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+  "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+  "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
+  "n f" '(org-roam-node-find :wk "Find note")
+  "n i" '(org-roam-node-insert :wk "Insert note")
+  "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  "n r" '(:ignore t :wk "References")
+  "n r" '(org-roam-ref-add :wk "Add reference")
+  "n R" '(org-roam-ref-remove :wk "Remove reference")
+  "n t" '(org-roam-tag-add :wk "Add tag")
+  "n T" '(org-roam-tag-remove :wk "Remove tag")
 )
 
 (custom/leader-keys
@@ -563,11 +566,13 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                    evil-window-up
                    evil-window-down
                    scroll-up-command
-                   scroll-down-command))
+                   scroll-down-command
+		       tab-select
+		       tab-next))
   (advice-add command :after #'custom/pulse-line))
 
 (set-face-attribute 'default nil
-  :font "JetBrainsMono NFM"
+  :font "ComicCodeLigaturesMediu Nerd Font"
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
@@ -575,7 +580,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :height 100
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-  :family "JetBrainsMono NFM Mono"
+  :family "ComicCodeLigaturesMediu Nerd Font"
   :height 80
   :weight 'medium)
 (set-face-attribute 'fixed-pitch-serif nil
@@ -613,11 +618,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                                      "<*>" "<|" "<|>" "<$" "<$>" "<!--" "<-" "<--" "<->" "<+"
                                      "<+>" "<=" "<==" "<=>" "<=<" "<>" "<<" "<<-" "<<=" "<<<"
                                      "<~" "<~~" "</" "</>" "~@" "~-" "~>" "~~" "~~>" "%%"))
-    (global-ligature-mode 't))
+    (global-ligature-mode 1))
 
 (unless (custom/termux-p)
   (use-package mixed-pitch
     :hook (org-mode . mixed-pitch-mode)
+    :diminish
     :config
     (dolist (faces '(;; org-level-1
                      ;; org-level-2
@@ -631,7 +637,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                      org-property-value
                      org-special-keyword
                      org-drawer
-                           org-document-face))
+                     org-document-face))
       (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
       ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-modern-tag)
       ;; (add-to-list 'mixed-pitch-fixed-pitch-faces 'org-property-value)
@@ -676,7 +682,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :custom (doom-modeline-battery t))
 
 (use-package rainbow-delimiters
-  :after prog-mode)
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package rainbow-mode
   :diminish
@@ -861,11 +867,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       (add-to-list 'dirvish-preview-dispatchers 'eza)
       ;; lines not wrapping
       (add-hook 'dirvish-find-entry-hook
-          (lambda (&rest _) (setq-local truncate-lines t)))
+          (lambda (&rest _) (setq-local truncate-lines t))))
       ;; rebinds all dired commands to dirvish
       ;; with dirvish-override-dired-mode it already moved dired commands to dirvish
       ;; but it didn't toggle the dirvish window layout
-      (defalias 'dired 'dirvish))
+      ;; (defalias 'dired 'dirvish))
 )
 
 (use-package dired
@@ -987,50 +993,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       "j" 'forward-button
       "k" 'backward-button))
 
-(use-package evil-org
-  :after org
-  :init
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map
-        "gj" 'evil-next-visual-line
-        "gk" 'evil-previous-visual-line
-        (kbd "C-j") 'org-next-visible-heading
-        (kbd "C-k") 'org-previous-visible-heading
-        (kbd "C-S-J") 'org-forward-heading-same-level
-        (kbd "C-S-K") 'org-backward-heading-same-level
-        (kbd "M-h") 'org-metaleft
-        (kbd "M-j") 'org-metadown
-        (kbd "M-k") 'org-metaup
-        (kbd "M-l") 'org-metaright
-        (kbd "M-H") 'org-shiftmetaleft
-        (kbd "M-J") 'org-shiftmetadown
-        (kbd "M-K") 'org-shiftmetaup
-        (kbd "M-L") 'org-shiftmetaright
-        (kbd "M-<return>") 'org-meta-return))
-
-    ;; In tables pressing RET doesn't follow links.
-    ;; I fix that
-    (defun custom/org-good-return ()
-      "`org-return' that allows for following links in table."
-      (interactive)
-      (if (org-at-table-p)
-          (if (org-in-regexp org-link-any-re 1)
-              (org-open-at-point)
-            (org-return))
-        (org-return))))
-
-;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-;; Otherwise, org-tempo is broken when you try to <s TAB...
-(add-hook 'org-mode-hook (lambda ()
-           (setq-local electric-pair-inhibit-predicate
-                   `(lambda (c)
-                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
-
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
@@ -1101,7 +1063,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
                             "#+title: ${title}\n#+date: %U\n")
          :unnarrowed t)
         ("g" "video game" plain "%?"
-         :target (file+head "${slug}.org"
+         :target (file+head "games/${slug}.org"
                             "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n* Notes")
          :unnarrowed t)))
     (org-roam-dailies-capture-templates
@@ -1111,11 +1073,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-roam-setup)
     (evil-collection-org-roam-setup)
     (require 'org-roam-export)
-    ;; if the file is dailie then increase text's size automatically
+    ;; if the file is dailie then increase buffer's size automatically
     (require 'org-roam-dailies)
-    (add-hook 'org-roam-find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3)))))
+    (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3))))
 
-;; (use-package org-roam-ui)
+(use-package org-roam-ui)
 
 (unless (custom/termux-p)
   (use-package org-superstar
@@ -1180,11 +1142,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package org
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-    ;; after refiling and archiving tasks agenda files aren't saves, I fix that
+    ;; after refiling and archiving tasks agenda files aren't saved, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
-    :bind
-      ([remap org-return] . custom/org-good-return)
+  :bind
+    ([remap org-return] . custom/org-good-return)
   :custom-face
     ;; setting size of headers
     (org-document-title ((t (:inherit outline-1 :height 1.7))))
@@ -1193,8 +1155,8 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-level-3 ((t (:inherit outline-3 :height 1.2))))
     (org-level-4 ((t (:inherit outline-4 :height 1.2))))
     (org-level-5 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-6 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-7 ((t (:inherit outline-5 :height 1.2))))
+    (org-level-6 ((t (:inherit outline-6 :height 1.2))))
+    (org-level-7 ((t (:inherit outline-7 :height 1.2))))
     (org-list-dt ((t (:weight bold))))
     (org-agenda-date-today ((t (:height 1.3))))
   :custom
@@ -1223,10 +1185,10 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         "YES(y)"
         "NO(n)")))
     (org-capture-templates
-     '(("t" "Todo" entry (file "agenda-inbox.org")
+     '(("t" "Todo" entry (file "inbox.org")
         "* TODO %?\n %a")))
     ;; =========== org agenda ===========
-    (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "agenda-inbox.org" org-roam-directory)))
+    (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "inbox.org" org-roam-directory)))
     (org-agenda-prefix-format ;; format at which tasks are displayed
      '((agenda . " %i ")
        (todo . " %i ")
@@ -1235,7 +1197,8 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-agenda-category-icon-alist ;; icons for categories
      `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
        ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
-       ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)))
+       ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
+       ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
     (org-agenda-include-all-todo nil)
     (org-agenda-start-day "+0d")
     (org-agenda-span 3)
@@ -1288,6 +1251,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-export-backends '(ascii html icalendar latex odt md))
     ;; (org-export-with-properties t)
     (org-startup-folded t)
+    (org-ellipsis "󱞣")
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
@@ -1313,7 +1277,43 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
                              :scale (expt text-scale-mode-step
                                           text-scale-mode-amount))))
     (plist-put org-format-latex-options :foreground nil)
-    (plist-put org-format-latex-options :background nil))
+    (plist-put org-format-latex-options :background nil)
+
+    ;; evil keybindings
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys)
+    (with-eval-after-load 'evil-maps
+      (define-key evil-motion-state-map (kbd "SPC") nil)
+      (define-key evil-motion-state-map (kbd "RET") nil)
+      (define-key evil-motion-state-map (kbd "TAB") nil)
+      (evil-define-key 'normal org-mode-map
+        "gj" 'evil-next-visual-line
+        "gk" 'evil-previous-visual-line
+        (kbd "C-j") 'org-next-visible-heading
+        (kbd "C-k") 'org-previous-visible-heading
+        (kbd "C-S-J") 'org-forward-heading-same-level
+        (kbd "C-S-K") 'org-backward-heading-same-level
+        (kbd "M-h") 'org-metaleft
+        (kbd "M-j") 'org-metadown
+        (kbd "M-k") 'org-metaup
+        (kbd "M-l") 'org-metaright
+        (kbd "M-H") 'org-shiftmetaleft
+        (kbd "M-J") 'org-shiftmetadown
+        (kbd "M-K") 'org-shiftmetaup
+        (kbd "M-L") 'org-shiftmetaright
+        (kbd "M-<return>") 'org-meta-return))
+    
+    ;; In tables pressing RET doesn't follow links.
+    ;; I fix that
+    (defun custom/org-good-return ()
+      "`org-return' that allows for following links in table."
+      (interactive)
+      (if (org-at-table-p)
+          (if (org-in-regexp org-link-any-re 1)
+              (org-open-at-point)
+            (org-return))
+        (org-return)))
+)
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1400,7 +1400,7 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
                 python-ts-mode-hook
                 bash-ts-mode-hook
                 c++-ts-mode-hook
-                html-ts-mode-hook))
+                mhtml-mode-hook))
   (add-hook mode 'eglot-ensure))
 
 (use-package lua-mode)
@@ -1528,6 +1528,15 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 )
 
 (use-package sudo-edit)
+
+(use-package tab-bar
+  :init (tab-bar-mode 1)
+  :custom
+    (tab-bar-show 1)                      ;; hide bar if <= 1 tabs open
+    (tab-bar-close-button-show nil)       ;; hide tab close / X button
+    (tab-bar-new-tab-choice "*dashboard*");; buffer to show in new tabs
+    (tab-bar-tab-hints t)                 ;; show tab numbers
+)
 
 (use-package buffer-move)
 

@@ -14,26 +14,27 @@ I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal
 
 [[file:screenshots/pywal-hypr/2023-09-25_17-59-51.png]]
 
-| Type of program           | My default choice |
-|---------------------------+-------------------|
-| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
-| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | [[https://github.com/gokcehan/lf][lf]], pcmanfm       |
-| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
-| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
-| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
-| Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
+| Type of program           | My default choice    |
+|---------------------------+----------------------|
+| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]                 |
+| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]                 |
+| File Manager              | [[https://github.com/gokcehan/lf][lf]], pcmanfm          |
+| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]], firefox |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]                |
+| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]               |
+| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                 |
+| Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]             |
 
 Install dependencies from =install/dependencies/hypr/pywal.txt= with =yay=.
 At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
-Software riced with pywal [11/12]:
+Software riced with pywal [12/13]:
 - [X] foot
 - [X] rofi
 - [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
 - [ ] gtk4
+- [X] qt
 - [X] emacs
 - [X] qutebrowser
 - [X] waybar

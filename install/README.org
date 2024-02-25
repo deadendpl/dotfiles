@@ -177,12 +177,15 @@ yay -S --noconfirm pywal \
 wpg-install.sh -g
 #+end_src
 *** Optional software
+You don't need to do this part.
 #+begin_src sh
 yay -S --noconfirm appimagelauncher-bin \
                    keepassxc \
                    syncthing \
                    gnome-disk-utility \
-                   freefilesync
+                   freefilesync \
+		         picard \
+			 rsgain
                    # syncthing-gtk
 #+end_src
 * Touchpad setup on Xorg

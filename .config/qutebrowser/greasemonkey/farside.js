@@ -12,6 +12,7 @@
 // @match       *://*.bing.com/*
 // @match       *://goodreads.com/*
 // @match       *://*.goodreads.com/*
+// @match       *://genius.com/*
 // @match       *://google.*/*
 // @match       *://*.google.*/*
 // @match       *://imgur.com/*
@@ -205,6 +206,13 @@ switch (true) {
     // 'bibr,https://read.whateveritworks.org',
     'bibr,https://biblioreads.privacyfucking.rocks',
     'bibr,https://read.seitan-ayoub.lol'];
+  break;
+
+  case hostname.endsWith('genius.com'):
+
+  site = [
+    // dumb
+    'gen,https://farside.link/dumb'];
   break;
 
   case hostname.endsWith('youtube.com'):

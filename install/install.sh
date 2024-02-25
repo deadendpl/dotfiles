@@ -138,7 +138,9 @@ yay -S --noconfirm appimagelauncher-bin \
                    keepassxc \
                    syncthing \
                    gnome-disk-utility \
-                   freefilesync
+                   freefilesync \
+		         picard \
+			 rsgain
                    # syncthing-gtk
 
 touchpad_conf='Section "InputClass"

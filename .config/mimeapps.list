@@ -1,4 +1,4 @@
-# -*- mode: conf-unix;-*-
+# -*- mode: conf-unix -*-
 [Default Applications]
 image/jpeg=swayimg.desktop
 image/avif=swayimg.desktop
@@ -21,19 +21,29 @@ image/x-portable-bitmap=swayimg.desktop
 image/x-portable-graymap=swayimg.desktop
 image/x-portable-pixmap=swayimg.desktop
 
-application/pdf=org.pwmt.zathura.desktop
-application/epub+zip=org.pwmt.zathura.desktop
+application/pdf=sioyek.desktop
+application/epub+zip=sioyek.desktop
 
-text/html=org.qutebrowser.qutebrowser.desktop
-text/xml=org.qutebrowser.qutebrowser.desktop
 text/mml=org.qutebrowser.qutebrowser.desktop
-x-scheme-handler/http=org.qutebrowser.qutebrowser.desktop
-x-scheme-handler/https=org.qutebrowser.qutebrowser.desktop
-application/xhtml+xml=org.qutebrowser.qutebrowser.desktop
-application/x-xpinstall=org.qutebrowser.qutebrowser.desktop
-application/json=org.qutebrowser.qutebrowser.desktop
 
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop
+
+x-scheme-handler/chrome=firefox.desktop
+application/x-extension-htm=firefox.desktop
+application/x-extension-html=firefox.desktop
+application/x-extension-shtml=firefox.desktop
+application/x-extension-xhtml=firefox.desktop
+application/x-extension-xht=firefox.desktop
+x-scheme-handler/about=firefox.desktop
+x-scheme-handler/unknown=firefox.desktop
+application/x-xpinstall=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+application/xhtml+xml=firefox.desktop
+application/vnd.mozilla.xul+xml=firefox.desktop
+application/json=firefox.desktop
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+application/xml=firefox.desktop
 
 text/plain=emacsclient.desktop
 inode/directory=pcmanfm.desktop

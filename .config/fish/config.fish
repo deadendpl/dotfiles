@@ -21,9 +21,10 @@ if set -q TERMUX_VERSION
 else
   # normal config
   if status is-interactive
-    function fish_greeting
-      echo "Why won't you do it in eshell?" | pokemonsay
-    end
+    set fish_greeting
+    # function fish_greeting
+    #   echo "Why won't you do it in eshell?" | pokemonsay
+    # end
   end
   starship init fish | source
 
