@@ -26,24 +26,25 @@
 (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 
 ;; This folder is for everything that clutters user-emacs-directory
-(defvar user-share-emacs-directory "~/.local/share/emacs/"
-  "Elisp packages cache folders/files normally clutter user-emacs-directory.
+(defvar custom/user-share-emacs-directory "~/.local/share/emacs/"
+  "Directory to redirect cache/dump files.
+Elisp packages cache folders/files normally clutter user-emacs-directory.
 The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq-default recentf-save-file (expand-file-name "recentf" user-share-emacs-directory) ; recentf file put somewhere else
-              bookmark-default-file (expand-file-name "bookmarks" user-share-emacs-directory) ; bookmarks file put somewhere else
-              elfeed-db-directory (expand-file-name "elfeed" user-share-emacs-directory) ; elfeed cache? directory
-              auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" user-share-emacs-directory)
-              prescient-save-file (expand-file-name "var/prescient-save.el" user-share-emacs-directory)
-              custom-file (expand-file-name "custom.el" user-share-emacs-directory) ; custom settings that emacs autosets put into it's own file
+(setq-default recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory) ; recentf file put somewhere else
+              bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory) ; bookmarks file put somewhere else
+              elfeed-db-directory (expand-file-name "elfeed" custom/user-share-emacs-directory) ; elfeed cache? directory
+              auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
+              prescient-save-file (expand-file-name "var/prescient-save.el" custom/user-share-emacs-directory)
+              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets put into it's own file
               backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (expand-file-name "tramp" user-share-emacs-directory) ; tramp file put somewhere else
-              save-place-file (expand-file-name "places" user-share-emacs-directory)
-              url-configuration-directory (expand-file-name "url" user-share-emacs-directory) ; cache from urls (eww)
-              multisession-directory (expand-file-name "multisession" user-share-emacs-directory)
-              transient-history-file (expand-file-name "transient/history.el" user-share-emacs-directory))
+              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory) ; tramp file put somewhere else
+              save-place-file (expand-file-name "places" custom/user-share-emacs-directory)
+              url-configuration-directory (expand-file-name "url" custom/user-share-emacs-directory) ; cache from urls (eww)
+              multisession-directory (expand-file-name "multisession" custom/user-share-emacs-directory)
+              transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory))
 
 (setq visible-bell nil ;; Set up the visible bell
       inhibit-startup-message nil ; default emacs startup message
@@ -67,18 +68,18 @@ Most of the stuff will get redirected here.")
       sentence-end-double-space nil ; sentences end with 1 space
       create-lockfiles nil ; no files wiht ".#"
       switch-to-buffer-obey-display-actions t) ; swtich-to-buffer will respect display-buffer-alist
-      ;; auto-save-list-file-name (concat user-share-emacs-directory "auto-save-list/list")
+      ;; auto-save-list-file-name (concat custom/user-share-emacs-directory "auto-save-list/list")
 (if (custom/termux-p)
   (setq browse-url-browser-function 'browse-url-xdg-open))
 
-(defun quit-window (&optional kill window)
-  "Quit WINDOW, deleting it, and kill its buffer.
-WINDOW must be a live window and defaults to the selected one.
-The buffer is killed instead of being buried.
-This function ignores the information stored in WINDOW's `quit-restore' window parameter."
-  (interactive "P")
-  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
-  (quit-restore-window window 'kill))
+;; (defun quit-window (&optional kill window)
+;;   "Quit WINDOW, deleting it, and kill its buffer.
+;; WINDOW must be a live window and defaults to the selected one.
+;; The buffer is killed instead of being buried.
+;; This function ignores the information stored in WINDOW's `quit-restore' window parameter."
+;;   (interactive "P")
+;;   (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
+;;   (quit-restore-window window 'kill))
 
 ;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
@@ -90,7 +91,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
           (emacs-lock-mode 'kill))
 
 ;; Make ESC quit prompts immediately
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(keymap-global-set "<escape>" 'keyboard-escape-quit)
 
 ;; make utf-8 the coding system
 (set-terminal-coding-system  'utf-8)
@@ -111,8 +112,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; Initialize package sources
 (require 'package)
 
-(setq package-user-dir (expand-file-name "packages/" user-share-emacs-directory)
-      package-gnupghome-dir (expand-file-name "gpg" user-share-emacs-directory)
+(setq package-user-dir (expand-file-name "packages/" custom/user-share-emacs-directory)
+      package-gnupghome-dir (expand-file-name "gpg" custom/user-share-emacs-directory)
       package-async t
       package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("elpa" . "https://elpa.gnu.org/packages/")
@@ -145,7 +146,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package quelpa
   :demand
   :custom
-    (quelpa-dir (expand-file-name "quelpa/" user-share-emacs-directory))
+    (quelpa-dir (expand-file-name "quelpa/" custom/user-share-emacs-directory))
     (quelpa-checkout-melpa-p nil))
     ;; (use-package-ensure-function 'quelpa))
     ;; (quelpa-build-dir (concat quelpa-dir "build/"))
@@ -165,9 +166,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (evil-vsplit-window-right t)
     (evil-split-window-below t)
     (evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
-  :bind
-    (:map evil-normal-state-map
-      ([remap evil-search-forward] . 'swiper))
+  ;; :bind
+  ;;   (:map evil-normal-state-map
+  ;;     ([remap evil-search-forward] . 'swiper))
   :config
     (evil-mode)
     (if (custom/termux-p)
@@ -206,6 +207,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :prefix "SPC" ;; set leader
   :global-prefix "M-SPC") ;; access leader in insert mode
 
+;; for easily quitting in termux
 (if (custom/termux-p)
   (custom/leader-keys
     "q" '(evil-quit :wk "Quit Emacs")))
@@ -213,7 +215,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (custom/leader-keys
   "SPC" '(projectile-find-file :wk "Find file in project")
   "." '(find-file :wk "Find file")
-  ;; "=" '(perspective-map :wk "Perspective") ;; Lists all the perspective keybindings
   "u" '(universal-argument :wk "Universal argument")
   "x" '(execute-extended-command :wk "M-x"))
 
@@ -268,7 +269,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
-  "b b" '(counsel-ibuffer :wk "Switch to buffer")
+  ;; "b b" '(counsel-ibuffer :wk "Switch to buffer")
   "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
   "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
   "b d" '(bookmark-delete :wk "Delete bookmark")
@@ -320,19 +321,16 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
             (dired user-emacs-directory))
           :wk "Open user-emacs-directory in dired")
   "f E" '((lambda () (interactive)
-            (dired user-share-emacs-directory))
-          :wk "Open user-share-emacs-directory in dired")
+            (dired custom/user-share-emacs-directory))
+          :wk "Open custom/user-share-emacs-directory in dired")
   "f d" '(find-grep-dired :wk "Search for string in files in DIR")
   "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
   "f i" '((lambda () (interactive)
             (find-file "~/.config/emacs/init.el"))
           :wk "Open emacs init.el")
-  "f j" '(counsel-file-jump :wk "Jump to a file below current directory")
-  "f l" '(counsel-locate :wk "Locate a file")
-  "f p" '((lambda () (interactive) (counsel-find-file (user-emacs-directory))) :wk "Config directory")
-  "f r" '(counsel-recentf :wk "Find recent files")
+  "f r" '(recentf :wk "Find recent files")
   "f u" '(sudo-edit-find-file :wk "Sudo find file")
-  "f U" '(sudo-edit :wk "Sudo edit file"))
+  "f U" '(sudo-edit :wk "Sudo edit current file"))
 
 (custom/leader-keys
   "g" '(:ignore t :wk "Git")
@@ -359,7 +357,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
-  "h a" '(counsel-describe-symbol :wk "Apropos")
+  "h a" '(describe-symbol :wk "Apropos")
   "h b" '(describe-bindings :wk "Describe bindings")
   "h c" '(describe-char :wk "Describe character under cursor")
   "h d" '(:ignore t :wk "Emacs documentation")
@@ -388,7 +386,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "h r" '(:ignore t :wk "Reload")
   "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
   "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
-  "h t" '(load-theme :wk "Load theme")
+  "h t" '(consult-theme :wk "Load theme")
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
@@ -549,9 +547,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "w L" '(buf-move-right :wk "Buffer move right"))
 )
 
-(global-set-key (kbd "C-=") 'text-scale-increase)
-(global-set-key (kbd "C-+") 'text-scale-increase)
-(global-set-key (kbd "C--") 'text-scale-decrease)
+(keymap-global-set "C-=" 'text-scale-increase)
+(keymap-global-set "C-+" 'text-scale-increase)
+(keymap-global-set "C--" 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
@@ -567,12 +565,12 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                    evil-window-down
                    scroll-up-command
                    scroll-down-command
-		       tab-select
-		       tab-next))
+                       tab-select
+                       tab-next))
   (advice-add command :after #'custom/pulse-line))
 
 (set-face-attribute 'default nil
-  :font "ComicCodeLigaturesMediu Nerd Font"
+  :font "JetBrainsMono NFM"
   :height 90
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
@@ -580,7 +578,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :height 100
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-  :family "ComicCodeLigaturesMediu Nerd Font"
+  :family "JetBrainsMono NFM Mono"
   :height 80
   :weight 'medium)
 (set-face-attribute 'fixed-pitch-serif nil
@@ -633,7 +631,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
                      ;; org-level-6
                      ;; org-level-7
                      ;; org-level-8
-                     org-modern-tag
+                           org-modern-label
                      org-property-value
                      org-special-keyword
                      org-drawer
@@ -660,21 +658,19 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (use-package nerd-icons)
 
-(use-package all-the-icons
-  :ensure t
-  :if (display-graphic-p))
-
-(use-package all-the-icons-dired
+(use-package nerd-icons-dired
   :after dired
-  :hook (dired-mode . (lambda () (all-the-icons-dired-mode t))))
+  :hook (dired-mode . nerd-icons-dired-mode))
 
-(use-package all-the-icons-ibuffer
-  :after ibuffer
-  :hook (ibuffer-mode . (lambda () (all-the-icons-ibuffer-mode t))))
+(use-package nerd-icons-ibuffer
+  :ensure t
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
-(use-package all-the-icons-ivy-rich
-  :after ivy
-  :init (all-the-icons-ivy-rich-mode 1))
+(use-package nerd-icons-completion
+  :after marginalia
+  :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup)
+  :config
+    (nerd-icons-completion-mode))
 
 (use-package doom-modeline
   :demand
@@ -749,75 +745,46 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   :diminish
   :hook (company-mode . company-box-mode))
 
-(use-package ivy
+(use-package vertico
   :defer 2
-  :diminish
-  :bind
-  ;; ivy-resume resumes the last Ivy-based completion.
-    (("C-c C-r" . ivy-resume)
-     ("C-x B" . ivy-switch-buffer-other-window)
-     ("C-s" . swiper)
-    :map ivy-minibuffer-map
-      ;; ("TAB" . ivy-alt-done)
-      ("C-l" . ivy-alt-done)
-      ("C-j" . ivy-next-line)
-      ("C-k" . ivy-previous-line)
-    :map ivy-switch-buffer-map
-      ("C-k" . ivy-previous-line)
-      ("C-l" . ivy-done)
-      ("C-d" . ivy-switch-buffer-kill)
-    :map ivy-reverse-i-search-map
-      ("C-k" . ivy-previous-line)
-      ("C-d" . ivy-reverse-i-search-kill))
-  :custom
-    (ivy-use-virtual-buffers t)
-    (ivy-count-format "(%d/%d) ")
-    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
-    (ivy-use-selectable-prompt t)
-    (enable-recursive-minibuffers t)
-  :config
-    (ivy-mode)
-    ;; preview of faces
-    (add-to-list 'ivy-format-functions-alist '(counsel-describe-face . counsel--faces-format-function)))
+  :bind (:map vertico-map
+    ("C-j" . vertico-next)
+    ("C-k" . vertico-previous)
+    ("C-l" . vertico-exit))
+  :custom (enable-recursive-minibuffers t)
+  :config (vertico-mode))
 
-(use-package ivy-rich
-  :after ivy
-  :init (ivy-rich-mode 1)
-  :custom
-    (ivy-virtual-abbreviate 'full)
-    (ivy-rich-switch-buffer-align-virtual-buffer t)
-    (ivy-rich-path-style 'abbrev)
-  :config
-    ;; this is obsolete, under it there's a rewrite
-    ;; (ivy-set-display-transformer 'ivy-switch-buffer
-    ;;                              'ivy-rich-switch-buffer-transformer)
-    (ivy-configure 'ivy-switch-buffer
-      :display-transformer-fn 'ivy-rich-switch-buffer-transformer))
+;; Use `consult-completion-in-region' if Vertico is enabled.
+;; Otherwise use the default `completion--in-region' function.
+(setq completion-in-region-function
+      (lambda (&rest args)
+        (apply (if vertico-mode
+                   #'consult-completion-in-region
+                 #'completion--in-region)
+               args)))
 
-(use-package counsel
-  :after ivy
-  :diminish
-  :bind
-    (("M-x" . counsel-M-x)
-     ("C-x b" . counsel-ibuffer)
-     ("C-x C-f" . counsel-find-file)
-      :map minibuffer-local-map
-        ("C-r" . 'counsel-minibuffer-history))
-  :config
-    (counsel-mode)
-    (setq ivy-initial-inputs-alist nil)) ;; removes starting ^ regex in M-x
-
-(use-package ivy-prescient
-  :demand
-  :after ivy
-  :custom
-    (ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
-    (ivy-prescient-enable-filtering nil)
-    ;; Here are commands that I don't want to get sorted
-    (ivy-prescient-sort-commands '(:not counsel-recentf swiper swiper-isearch ivy-switch-buffer counsel-find-file))
+(use-package vertico-prescient
+  :after vertico
   :config
     (prescient-persist-mode 1)
-    (ivy-prescient-mode 1))
+    (vertico-prescient-mode))
+
+(use-package orderless
+  :after vertico
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
+  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package marginalia
+  :after vertico
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :custom (marginalia--pangram "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+  :init (marginalia-mode))
 
 (unless (custom/termux-p)
   (use-package dashboard
@@ -849,9 +816,9 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 (unless (custom/termux-p)
   (use-package dirvish
-    :init (dirvish-override-dired-mode t)
+    :init (dirvish-override-dired-mode t) ; dirvish takes over dired
     :custom
-      (dirvish-cache-dir (expand-file-name "dirvish" user-share-emacs-directory))
+      (dirvish-cache-dir (expand-file-name "dirvish" custom/user-share-emacs-directory))
       (dirvish-attributes '(collapse git-msg file-time file-size))
       (dirvish-default-layout '(1 0.15 0.5))
     :config
@@ -882,7 +849,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (insert-directory-program "ls")
     (dired-listing-switches "-Hl --almost-all --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
-    (image-dired-dir (expand-file-name "image-dired" user-share-emacs-directory))
+    (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
@@ -921,15 +888,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       "p" 'dired-ranger-paste))
 
 (use-package helpful
-  :custom
-    (counsel-describe-function-function #'helpful-callable)
-    (counsel-describe-variable-function #'helpful-variable)
-    (counsel-describe-symbol-function #'helpful-symbol)
   :bind
-    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-function] . helpful-function)
     ([remap describe-command] . helpful-command)
     ([remap describe-symbol] . helpful-symbol)
-    ([remap describe-variable] . counsel-describe-variable)
+    ([remap describe-variable] . helpful-variable)
     ([remap describe-key] . helpful-key))
 
 (unless (custom/termux-p)
@@ -976,7 +939,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (magit-bury-buffer-function 'magit-restore-window-configuration))
 
 (use-package git-timemachine
-  :after git-timemachine
+  :after git-timemachine ;; I don't know why it's loading after itself
   :hook (evil-normalize-keymaps . git-timemachine-hook)
   :config
     (evil-define-key 'normal git-timemachine-mode-map
@@ -985,8 +948,8 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 (use-package imenu-list
   :custom
-    (imenu-list-focus-after-activation t
-     imenu-list-auto-resize t)
+    (imenu-list-focus-after-activation t)
+    (imenu-list-auto-resize t)
   :config
     (evil-collection-imenu-list-setup)
     (evil-define-key 'normal imenu-list-major-mode-map
@@ -1043,7 +1006,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package org-modern-indent
     :after org
     :quelpa (org-modern-indent :fetcher github :repo "jdtsmith/org-modern-indent")
-    :init (add-hook 'org-mode-hook #'org-modern-indent-mode))
+    :init (add-hook 'org-mode-indent-hook #'org-modern-indent-mode))
 )
 
 (use-package org-roam
@@ -1054,7 +1017,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         (setq org-roam-directory "~/storage/shared/org-roam")
       (setq org-roam-directory "~/org-roam"))
   :custom
-    (org-roam-db-location (expand-file-name "org/org-roam.db" user-share-emacs-directory))
+    (org-roam-db-location (expand-file-name "org/org-roam.db" custom/user-share-emacs-directory))
     (org-roam-dailies-directory "journals/")
     (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
     (org-roam-capture-templates
@@ -1065,6 +1028,10 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         ("g" "video game" plain "%?"
          :target (file+head "games/${slug}.org"
                             "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n* Notes")
+         :unnarrowed t)
+        ("b" "book" plain "%?"
+         :target (file+head "books/${slug}.org"
+                            "#+title: ${title}\n#+filetags: :books:\n#+date: %U\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
          :unnarrowed t)))
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
@@ -1149,16 +1116,17 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     ([remap org-return] . custom/org-good-return)
   :custom-face
     ;; setting size of headers
-    (org-document-title ((t (:inherit outline-1 :height 1.7))))
-    (org-level-1 ((t (:inherit outline-1 :height 1.2))))
-    (org-level-2 ((t (:inherit outline-2 :height 1.2))))
-    (org-level-3 ((t (:inherit outline-3 :height 1.2))))
-    (org-level-4 ((t (:inherit outline-4 :height 1.2))))
-    (org-level-5 ((t (:inherit outline-5 :height 1.2))))
-    (org-level-6 ((t (:inherit outline-6 :height 1.2))))
-    (org-level-7 ((t (:inherit outline-7 :height 1.2))))
-    (org-list-dt ((t (:weight bold))))
-    (org-agenda-date-today ((t (:height 1.3))))
+    (org-document-title ((nil (:inherit outline-1 :height 1.7))))
+    (org-level-1 ((nil (:inherit outline-1 :height 1.2))))
+    (org-level-2 ((nil (:inherit outline-2 :height 1.2))))
+    (org-level-3 ((nil (:inherit outline-3 :height 1.2))))
+    (org-level-4 ((nil (:inherit outline-4 :height 1.2))))
+    (org-level-5 ((nil (:inherit outline-5 :height 1.2))))
+    (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
+    (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
+    (org-list-dt ((nil (:weight bold))))
+    (org-agenda-date-today ((nil (:height 1.3))))
+    (org-ellipsis ((nil (:underline t))))
   :custom
     (org-directory org-roam-directory)
     (org-todo-keywords
@@ -1230,11 +1198,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-list-allow-alphabetical t)
     (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
     (org-fontify-quote-and-verse-blocks t)
-    (org-preview-latex-image-directory (expand-file-name "org/lateximg/" user-share-emacs-directory))
+    (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
     (org-preview-latex-default-process 'dvisvgm)
     (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
     (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-    (org-id-locations-file (expand-file-name "org/.org-id-locations" user-share-emacs-directory))
+    (org-id-locations-file (expand-file-name "org/.org-id-locations" custom/user-share-emacs-directory))
     (org-return-follows-link t)
     (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
     (org-M-RET-may-split-line nil)
@@ -1251,7 +1219,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-export-backends '(ascii html icalendar latex odt md))
     ;; (org-export-with-properties t)
     (org-startup-folded t)
-    (org-ellipsis "󱞣")
+    ;; (org-ellipsis "󱞣")
   :config
     (add-to-list 'display-buffer-alist
                  '("*Agenda Commands*"
@@ -1302,7 +1270,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
         (kbd "M-K") 'org-shiftmetaup
         (kbd "M-L") 'org-shiftmetaright
         (kbd "M-<return>") 'org-meta-return))
-    
+
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
     (defun custom/org-good-return ()
@@ -1313,6 +1281,8 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
               (org-open-at-point)
             (org-return))
         (org-return)))
+    ;; saving agenda files after changing TODO state in org-agenda
+    (advice-add 'org-agenda-todo :after (lambda () (save-some-buffers (list org-agenda-files))))
 )
 
 ;; it's for html source block syntax highlighting
@@ -1327,7 +1297,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
   (use-package projectile
     :diminish projectile-mode
     :custom
-      (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-share-emacs-directory))
+      (projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" custom/user-share-emacs-directory))
       (projectile-switch-project-action #'projectile-dired)
     :config (projectile-mode)
     :bind-keymap
@@ -1361,6 +1331,11 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (defadvice recompile (after compile-command activate)
       "Advises `recompile' so it moves to the compilation buffer."
       (switch-to-buffer-other-window "*compilation*"))
+
+    (evil-set-initial-state 'compilation-mode 'normal)
+    (evil-set-initial-state 'comint-mode 'normal)
+
+    (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
 )
 
 
@@ -1379,8 +1354,6 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
   (switch-to-buffer-other-window "*Async Shell Command*")
   (evil-change-state 'normal)
   (evil-local-set-key 'normal (kbd "q") 'quit-window))
-
-(evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
 
 (use-package flycheck
   :defer 1
@@ -1450,7 +1423,7 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
    (sh-mode . bash-ts-mode)))
 
 (use-package autoinsert
-  :hook (after-init . auto-insert-mode)
+  :hook (prog-mode . auto-insert-mode)
   :custom
     (auto-insert-directory (expand-file-name "templates/" user-emacs-directory))
     (auto-insert-query nil)
@@ -1489,28 +1462,18 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package eshell
   :custom
     (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
-    (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell.
-    (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell.
-    (eshell-history-file-name (expand-file-name "eshell-history" user-share-emacs-directory))
-    (eshell-last-dir-ring-file-name (expand-file-name "eshell-lastdir" user-share-emacs-directory))
+    (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell
+    (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell
+    (eshell-history-file-name (expand-file-name "eshell-history" custom/user-share-emacs-directory))
+    (eshell-last-dir-ring-file-name (expand-file-name "eshell-lastdir" custom/user-share-emacs-directory))
     (eshell-history-size 5000)
     (eshell-buffer-maximum-lines 5000)
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
-    ;; (eshell-visual-commands '("bash" "fish" "htop" "ssh" "top" "zsh" "less"))
-    ;; :config
-    ;; (evil-set-initial-state 'eshell-mode 'emacs)
   :config
     (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
     (eat-eshell-mode))
-
-;; (use-package eshell-toggle
-;;   :custom
-;;     (eshell-toggle-size-fraction 3)
-;;     (eshell-toggle-use-projectile-root nil)
-;;     (eshell-toggle-run-command nil)
-;;     (eshell-toggle-init-function #'eshell-toggle-init-eshell))
 
 (use-package eshell-syntax-highlighting
   :after esh-mode
@@ -1532,10 +1495,10 @@ set its' evil state to normal and to bind 'q' to `quit-window'"
 (use-package tab-bar
   :init (tab-bar-mode 1)
   :custom
-    (tab-bar-show 1)                      ;; hide bar if <= 1 tabs open
-    (tab-bar-close-button-show nil)       ;; hide tab close / X button
-    (tab-bar-new-tab-choice "*dashboard*");; buffer to show in new tabs
-    (tab-bar-tab-hints t)                 ;; show tab numbers
+    (tab-bar-show 1)                                      ;; hide bar if <= 1 tabs open
+    (tab-bar-close-button-show nil)                       ;; hide tab close / X button
+    (tab-bar-new-tab-choice (lambda () (dashboard-open))) ;; buffer to show in new tabs
+    (tab-bar-tab-hints t)                                 ;; show tab numbers
 )
 
 (use-package buffer-move)
