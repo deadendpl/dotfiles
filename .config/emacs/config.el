@@ -1282,7 +1282,16 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
             (org-return))
         (org-return)))
     ;; saving agenda files after changing TODO state in org-agenda
-    (advice-add 'org-agenda-todo :after (lambda () (save-some-buffers (list org-agenda-files))))
+    ;; (advice-add 'org-agenda-todo :after (lambda () (save-some-buffers (list org-agenda-files))))
+    ;; (advice-add 'org-agenda-todo :after
+    ;;         (lambda (&rest args)
+    ;;           (save-some-buffers (list org-agenda-files))
+    ;;           (apply #'org-agenda-todo args)))
+    (advice-add 'org-agenda-todo :after
+            (lambda (&rest _)
+              (when (called-interactively-p 'any)
+                (save-some-buffers (list org-agenda-files)))))
+
 )
 
 ;; it's for html source block syntax highlighting
