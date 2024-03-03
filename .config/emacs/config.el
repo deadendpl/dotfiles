@@ -269,7 +269,7 @@ Most of the stuff will get redirected here.")
 
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
-  ;; "b b" '(counsel-ibuffer :wk "Switch to buffer")
+  "b b" '(switch-to-buffer :wk "Switch to buffer")
   "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
   "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
   "b d" '(bookmark-delete :wk "Delete bookmark")
