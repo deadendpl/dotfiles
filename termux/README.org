@@ -10,9 +10,15 @@ termux-setup-storage
 pkg install --yes emacs sqlite fish eza git openssh openssh-sftp-server iproute2
 chsh -s fish
 
+# linking directories
 rm -rf ~/.config/ ~/.termux/
-ln -s $PREFIX/../home/.dotfiles/termux/.config $PREFIX/../home/
+ln -s $PREFIX/../home/.dotfiles/.config $PREFIX/../home/
 ln -s $PREFIX/../home/.dotfiles/termux/.termux $PREFIX/../home/
+
+# setting up the font
+cd ~/.termux
+wget "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFontMono-Regular.ttf"
+mv JetBrainsMonoNerdFontMono-Regular.ttf font.ttf
 #+end_src
 * Termux configuration
 #+begin_src conf :tangle .termux/termux.properties
@@ -191,7 +197,7 @@ ln -s $PREFIX/../home/.dotfiles/termux/.termux $PREFIX/../home/
 ### ctrl+space (for marking text in emacs) does not work on some devices
 # ctrl-space-workaround = true
 #+end_src
-* Shell
+* Shell :ARCHIVE:
 #+begin_src sh :tangle .config/fish/config.fish
 export TERM=xterm-256color
 set -gx EDITOR 'emacsclient -c -t -a "nvim"'
