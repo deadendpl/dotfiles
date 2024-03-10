@@ -52,7 +52,7 @@ swaync-client -rs
 swaync-client -R
 emacsclient --eval '(load-theme real-theme t)'
 
-if [[ $(which pywalfox) ]]; then
+if pgrep "firefox" > /dev/null; then
   pywalfox update
 fi
 

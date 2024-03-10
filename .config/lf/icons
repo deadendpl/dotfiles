@@ -78,13 +78,6 @@ fi             # FILE
 *.toml          
 *.bat           
 *.mk            
-*.jpg           
-*.jpeg          
-*.bmp           
-*.png           
-*.webp          
-*.gif           
-*.ico           
 *.twig          
 *.cpp           
 *.c++           
@@ -324,6 +317,8 @@ Vagrantfile             
 *.svgz  
 *.mng   
 *.pcx   
+*.webp  
+*.ico   
 
 # Video formats
 *.mov   
