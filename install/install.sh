@@ -93,7 +93,8 @@ sudo pacman -S --noconfirm hyprland \
                            fastfetch \
                            git \
                            tree-sitter \
-                           udiskie
+                           udiskie \
+                           swaylock
 
 if $(pacman -Q yay >> /dev/null); then
   echo "yay is installed"

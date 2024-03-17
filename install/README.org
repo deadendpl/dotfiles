@@ -125,11 +125,11 @@ sudo pacman -S --noconfirm hyprland \
                            fastfetch \
                            git \
                            tree-sitter \
-                           udiskie
+                           udiskie \
+                           swaylock
 #+end_src
-
 *** Yay dependencies
-yay is AUR wrapper which is can also be used as frontend to pacman.
+yay is AUR wrapper which can also be used as frontend to pacman.
 #+begin_src sh
 if $(pacman -Q yay >> /dev/null); then
   echo "yay is installed"

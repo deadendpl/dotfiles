@@ -64,7 +64,7 @@ else
   alias ainstalled='apt list --installed'
   alias asearch='apt search'
 
-  # pacman and yay on Arch/pkg on Termux
+  # pacman and yay on Arch
   alias pinst='yay -S'
   alias ppu='yay -Rs'
   alias pup='yay -Syu'

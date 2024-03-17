@@ -52,13 +52,13 @@ swaync-client -rs
 swaync-client -R
 emacsclient --eval '(load-theme real-theme t)'
 
-if pgrep "firefox" > /dev/null; then
-  pywalfox update
-fi
-
 notify-send "New rice applied"
 
 # I do it after notification confirmation because it takes few seconds
 if pgrep "qutebrowser" > /dev/null; then
   qutebrowser :config-source &
+fi
+
+if pgrep "firefox" > /dev/null; then
+  pywalfox update &
 fi

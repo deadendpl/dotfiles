@@ -1,10 +1,8 @@
 alias vim find-file $1
 
-alias man batman $*
 alias ip ip -color=auto $*
-alias grep grep --color=auto $*
 alias cllr clear && l $*
-alias clr clear $*
+alias clr clear
 alias l exa --all --long --header --icons --git --group-directories-first --color-scale $*
 alias nclean sudo nix-collect-garbage -d $*
 alias nup sudo nixos-rebuild switch $*
