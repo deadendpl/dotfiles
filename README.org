@@ -25,7 +25,6 @@ I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                 |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]             |
 
-Install dependencies from =install/dependencies/hypr/pywal.txt= with =yay=.
 At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
@@ -51,9 +50,9 @@ Then go to =install/README.org= to look at the dependencies and other tweaks.
 Copy/move all files to your =$HOME= directory.
 
 Another way to manage this conveniently is to install [[https://www.gnu.org/software/stow/][stow]].
-1. Move cloned repo into =~/.repo-name=.
+1. Move cloned repo into =~/repo-name=.
 2. Backup your =~/.config= and delete everything inside if necessary.
-3. Then inside that directory do =stow .=
+3. Inside repo directory do =stow .=
 This will link all files automatically to its corrensponding places
 * UNMAINTAINED :ARCHIVE:
 ** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
@@ -91,4 +90,3 @@ This will link all files automatically to its corrensponding places
 | Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
-

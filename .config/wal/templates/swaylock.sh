@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-color1_value="{color1.strip}"  # Replace with your actual variable names
-color2_value="{color2.strip}"
-color3_value="{color3.strip}"
-color4_value="{color4.strip}"
-color5_value="{color5.strip}"
-background_value="{background.strip}"
+color1_value="{color1}"  # Replace with your actual variable names
+color2_value="{color2}"
+color3_value="{color3}"
+color4_value="{color4}"
+color5_value="{color5}"
+background_value="{background}"
 
 swaylock \
   --image "~/.config/wpg/.current" \

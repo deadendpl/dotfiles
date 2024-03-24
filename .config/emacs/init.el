@@ -15,12 +15,11 @@
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
+;; (add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
-;; (fset 'yes-or-no-p 'y-or-n-p)        ; Simplyfying yes or no prompts
 (save-place-mode 1)                  ; Saving last place in file
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
@@ -44,36 +43,32 @@ Most of the stuff will get redirected here.")
               transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory)
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
-(setq visible-bell nil ;; Set up the visible bell
-      inhibit-startup-message nil ; default emacs startup message
-      global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
-      use-dialog-box nil ; turns off graphical dialog boxes
-      initial-major-mode 'fundamental-mode ; setting scratch buffer in fundamental mode
-      initial-scratch-message nil ; deleting scratch buffer message
-      scroll-conservatively 1000 ; Scroll one line at a time
-      scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-      tab-always-indent nil
-      vc-follow-symlinks t ; Enable follow symlinks
-      indent-tabs-mode nil ; use spaces instead of tabs for indenting
-      standard-indent 2 ; indenting set to 2
-      auto-revert-interval 1
-      display-line-numbers-type 'relative
-      use-short-answers t ; replace yes-no prompts with y-n
-      fast-but-imprecise-scrolling t ; fast scrolling
-      inhibit-compacting-font-caches t
-      sentence-end-double-space nil ; sentences end with 1 space
-      create-lockfiles nil) ; no files wiht ".#"
+(setq-default visible-bell nil ;; Set up the visible bell
+              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+              use-dialog-box nil ; turns off graphical dialog boxes
+              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
+              initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
+              initial-scratch-message nil ; scratch buffer message
+              inhibit-startup-message nil ; default emacs startup message
+              scroll-conservatively 1000 ; Scroll one line at a time
+              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
+              vc-follow-symlinks t ; Enable follow symlinks
+              tab-always-indent 'complete
+              indent-tabs-mode nil ; use spaces instead of tabs for indenting
+              standard-indent 2 ; indenting set to 2
+              auto-revert-interval 1
+              use-short-answers t ; replace yes-no prompts with y-n
+              fast-but-imprecise-scrolling t ; fast scrolling
+              inhibit-compacting-font-caches t
+              sentence-end-double-space nil ; sentences end with 1 space
+              create-lockfiles nil) ; no files wiht ".#"
+
+;; showing init time in scratch buffer
+(add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+
+;; this opens links in android's default apps in termux
 (if (custom/termux-p)
   (setq browse-url-browser-function 'browse-url-xdg-open))
-
-(defun quit-window (&optional kill window)
-  "Quit WINDOW, deleting it, and kill its buffer.
-WINDOW must be a live window and defaults to the selected one.
-The buffer is killed instead of being buried.
-This function ignores the information stored in WINDOW's `quit-restore' window parameter."
-  (interactive "P")
-  (set-window-parameter window 'quit-restore `(frame frame nil ,(current-buffer)))
-  (quit-restore-window window 'kill))
 
 ;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
@@ -103,14 +98,19 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       (unless (file-exists-p dir)
         (make-directory dir t)))))
 
+(use-package use-package
+  :custom
+    (use-package-verbose t)
+    (use-package-always-ensure t)
+    (use-package-always-defer t)) ; packages by default will be lazy loaded, like they will have defer: t
+
 (use-package package
   :custom
     (package-user-dir (expand-file-name "packages/" custom/user-share-emacs-directory))
     (package-gnupghome-dir (expand-file-name "gpg" custom/user-share-emacs-directory))
     (package-archives '(("melpa" . "https://melpa.org/packages/")
                         ("elpa" . "https://elpa.gnu.org/packages/")
-                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")
-                        ("org" . "https://orgmode.org/elpa/")))
+                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")))
     (package-async t)
   :init
     (package-initialize)
@@ -121,12 +121,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 ;; Initialize use-package on non-Linux platforms
 ;; (unless (package-installed-p 'use-package)
 ;;   (package-install 'use-package))
-
-(use-package use-package
-  :custom
-    (use-package-verbose t)
-    (use-package-always-ensure t)
-    (use-package-always-defer t)) ; packages by default will be lazy loaded, like they will have defer: t
 
 (use-package gcmh
   :demand
@@ -151,10 +145,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (use-package eww
   :custom (eww-auto-rename-buffer 'title))
 
+(use-package display-line-numbers
+  :hook (prog-mode . display-line-numbers-mode)
+  :custom (display-line-numbers-type 'relative))
+
 (use-package evil
   :demand
   :init
-    (setq evil-want-integration t  ;; This is optional since it's already set to t by default.
+    (setq ;; evil-want-integration t  ;; This is optional since it's already set to t by default.
           evil-want-keybinding nil)
   :custom
     (evil-want-C-u-scroll t)
@@ -285,9 +283,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "f i" '((lambda () (interactive)
             (find-file "~/.config/emacs/init.el"))
           :wk "Open emacs init.el")
-  "f r" '(recentf :wk "Find recent files")
-  "f u" '(sudo-edit-find-file :wk "Sudo find file")
-  "f U" '(sudo-edit :wk "Sudo edit current file"))
+  "f r" '(recentf :wk "Find recent files"))
 
 (custom/leader-keys
   "g" '(:ignore t :wk "Git")
@@ -314,7 +310,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
-  "h a" '(describe-symbol :wk "Apropos")
   "h b" '(describe-bindings :wk "Describe bindings")
   "h c" '(describe-char :wk "Describe character under cursor")
   "h d" '(:ignore t :wk "Emacs documentation")
@@ -339,10 +334,11 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
   "h L" '(describe-language-environment :wk "Describe language environment")
   "h m" '(describe-mode :wk "Describe mode")
   "h M" '(describe-keymap :wk "Describe keymap")
+  "h o" '(describe-symbol :wk "Apropos")
   "h p" '(describe-package :wk "Describe package")
   "h r" '(:ignore t :wk "Reload")
   "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
-  "h r t" '((lambda () (interactive) (load-theme real-theme t)) :wk "Reload theme")
+  "h r t" '(custom/load-real-theme :wk "Reload theme")
   "h t" '(consult-theme :wk "Load theme")
   "h v" '(describe-variable :wk "Describe variable")
   "h w" '(where-is :wk "Prints keybinding for command if set")
@@ -426,6 +422,14 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
       (advice-add command :after #'custom/pulse-line))
 )
 
+(use-package abbrev
+  :ensure nil
+  :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
+  :config
+    (define-abbrev global-abbrev-table "btw" "by the way")
+    (define-abbrev global-abbrev-table "idk" "I don't know")
+)
+
 (set-face-attribute 'default nil
   :font "JetBrainsMono NFM"
   :height 90
@@ -465,26 +469,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (ligature-set-ligatures 't '("www"))
     ;; Enable ligatures in programming modes
     (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
-
-(use-package mixed-pitch
-  :unless (custom/termux-p)
-  :hook (org-mode . mixed-pitch-mode)
-  :diminish
-  :config
-  (dolist (faces '(;; org-level-1
-                   ;; org-level-2
-                   ;; org-level-3
-                   ;; org-level-4
-                   ;; org-level-5
-                   ;; org-level-6
-                   ;; org-level-7
-                   ;; org-level-8
-                   org-modern-label
-                   org-property-value
-                   org-special-keyword
-                   org-drawer
-                   org-document-face))
-    (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
 
 (use-package hl-todo
   :hook ((org-mode . hl-todo-mode)
@@ -557,40 +541,46 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
         :inherit 'default))
 )
 
-(defvar real-theme nil
+(defvar custom/real-theme nil
   "It represents theme to load at startup.
-It will be loaded st startup with `load-theme' and restarted with 'SPC-h-r-t'.")
+It will be loaded st startup with `custom/load-real-theme' and restarted with 'SPC-h-r-t'.")
+
+(defun custom/load-real-theme ()
+  "Loads `real-theme'."
+  (interactive)
+  (load-theme custom/real-theme t))
 
 (if (custom/termux-p)
-    (setq real-theme 'doom-dracula) ;; for termux
-  (setq real-theme 'ewal-doom-one)) ;; for PC
+    (setq custom/real-theme 'doom-dracula) ;; for termux
+  (setq custom/real-theme 'ewal-doom-one)) ;; for PC
 
-(load-theme real-theme t)
+(custom/load-real-theme)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
-(use-package company
-  :after prog-mode
-  ;; :diminish
+(use-package corfu
+  ;; Optional customizations
   :custom
-    (company-begin-commands '(self-insert-command))
-    (company-idle-delay nil) ;; no auto appearing
-    (company-minimum-prefix-length 2)
-    (company-show-numbers t)
-    (company-tooltip-align-annotations 't)
-    (global-company-mode t)
-  :config
-    (add-hook 'prog-mode-hook (lambda ()
-                                (setq-local company-idle-delay 0 ;; auto appearing when in prog-mode
-                                            company-selection-wrap-around t
-                                            company-minimum-prefix-length 1
-                                            completion-styles '(basic partial-completion emacs22)))) ;; orderless kind of /breaks/ completion matching so I revert it back to default value
-)
+  ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+  (corfu-auto t)                 ;; Enable auto completion
+  ;; (corfu-separator ?\s)          ;; Orderless field separator
+  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
-(use-package company-box
-  :after company
-  :diminish
-  :hook (company-mode . company-box-mode))
+  ;; Enable Corfu only for certain modes.
+   :hook ((prog-mode . corfu-mode)))
+          ;; (shell-mode . corfu-mode)
+          ;; (eshell-mode . corfu-mode))
+
+  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+  ;; be used globally (M-/).  See also the customization variable
+  ;; `global-corfu-modes' to exclude certain modes.
+  ;; :init
+  ;; (global-corfu-mode))
 
 (use-package vertico
   :defer 2
@@ -604,15 +594,19 @@ It will be loaded st startup with `load-theme' and restarted with 'SPC-h-r-t'.")
   :config
     (vertico-mode)
     (vertico-mouse-mode t)
-    ;; Use `consult-completion-in-region' if Vertico is enabled.
-    ;; Otherwise use the default `completion--in-region' function.
-    (setq completion-in-region-function
-          (lambda (&rest args)
-            (apply (if vertico-mode
-                       #'consult-completion-in-region
-                     #'completion--in-region)
-                   args)))
 )
+
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  ;; More convenient directory navigation commands
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("C-l" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
 (use-package orderless
   :after vertico
@@ -628,64 +622,25 @@ It will be loaded st startup with `load-theme' and restarted with 'SPC-h-r-t'.")
   :init (savehist-mode t)
   :custom (savehist-file (expand-file-name "history" custom/user-share-emacs-directory)))
 
+(use-package consult
+  :after vertico
+  :init
+    ;; Use `consult-completion-in-region' if Vertico is enabled.
+    ;; Otherwise use the default `completion--in-region' function.
+    (setq completion-in-region-function
+          (lambda (&rest args)
+            (apply (if vertico-mode
+                       #'consult-completion-in-region
+                     #'completion--in-region)
+                   args)))
+)
+
 (use-package marginalia
   :after vertico
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle))
   :custom (marginalia--pangram "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
   :init (marginalia-mode))
-
-(use-package dashboard
-  :unless (custom/termux-p)
-  ;; :demand
-  :hook (dashboard-mode . (lambda () (with-current-buffer "*dashboard*" (emacs-lock-mode 'kill))))
-  :custom
-    (initial-buffer-choice (lambda () (dashboard-open)))
-    (dashboard-startup-banner "~/.config/doom/ricky.jpg")
-    (dashboard-banner-logo-title
-"You still refuse to accept my god-hood?
-Keep your own god!
-In fact, this might be a good time to pray to him.
-For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
-    (dashboard-set-footer nil)
-    (dashboard-center-content t)
-    (dashboard-agenda-prefix-format " %i %s ")
-    (dashboard-items '((recents  . 5)))
-                       ;; (bookmarks . 5)
-                       ;; (projects . 5)
-                       ;; (agenda . 5)
-                       ;; (registers . 5)
-  :config
-    (dashboard-setup-startup-hook)
-    (evil-collection-dashboard-setup)
-    (evil-collection-define-key 'normal 'dashboard-mode-map
-      "j" 'widget-forward
-      "k" 'widget-backward
-      "l" 'dashboard-return))
-
-(use-package dirvish
-  :unless (custom/termux-p)
-  :init (dirvish-override-dired-mode t) ; dirvish takes over dired
-  :custom
-    (dirvish-cache-dir (expand-file-name "dirvish" custom/user-share-emacs-directory))
-    (dirvish-attributes '(collapse git-msg file-time file-size))
-    (dirvish-default-layout '(1 0.15 0.5))
-  :config
-    (evil-collection-define-key 'normal 'dirvish-mode-map
-      "p" 'dirvish-yank-menu
-      "q" 'dirvish-quit)
-    ;; (dirvish-define-preview eza (file)
-    ;;   "Use `eza' to generate directory preview."
-    ;;   :require ("eza") ; tell Dirvish to check if we have the executable
-    ;;   (when (file-directory-p file) ; we only interest in directories here
-    ;;     `(shell . ("eza" "-al" "--color=always" "--icons"
-    ;;                "--group-directories-first" ,file))))
-    ;; (add-to-list 'dirvish-preview-dispatchers 'eza)
-    ;; lines not wrapping
-    (add-hook 'dirvish-find-entry-hook
-        (lambda (&rest _) (setq-local truncate-lines t)))
-    ;; rebinds all dired commands to dirvish-dwim so when I only have 1 window dirvish will have 3 pane view
-    (defalias 'dired 'dirvish-dwim))
 
 (use-package dired
   :ensure nil
@@ -740,6 +695,30 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 ;;       [remap evil-yank] 'dired-ranger-copy
 ;;       "p" 'dired-ranger-paste))
 
+(use-package dirvish
+  :unless (custom/termux-p)
+  :init (dirvish-override-dired-mode t) ; dirvish takes over dired
+  :custom
+    (dirvish-cache-dir (expand-file-name "dirvish" custom/user-share-emacs-directory))
+    (dirvish-attributes '(collapse git-msg file-time file-size))
+    (dirvish-default-layout '(1 0.15 0.5))
+  :config
+    (evil-collection-define-key 'normal 'dirvish-mode-map
+      "p" 'dirvish-yank-menu
+      "q" 'dirvish-quit)
+    ;; (dirvish-define-preview eza (file)
+    ;;   "Use `eza' to generate directory preview."
+    ;;   :require ("eza") ; tell Dirvish to check if we have the executable
+    ;;   (when (file-directory-p file) ; we only interest in directories here
+    ;;     `(shell . ("eza" "-al" "--color=always" "--icons"
+    ;;                "--group-directories-first" ,file))))
+    ;; (add-to-list 'dirvish-preview-dispatchers 'eza)
+    ;; lines not wrapping
+    (add-hook 'dirvish-find-entry-hook
+        (lambda (&rest _) (setq-local truncate-lines t)))
+    ;; rebinds all dired commands to `dirvish-dwim' so when I only have 1 window dirvish will have 3 pane view
+    (defalias 'dired 'dirvish-dwim))
+
 (use-package helpful
   :bind
     ([remap describe-function] . helpful-function)
@@ -774,16 +753,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
     (elfeed-search-filter "@6-months-ago"))
 
-(unless (custom/termux-p)
-
-(use-package minesweeper
-  :config (evil-set-initial-state 'minesweeper-mode 'emacs))
-
-(use-package tetris
-  :ensure nil
-  :config (evil-set-initial-state 'tetris-mode 'insert))
-)
-
 (use-package magit
   :custom
     (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
@@ -795,193 +764,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (evil-define-key 'normal git-timemachine-mode-map
       (kbd "C-j") 'git-timemachine-show-previous-revision
       (kbd "C-k") 'git-timemachine-show-next-revision))
-
-(use-package imenu-list
-  :custom
-    (imenu-list-focus-after-activation t)
-    (imenu-list-auto-resize t)
-  :config
-    (evil-collection-imenu-list-setup)
-    (evil-define-key 'normal imenu-list-major-mode-map
-      "j" 'forward-button
-      "k" 'backward-button))
-
-(require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
-
-(use-package company-org-block
-  :after org
-  :custom
-    (company-org-block-edit-style 'auto) ;; 'auto, 'prompt, or 'inline
-  :hook (org-mode . (lambda ()
-                       (setq-local company-backends '(company-org-block))
-                       (company-mode +1))))
-
-(use-package org-appear
-  :after org
-  :hook (org-mode . org-appear-mode)
-  :custom
-    (org-appear-trigger 'manual)
-    (org-appear-autolinks t)
-  :config
-    (add-hook 'org-appear-mode-hook (lambda ()
-      (add-hook 'evil-insert-state-entry-hook
-        #'org-appear-manual-start
-        nil
-        t)
-      (add-hook 'evil-insert-state-exit-hook
-        #'org-appear-manual-stop
-          nil
-          t))))
-
-(use-package org-auto-tangle
-  :after org
-  :diminish
-  :hook (org-mode . org-auto-tangle-mode))
-
-(unless (custom/termux-p)
-  (use-package org-modern
-    :after org
-    ;; :init (add-hook 'org-mode-hook 'org-modern-mode t)
-    :hook (org-mode . org-modern-mode)
-    :custom-face
-      ;; (org-modern-label ((t (:height 1.2))))
-    :custom
-      (org-modern-star nil)
-      (org-modern-list nil)
-      (org-modern-table nil))
-
-  (use-package org-modern-indent
-    :after org
-    :hook (org-indent-mode . org-modern-indent-mode)
-    :vc (:fetcher github :repo "jdtsmith/org-modern-indent"))
-    ;; :init (add-hook 'org-mode-indent-hook #'org-modern-indent-mode))
-)
-
-(use-package org-roam
-  :after org
-  :init
-    (setq org-roam-v2-ack t)
-    (if (custom/termux-p)
-        (setq org-roam-directory "~/storage/shared/org-roam")
-      (setq org-roam-directory "~/org-roam"))
-  :custom
-    (org-roam-db-location (expand-file-name "org/org-roam.db" custom/user-share-emacs-directory))
-    (org-roam-dailies-directory "journals/")
-    (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
-    (org-roam-capture-templates
-      '(("d" "default" plain "%?"
-         :target (file+head "${slug}.org"
-                            "#+title: ${title}\n#+date: %U\n")
-         :unnarrowed t)
-        ("g" "video game" plain "%?"
-         :target (file+head "games/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n* Notes")
-         :unnarrowed t)
-        ("b" "book" plain "%?"
-         :target (file+head "books/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :books:\n#+date: %U\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
-         :unnarrowed t)
-        ("a" "animanga" plain "%?"
-         :target (file+head "animan/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime: \n* Manga :manga:")
-         :unnarrowed t)
-    ))
-    (org-roam-dailies-capture-templates
-     '(("d" "default" entry "* %?" :target
-        (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
-  :config
-    (org-roam-setup)
-    (evil-collection-org-roam-setup)
-    (require 'org-roam-export)
-    ;; if the file is dailie then increase buffer's size automatically
-    (require 'org-roam-dailies)
-    (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
-  :general
-(custom/leader-keys
-  "n" '(:ignore t :wk "Notes")
-  "n a" '(:ignore t :wk "Alias")
-  "n a a" '(org-roam-alias-add :wk "Add alias")
-  "n a r" '(org-roam-alias-remove :wk "Remove alias")
-  "n d" '(:ignore t :wk "Roam dailies")
-  "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
-  "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
-  "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-  "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-  "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
-  "n f" '(org-roam-node-find :wk "Find note")
-  "n i" '(org-roam-node-insert :wk "Insert note")
-  "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-  "n r" '(:ignore t :wk "References")
-  "n r" '(org-roam-ref-add :wk "Add reference")
-  "n R" '(org-roam-ref-remove :wk "Remove reference")
-  "n t" '(org-roam-tag-add :wk "Add tag")
-  "n T" '(org-roam-tag-remove :wk "Remove tag")
-)
-)
-
-(use-package org-roam-ui
-  :custom (org-roam-ui-sync-theme t))
-
-(use-package org-superstar
-  :unless (custom/termux-p)
-  :after org
-  :hook (org-mode . org-superstar-mode)
-  :custom
-    (org-superstar-remove-leading-stars t)
-    (org-superstar-item-bullet-alist
-      '((?+ . ?✸)
-        (?* . ?•)
-        (?- . ?●))))
-
-(use-package org-yt
-  :unless (custom/termux-p)
-  :after org
-  :vc (:fetcher github :repo "TobiasZawada/org-yt")
-  :config
-    (require 'org-yt)
-
-    (defun custom/org-image-link (protocol link _description)
-      "Interpret LINK as base64-encoded image data."
-      (cl-assert (string-match "\\`img" protocol) nil
-                 "Expected protocol type starting with img")
-      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-        (cl-assert buf nil
-                   "Download of image \"%s\" failed." link)
-        (with-current-buffer buf
-          (goto-char (point-min))
-          (re-search-forward "\r?\n\r?\n")
-          (buffer-substring-no-properties (point) (point-max)))))
-
-    (org-link-set-parameters
-     "imghttp"
-     :image-data-fun #'custom/org-image-link)
-
-    (org-link-set-parameters
-     "imghttps"
-     :image-data-fun #'custom/org-image-link))
-
-(use-package toc-org
-  :after org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
-
-(defun custom/org-notes-dired ()
-  "Opens org-directory in Dired."
-  (interactive)
-  (dired org-directory))
-
-(defun custom/org-roam-notes-dired ()
-  "Opens org-roam-directory in Dired."
-  (interactive)
-  (dired org-roam-directory))
-
-(defun custom/org-add-ids-to-headlines-in-file ()
-  "Add ID properties to all headlines in the current file."
-  (interactive)
-  (org-map-entries 'org-id-get-create))
 
 (use-package org
   :ensure nil
@@ -1006,7 +788,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-agenda-date-today ((nil (:height 1.3))))
     ;; (org-ellipsis ((nil (:underline t))))
   :custom
-    (org-directory org-roam-directory)
     (org-todo-keywords
      '((sequence
         "TODO(t)"  ; A task that needs doing & is ready to do
@@ -1067,13 +848,14 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
-    (org-image-actual-width nil)
+    (org-image-actual-width '(300 600))
     (org-startup-with-inline-images t)
     (org-startup-indented t) ;; use org-indent-mode at startup
     ;; (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
     (org-list-allow-alphabetical t)
+    (org-log-done t)
     (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
     (org-fontify-quote-and-verse-blocks t)
     (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
@@ -1221,6 +1003,162 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
 
+(use-package evil-org
+  :after org
+  ;; :hook (org-mode . (lambda () (evil-org-mode)))
+)
+
+;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+;; Otherwise, org-tempo is broken when you try to <s TAB...
+;; (add-hook 'org-mode-hook (lambda ()
+;;            (setq-local electric-pair-inhibit-predicate
+;;                    `(lambda (c)
+;;                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+
+(with-eval-after-load 'org
+  (require 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+)
+
+(use-package org-appear
+  :after org
+  :hook (org-mode . org-appear-mode)
+  :custom
+    (org-appear-trigger 'manual)
+    (org-appear-autolinks t)
+  :config
+    (add-hook 'org-appear-mode-hook (lambda ()
+      (add-hook 'evil-insert-state-entry-hook
+        #'org-appear-manual-start
+        nil
+        t)
+      (add-hook 'evil-insert-state-exit-hook
+        #'org-appear-manual-stop
+          nil
+          t))))
+
+(use-package org-auto-tangle
+  :after org
+  :diminish
+  :hook (org-mode . org-auto-tangle-mode))
+
+(use-package org-roam
+  ;; :after org
+  :init
+    (setq org-roam-v2-ack t)
+    (if (custom/termux-p)
+        (setq org-roam-directory "~/storage/shared/org-roam")
+      (setq org-roam-directory "~/org-roam"))
+  :custom
+    (org-directory org-roam-directory)
+    (org-roam-db-location (expand-file-name "org/org-roam.db" custom/user-share-emacs-directory))
+    (org-roam-dailies-directory "journals/")
+    (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+    (org-roam-capture-templates
+      '(("d" "default" plain "%?"
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+date: %U\n")
+         :unnarrowed t)
+        ("g" "video game" plain "%?"
+         :target (file+head "games/${slug}.org"
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating      | Ownership | Achievements |\n* Notes")
+
+         :unnarrowed t)
+        ("b" "book" plain "%?"
+         :target (file+head "books/${slug}.org"
+                            "#+title: ${title}\n#+filetags: :books:\n#+date: %U\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
+         :unnarrowed t)
+        ("a" "animanga" plain "%?"
+         :target (file+head "animan/${slug}.org"
+                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime: \n* Manga :manga:")
+         :unnarrowed t)
+    ))
+    (org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %?" :target
+        (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+  :config
+    (org-roam-setup)
+    (evil-collection-org-roam-setup)
+    (require 'org-roam-export)
+    ;; if the file is dailie then increase buffer's size automatically
+    (require 'org-roam-dailies)
+    ;; (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
+    ;; (add-hook 'find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3))))
+  :general
+    (custom/leader-keys
+      "n" '(:ignore t :wk "Notes")
+      "n a" '(:ignore t :wk "Alias")
+      "n a a" '(org-roam-alias-add :wk "Add alias")
+      "n a r" '(org-roam-alias-remove :wk "Remove alias")
+      "n d" '(:ignore t :wk "Roam dailies")
+      "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
+      "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
+      "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+      "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+      "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
+      "n f" '(org-roam-node-find :wk "Find note")
+      "n i" '(org-roam-node-insert :wk "Insert note")
+      "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+      "n r" '(:ignore t :wk "References")
+      "n r" '(org-roam-ref-add :wk "Add reference")
+      "n R" '(org-roam-ref-remove :wk "Remove reference")
+      "n t" '(org-roam-tag-add :wk "Add tag")
+      "n T" '(org-roam-tag-remove :wk "Remove tag")
+    )
+)
+
+(use-package org-roam-ui
+  :custom (org-roam-ui-sync-theme t))
+
+(use-package org-yt
+  :unless (custom/termux-p)
+  :after org
+  :vc (:fetcher github :repo "TobiasZawada/org-yt")
+  :config
+    (require 'org-yt)
+
+    (defun custom/org-image-link (protocol link _description)
+      "Interpret LINK as base64-encoded image data."
+      (cl-assert (string-match "\\`img" protocol) nil
+                 "Expected protocol type starting with img")
+      (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
+        (cl-assert buf nil
+                   "Download of image \"%s\" failed." link)
+        (with-current-buffer buf
+          (goto-char (point-min))
+          (re-search-forward "\r?\n\r?\n")
+          (buffer-substring-no-properties (point) (point-max)))))
+
+    (org-link-set-parameters
+     "imghttp"
+     :image-data-fun #'custom/org-image-link)
+
+    (org-link-set-parameters
+     "imghttps"
+     :image-data-fun #'custom/org-image-link))
+
+(use-package toc-org
+  :after org
+  :commands toc-org-enable
+  :init (add-hook 'org-mode-hook 'toc-org-enable))
+
+(defun custom/org-notes-dired ()
+  "Opens org-directory in Dired."
+  (interactive)
+  (dired org-directory))
+
+(defun custom/org-roam-notes-dired ()
+  "Opens org-roam-directory in Dired."
+  (interactive)
+  (dired org-roam-directory))
+
+(defun custom/org-add-ids-to-headlines-in-file ()
+  "Add ID properties to all headlines in the current file."
+  (interactive)
+  (org-map-entries 'org-id-get-create))
+
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
   :config (require 'smartparens-config)) ;; load default config
@@ -1258,10 +1196,14 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (use-package compile
   :custom
     (compilation-scroll-output t)
+    (compilation-ask-about-save nil)
   :config
     (defadvice compile (before ad-compile-smart activate)
       "Advises `compile' so it sets the argument COMINT to t."
       (ad-set-arg 1 t))
+    (defadvice recompile (before ad-recompile-smart activate)
+      "Advises `recompile' so it sets the argument COMINT to t."
+      (setq compilation-arguments (list compile-command t)))
     ;; (defadvice compile (after ad-compile-smart activate)
     ;;   "Advises `compile' so it moves to the compilation buffer."
     ;;   (switch-to-buffer-other-window "*compilation*"))
@@ -1337,7 +1279,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
      ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-     ;; (c "https://github.com/tree-sitter/tree-sitter-c")
+     (c "https://github.com/tree-sitter/tree-sitter-c")
      (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
      (css "https://github.com/tree-sitter/tree-sitter-css")
      ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
@@ -1393,13 +1335,6 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
 
 )
 
-(use-package company-shell
-  :unless (custom/termux-p)
-  :after sh-mode
-  :config
-    (add-to-list 'company-backends 'company-shell)
-    (add-to-list 'company-backends 'company-shell-env))
-
 (use-package eshell
   :custom
     (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
@@ -1430,7 +1365,12 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
     (shell-file-name "/bin/fish")
     (vterm-max-scrollback 5000))
 
-(use-package sudo-edit)
+(use-package sudo-edit
+  :general
+    (custom/leader-keys
+      "f u" '(sudo-edit-find-file :wk "Sudo find file")
+      "f U" '(sudo-edit :wk "Sudo edit current file"))
+)
 
 (use-package tab-bar
   :init
@@ -1440,10 +1380,10 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
                 (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
                                     (call-interactively #'tab-rename))))
   :custom
-    (tab-bar-show 1)                                      ;; hide bar if <= 1 tabs open
-    (tab-bar-close-button-show nil)                       ;; hide tab close / X button
-    (tab-bar-new-tab-choice (lambda () (dashboard-open))) ;; buffer to show in new tabs
-    (tab-bar-tab-hints t)                                 ;; show tab numbers
+    (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
+    (tab-bar-close-button-show nil)      ;; hide tab close / X button
+    (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
+    (tab-bar-tab-hints t)                ;; show tab numbers
   :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
   :general
     (custom/leader-keys
@@ -1460,7 +1400,7 @@ For I beheld Satan as he fell FROM HEAVEN! LIKE LIGHTNING!")
       "= 8" '((lambda () (interactive) (tab-select 8)) :wk "Tab 8")
       "= 9" '((lambda () (interactive) (tab-select 9)) :wk "Tab 9")
       "= 0" '((lambda () (interactive) (tab-select 0)) :wk "Tab 0")
-      "= t" '(tab-bar-new-tab :wk "New")
+      "= t" '(tab-new :wk "New")
       "= d" '(tab-bar-close-tab :wk "Close")
       "= r" '(tab-rename :wk "Rename"))
 )
