@@ -2,6 +2,31 @@
 #+STARTUP: fold
 #+auto_tangle: t
 
+* Table of Contents :toc:
+- [[#info-and-credits][INFO and CREDITS]]
+- [[#early-init][Early Init]]
+- [[#the-rest][The rest]]
+  - [[#sane-defaults-and-other][Sane defaults (and other)]]
+  - [[#keybindings][Keybindings]]
+  - [[#built-in-packages][Built-in packages]]
+  - [[#appearance][Appearance]]
+  - [[#completion][Completion]]
+  - [[#dired][Dired]]
+  - [[#docs][Docs]]
+  - [[#elfeed][Elfeed]]
+  - [[#git-stuff][Git stuff]]
+  - [[#tetris][Tetris]]
+  - [[#org-mode][Org Mode]]
+  - [[#parenthesis][Parenthesis]]
+  - [[#real-programming][Real programming]]
+  - [[#shells-and-terminals][Shells and terminals]]
+  - [[#sudo-edit][Sudo edit]]
+  - [[#tabs][Tabs]]
+  - [[#translation][Translation]]
+  - [[#windowbuffer-management][Window/buffer management]]
+  - [[#writeroom][Writeroom]]
+  - [[#display-buffer-alist][display-buffer-alist]]
+
 * INFO and CREDITS
 Credits to:
 - DistroTube with his [[https://youtube.com/playlist?list=PL5--8gKSku15e8lXf7aLICFmAHQVo0KXX][Emacs Configuration videos]]
@@ -45,15 +70,14 @@ Those =fbound= are because Termux Emacs doesn't have some functions at all and t
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
-(save-place-mode 1)                  ; Saving last place in file
 (display-battery-mode 1)             ; Setting battery percentage in modeline
-(indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
+;; (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 #+end_src
 *** Uncluttering user-emacs-directory
 #+begin_src emacs-lisp
 (defvar custom/user-share-emacs-directory "~/.local/share/emacs/"
   "Directory to redirect cache/dump files.
-Elisp packages cache folders/files normally clutter user-emacs-directory.
+Elisp packages cache folders/files normally clutter `user-emacs-directory'.
 The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
@@ -87,8 +111,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (setq-default visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
+              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               scroll-conservatively 1000 ; Scroll one line at a time
@@ -140,6 +164,9 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
     (let ((dir (file-name-directory filename)))
       (unless (file-exists-p dir)
         (make-directory dir t)))))
+
+;; cleaning whistespace when saving file
+(add-hook 'before-save-hook #'whitespace-cleanup)
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -188,37 +215,17 @@ The [[https://gitlab.com/koral/gcmh][garbage collector magic hack]] is installed
 #+end_src
 **** Not normal packages (vc)
 =package-vc-install= can install pacakges directly from their source.
-That is great for packages not available not elisp repos.
+That is great for packages not available in elpas.
 [[https://github.com/slotThe/vc-use-package][vc-use-package]] integrates it into =use-package=.
 #+begin_src emacs-lisp
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
 #+end_src
-*** File history
-=recentf= is built-in package for remembering file visit history.
-#+begin_src emacs-lisp
-(use-package recentf
-  :custom
-    (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
-    (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
-    (recentf-auto-cleanup 'never) ; not cleaning recentf file
-)
-#+end_src
-*** EWW
-#+begin_src emacs-lisp
-(use-package eww
-  :custom (eww-auto-rename-buffer 'title))
-#+end_src
-*** Line numbers
-#+begin_src emacs-lisp
-(use-package display-line-numbers
-  :hook (prog-mode . display-line-numbers-mode)
-  :custom (display-line-numbers-type 'relative))
-#+end_src
-** Modal editing (Evil)
+** Keybindings
+*** Modal editing (Evil) :ARCHIVE:
 Before having my own Emacs config I used [[https://github.com/doomemacs/doomemacs][Doom Emacs]] and before that I used vanilla Vim so I set up [[https://github.com/emacs-evil/evil][evil mode]].
-*** Evil setup
+**** Evil setup
 #+begin_src emacs-lisp
 (use-package evil
   :demand
@@ -265,16 +272,15 @@ Before having my own Emacs config I used [[https://github.com/doomemacs/doomemac
   :after evil
   :config (global-evil-surround-mode 1))
 #+end_src
-*** Actual keybindings
+**** Leader keymap (general)
 [[https://github.com/noctuid/general.el][General]] lets you bind keybindings.
-This is a big list.
 #+begin_src emacs-lisp
 (use-package general
   :config
   (general-evil-setup)
 #+end_src
 Other keybindings are defined in other sections with =:general= use-package keyword.
-**** Normal
+***** Normal
 #+begin_src emacs-lisp
   ;; set up 'SPC' as the global leader key
   (general-create-definer custom/leader-keys
@@ -300,12 +306,12 @@ Other keybindings are defined in other sections with =:general= use-package keyw
     "TAB SPC" '(untabify :wk "Untabify")
     "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
 #+end_src
-**** Amusement
+***** Amusement
 #+begin_src emacs-lisp
 (custom/leader-keys
   "a" '(:ignore t :wk "Amusement")
   "a b" '(animate-birthday-present :wk "Birthday")
-  "a d" '(dissociated-press :wk "Dissoctation")
+  "a d" '(dissociated-press :wk "Dissociation")
   "a g" '(:ignore t :wk "Games")
   "a g b" '(bubbles :wk "Bubbles")
   "a g m" '(minesweeper :wk "Minesweeper")
@@ -324,7 +330,7 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "a e s" '(emoji-search :wk "Search")
   "a z" '(zone :wk "Zone"))
 #+end_src
-**** Bookmarks/Buffers
+***** Bookmarks/Buffers
 #+begin_src emacs-lisp
 (custom/leader-keys
   "b" '(:ignore t :wk "Bookmarks/Buffers")
@@ -346,7 +352,14 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "b S" '(save-some-buffers :wk "Save multiple buffers")
   "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
 #+end_src
-**** Eshell/Evaluate
+***** Compiling
+#+begin_src emacs-lisp
+(custom/leader-keys
+  "c" '(:ignore t :wk "Compiling")
+  "c c" '(compile :wk "Compile")
+  "c r" '(recompile :wk "Recompile"))
+#+end_src
+***** Eshell/Evaluate
 #+begin_src emacs-lisp
 (custom/leader-keys
   "e" '(:ignore t :wk "Eshell/Evaluate")
@@ -360,7 +373,7 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "e s" '(eshell :which-key "Eshell")
   "e w" '(eww :which-key "EWW emacs web wowser"))
 #+end_src
-**** Files
+***** Files
 #+begin_src emacs-lisp
 (custom/leader-keys
   "f" '(:ignore t :wk "Files")
@@ -378,9 +391,10 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "f i" '((lambda () (interactive)
             (find-file "~/.config/emacs/init.el"))
           :wk "Open emacs init.el")
-  "f r" '(recentf :wk "Find recent files"))
+  "f u" '(sudo-edit-find-file :wk "Sudo find file")
+  "f U" '(sudo-edit :wk "Sudo edit current file"))
 #+end_src
-**** Git
+***** Git
 #+begin_src emacs-lisp
 (custom/leader-keys
   "g" '(:ignore t :wk "Git")
@@ -400,12 +414,12 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "g g" '(magit-status :wk "Magit status")
   "g i" '(magit-init :wk "Initialize git repo")
   "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-  "g r" '(vc-revert :wk "Git revert file")
   "g s" '(magit-stage-file :wk "Git stage file")
   "g t" '(git-timemachine :wk "Git time machine")
-  "g u" '(magit-stage-file :wk "Git unstage file"))
+  "g u" '(magit-stage-file :wk "Git unstage file")
+  "g r" '(vc-revert :wk "Git revert file"))
 #+end_src
-**** Help/Docs
+***** Help/Docs
 #+begin_src emacs-lisp
 (custom/leader-keys
   "h" '(:ignore t :wk "Help")
@@ -443,40 +457,63 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "h w" '(where-is :wk "Prints keybinding for command if set")
   "h x" '(describe-command :wk "Display full documentation for command"))
 #+end_src
-**** Opening
+***** Opening
 #+begin_src emacs-lisp
 (custom/leader-keys
   "o" '(:ignore t :wk "Open")
-  "o d" '(dashboard-open :wk "Dashboard")
+  ;; "o d" '(dashboard-open :wk "Dashboard")
   "o e" '(elfeed :wk "Elfeed RSS")
   "o f" '(make-frame :wk "Open buffer in new frame")
   "o F" '(select-frame-by-name :wk "Select frame by name"))
 #+end_src
-**** Searching
+***** Project
+#+begin_src emacs-lisp
+(custom/leader-keys
+  "SPC" '(project-find-file :wk "Find file in project")
+  "p" '(:ignore t :wk "Project")
+  "p !" '(project-shell-command :wk nil)
+  "p &" '(project-async-shell-command :wk nil)
+  "p f" '(project-find-file :wk nil)
+  "p F" '(project-or-external-find-file :wk nil)
+  "p b" '(project-switch-to-buffer :wk nil)
+  "p s" '(project-shell :wk nil)
+  "p d" '(project-find-dir :wk nil)
+  "p D" '(project-dired :wk nil)
+  "p v" '(project-vc-dir :wk nil)
+  "p c" '(project-compile :wk nil)
+  "p e" '(project-eshell :wk nil)
+  "p k" '(project-kill-buffers :wk nil)
+  "p p" '(project-switch-project :wk nil)
+  "p g" '(project-find-regexp :wk nil)
+  "p G" '(project-or-external-find-regexp :wk nil)
+  "p r" '(project-query-replace-regexp :wk nil)
+  "p x" '(project-execute-extended-command :wk nil)
+  "p C-b" '(project-list-buffers :wk nil))
+#+end_src
+***** Searching
 #+begin_src emacs-lisp
 (custom/leader-keys
   "s" '(:ignore t :wk "Search")
   "s d" '(dictionary-search :wk "Search dictionary")
   "s m" '(man :wk "Man pages")
-  "s t" '(tldr :wk "Lookup TLDR docs for a command")
+  ;; "s t" '(tldr :wk "Lookup TLDR docs for a command")
   "s w" '(woman :wk "Man that doesn't require man"))
 #+end_src
-**** Toggling
+***** Toggling
 #+begin_src emacs-lisp
 (custom/leader-keys
   "t" '(:ignore t :wk "Toggle")
   "t d" '(toggle-debug-on-error :wk "Debug on error")
-  "t e" '(eshell-toggle :wk "Eshell")
+  ;; "t e" '(eshell-toggle :wk "Eshell")
   "t f" '(flycheck-mode :wk "Flycheck")
   "t i" '(imenu-list-smart-toggle :wk "Imenu list")
   "t l" '(display-line-numbers-mode :wk "Line numbers")
   "t n" '(neotree-toggle :wk "Neotree")
-  "t r" '(rainbow-mode :wk "Rainbow mode")
   "t t" '(visual-line-mode :wk "Word Wrap")
   "t v" '(vterm :wk "Vterm")
   "t z" '(writeroom-mode :wk "Zen mode"))
 #+end_src
-**** Windows
+***** Windows
 #+begin_src emacs-lisp
 (custom/leader-keys
   "W" '(custom/hydra-window/body :wk "Windows hydra")
@@ -496,49 +533,22 @@ Other keybindings are defined in other sections with =:general= use-package keyw
   "w j" '(evil-window-down :wk "Window down")
   "w k" '(evil-window-up :wk "Window up")
   "w l" '(evil-window-right :wk "Window right")
-  "w w" '(evil-window-next :wk "Go to next window")
-  ;; Move Windows
+  "w w" '(evil-window-next :wk "Go to next window"))
   "w H" '(buf-move-left :wk "Buffer move left")
   "w J" '(buf-move-down :wk "Buffer move down")
   "w K" '(buf-move-up :wk "Buffer move up")
-  "w L" '(buf-move-right :wk "Buffer move right"))
+  "w L" '(buf-move-right :wk "Buffer move right")
+  ;; Move Windows
 )
 #+end_src
-**** Text resizing
-#+begin_src emacs-lisp
-(keymap-global-set "C-=" 'text-scale-increase)
-(keymap-global-set "C-+" 'text-scale-increase)
-(keymap-global-set "C--" 'text-scale-decrease)
-(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
-#+end_src
-*** Flashing
-When I do =C-u= or =C-d= I will get a flash at the current line.
-#+begin_src emacs-lisp
-(use-package pulse
-  :config
-    (defun custom/pulse-line (&rest _)
-      "Pulse the current line."
-      (pulse-momentary-highlight-one-line (point)))
-
-    (dolist (command '(evil-scroll-up
-                       evil-scroll-down
-                       evil-window-right
-                       evil-window-left
-                       evil-window-up
-                       evil-window-down
-                       scroll-up-command
-                       scroll-down-command
-                       tab-select
-                       tab-next))
-      (advice-add command :after #'custom/pulse-line))
-)
-#+end_src
-** Modal editing (Meow) :ARCHIVE:
+*** Modal editing (Meow)
 #+begin_src emacs-lisp
 (use-package meow
   :demand
-  :custom (meow-use-clipboard t)
+  :custom
+    (meow-use-clipboard t)
+    (initial-buffer-choice (lambda () (meow-cheatsheet)))
+    (meow-expand-hint-remove-delay 0)
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -562,7 +572,10 @@ When I do =C-u= or =C-d= I will get a flash at the current line.
      '("9" . meow-digit-argument)
      '("0" . meow-digit-argument)
      '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet))
+     '("?" . meow-cheatsheet)
+     '("TAB" . evilnc-comment-or-uncomment-lines))
+     ;; '("f c" . (find-file "~/.config/emacs/config.org"))
+
     (if (custom/termux-p) (meow-leader-define-key '("s" . save-buffer)))
 
     (meow-normal-define-key
@@ -632,7 +645,40 @@ When I do =C-u= or =C-d= I will get a flash at the current line.
   (meow-global-mode 1)
 )
 #+end_src
-** Abbreviations
+*** Flashing
+When I do =C-u= or =C-d= I will get a flash at the current line.
+#+begin_src emacs-lisp
+(use-package pulse
+  :config
+    (defun custom/pulse-line (&rest _)
+      "Pulse the current line."
+      (pulse-momentary-highlight-one-line (point)))
+
+    (dolist (command '(meow-beginning-of-thing
+                       meow-end-of-thing
+                       ;; evil-scroll-up
+                       ;; evil-scroll-down
+                       ;; evil-window-right
+                       ;; evil-window-left
+                       ;; evil-window-up
+                       ;; evil-window-down
+                       scroll-up-command
+                       scroll-down-command
+                       tab-select
+                       tab-next))
+      (advice-add command :after #'custom/pulse-line))
+)
+#+end_src
+*** Text resizing
+#+begin_src emacs-lisp
+(keymap-global-set "C-=" 'text-scale-increase)
+(keymap-global-set "C-+" 'text-scale-increase)
+(keymap-global-set "C--" 'text-scale-decrease)
+(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+#+end_src
+** Built-in packages
+*** Abbreviations
 Built-in =abbrev-mode= allows for abbreviations.
 #+begin_src emacs-lisp
 (use-package abbrev
@@ -641,11 +687,50 @@ Built-in =abbrev-mode= allows for abbreviations.
   :config
     (define-abbrev global-abbrev-table "btw" "by the way")
     (define-abbrev global-abbrev-table "idk" "I don't know")
+    (define-abbrev global-abbrev-table "tbh" "to be honest")
 )
 #+end_src
 
 I have /btw/ set for /by the way/.
 The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at the beginning.
+*** File history
+=recentf= is built-in package for remembering file visit history.
+#+begin_src emacs-lisp
+(use-package recentf
+  :custom
+    (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
+    (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
+    (recentf-auto-cleanup 'never) ; not cleaning recentf file
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "f r" '(recentf :wk "Find recent files"))
+)
+#+end_src
+*** Remembering file place
+#+begin_src emacs-lisp
+(use-package save-place
+  :ensure nil
+  :hook (after-init . save-place-mode)
+)
+#+end_src
+*** EWW
+#+begin_src emacs-lisp
+(use-package eww
+  :custom (eww-auto-rename-buffer 'title))
+#+end_src
+*** Line numbers
+#+begin_src emacs-lisp
+(use-package display-line-numbers
+  :hook (prog-mode . display-line-numbers-mode)
+  :custom (display-line-numbers-type 'relative))
+#+end_src
+*** Project management
+I'm using built-in =project= package.
+I'm copying whole project keymap onto =SPC-p=.
+#+begin_src emacs-lisp
+(use-package project
+  :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory)))
+#+end_src
 ** Appearance
 *** Fonts
 **** Setting fonts
@@ -775,9 +860,13 @@ Adding highlights to TODO and related words.
 *** Modeline
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
 #+begin_src emacs-lisp
+;; (use-package doom-modeline
+;;   :demand
+;;   :init (doom-modeline-mode 1)
+;;   :custom (doom-modeline-battery t))
+
 (use-package doom-modeline
-  :demand
-  :init (doom-modeline-mode 1)
+  :hook (after-init . doom-modeline-mode)
   :custom (doom-modeline-battery t))
 #+end_src
 *** Rainbow delimiters
@@ -791,7 +880,11 @@ It displays the actual color as a background for any hex color value (ex. #fffff
 #+begin_src emacs-lisp
 (use-package rainbow-mode
   :diminish
-  :hook org-mode prog-mode)
+  :hook org-mode prog-mode conf-mode
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "t r" '(rainbow-mode :wk "Rainbow mode"))
+)
 #+end_src
 *** Theme
 I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
@@ -880,6 +973,7 @@ Completion will start automatically after you type a few letters.
   :hook (company-mode . company-box-mode))
 #+end_src
 *** In-buffer completion (corfu)
+[[https://github.com/minad/corfu][corfu]] is minimal completion provider aligning with Emacs built-in tools.
 #+begin_src emacs-lisp
 (use-package corfu
   ;; Optional customizations
@@ -895,7 +989,10 @@ Completion will start automatically after you type a few letters.
   ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
   ;; Enable Corfu only for certain modes.
-   :hook ((prog-mode . corfu-mode)))
+   :hook ((prog-mode . corfu-mode))
+   :bind (:map corfu-map
+               ("C-j" . corfu-next)
+               ("C-k" . corfu-previous)))
           ;; (shell-mode . corfu-mode)
           ;; (eshell-mode . corfu-mode))
 
@@ -993,31 +1090,34 @@ I still do some configurations because dirvish at its core uses dired and its ke
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
-  :init (evil-collection-dired-setup)
+  ;; :init (evil-collection-dired-setup)
+  :hook (dired-mode . dired-hide-details-mode)
   :custom
     (insert-directory-program "ls")
     (dired-listing-switches "-Hl --almost-all --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
+    (dired-auto-revert-buffer t)
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
       "Spawns `dired' in user's home directory."
       (dired "~/"))
-    (evil-collection-define-key 'normal 'dired-mode-map
-      [remap evil-yank] 'dired-ranger-copy
-      "gh" 'custom/dired-go-to-home
-      "p"  'dired-ranger-paste
-      "h"  'dired-up-directory
-      "l"  'dired-find-file)
-  :general
-    (custom/leader-keys
-      "d" '(:ignore t :wk "Dired")
-      "d d" '(dired :wk "Open dired")
-      "d h" '(custom/dired-go-to-home :wk "Open home directory")
-      "d j" '(dired-jump :wk "Dired jump to current")
-      "d n" '(neotree-dir :wk "Open directory in neotree")
-      "d /" '((lambda () (interactive) (dired "/")) :wk "Open /")))
+    ;; (evil-collection-define-key 'normal 'dired-mode-map
+    ;;   [remap evil-yank] 'dired-ranger-copy
+    ;;   "gh" 'custom/dired-go-to-home
+    ;;   "p"  'dired-ranger-paste
+    ;;   "h"  'dired-up-directory
+    ;;   "l"  'dired-find-file)
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "d" '(:ignore t :wk "Dired")
+  ;;     "d d" '(dired :wk "Open dired")
+  ;;     "d h" '(custom/dired-go-to-home :wk "Open home directory")
+  ;;     "d j" '(dired-jump :wk "Dired jump to current")
+  ;;     "d n" '(neotree-dir :wk "Open directory in neotree")
+  ;;     "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
+)
 
 ;; (use-package dired-open
 ;;   :after dired
@@ -1057,9 +1157,9 @@ It kills the buffers when =dirvish-quit= is called or when you enter the file.
     (dirvish-attributes '(collapse git-msg file-time file-size))
     (dirvish-default-layout '(1 0.15 0.5))
   :config
-    (evil-collection-define-key 'normal 'dirvish-mode-map
-      "p" 'dirvish-yank-menu
-      "q" 'dirvish-quit)
+    ;; (evil-collection-define-key 'normal 'dirvish-mode-map
+    ;;   "p" 'dirvish-yank-menu
+    ;;   "q" 'dirvish-quit)
     ;; (dirvish-define-preview eza (file)
     ;;   "Use `eza' to generate directory preview."
     ;;   :require ("eza") ; tell Dirvish to check if we have the executable
@@ -1075,7 +1175,7 @@ It kills the buffers when =dirvish-quit= is called or when you enter the file.
 #+end_src
 ** Docs
 *** Helpful
-[[https://github.com/Wilfred/helpful][This]] makes emacs documentation look pretty
+[[https://github.com/Wilfred/helpful][This]] makes Emacs documentation look pretty.
 #+begin_src emacs-lisp
 (use-package helpful
   :bind
@@ -1134,10 +1234,22 @@ A Git Porcelain inside Emacs
 #+begin_src emacs-lisp
 (use-package git-timemachine
   :hook (evil-normalize-keymaps . git-timemachine-mode)
-  :config
-    (evil-define-key 'normal git-timemachine-mode-map
-      (kbd "C-j") 'git-timemachine-show-previous-revision
-      (kbd "C-k") 'git-timemachine-show-next-revision))
+  ;; :config
+  ;;   (evil-define-key 'normal git-timemachine-mode-map
+  ;;     (kbd "C-j") 'git-timemachine-show-previous-revision
+  ;;     (kbd "C-k") 'git-timemachine-show-next-revision)
+)
+#+end_src
+** Tetris
+Tetris is built-in.
+#+begin_src emacs-lisp
+(use-package tetris
+  :ensure nil
+  ;; :config
+  ;;   (evil-set-initial-state 'tetris-mode 'emacs)
+  ;;   (add-hook 'tetris-mode-hook (lambda () (with-current-buffer "*Tetris*" (evil-local-set-key 'emacs "z" 'tetris-rotate-prev)
+  ;;                                                                               (evil-local-set-key 'emacs "x" 'tetris-rotate-next))))
+)
 #+end_src
 ** Org Mode
 [[https://orgmode.org/][Org Mode]] is one of the killer features of Emacs.
@@ -1155,6 +1267,8 @@ A whole lot of stuff.
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
     ([remap org-return] . custom/org-good-return)
+    ("C-c a" . org-agenda)
+    ("C-c c" . org-capture)
   :custom-face
     ;; setting size of headers
     (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -1226,12 +1340,13 @@ A whole lot of stuff.
     (org-refile-use-outline-path nil)
     (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
     (org-hide-emphasis-markers t)
-    (org-hide-leading-stars t)
+    ;; (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
     (org-image-actual-width '(300 600))
     (org-startup-with-inline-images t)
     (org-startup-indented t) ;; use org-indent-mode at startup
+    (org-indent-mode-turns-on-hiding-stars nil)
     ;; (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
@@ -1274,28 +1389,70 @@ A whole lot of stuff.
     (plist-put org-format-latex-options :background nil)
 
     ;; evil keybindings
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map
-        "gj" 'evil-next-visual-line
-        "gk" 'evil-previous-visual-line
-        (kbd "C-j") 'org-next-visible-heading
-        (kbd "C-k") 'org-previous-visible-heading
-        (kbd "C-S-J") 'org-forward-heading-same-level
-        (kbd "C-S-K") 'org-backward-heading-same-level
-        (kbd "M-h") 'org-metaleft
-        (kbd "M-j") 'org-metadown
-        (kbd "M-k") 'org-metaup
-        (kbd "M-l") 'org-metaright
-        (kbd "M-H") 'org-shiftmetaleft
-        (kbd "M-J") 'org-shiftmetadown
-        (kbd "M-K") 'org-shiftmetaup
-        (kbd "M-L") 'org-shiftmetaright
-        (kbd "M-<return>") 'org-meta-return))
+    ;; (require 'evil-org-agenda)
+    ;; (evil-org-agenda-set-keys)
+    ;; (with-eval-after-load 'evil-maps
+    ;;   (define-key evil-motion-state-map (kbd "SPC") nil)
+    ;;   (define-key evil-motion-state-map (kbd "RET") nil)
+    ;;   (define-key evil-motion-state-map (kbd "TAB") nil)
+    ;;   (evil-define-key 'normal org-mode-map
+    ;;     "gj" 'evil-next-visual-line
+    ;;     "gk" 'evil-previous-visual-line
+    ;;     (kbd "C-j") 'org-next-visible-heading
+    ;;     (kbd "C-k") 'org-previous-visible-heading
+    ;;     (kbd "C-S-J") 'org-forward-heading-same-level
+    ;;     (kbd "C-S-K") 'org-backward-heading-same-level
+    ;;     (kbd "M-h") 'org-metaleft
+    ;;     (kbd "M-j") 'org-metadown
+    ;;     (kbd "M-k") 'org-metaup
+    ;;     (kbd "M-l") 'org-metaright
+    ;;     (kbd "M-H") 'org-shiftmetaleft
+    ;;     (kbd "M-J") 'org-shiftmetadown
+    ;;     (kbd "M-K") 'org-shiftmetaup
+    ;;     (kbd "M-L") 'org-shiftmetaright
+    ;;     (kbd "M-<return>") 'org-meta-return))
+
+    ;; meow custom state (taken from https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
+    (setq meow-org-motion-keymap (make-keymap))
+    (meow-define-state org-motion
+      "Org-mode structural motion"
+      :lighter "[O]"
+      :keymap meow-org-motion-keymap)
+
+    (meow-define-keys 'org-motion
+      '("<escape>" . meow-normal-mode)
+      '("i" . meow-insert-mode)
+      '("g" . meow-normal-mode)
+      '("u" .  meow-undo)
+      ;; Moving between headlines
+      '("k" .  org-previous-visible-heading)
+      '("j" .  org-next-visible-heading)
+      ;; Moving between headings at the same level
+      '("p" .  org-backward-heading-same-level)
+      '("n" .  org-forward-heading-same-level)
+      ;; Moving subtrees themselves
+      '("K" .  org-subtree-up)
+      '("J" .  org-subtree-down)
+      ;; Subtree de/promotion
+      '("L" .  org-demote-subtree)
+      '("H" .  org-promote-subtree)
+      ;; Completion-style search of headings
+      '("v" .  consult-org-heading)
+      ;; Setting subtree metadata
+      '("l" .  org-set-property)
+      '("t" .  org-todo)
+      '("d" .  org-deadline)
+      '("s" .  org-schedule)
+      '("e" .  org-set-effort)
+      ;; Block navigation
+      '("b" .  org-previous-block)
+      '("f" .  org-next-block)
+      ;; Narrowing/widening
+      '("N" .  org-narrow-to-subtree)
+      '("W" .  widen))
+
+    (meow-define-keys 'normal
+      '("O" . meow-org-motion-mode))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
@@ -1312,85 +1469,86 @@ A whole lot of stuff.
             (lambda (&rest _)
               (when (called-interactively-p 'any)
                 (save-some-buffers (list org-agenda-files)))))
-  :general
-    (custom/leader-keys
-      "m" '(:ignore t :wk "Org")
-      "m a" '(org-agenda :wk "Org agenda")
-      "m b" '(:ignore t :wk "Tables")
-      "m b -" '(org-table-insert-hline :wk "Insert hline in table")
-      "m b a" '(org-table-align :wk "Align table")
-      "m b b" '(org-table-blank-field :wk "Make blank field")
-      "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
-      "m b e" '(org-table-edit-field :wk "Edit field")
-      "m b f" '(org-table-edit-formulas :wk "Edit formulas")
-      "m b h" '(org-table-field-info :wk "Field info")
-      "m b s" '(org-table-sort-lines :wk "Sort lines")
-      "m b r" '(org-table-recalculate :wk "Recalculate")
-      "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
-      "m b d" '(:ignore t :wk "delete")
-      "m b d c" '(org-table-delete-column :wk "Delete column")
-      "m b d r" '(org-table-kill-row :wk "Delete row")
-      "m b i" '(:ignore t :wk "insert")
-      "m b i c" '(org-table-insert-column :wk "Insert column")
-      "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
-      "m b i r" '(org-table-insert-row :wk "Insert row")
-      "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
-      "m c" '(org-capture :wk "Capture")
-      "m d" '(:ignore t :wk "Date/deadline")
-      "m d d" '(org-deadline :wk "Org deadline")
-      "m d s" '(org-schedule :wk "Org schedule")
-      "m d t" '(org-time-stamp :wk "Org time stamp")
-      "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
-      "m e" '(org-export-dispatch :wk "Org export dispatch")
-      "m f" '(:ignore t :wk "Fonts")
-      "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
-      "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
-      "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
-      "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
-      "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
-      "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
-      "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
-      "m i" '(org-toggle-item :wk "Org toggle item")
-      "m I" '(:ignore t :wk "IDs")
-      "m I c" '(org-id-get-create :wk "Create ID")
-      "m l" '(:ignore t :wk "Link")
-      "m l l" '(org-insert-link :wk "Insert link")
-      "m l i" '(org-roam-node-insert :wk "Insert roam link")
-      "m p" '(:ignore t :wk "Priority")
-      "m p d" '(org-priority-down :wk "Down")
-      "m p p" '(org-priority :wk "Set priority")
-      "m p u" '(org-priority-down :wk "Up")
-      "m q" '(org-set-tags-command :wk "Set tag")
-      "m s" '(:ignore t :wk "Tree/Subtree")
-      "m s a" '(org-toggle-archive-tag :wk "Archive tag")
-      "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
-      "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
-      "m s d" '(org-cut-subtree :wk "Cut subtree")
-      "m s h" '(org-promote-subtree :wk "Promote subtree")
-      "m s j" '(org-move-subtree-down :wk "Move subtree down")
-      "m s k" '(org-move-subtree-up :wk "Move subtree up")
-      "m s l" '(org-demote-subtree :wk "Demote subtree")
-      "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
-      "m s r" '(org-refile :wk "Refile")
-      "m s s" '(org-sparse-tree :wk "Sparse tree")
-      "m s A" '(org-archive-subtree :wk "Archive subtree")
-      "m s N" '(widen :wk "Widen")
-      "m s S" '(org-sort :wk "Sort")
-      "m t" '(org-todo :wk "Org todo")
-      "m B" '(org-babel-tangle :wk "Org babel tangle")
-      "m T" '(org-todo-list :wk "Org todo list"))
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "m" '(:ignore t :wk "Org")
+  ;;     "m a" '(org-agenda :wk "Org agenda")
+  ;;     "m b" '(:ignore t :wk "Tables")
+  ;;     "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  ;;     "m b a" '(org-table-align :wk "Align table")
+  ;;     "m b b" '(org-table-blank-field :wk "Make blank field")
+  ;;     "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
+  ;;     "m b e" '(org-table-edit-field :wk "Edit field")
+  ;;     "m b f" '(org-table-edit-formulas :wk "Edit formulas")
+  ;;     "m b h" '(org-table-field-info :wk "Field info")
+  ;;     "m b s" '(org-table-sort-lines :wk "Sort lines")
+  ;;     "m b r" '(org-table-recalculate :wk "Recalculate")
+  ;;     "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
+  ;;     "m b d" '(:ignore t :wk "delete")
+  ;;     "m b d c" '(org-table-delete-column :wk "Delete column")
+  ;;     "m b d r" '(org-table-kill-row :wk "Delete row")
+  ;;     "m b i" '(:ignore t :wk "insert")
+  ;;     "m b i c" '(org-table-insert-column :wk "Insert column")
+  ;;     "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
+  ;;     "m b i r" '(org-table-insert-row :wk "Insert row")
+  ;;     "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
+  ;;     "m c" '(org-capture :wk "Capture")
+  ;;     "m d" '(:ignore t :wk "Date/deadline")
+  ;;     "m d d" '(org-deadline :wk "Org deadline")
+  ;;     "m d s" '(org-schedule :wk "Org schedule")
+  ;;     "m d t" '(org-time-stamp :wk "Org time stamp")
+  ;;     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
+  ;;     "m e" '(org-export-dispatch :wk "Org export dispatch")
+  ;;     "m f" '(:ignore t :wk "Fonts")
+  ;;     "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
+  ;;     "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
+  ;;     "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
+  ;;     "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
+  ;;     "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
+  ;;     "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
+  ;;     "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
+  ;;     "m i" '(org-toggle-item :wk "Org toggle item")
+  ;;     "m I" '(:ignore t :wk "IDs")
+  ;;     "m I c" '(org-id-get-create :wk "Create ID")
+  ;;     "m l" '(:ignore t :wk "Link")
+  ;;     "m l l" '(org-insert-link :wk "Insert link")
+  ;;     "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  ;;     "m p" '(:ignore t :wk "Priority")
+  ;;     "m p d" '(org-priority-down :wk "Down")
+  ;;     "m p p" '(org-priority :wk "Set priority")
+  ;;     "m p u" '(org-priority-down :wk "Up")
+  ;;     "m q" '(org-set-tags-command :wk "Set tag")
+  ;;     "m s" '(:ignore t :wk "Tree/Subtree")
+  ;;     "m s a" '(org-toggle-archive-tag :wk "Archive tag")
+  ;;     "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
+  ;;     "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
+  ;;     "m s d" '(org-cut-subtree :wk "Cut subtree")
+  ;;     "m s h" '(org-promote-subtree :wk "Promote subtree")
+  ;;     "m s j" '(org-move-subtree-down :wk "Move subtree down")
+  ;;     "m s k" '(org-move-subtree-up :wk "Move subtree up")
+  ;;     "m s l" '(org-demote-subtree :wk "Demote subtree")
+  ;;     "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
+  ;;     "m s r" '(org-refile :wk "Refile")
+  ;;     "m s s" '(org-sparse-tree :wk "Sparse tree")
+  ;;     "m s A" '(org-archive-subtree :wk "Archive subtree")
+  ;;     "m s N" '(widen :wk "Widen")
+  ;;     "m s S" '(org-sort :wk "Sort")
+  ;;     "m t" '(org-todo :wk "Org todo")
+  ;;     "m B" '(org-babel-tangle :wk "Org babel tangle")
+  ;;     "m T" '(org-todo-list :wk "Org todo list"))
 )
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
 #+end_src
-*** Evil Agenda setup
-[[https://github.com/Somelauw/evil-org-mode.git][evil-org]] is used for org-agenda keybindings
+*** Evil Agenda setup :ARCHIVE:
+[[https://github.com/Somelauw/evil-org-mode.git][evil-org]] is used for org-agenda keybindings.
+It also sets keybindings for org mode but I don't use them.
 #+begin_src emacs-lisp
-(use-package evil-org
-  :after org
-  ;; :hook (org-mode . (lambda () (evil-org-mode)))
-)
+;; (use-package evil-org
+;;   :after org
+;;   ;; :hook (org-mode . (lambda () (evil-org-mode)))
+;; )
 
 ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
 ;; Otherwise, org-tempo is broken when you try to <s TAB...
@@ -1399,8 +1557,8 @@ A whole lot of stuff.
 ;;                    `(lambda (c)
 ;;                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 #+end_src
-*** Block Tag Expansion
-Org-tempo is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a =begin_src= tag. Other expansions available include:
+*** Org Tempo
+=org-tempo= is a module within org that can be enabled. It allows for '<s' followed by TAB to expand to a =begin_src= tag. Other expansions available include:
 
 | Typing the below + TAB | Expands to ...                      |
 |------------------------+-------------------------------------|
@@ -1415,6 +1573,7 @@ Org-tempo is a module within org that can be enabled. It allows for '<s' followe
 | <s                     | =#+BEGIN_SRC= … =#+END_SRC=             |
 | <v                     | =#+BEGIN_VERSE= … =#+END_VERSE=         |
 
+Since it's not a separate package, I can't use =use-package= on it.
 #+begin_src emacs-lisp
 (with-eval-after-load 'org
   (require 'org-tempo)
@@ -1444,15 +1603,25 @@ It's set up so it will display markers when entering insert mode.
     (org-appear-trigger 'manual)
     (org-appear-autolinks t)
   :config
+  ;;   (add-hook 'org-appear-mode-hook (lambda ()
+  ;;     (add-hook 'evil-insert-state-entry-hook
+  ;;       #'org-appear-manual-start
+  ;;       nil
+  ;;       t)
+  ;;     (add-hook 'evil-insert-state-exit-hook
+  ;;       #'org-appear-manual-stop
+  ;;         nil
+  ;;        t)))
     (add-hook 'org-appear-mode-hook (lambda ()
-      (add-hook 'evil-insert-state-entry-hook
+      (add-hook 'meow-insert-enter-hook
         #'org-appear-manual-start
         nil
         t)
-      (add-hook 'evil-insert-state-exit-hook
+      (add-hook 'meow-insert-exit-hook
         #'org-appear-manual-stop
           nil
-          t))))
+          t)))
+)
 #+end_src
 *** Org auto tangle
 [[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] automatically tangles files that have =#+auto_tangle: t= in them.
@@ -1510,7 +1679,7 @@ This [[https://github.com/jdtsmith/org-modern-indent][package]] adds borders to 
          :unnarrowed t)
         ("g" "video game" plain "%?"
          :target (file+head "games/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating      | Ownership | Achievements |\n* Notes")
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
          :unnarrowed t)
         ("b" "book" plain "%?"
@@ -1525,35 +1694,52 @@ This [[https://github.com/jdtsmith/org-modern-indent][package]] adds borders to 
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
         (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+
+   :bind (
+      ("C-c n a a" . org-roam-alias-add)
+      ("C-c n a r" . org-roam-alias-remove)
+      ("C-c n d c" . org-roam-dailies-capture-today)
+      ("C-c n d t" . org-roam-dailies-goto-today)
+      ("C-c n d j" . org-roam-dailies-goto-next-note)
+      ("C-c n d k" . org-roam-dailies-goto-previous-note)
+      ("C-c n D"   . custom/org-roam-notes-dired)
+      ("C-c n f"   . org-roam-node-find)
+      ("C-c n i"   . org-roam-node-insert)
+      ("C-c n l"   . org-roam-buffer-toggle)
+      ("C-c n r"   . org-roam-ref-add)
+      ("C-c n R"   . org-roam-ref-remove)
+      ("C-c n t"   . org-roam-tag-add)
+      ("C-c n T"   . org-roam-tag-remove)
+      )
   :config
     (org-roam-setup)
-    (evil-collection-org-roam-setup)
+    ;; (evil-collection-org-roam-setup)
     (require 'org-roam-export)
     ;; if the file is dailie then increase buffer's size automatically
     (require 'org-roam-dailies)
     ;; (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
     ;; (add-hook 'find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3))))
-  :general
-    (custom/leader-keys
-      "n" '(:ignore t :wk "Notes")
-      "n a" '(:ignore t :wk "Alias")
-      "n a a" '(org-roam-alias-add :wk "Add alias")
-      "n a r" '(org-roam-alias-remove :wk "Remove alias")
-      "n d" '(:ignore t :wk "Roam dailies")
-      "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
-      "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
-      "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-      "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-      "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
-      "n f" '(org-roam-node-find :wk "Find note")
-      "n i" '(org-roam-node-insert :wk "Insert note")
-      "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-      "n r" '(:ignore t :wk "References")
-      "n r" '(org-roam-ref-add :wk "Add reference")
-      "n R" '(org-roam-ref-remove :wk "Remove reference")
-      "n t" '(org-roam-tag-add :wk "Add tag")
-      "n T" '(org-roam-tag-remove :wk "Remove tag")
-    )
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "n" '(:ignore t :wk "Notes")
+  ;;     "n a" '(:ignore t :wk "Alias")
+  ;;     "n a a" '(org-roam-alias-add :wk "Add alias")
+  ;;     "n a r" '(org-roam-alias-remove :wk "Remove alias")
+  ;;     "n d" '(:ignore t :wk "Roam dailies")
+  ;;     "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  ;;     "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
+  ;;     "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+  ;;     "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+  ;;     "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
+  ;;     "n f" '(org-roam-node-find :wk "Find note")
+  ;;     "n i" '(org-roam-node-insert :wk "Insert note")
+  ;;     "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  ;;     "n r" '(:ignore t :wk "References")
+  ;;     "n r" '(org-roam-ref-add :wk "Add reference")
+  ;;     "n R" '(org-roam-ref-remove :wk "Remove reference")
+  ;;     "n t" '(org-roam-tag-add :wk "Add tag")
+  ;;     "n T" '(org-roam-tag-remove :wk "Remove tag")
+  ;;   )
 )
 #+end_src
 
@@ -1611,8 +1797,9 @@ Table of contents after after typing =:toc:= in header
 #+begin_src emacs-lisp
 (use-package toc-org
   :after org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :hook (org-mode . #'toc-org-enable))
+  ;; :commands toc-org-enable
+  ;; :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 *** Notes
 Here are some functions.
@@ -1637,37 +1824,7 @@ Here are some functions.
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
   :config (require 'smartparens-config)) ;; load default config
-(use-package evil-smartparens :after smartparens)
-#+end_src
-** Project management
-I'm using built-in =project= package.
-#+begin_src emacs-lisp
-(use-package project
-  :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory))
-  :general
-    (custom/leader-keys
-      "SPC" '(project-find-file :wk "Find file in project")
-      "p" '(:ignore t :wk "Project")
-      "p !" '(project-shell-command :wk nil)
-      "p &" '(project-async-shell-command :wk nil)
-      "p f" '(project-find-file :wk nil)
-      "p F" '(project-or-external-find-file :wk nil)
-      "p b" '(project-switch-to-buffer :wk nil)
-      "p s" '(project-shell :wk nil)
-      "p d" '(project-find-dir :wk nil)
-      "p D" '(project-dired :wk nil)
-      "p v" '(project-vc-dir :wk nil)
-      "p c" '(project-compile :wk nil)
-      "p e" '(project-eshell :wk nil)
-      "p k" '(project-kill-buffers :wk nil)
-      "p p" '(project-switch-project :wk nil)
-      "p g" '(project-find-regexp :wk nil)
-      "p G" '(project-or-external-find-regexp :wk nil)
-      "p r" '(project-query-replace-regexp :wk nil)
-      "p x" '(project-execute-extended-command :wk nil)
-      "p C-b" '(project-list-buffers :wk nil)
-    )
-)
+;; (use-package evil-smartparens :after smartparens)
 #+end_src
 ** Real programming
 This bit is not intended for Termux usage. That's why I include =unless= statement here.
@@ -1679,8 +1836,9 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
 #+begin_src emacs-lisp
 (use-package compile
   :custom
-    (compilation-scroll-output t)
+    (compilation-scroll-output 'first-error)
     (compilation-ask-about-save nil)
+    (compilation-always-kill nil)
   :config
     (defadvice compile (before ad-compile-smart activate)
       "Advises `compile' so it sets the argument COMINT to t."
@@ -1695,25 +1853,20 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
     ;;   "Advises `recompile' so it moves to the compilation buffer."
     ;;   (switch-to-buffer-other-window "*compilation*"))
 
-    (evil-set-initial-state 'compilation-mode 'normal)
-    (evil-set-initial-state 'comint-mode 'normal)
+    ;; (evil-set-initial-state 'compilation-mode 'normal)
+    ;; (evil-set-initial-state 'comint-mode 'normal)
 
-    (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
-  :general
-    (custom/leader-keys
-      "c" '(:ignore t :wk "Compiling")
-      "c c" '(compile :wk "Compile")
-      "c r" '(recompile :wk "Recompile"))
+    ;; (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
 )
 
-(defadvice async-shell-command (after shell-command activate)
-  "Advises `async-shell-command' to:
-;; 1. Move to it's buffer after activation,
-2. Set its' evil state to normal
-3. Bind 'q' to `quit-window'"
-  ;; (switch-to-buffer-other-window "*Async Shell Command*")
-  (evil-change-state 'normal)
-  (evil-local-set-key 'normal (kbd "q") 'quit-window))
+;; (defadvice async-shell-command (after shell-command activate)
+;;   "Advises `async-shell-command' to:
+;; ;; 1. Move to it's buffer after activation,
+;; 2. Set its' evil state to normal
+;; 3. Bind 'q' to `quit-window'"
+;;   ;; (switch-to-buffer-other-window "*Async Shell Command*")
+;;   (evil-change-state 'normal)
+;;   (evil-local-set-key 'normal (kbd "q") 'quit-window))
 #+end_src
 *** QUICK EVALUATION :ARCHIVE:
 [[https://github.com/emacsorphanage/quickrun][quickrun]] lets you evaluate a buffer or region of text. It supports a lot of languages.
@@ -1735,7 +1888,7 @@ For more information on language support, [[https://www.flycheck.org/en/latest/l
   :after prog-mode
   :hook (prog-mode . flycheck-mode))
 #+end_src
-*** LSP
+*** LSP :ARCHIVE:
 [[https://github.com/joaotavora/eglot][Eglot]] is from Emacs 29 built-in LSP client.
 #+begin_src emacs-lisp
 (use-package eglot
@@ -1894,6 +2047,9 @@ This is the end of =unless= statement.
 Eshell is an Emacs /shell/ that is written in Elisp.
 #+begin_src emacs-lisp
 (use-package eshell
+  :hook
+    (eshell-mode . (lambda () (setq mode-line-format nil)))
+    (eshell-mode . (lambda () (keymap-local-set "C-d" 'eshell-life-is-too-much)))
   :custom
     (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
     (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell
@@ -1905,9 +2061,15 @@ Eshell is an Emacs /shell/ that is written in Elisp.
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
+  ;; :bind (:map eshell-mode-map
+  ;;             ("C-d" . 'eshell-life-is-too-much))
   :config
-    (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
-    (defalias 'eshell/clear #'eshell/clear-scrollback))
+    ;; (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
+    ;; (define-key eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
+
+    (defalias 'eshell/clear #'eshell/clear-scrollback)
+
+    (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
   :after eshell
@@ -1926,19 +2088,16 @@ The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x
 #+begin_src emacs-lisp
 (use-package vterm
   :unless (custom/termux-p)
+  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   :custom
     (shell-file-name "/bin/fish")
-    (vterm-max-scrollback 5000))
+    (vterm-max-scrollback 5000)
+)
 #+end_src
 ** Sudo edit
 [[https://github.com/nflath/sudo-edit][sudo-edit]] lets you open files with sudo privileges or edit current buffer with such privileges.
 #+begin_src emacs-lisp
-(use-package sudo-edit
-  :general
-    (custom/leader-keys
-      "f u" '(sudo-edit-find-file :wk "Sudo find file")
-      "f U" '(sudo-edit :wk "Sudo edit current file"))
-)
+(use-package sudo-edit)
 #+end_src
 ** Tabs
 =tab-bar= is built-in package that emulates web browser tab behaviour.
@@ -1956,25 +2115,24 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
     (tab-bar-close-button-show nil)      ;; hide tab close / X button
     (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
     (tab-bar-tab-hints t)                ;; show tab numbers
-  :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
-  :general
-    (custom/leader-keys
-      "=" '(:ignore t :wk "Tabs/Workspaces")
-      "= TAB" '(tab-next :wk "Next tab")
-      "= =" '(tab-bar-mode :wk "Enable/Disable")
-      "= 1" '((lambda () (interactive) (tab-select 1)) :wk "Tab 1")
-      "= 2" '((lambda () (interactive) (tab-select 2)) :wk "Tab 2")
-      "= 3" '((lambda () (interactive) (tab-select 3)) :wk "Tab 3")
-      "= 4" '((lambda () (interactive) (tab-select 4)) :wk "Tab 4")
-      "= 5" '((lambda () (interactive) (tab-select 5)) :wk "Tab 5")
-      "= 6" '((lambda () (interactive) (tab-select 6)) :wk "Tab 6")
-      "= 7" '((lambda () (interactive) (tab-select 7)) :wk "Tab 7")
-      "= 8" '((lambda () (interactive) (tab-select 8)) :wk "Tab 8")
-      "= 9" '((lambda () (interactive) (tab-select 9)) :wk "Tab 9")
-      "= 0" '((lambda () (interactive) (tab-select 0)) :wk "Tab 0")
-      "= t" '(tab-new :wk "New")
-      "= d" '(tab-bar-close-tab :wk "Close")
-      "= r" '(tab-rename :wk "Rename"))
+  ;; :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
+  :config
+    (meow-leader-define-key
+      '("= TAB" . tab-next)
+      '("= ="   . tab-bar-mode)
+      '("= 1"   . (lambda () (interactive) (tab-select 1)))
+      '("= 2"   . (lambda () (interactive) (tab-select 2)))
+      '("= 3"   . (lambda () (interactive) (tab-select 3)))
+      '("= 4"   . (lambda () (interactive) (tab-select 4)))
+      '("= 5"   . (lambda () (interactive) (tab-select 5)))
+      '("= 6"   . (lambda () (interactive) (tab-select 6)))
+      '("= 7"   . (lambda () (interactive) (tab-select 7)))
+      '("= 8"   . (lambda () (interactive) (tab-select 8)))
+      '("= 9"   . (lambda () (interactive) (tab-select 9)))
+      '("= 0"   . (lambda () (interactive) (tab-select 0)))
+      '("= t"   . tab-new)
+      '("= d"   . tab-bar-close-tab)
+      '("= r"   . tab-rename))
 )
 #+end_src
 ** Translation
@@ -1988,7 +2146,7 @@ This allows to easily move windows (splits) around.
 #+begin_src emacs-lisp
 (use-package buffer-move)
 #+end_src
-*** Window close functions
+*** Window close functions :ARCHIVE:
 These functions move to window on specified side and close it
 #+begin_src emacs-lisp
 (defun custom/evil-close-down-window ()
@@ -2015,7 +2173,7 @@ These functions move to window on specified side and close it
   (evil-window-right 1)
   (evil-window-delete))
 #+end_src
-*** Big hydra
+*** Big hydra :ARCHIVE:
 I stole it from somewhere and edited it.
 #+begin_src emacs-lisp
 (use-package windresize)
@@ -2084,7 +2242,7 @@ _q_uit        _e_qualize        _K_ill          ^
 This variable desribes the way chosen buffers are displaying and behaving.
 #+begin_src emacs-lisp
 (defun custom/switch-to-buffer-other-window-for-alist (window)
-  "Kind of `switch-to-buffer-other-window' but can be used in `display-buffer-alist' with body-function parameter"
+  "Kind of `switch-to-buffer-other-window' but can be used in `display-buffer-alist' with body-function parameter."
   (select-window window))
 
 (setq display-buffer-alist
@@ -2108,6 +2266,10 @@ This variable desribes the way chosen buffers are displaying and behaving.
         ("\\*Org Links\\*"
          (display-buffer-at-bottom)
          (window-height . 1)
+         (window-parameters . ((mode-line-format . none))))
+        ("\\*Org todo\\*"
+         (display-buffer-at-bottom)
+         ;; (window-height . 1)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Agenda Commands\\*"
          (display-buffer-at-bottom)
@@ -2147,5 +2309,5 @@ This variable desribes the way chosen buffers are displaying and behaving.
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
         )
 
-      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect display-buffer-alist
+      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect `display-buffer-alist'
 #+end_src

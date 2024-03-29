@@ -13,21 +13,21 @@ configuration {
   display-ssh: " 󰤨  ssh ";
   sidebar-mode: true;
 
-  /* Keybindings */   
+  /* Keybindings */
   kb-move-word-back: "";
   kb-remove-to-eol: "";
   kb-remove-to-sol: "";
   kb-mode-complete: "";
   kb-remove-char-forward: "Delete";
-  kb-remove-char-back: "BackSpace,Shift+BackSpace";
+  kb-remove-char-back: "BackSpace,Shift+BackSpace,Control+h";
 
-  kb-accept-entry: "Return";
+  kb-accept-entry: "Control+l,Return";
   kb-row-up: "Up,Control+k";
   kb-row-down: "Down,Control+j";
   kb-page-prev: "Page_Up,Control+u";
   kb-page-next: "Page_Down,Control+d";
-  kb-mode-next: "Control+l,Control+Tab";
-  kb-mode-previous: "Control+h,Control+ISO_Left_Tab";
+  kb-mode-next: "Control+Tab";
+  kb-mode-previous: "Control+ISO_Left_Tab";
 }
 
 /* Pywal theme */

@@ -20,13 +20,12 @@
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
-(save-place-mode 1)                  ; Saving last place in file
 (display-battery-mode 1)             ; Setting battery percentage in modeline
-(indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
+;; (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 
 (defvar custom/user-share-emacs-directory "~/.local/share/emacs/"
   "Directory to redirect cache/dump files.
-Elisp packages cache folders/files normally clutter user-emacs-directory.
+Elisp packages cache folders/files normally clutter `user-emacs-directory'.
 The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
@@ -46,8 +45,8 @@ Most of the stuff will get redirected here.")
 (setq-default visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
+              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               scroll-conservatively 1000 ; Scroll one line at a time
@@ -98,6 +97,9 @@ Most of the stuff will get redirected here.")
       (unless (file-exists-p dir)
         (make-directory dir t)))))
 
+;; cleaning whistespace when saving file
+(add-hook 'before-save-hook #'whitespace-cleanup)
+
 (use-package use-package
   :custom
     (use-package-verbose t)
@@ -135,11 +137,157 @@ Most of the stuff will get redirected here.")
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
 
+(use-package meow
+  :demand
+  :custom
+    (meow-use-clipboard t)
+    (initial-buffer-choice (lambda () (meow-cheatsheet)))
+    (meow-expand-hint-remove-delay 0)
+  :config
+  (defun meow-setup ()
+    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+    (meow-motion-overwrite-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    (meow-leader-define-key
+     ;; SPC j/k will run the original command in MOTION state.
+     '("j" . "H-j")
+     '("k" . "H-k")
+     ;; Use SPC (0-9) for digit arguments.
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet)
+     '("TAB" . evilnc-comment-or-uncomment-lines))
+     ;; '("f c" . (find-file "~/.config/emacs/config.org"))
+
+    (if (custom/termux-p) (meow-leader-define-key '("s" . save-buffer)))
+
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("<escape>" . ignore)))
+
+  (meow-setup)
+  (meow-global-mode 1)
+)
+
+(use-package pulse
+  :config
+    (defun custom/pulse-line (&rest _)
+      "Pulse the current line."
+      (pulse-momentary-highlight-one-line (point)))
+
+    (dolist (command '(meow-beginning-of-thing
+                       meow-end-of-thing
+                       ;; evil-scroll-up
+                       ;; evil-scroll-down
+                       ;; evil-window-right
+                       ;; evil-window-left
+                       ;; evil-window-up
+                       ;; evil-window-down
+                       scroll-up-command
+                       scroll-down-command
+                       tab-select
+                       tab-next))
+      (advice-add command :after #'custom/pulse-line))
+)
+
+(keymap-global-set "C-=" 'text-scale-increase)
+(keymap-global-set "C-+" 'text-scale-increase)
+(keymap-global-set "C--" 'text-scale-decrease)
+(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+
+(use-package abbrev
+  :ensure nil
+  :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
+  :config
+    (define-abbrev global-abbrev-table "btw" "by the way")
+    (define-abbrev global-abbrev-table "idk" "I don't know")
+    (define-abbrev global-abbrev-table "tbh" "to be honest")
+)
+
 (use-package recentf
   :custom
     (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
     (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
     (recentf-auto-cleanup 'never) ; not cleaning recentf file
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "f r" '(recentf :wk "Find recent files"))
+)
+
+(use-package save-place
+  :ensure nil
+  :hook (after-init . save-place-mode)
 )
 
 (use-package eww
@@ -149,286 +297,8 @@ Most of the stuff will get redirected here.")
   :hook (prog-mode . display-line-numbers-mode)
   :custom (display-line-numbers-type 'relative))
 
-(use-package evil
-  :demand
-  :init
-    (setq ;; evil-want-integration t  ;; This is optional since it's already set to t by default.
-          evil-want-keybinding nil)
-  :custom
-    (evil-want-C-u-scroll t)
-    (evil-vsplit-window-right t)
-    (evil-split-window-below t)
-    (evil-undo-system 'undo-redo)  ;; Adds vim-like C-r redo functionality
-  :config
-    (evil-mode)
-    (if (custom/termux-p)
-        (define-key evil-normal-state-map (kbd "C-s") 'save-buffer)) ;; for quick save on termux
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-    (evil-define-key 'normal ibuffer-mode-map (kbd "l") 'ibuffer-visit-buffer))
-
-(use-package evil-collection
-  :demand
-  :after evil
-  :config
-    ;; Do not uncomment this unless you want to specify each and every mode
-    ;; that evil-collection should works with.  The following line is here
-    ;; for documentation purposes in case you need it.
-    ;; (setq evil-collection-mode-list '(calendar dashboard dired ediff info magit ibuffer))
-    (add-to-list 'evil-collection-mode-list 'helpful) ;; evilify helpful mode
-    (evil-collection-init))
-
-(use-package evil-nerd-commenter
-  :after evil)
-
-(use-package evil-surround
-  :defer 20
-  :after evil
-  :config (global-evil-surround-mode 1))
-
-(use-package general
-  :config
-  (general-evil-setup)
-
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer custom/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
-
-  ;; for easily quitting in termux
-  (if (custom/termux-p)
-    (custom/leader-keys
-      "q" '(evil-quit :wk "Quit Emacs")))
-
-  (custom/leader-keys
-    "." '(find-file :wk "Find file")
-    "u" '(universal-argument :wk "Universal argument")
-    "x" '(execute-extended-command :wk "M-x")
-    "RET" '(bookmark-jump :wk "Go to bookmark"))
-
-  (custom/leader-keys
-    "TAB" '(:ignore t :wk "Spacing/Indent")
-    "TAB TAB" '(evilnc-comment-or-uncomment-lines :wk "Un/Comment lines")
-    "TAB SPC" '(untabify :wk "Untabify")
-    "TAB DEL" '(whitespace-cleanup :wk "Clean whitespace"))
-
-(custom/leader-keys
-  "a" '(:ignore t :wk "Amusement")
-  "a b" '(animate-birthday-present :wk "Birthday")
-  "a d" '(dissociated-press :wk "Dissoctation")
-  "a g" '(:ignore t :wk "Games")
-  "a g b" '(bubbles :wk "Bubbles")
-  "a g m" '(minesweeper :wk "Minesweeper")
-  "a g p" '(pong :wk "Pong")
-  "a g s" '(snake :wk "Snake")
-  "a g t" '(tetris :wk "Tetris")
-  "a e" '(:ignore t :wk "Emoji")
-  "a e +" '(emoji-zoom-increase :wk "Zoom in")
-  "a e -" '(emoji-zoom-decrease :wk "Zoom out")
-  "a e 0" '(emoji-zoom-reset :wk "Zoom reset")
-  "a e d" '(emoji-describe :wk "Describe")
-  "a e e" '(emoji-insert :wk "Insert")
-  "a e i" '(emoji-insert :wk "Insert")
-  "a e l" '(emoji-list :wk "List")
-  "a e r" '(emoji-recent :wk "Recent")
-  "a e s" '(emoji-search :wk "Search")
-  "a z" '(zone :wk "Zone"))
-
-(custom/leader-keys
-  "b" '(:ignore t :wk "Bookmarks/Buffers")
-  "b b" '(switch-to-buffer :wk "Switch to buffer")
-  "b c" '(clone-indirect-buffer :wk "Create indirect buffer copy in a split")
-  "b C" '(clone-indirect-buffer-other-window :wk "Clone indirect buffer in new window")
-  "b d" '(bookmark-delete :wk "Delete bookmark")
-  "b f" '(scratch-buffer :wk "Scratch buffer")
-  "b i" '(ibuffer :wk "Ibuffer")
-  "b k" '(kill-current-buffer :wk "Kill current buffer")
-  "b K" '(kill-some-buffers :wk "Kill multiple buffers")
-  "b l" '(list-bookmarks :wk "List bookmarks")
-  "b m" '(bookmark-set :wk "Set bookmark")
-  "b n" '(next-buffer :wk "Next buffer")
-  "b p" '(previous-buffer :wk "Previous buffer")
-  "b r" '(revert-buffer :wk "Reload buffer")
-  "b R" '(rename-buffer :wk "Rename buffer")
-  "b s" '(basic-save-buffer :wk "Save buffer")
-  "b S" '(save-some-buffers :wk "Save multiple buffers")
-  "b w" '(bookmark-save :wk "Save current bookmarks to bookmark file"))
-
-(custom/leader-keys
-  "e" '(:ignore t :wk "Eshell/Evaluate")
-  "e b" '(eval-buffer :wk "Evaluate elisp in buffer")
-  "e d" '(eval-defun :wk "Evaluate defun containing or after point")
-  "e e" '(eval-expression :wk "Evaluate and elisp expression")
-  ;; "e h" '(counsel-esh-history :which-key "Eshell history")
-  "e l" '(eval-last-sexp :wk "Evaluate elisp expression before point")
-  "e r" '(eval-region :wk "Evaluate elisp in region")
-  "e R" '(eww-reload :which-key "Reload current page in EWW")
-  "e s" '(eshell :which-key "Eshell")
-  "e w" '(eww :which-key "EWW emacs web wowser"))
-
-(custom/leader-keys
-  "f" '(:ignore t :wk "Files")
-  "f c" '((lambda () (interactive)
-            (find-file "~/.config/emacs/config.org"))
-          :wk "Open emacs config.org")
-  "f e" '((lambda () (interactive)
-            (dired user-emacs-directory))
-          :wk "Open user-emacs-directory in dired")
-  "f E" '((lambda () (interactive)
-            (dired custom/user-share-emacs-directory))
-          :wk "Open custom/user-share-emacs-directory in dired")
-  "f d" '(find-grep-dired :wk "Search for string in files in DIR")
-  ;; "f g" '(counsel-grep-or-swiper :wk "Search for string current file")
-  "f i" '((lambda () (interactive)
-            (find-file "~/.config/emacs/init.el"))
-          :wk "Open emacs init.el")
-  "f r" '(recentf :wk "Find recent files"))
-
-(custom/leader-keys
-  "g" '(:ignore t :wk "Git")
-  "g /" '(magit-displatch :wk "Magit dispatch")
-  "g ." '(magit-file-displatch :wk "Magit file dispatch")
-  "g b" '(magit-branch-checkout :wk "Switch branch")
-  "g c" '(:ignore t :wk "Create")
-  "g c b" '(magit-branch-and-checkout :wk "Create branch and checkout")
-  "g c c" '(magit-commit-create :wk "Create commit")
-  "g c f" '(magit-commit-fixup :wk "Create fixup commit")
-  "g C" '(magit-clone :wk "Clone repo")
-  "g f" '(:ignore t :wk "Find")
-  "g f c" '(magit-show-commit :wk "Show commit")
-  "g f f" '(magit-find-file :wk "Magit find file")
-  "g f g" '(magit-find-git-config-file :wk "Find gitconfig file")
-  "g F" '(magit-fetch :wk "Git fetch")
-  "g g" '(magit-status :wk "Magit status")
-  "g i" '(magit-init :wk "Initialize git repo")
-  "g l" '(magit-log-buffer-file :wk "Magit buffer log")
-  "g r" '(vc-revert :wk "Git revert file")
-  "g s" '(magit-stage-file :wk "Git stage file")
-  "g t" '(git-timemachine :wk "Git time machine")
-  "g u" '(magit-stage-file :wk "Git unstage file"))
-
-(custom/leader-keys
-  "h" '(:ignore t :wk "Help")
-  "h b" '(describe-bindings :wk "Describe bindings")
-  "h c" '(describe-char :wk "Describe character under cursor")
-  "h d" '(:ignore t :wk "Emacs documentation")
-  "h d a" '(about-emacs :wk "About Emacs")
-  "h d d" '(view-emacs-debugging :wk "View Emacs debugging")
-  "h d f" '(view-emacs-FAQ :wk "View Emacs FAQ")
-  "h d m" '(info-emacs-manual :wk "The Emacs manual")
-  "h d n" '(view-emacs-news :wk "View Emacs news")
-  "h d o" '(describe-distribution :wk "How to obtain Emacs")
-  "h d p" '(view-emacs-problems :wk "View Emacs problems")
-  "h d t" '(view-emacs-todo :wk "View Emacs todo")
-  "h d w" '(describe-no-warranty :wk "Describe no warranty")
-  "h e" '(view-echo-area-messages :wk "View echo area messages")
-  "h f" '(describe-function :wk "Describe function")
-  "h F" '(describe-face :wk "Describe face")
-  "h g" '(describe-gnu-project :wk "Describe GNU Project")
-  "h h" '(helpful-at-point :wk "Describe at point")
-  "h i" '(info :wk "Info")
-  "h I" '(describe-input-method :wk "Describe input method")
-  "h k" '(describe-key :wk "Describe key")
-  "h l" '(view-lossage :wk "Display recent keystrokes and the commands run")
-  "h L" '(describe-language-environment :wk "Describe language environment")
-  "h m" '(describe-mode :wk "Describe mode")
-  "h M" '(describe-keymap :wk "Describe keymap")
-  "h o" '(describe-symbol :wk "Apropos")
-  "h p" '(describe-package :wk "Describe package")
-  "h r" '(:ignore t :wk "Reload")
-  "h r r" '((lambda () (interactive) (load-file "~/.config/emacs/init.el")) :wk "Reload emacs config")
-  "h r t" '(custom/load-real-theme :wk "Reload theme")
-  "h t" '(consult-theme :wk "Load theme")
-  "h v" '(describe-variable :wk "Describe variable")
-  "h w" '(where-is :wk "Prints keybinding for command if set")
-  "h x" '(describe-command :wk "Display full documentation for command"))
-
-(custom/leader-keys
-  "o" '(:ignore t :wk "Open")
-  "o d" '(dashboard-open :wk "Dashboard")
-  "o e" '(elfeed :wk "Elfeed RSS")
-  "o f" '(make-frame :wk "Open buffer in new frame")
-  "o F" '(select-frame-by-name :wk "Select frame by name"))
-
-(custom/leader-keys
-  "s" '(:ignore t :wk "Search")
-  "s d" '(dictionary-search :wk "Search dictionary")
-  "s m" '(man :wk "Man pages")
-  "s t" '(tldr :wk "Lookup TLDR docs for a command")
-  "s w" '(woman :wk "Man that doesn't require man"))
-
-(custom/leader-keys
-  "t" '(:ignore t :wk "Toggle")
-  "t d" '(toggle-debug-on-error :wk "Debug on error")
-  "t e" '(eshell-toggle :wk "Eshell")
-  "t f" '(flycheck-mode :wk "Flycheck")
-  "t i" '(imenu-list-smart-toggle :wk "Imenu list")
-  "t l" '(display-line-numbers-mode :wk "Line numbers")
-  "t n" '(neotree-toggle :wk "Neotree")
-  "t r" '(rainbow-mode :wk "Rainbow mode")
-  "t t" '(visual-line-mode :wk "Word Wrap")
-  "t v" '(vterm :wk "Vterm")
-  "t z" '(writeroom-mode :wk "Zen mode"))
-
-(custom/leader-keys
-  "W" '(custom/hydra-window/body :wk "Windows hydra")
-  ;; Window splits
-  "w" '(:ingore t :wk "Windows")
-  "w c" '(evil-window-delete :wk "Close window")
-  "w n" '(evil-window-new :wk "New window")
-  "w q" '(:ingore t :wk "Close on side")
-  "w q h" '(custom/evil-close-left-window :wk "Left")
-  "w q j" '(custom/evil-close-down-window :wk "Down")
-  "w q k" '(custom/evil-close-up-window :wk "Up")
-  "w q l" '(custom/evil-close-right-window :wk "Right")
-  "w s" '(evil-window-split :wk "Horizontal split window")
-  "w v" '(evil-window-vsplit :wk "Vertical split window")
-  ;; Window motions
-  "w h" '(evil-window-left :wk "Window left")
-  "w j" '(evil-window-down :wk "Window down")
-  "w k" '(evil-window-up :wk "Window up")
-  "w l" '(evil-window-right :wk "Window right")
-  "w w" '(evil-window-next :wk "Go to next window")
-  ;; Move Windows
-  "w H" '(buf-move-left :wk "Buffer move left")
-  "w J" '(buf-move-down :wk "Buffer move down")
-  "w K" '(buf-move-up :wk "Buffer move up")
-  "w L" '(buf-move-right :wk "Buffer move right"))
-)
-
-(keymap-global-set "C-=" 'text-scale-increase)
-(keymap-global-set "C-+" 'text-scale-increase)
-(keymap-global-set "C--" 'text-scale-decrease)
-(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
-
-(use-package pulse
-  :config
-    (defun custom/pulse-line (&rest _)
-      "Pulse the current line."
-      (pulse-momentary-highlight-one-line (point)))
-
-    (dolist (command '(evil-scroll-up
-                       evil-scroll-down
-                       evil-window-right
-                       evil-window-left
-                       evil-window-up
-                       evil-window-down
-                       scroll-up-command
-                       scroll-down-command
-                       tab-select
-                       tab-next))
-      (advice-add command :after #'custom/pulse-line))
-)
-
-(use-package abbrev
-  :ensure nil
-  :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
-  :config
-    (define-abbrev global-abbrev-table "btw" "by the way")
-    (define-abbrev global-abbrev-table "idk" "I don't know")
-)
+(use-package project
+  :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory)))
 
 (set-face-attribute 'default nil
   :font "JetBrainsMono NFM"
@@ -500,9 +370,13 @@ Most of the stuff will get redirected here.")
   :config
     (all-the-icons-completion-mode))
 
+;; (use-package doom-modeline
+;;   :demand
+;;   :init (doom-modeline-mode 1)
+;;   :custom (doom-modeline-battery t))
+
 (use-package doom-modeline
-  :demand
-  :init (doom-modeline-mode 1)
+  :hook (after-init . doom-modeline-mode)
   :custom (doom-modeline-battery t))
 
 (use-package rainbow-delimiters
@@ -510,7 +384,11 @@ Most of the stuff will get redirected here.")
 
 (use-package rainbow-mode
   :diminish
-  :hook org-mode prog-mode)
+  :hook org-mode prog-mode conf-mode
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "t r" '(rainbow-mode :wk "Rainbow mode"))
+)
 
 (use-package doom-themes
   ;; :demand
@@ -572,7 +450,10 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
   ;; (corfu-scroll-margin 5)        ;; Use scroll margin
 
   ;; Enable Corfu only for certain modes.
-   :hook ((prog-mode . corfu-mode)))
+   :hook ((prog-mode . corfu-mode))
+   :bind (:map corfu-map
+               ("C-j" . corfu-next)
+               ("C-k" . corfu-previous)))
           ;; (shell-mode . corfu-mode)
           ;; (eshell-mode . corfu-mode))
 
@@ -644,31 +525,34 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package dired
   :ensure nil
-  :init (evil-collection-dired-setup)
+  ;; :init (evil-collection-dired-setup)
+  :hook (dired-mode . dired-hide-details-mode)
   :custom
     (insert-directory-program "ls")
     (dired-listing-switches "-Hl --almost-all --group-directories-first")
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
+    (dired-auto-revert-buffer t)
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
       "Spawns `dired' in user's home directory."
       (dired "~/"))
-    (evil-collection-define-key 'normal 'dired-mode-map
-      [remap evil-yank] 'dired-ranger-copy
-      "gh" 'custom/dired-go-to-home
-      "p"  'dired-ranger-paste
-      "h"  'dired-up-directory
-      "l"  'dired-find-file)
-  :general
-    (custom/leader-keys
-      "d" '(:ignore t :wk "Dired")
-      "d d" '(dired :wk "Open dired")
-      "d h" '(custom/dired-go-to-home :wk "Open home directory")
-      "d j" '(dired-jump :wk "Dired jump to current")
-      "d n" '(neotree-dir :wk "Open directory in neotree")
-      "d /" '((lambda () (interactive) (dired "/")) :wk "Open /")))
+    ;; (evil-collection-define-key 'normal 'dired-mode-map
+    ;;   [remap evil-yank] 'dired-ranger-copy
+    ;;   "gh" 'custom/dired-go-to-home
+    ;;   "p"  'dired-ranger-paste
+    ;;   "h"  'dired-up-directory
+    ;;   "l"  'dired-find-file)
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "d" '(:ignore t :wk "Dired")
+  ;;     "d d" '(dired :wk "Open dired")
+  ;;     "d h" '(custom/dired-go-to-home :wk "Open home directory")
+  ;;     "d j" '(dired-jump :wk "Dired jump to current")
+  ;;     "d n" '(neotree-dir :wk "Open directory in neotree")
+  ;;     "d /" '((lambda () (interactive) (dired "/")) :wk "Open /"))
+)
 
 ;; (use-package dired-open
 ;;   :after dired
@@ -703,9 +587,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (dirvish-attributes '(collapse git-msg file-time file-size))
     (dirvish-default-layout '(1 0.15 0.5))
   :config
-    (evil-collection-define-key 'normal 'dirvish-mode-map
-      "p" 'dirvish-yank-menu
-      "q" 'dirvish-quit)
+    ;; (evil-collection-define-key 'normal 'dirvish-mode-map
+    ;;   "p" 'dirvish-yank-menu
+    ;;   "q" 'dirvish-quit)
     ;; (dirvish-define-preview eza (file)
     ;;   "Use `eza' to generate directory preview."
     ;;   :require ("eza") ; tell Dirvish to check if we have the executable
@@ -760,10 +644,19 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package git-timemachine
   :hook (evil-normalize-keymaps . git-timemachine-mode)
-  :config
-    (evil-define-key 'normal git-timemachine-mode-map
-      (kbd "C-j") 'git-timemachine-show-previous-revision
-      (kbd "C-k") 'git-timemachine-show-next-revision))
+  ;; :config
+  ;;   (evil-define-key 'normal git-timemachine-mode-map
+  ;;     (kbd "C-j") 'git-timemachine-show-previous-revision
+  ;;     (kbd "C-k") 'git-timemachine-show-next-revision)
+)
+
+(use-package tetris
+  :ensure nil
+  ;; :config
+  ;;   (evil-set-initial-state 'tetris-mode 'emacs)
+  ;;   (add-hook 'tetris-mode-hook (lambda () (with-current-buffer "*Tetris*" (evil-local-set-key 'emacs "z" 'tetris-rotate-prev)
+  ;;                                                                               (evil-local-set-key 'emacs "x" 'tetris-rotate-next))))
+)
 
 (use-package org
   :ensure nil
@@ -774,6 +667,8 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
     ([remap org-return] . custom/org-good-return)
+    ("C-c a" . org-agenda)
+    ("C-c c" . org-capture)
   :custom-face
     ;; setting size of headers
     (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -845,12 +740,13 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (org-refile-use-outline-path nil)
     (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
     (org-hide-emphasis-markers t)
-    (org-hide-leading-stars t)
+    ;; (org-hide-leading-stars t)
     (org-html-validation-link nil)
     (org-pretty-entities t)
     (org-image-actual-width '(300 600))
     (org-startup-with-inline-images t)
     (org-startup-indented t) ;; use org-indent-mode at startup
+    (org-indent-mode-turns-on-hiding-stars nil)
     ;; (org-cycle-inline-images-display t)
     (org-cycle-separator-lines 0)
     (org-display-remote-inline-images 'download)
@@ -893,28 +789,70 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (plist-put org-format-latex-options :background nil)
 
     ;; evil keybindings
-    (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys)
-    (with-eval-after-load 'evil-maps
-      (define-key evil-motion-state-map (kbd "SPC") nil)
-      (define-key evil-motion-state-map (kbd "RET") nil)
-      (define-key evil-motion-state-map (kbd "TAB") nil)
-      (evil-define-key 'normal org-mode-map
-        "gj" 'evil-next-visual-line
-        "gk" 'evil-previous-visual-line
-        (kbd "C-j") 'org-next-visible-heading
-        (kbd "C-k") 'org-previous-visible-heading
-        (kbd "C-S-J") 'org-forward-heading-same-level
-        (kbd "C-S-K") 'org-backward-heading-same-level
-        (kbd "M-h") 'org-metaleft
-        (kbd "M-j") 'org-metadown
-        (kbd "M-k") 'org-metaup
-        (kbd "M-l") 'org-metaright
-        (kbd "M-H") 'org-shiftmetaleft
-        (kbd "M-J") 'org-shiftmetadown
-        (kbd "M-K") 'org-shiftmetaup
-        (kbd "M-L") 'org-shiftmetaright
-        (kbd "M-<return>") 'org-meta-return))
+    ;; (require 'evil-org-agenda)
+    ;; (evil-org-agenda-set-keys)
+    ;; (with-eval-after-load 'evil-maps
+    ;;   (define-key evil-motion-state-map (kbd "SPC") nil)
+    ;;   (define-key evil-motion-state-map (kbd "RET") nil)
+    ;;   (define-key evil-motion-state-map (kbd "TAB") nil)
+    ;;   (evil-define-key 'normal org-mode-map
+    ;;     "gj" 'evil-next-visual-line
+    ;;     "gk" 'evil-previous-visual-line
+    ;;     (kbd "C-j") 'org-next-visible-heading
+    ;;     (kbd "C-k") 'org-previous-visible-heading
+    ;;     (kbd "C-S-J") 'org-forward-heading-same-level
+    ;;     (kbd "C-S-K") 'org-backward-heading-same-level
+    ;;     (kbd "M-h") 'org-metaleft
+    ;;     (kbd "M-j") 'org-metadown
+    ;;     (kbd "M-k") 'org-metaup
+    ;;     (kbd "M-l") 'org-metaright
+    ;;     (kbd "M-H") 'org-shiftmetaleft
+    ;;     (kbd "M-J") 'org-shiftmetadown
+    ;;     (kbd "M-K") 'org-shiftmetaup
+    ;;     (kbd "M-L") 'org-shiftmetaright
+    ;;     (kbd "M-<return>") 'org-meta-return))
+
+    ;; meow custom state (taken from https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
+    (setq meow-org-motion-keymap (make-keymap))
+    (meow-define-state org-motion
+      "Org-mode structural motion"
+      :lighter "[O]"
+      :keymap meow-org-motion-keymap)
+
+    (meow-define-keys 'org-motion
+      '("<escape>" . meow-normal-mode)
+      '("i" . meow-insert-mode)
+      '("g" . meow-normal-mode)
+      '("u" .  meow-undo)
+      ;; Moving between headlines
+      '("k" .  org-previous-visible-heading)
+      '("j" .  org-next-visible-heading)
+      ;; Moving between headings at the same level
+      '("p" .  org-backward-heading-same-level)
+      '("n" .  org-forward-heading-same-level)
+      ;; Moving subtrees themselves
+      '("K" .  org-subtree-up)
+      '("J" .  org-subtree-down)
+      ;; Subtree de/promotion
+      '("L" .  org-demote-subtree)
+      '("H" .  org-promote-subtree)
+      ;; Completion-style search of headings
+      '("v" .  consult-org-heading)
+      ;; Setting subtree metadata
+      '("l" .  org-set-property)
+      '("t" .  org-todo)
+      '("d" .  org-deadline)
+      '("s" .  org-schedule)
+      '("e" .  org-set-effort)
+      ;; Block navigation
+      '("b" .  org-previous-block)
+      '("f" .  org-next-block)
+      ;; Narrowing/widening
+      '("N" .  org-narrow-to-subtree)
+      '("W" .  widen))
+
+    (meow-define-keys 'normal
+      '("O" . meow-org-motion-mode))
 
     ;; In tables pressing RET doesn't follow links.
     ;; I fix that
@@ -931,89 +869,77 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
             (lambda (&rest _)
               (when (called-interactively-p 'any)
                 (save-some-buffers (list org-agenda-files)))))
-  :general
-    (custom/leader-keys
-      "m" '(:ignore t :wk "Org")
-      "m a" '(org-agenda :wk "Org agenda")
-      "m b" '(:ignore t :wk "Tables")
-      "m b -" '(org-table-insert-hline :wk "Insert hline in table")
-      "m b a" '(org-table-align :wk "Align table")
-      "m b b" '(org-table-blank-field :wk "Make blank field")
-      "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
-      "m b e" '(org-table-edit-field :wk "Edit field")
-      "m b f" '(org-table-edit-formulas :wk "Edit formulas")
-      "m b h" '(org-table-field-info :wk "Field info")
-      "m b s" '(org-table-sort-lines :wk "Sort lines")
-      "m b r" '(org-table-recalculate :wk "Recalculate")
-      "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
-      "m b d" '(:ignore t :wk "delete")
-      "m b d c" '(org-table-delete-column :wk "Delete column")
-      "m b d r" '(org-table-kill-row :wk "Delete row")
-      "m b i" '(:ignore t :wk "insert")
-      "m b i c" '(org-table-insert-column :wk "Insert column")
-      "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
-      "m b i r" '(org-table-insert-row :wk "Insert row")
-      "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
-      "m c" '(org-capture :wk "Capture")
-      "m d" '(:ignore t :wk "Date/deadline")
-      "m d d" '(org-deadline :wk "Org deadline")
-      "m d s" '(org-schedule :wk "Org schedule")
-      "m d t" '(org-time-stamp :wk "Org time stamp")
-      "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
-      "m e" '(org-export-dispatch :wk "Org export dispatch")
-      "m f" '(:ignore t :wk "Fonts")
-      "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
-      "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
-      "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
-      "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
-      "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
-      "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
-      "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
-      "m i" '(org-toggle-item :wk "Org toggle item")
-      "m I" '(:ignore t :wk "IDs")
-      "m I c" '(org-id-get-create :wk "Create ID")
-      "m l" '(:ignore t :wk "Link")
-      "m l l" '(org-insert-link :wk "Insert link")
-      "m l i" '(org-roam-node-insert :wk "Insert roam link")
-      "m p" '(:ignore t :wk "Priority")
-      "m p d" '(org-priority-down :wk "Down")
-      "m p p" '(org-priority :wk "Set priority")
-      "m p u" '(org-priority-down :wk "Up")
-      "m q" '(org-set-tags-command :wk "Set tag")
-      "m s" '(:ignore t :wk "Tree/Subtree")
-      "m s a" '(org-toggle-archive-tag :wk "Archive tag")
-      "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
-      "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
-      "m s d" '(org-cut-subtree :wk "Cut subtree")
-      "m s h" '(org-promote-subtree :wk "Promote subtree")
-      "m s j" '(org-move-subtree-down :wk "Move subtree down")
-      "m s k" '(org-move-subtree-up :wk "Move subtree up")
-      "m s l" '(org-demote-subtree :wk "Demote subtree")
-      "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
-      "m s r" '(org-refile :wk "Refile")
-      "m s s" '(org-sparse-tree :wk "Sparse tree")
-      "m s A" '(org-archive-subtree :wk "Archive subtree")
-      "m s N" '(widen :wk "Widen")
-      "m s S" '(org-sort :wk "Sort")
-      "m t" '(org-todo :wk "Org todo")
-      "m B" '(org-babel-tangle :wk "Org babel tangle")
-      "m T" '(org-todo-list :wk "Org todo list"))
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "m" '(:ignore t :wk "Org")
+  ;;     "m a" '(org-agenda :wk "Org agenda")
+  ;;     "m b" '(:ignore t :wk "Tables")
+  ;;     "m b -" '(org-table-insert-hline :wk "Insert hline in table")
+  ;;     "m b a" '(org-table-align :wk "Align table")
+  ;;     "m b b" '(org-table-blank-field :wk "Make blank field")
+  ;;     "m b c" '(org-table-create-or-convert-from-region :wk "Create/Convert from region")
+  ;;     "m b e" '(org-table-edit-field :wk "Edit field")
+  ;;     "m b f" '(org-table-edit-formulas :wk "Edit formulas")
+  ;;     "m b h" '(org-table-field-info :wk "Field info")
+  ;;     "m b s" '(org-table-sort-lines :wk "Sort lines")
+  ;;     "m b r" '(org-table-recalculate :wk "Recalculate")
+  ;;     "m b R" '(org-table-recalculate-buffer-tables :wk "Recalculate buffer tables")
+  ;;     "m b d" '(:ignore t :wk "delete")
+  ;;     "m b d c" '(org-table-delete-column :wk "Delete column")
+  ;;     "m b d r" '(org-table-kill-row :wk "Delete row")
+  ;;     "m b i" '(:ignore t :wk "insert")
+  ;;     "m b i c" '(org-table-insert-column :wk "Insert column")
+  ;;     "m b i h" '(org-table-insert-hline :wk "Insert horizontal line")
+  ;;     "m b i r" '(org-table-insert-row :wk "Insert row")
+  ;;     "m b i H" '(org-table-hline-and-move :wk "Insert horizontal line and move")
+  ;;     "m c" '(org-capture :wk "Capture")
+  ;;     "m d" '(:ignore t :wk "Date/deadline")
+  ;;     "m d d" '(org-deadline :wk "Org deadline")
+  ;;     "m d s" '(org-schedule :wk "Org schedule")
+  ;;     "m d t" '(org-time-stamp :wk "Org time stamp")
+  ;;     "m d T" '(org-time-stamp-inactive :wk "Org time stamp inactive")
+  ;;     "m e" '(org-export-dispatch :wk "Org export dispatch")
+  ;;     "m f" '(:ignore t :wk "Fonts")
+  ;;     "m f b" '((lambda () (interactive) (org-emphasize ?*)) :wk "Bold in region")
+  ;;     "m f c" '((lambda () (interactive) (org-emphasize ?~)) :wk "Code in region")
+  ;;     "m f C" '((lambda () (interactive) (org-emphasize ?=)) :wk "Verbatim in region")
+  ;;     "m f i" '((lambda () (interactive) (org-emphasize ?/)) :wk "Italic in region")
+  ;;     "m f l" '((lambda () (interactive) (org-emphasize ?$)) :wk "Latex in region")
+  ;;     "m f u" '((lambda () (interactive) (org-emphasize ?_)) :wk "Underline in region")
+  ;;     "m f -" '((lambda () (interactive) (org-emphasize ?+)) :wk "Strike through in region")
+  ;;     "m i" '(org-toggle-item :wk "Org toggle item")
+  ;;     "m I" '(:ignore t :wk "IDs")
+  ;;     "m I c" '(org-id-get-create :wk "Create ID")
+  ;;     "m l" '(:ignore t :wk "Link")
+  ;;     "m l l" '(org-insert-link :wk "Insert link")
+  ;;     "m l i" '(org-roam-node-insert :wk "Insert roam link")
+  ;;     "m p" '(:ignore t :wk "Priority")
+  ;;     "m p d" '(org-priority-down :wk "Down")
+  ;;     "m p p" '(org-priority :wk "Set priority")
+  ;;     "m p u" '(org-priority-down :wk "Up")
+  ;;     "m q" '(org-set-tags-command :wk "Set tag")
+  ;;     "m s" '(:ignore t :wk "Tree/Subtree")
+  ;;     "m s a" '(org-toggle-archive-tag :wk "Archive tag")
+  ;;     "m s b" '(org-tree-to-indirect-buffer :wk "Tree to indirect buffer")
+  ;;     "m s c" '(org-clone-subtree-with-time-shift :wk "Clone subtree with time shift")
+  ;;     "m s d" '(org-cut-subtree :wk "Cut subtree")
+  ;;     "m s h" '(org-promote-subtree :wk "Promote subtree")
+  ;;     "m s j" '(org-move-subtree-down :wk "Move subtree down")
+  ;;     "m s k" '(org-move-subtree-up :wk "Move subtree up")
+  ;;     "m s l" '(org-demote-subtree :wk "Demote subtree")
+  ;;     "m s n" '(org-narrow-to-subtree :wk "Narrow to subtree")
+  ;;     "m s r" '(org-refile :wk "Refile")
+  ;;     "m s s" '(org-sparse-tree :wk "Sparse tree")
+  ;;     "m s A" '(org-archive-subtree :wk "Archive subtree")
+  ;;     "m s N" '(widen :wk "Widen")
+  ;;     "m s S" '(org-sort :wk "Sort")
+  ;;     "m t" '(org-todo :wk "Org todo")
+  ;;     "m B" '(org-babel-tangle :wk "Org babel tangle")
+  ;;     "m T" '(org-todo-list :wk "Org todo list"))
 )
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
-
-(use-package evil-org
-  :after org
-  ;; :hook (org-mode . (lambda () (evil-org-mode)))
-)
-
-;; The following prevents <> from auto-pairing when electric-pair-mode is on.
-;; Otherwise, org-tempo is broken when you try to <s TAB...
-;; (add-hook 'org-mode-hook (lambda ()
-;;            (setq-local electric-pair-inhibit-predicate
-;;                    `(lambda (c)
-;;                   (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
 (with-eval-after-load 'org
   (require 'org-tempo)
@@ -1029,15 +955,25 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (org-appear-trigger 'manual)
     (org-appear-autolinks t)
   :config
+  ;;   (add-hook 'org-appear-mode-hook (lambda ()
+  ;;     (add-hook 'evil-insert-state-entry-hook
+  ;;       #'org-appear-manual-start
+  ;;       nil
+  ;;       t)
+  ;;     (add-hook 'evil-insert-state-exit-hook
+  ;;       #'org-appear-manual-stop
+  ;;         nil
+  ;;        t)))
     (add-hook 'org-appear-mode-hook (lambda ()
-      (add-hook 'evil-insert-state-entry-hook
+      (add-hook 'meow-insert-enter-hook
         #'org-appear-manual-start
         nil
         t)
-      (add-hook 'evil-insert-state-exit-hook
+      (add-hook 'meow-insert-exit-hook
         #'org-appear-manual-stop
           nil
-          t))))
+          t)))
+)
 
 (use-package org-auto-tangle
   :after org
@@ -1063,7 +999,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
          :unnarrowed t)
         ("g" "video game" plain "%?"
          :target (file+head "games/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating      | Ownership | Achievements |\n* Notes")
+                            "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
          :unnarrowed t)
         ("b" "book" plain "%?"
@@ -1078,35 +1014,52 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (org-roam-dailies-capture-templates
      '(("d" "default" entry "* %?" :target
         (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+
+   :bind (
+      ("C-c n a a" . org-roam-alias-add)
+      ("C-c n a r" . org-roam-alias-remove)
+      ("C-c n d c" . org-roam-dailies-capture-today)
+      ("C-c n d t" . org-roam-dailies-goto-today)
+      ("C-c n d j" . org-roam-dailies-goto-next-note)
+      ("C-c n d k" . org-roam-dailies-goto-previous-note)
+      ("C-c n D"   . custom/org-roam-notes-dired)
+      ("C-c n f"   . org-roam-node-find)
+      ("C-c n i"   . org-roam-node-insert)
+      ("C-c n l"   . org-roam-buffer-toggle)
+      ("C-c n r"   . org-roam-ref-add)
+      ("C-c n R"   . org-roam-ref-remove)
+      ("C-c n t"   . org-roam-tag-add)
+      ("C-c n T"   . org-roam-tag-remove)
+      )
   :config
     (org-roam-setup)
-    (evil-collection-org-roam-setup)
+    ;; (evil-collection-org-roam-setup)
     (require 'org-roam-export)
     ;; if the file is dailie then increase buffer's size automatically
     (require 'org-roam-dailies)
     ;; (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
     ;; (add-hook 'find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3))))
-  :general
-    (custom/leader-keys
-      "n" '(:ignore t :wk "Notes")
-      "n a" '(:ignore t :wk "Alias")
-      "n a a" '(org-roam-alias-add :wk "Add alias")
-      "n a r" '(org-roam-alias-remove :wk "Remove alias")
-      "n d" '(:ignore t :wk "Roam dailies")
-      "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
-      "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
-      "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
-      "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
-      "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
-      "n f" '(org-roam-node-find :wk "Find note")
-      "n i" '(org-roam-node-insert :wk "Insert note")
-      "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
-      "n r" '(:ignore t :wk "References")
-      "n r" '(org-roam-ref-add :wk "Add reference")
-      "n R" '(org-roam-ref-remove :wk "Remove reference")
-      "n t" '(org-roam-tag-add :wk "Add tag")
-      "n T" '(org-roam-tag-remove :wk "Remove tag")
-    )
+  ;; :general
+  ;;   (custom/leader-keys
+  ;;     "n" '(:ignore t :wk "Notes")
+  ;;     "n a" '(:ignore t :wk "Alias")
+  ;;     "n a a" '(org-roam-alias-add :wk "Add alias")
+  ;;     "n a r" '(org-roam-alias-remove :wk "Remove alias")
+  ;;     "n d" '(:ignore t :wk "Roam dailies")
+  ;;     "n d c" '(org-roam-dailies-capture-today :wk "Cature today")
+  ;;     "n d t" '(org-roam-dailies-goto-today :wk "Go to today")
+  ;;     "n d j" '(org-roam-dailies-goto-next-note :wk "Next note")
+  ;;     "n d k" '(org-roam-dailies-goto-previous-note :wk "Previous note")
+  ;;     "n D" '(custom/org-roam-notes-dired :wk "Open notes in Dired")
+  ;;     "n f" '(org-roam-node-find :wk "Find note")
+  ;;     "n i" '(org-roam-node-insert :wk "Insert note")
+  ;;     "n l" '(org-roam-buffer-toggle :wk "Toggle note buffer")
+  ;;     "n r" '(:ignore t :wk "References")
+  ;;     "n r" '(org-roam-ref-add :wk "Add reference")
+  ;;     "n R" '(org-roam-ref-remove :wk "Remove reference")
+  ;;     "n t" '(org-roam-tag-add :wk "Add tag")
+  ;;     "n T" '(org-roam-tag-remove :wk "Remove tag")
+  ;;   )
 )
 
 (use-package org-roam-ui
@@ -1141,8 +1094,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package toc-org
   :after org
-  :commands toc-org-enable
-  :init (add-hook 'org-mode-hook 'toc-org-enable))
+  :hook (org-mode . #'toc-org-enable))
+  ;; :commands toc-org-enable
+  ;; :init (add-hook 'org-mode-hook 'toc-org-enable))
 
 (defun custom/org-notes-dired ()
   "Opens org-directory in Dired."
@@ -1162,41 +1116,15 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode` to these hooks
   :config (require 'smartparens-config)) ;; load default config
-(use-package evil-smartparens :after smartparens)
-
-(use-package project
-  :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory))
-  :general
-    (custom/leader-keys
-      "SPC" '(project-find-file :wk "Find file in project")
-      "p" '(:ignore t :wk "Project")
-      "p !" '(project-shell-command :wk nil)
-      "p &" '(project-async-shell-command :wk nil)
-      "p f" '(project-find-file :wk nil)
-      "p F" '(project-or-external-find-file :wk nil)
-      "p b" '(project-switch-to-buffer :wk nil)
-      "p s" '(project-shell :wk nil)
-      "p d" '(project-find-dir :wk nil)
-      "p D" '(project-dired :wk nil)
-      "p v" '(project-vc-dir :wk nil)
-      "p c" '(project-compile :wk nil)
-      "p e" '(project-eshell :wk nil)
-      "p k" '(project-kill-buffers :wk nil)
-      "p p" '(project-switch-project :wk nil)
-      "p g" '(project-find-regexp :wk nil)
-      "p G" '(project-or-external-find-regexp :wk nil)
-      "p r" '(project-query-replace-regexp :wk nil)
-      "p x" '(project-execute-extended-command :wk nil)
-      "p C-b" '(project-list-buffers :wk nil)
-    )
-)
+;; (use-package evil-smartparens :after smartparens)
 
 (unless (custom/termux-p)
 
 (use-package compile
   :custom
-    (compilation-scroll-output t)
+    (compilation-scroll-output 'first-error)
     (compilation-ask-about-save nil)
+    (compilation-always-kill nil)
   :config
     (defadvice compile (before ad-compile-smart activate)
       "Advises `compile' so it sets the argument COMINT to t."
@@ -1211,45 +1139,24 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ;;   "Advises `recompile' so it moves to the compilation buffer."
     ;;   (switch-to-buffer-other-window "*compilation*"))
 
-    (evil-set-initial-state 'compilation-mode 'normal)
-    (evil-set-initial-state 'comint-mode 'normal)
+    ;; (evil-set-initial-state 'compilation-mode 'normal)
+    ;; (evil-set-initial-state 'comint-mode 'normal)
 
-    (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
-  :general
-    (custom/leader-keys
-      "c" '(:ignore t :wk "Compiling")
-      "c c" '(compile :wk "Compile")
-      "c r" '(recompile :wk "Recompile"))
+    ;; (evil-define-key 'normal comint-mode-map (kbd "q") 'quit-window)
 )
 
-(defadvice async-shell-command (after shell-command activate)
-  "Advises `async-shell-command' to:
-;; 1. Move to it's buffer after activation,
-2. Set its' evil state to normal
-3. Bind 'q' to `quit-window'"
-  ;; (switch-to-buffer-other-window "*Async Shell Command*")
-  (evil-change-state 'normal)
-  (evil-local-set-key 'normal (kbd "q") 'quit-window))
+;; (defadvice async-shell-command (after shell-command activate)
+;;   "Advises `async-shell-command' to:
+;; ;; 1. Move to it's buffer after activation,
+;; 2. Set its' evil state to normal
+;; 3. Bind 'q' to `quit-window'"
+;;   ;; (switch-to-buffer-other-window "*Async Shell Command*")
+;;   (evil-change-state 'normal)
+;;   (evil-local-set-key 'normal (kbd "q") 'quit-window))
 
 (use-package flycheck
   :after prog-mode
   :hook (prog-mode . flycheck-mode))
-
-(use-package eglot
-  :ensure nil
-  :after prog-mode
-  :custom (eglot-autoshutdown t))
-
-(use-package flycheck-eglot
-  :after eglot
-  :hook (eglot-managed-mode . flycheck-eglot-mode))
-
-(dolist (mode '(css-ts-mode-hook
-                python-ts-mode-hook
-                bash-ts-mode-hook
-                c++-ts-mode-hook
-                mhtml-mode-hook))
-  (add-hook mode 'eglot-ensure))
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1336,6 +1243,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 )
 
 (use-package eshell
+  :hook
+    (eshell-mode . (lambda () (setq mode-line-format nil)))
+    (eshell-mode . (lambda () (keymap-local-set "C-d" 'eshell-life-is-too-much)))
   :custom
     (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
     (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell
@@ -1347,9 +1257,15 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
+  ;; :bind (:map eshell-mode-map
+  ;;             ("C-d" . 'eshell-life-is-too-much))
   :config
-    (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
-    (defalias 'eshell/clear #'eshell/clear-scrollback))
+    ;; (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
+    ;; (define-key eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
+
+    (defalias 'eshell/clear #'eshell/clear-scrollback)
+
+    (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
   :after eshell
@@ -1361,16 +1277,13 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package vterm
   :unless (custom/termux-p)
+  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   :custom
     (shell-file-name "/bin/fish")
-    (vterm-max-scrollback 5000))
-
-(use-package sudo-edit
-  :general
-    (custom/leader-keys
-      "f u" '(sudo-edit-find-file :wk "Sudo find file")
-      "f U" '(sudo-edit :wk "Sudo edit current file"))
+    (vterm-max-scrollback 5000)
 )
+
+(use-package sudo-edit)
 
 (use-package tab-bar
   :init
@@ -1384,116 +1297,35 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (tab-bar-close-button-show nil)      ;; hide tab close / X button
     (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
     (tab-bar-tab-hints t)                ;; show tab numbers
-  :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
-  :general
-    (custom/leader-keys
-      "=" '(:ignore t :wk "Tabs/Workspaces")
-      "= TAB" '(tab-next :wk "Next tab")
-      "= =" '(tab-bar-mode :wk "Enable/Disable")
-      "= 1" '((lambda () (interactive) (tab-select 1)) :wk "Tab 1")
-      "= 2" '((lambda () (interactive) (tab-select 2)) :wk "Tab 2")
-      "= 3" '((lambda () (interactive) (tab-select 3)) :wk "Tab 3")
-      "= 4" '((lambda () (interactive) (tab-select 4)) :wk "Tab 4")
-      "= 5" '((lambda () (interactive) (tab-select 5)) :wk "Tab 5")
-      "= 6" '((lambda () (interactive) (tab-select 6)) :wk "Tab 6")
-      "= 7" '((lambda () (interactive) (tab-select 7)) :wk "Tab 7")
-      "= 8" '((lambda () (interactive) (tab-select 8)) :wk "Tab 8")
-      "= 9" '((lambda () (interactive) (tab-select 9)) :wk "Tab 9")
-      "= 0" '((lambda () (interactive) (tab-select 0)) :wk "Tab 0")
-      "= t" '(tab-new :wk "New")
-      "= d" '(tab-bar-close-tab :wk "Close")
-      "= r" '(tab-rename :wk "Rename"))
+  ;; :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
+  :config
+    (meow-leader-define-key
+      '("= TAB" . tab-next)
+      '("= ="   . tab-bar-mode)
+      '("= 1"   . (lambda () (interactive) (tab-select 1)))
+      '("= 2"   . (lambda () (interactive) (tab-select 2)))
+      '("= 3"   . (lambda () (interactive) (tab-select 3)))
+      '("= 4"   . (lambda () (interactive) (tab-select 4)))
+      '("= 5"   . (lambda () (interactive) (tab-select 5)))
+      '("= 6"   . (lambda () (interactive) (tab-select 6)))
+      '("= 7"   . (lambda () (interactive) (tab-select 7)))
+      '("= 8"   . (lambda () (interactive) (tab-select 8)))
+      '("= 9"   . (lambda () (interactive) (tab-select 9)))
+      '("= 0"   . (lambda () (interactive) (tab-select 0)))
+      '("= t"   . tab-new)
+      '("= d"   . tab-bar-close-tab)
+      '("= r"   . tab-rename))
 )
 
 (use-package reverso)
 
 (use-package buffer-move)
 
-(defun custom/evil-close-down-window ()
-  "Goes down the window and closes it"
-  (interactive)
-  (evil-window-down 1)
-  (evil-window-delete))
-
-(defun custom/evil-close-up-window ()
-  "Goes up the window and closes it"
-  (interactive)
-  (evil-window-up 1)
-  (evil-window-delete))
-
-(defun custom/evil-close-left-window ()
-  "Goes left the window and closes it"
-  (interactive)
-  (evil-window-left 1)
-  (evil-window-delete))
-
-(defun custom/evil-close-right-window ()
-  "Goes right the window and closes it"
-  (interactive)
-  (evil-window-right 1)
-  (evil-window-delete))
-
-(use-package windresize)
-(use-package hydra)
-;; All-in-one window managment. Makes use of some custom functions,
-;; `ace-window' (for swapping), `windmove' (could probably be replaced
-;; by evil?) and `windresize'.
-;; inspired by https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/init.org#hydra
-
-(defhydra custom/hydra-window (:hint nil)
-   "
-Movement      ^Split^            ^Switch^        ^Resize^
-----------------------------------------------------------------
-_h_          _/_ vertical      _b_uffer        _<left>_  
-_l_          _-_ horizontal    _s_wap          _<down>_  
-_k_          _m_aximize        _[_backward     _<up>_    
-_j_          _c_lose           _]_forward      _<right>_ 
-_q_uit        _e_qualize        _K_ill          ^
-^             ^                 ^               ^
-^             ^                 ^
-"
-   ;; Movement
-   ("h" windmove-left)
-   ("j" windmove-down)
-   ("k" windmove-up)
-   ("l" windmove-right)
-
-   ;; Split/manage
-   ("-" evil-window-split)
-   ("/" evil-window-vsplit)
-   ("c" evil-window-delete)
-   ("d" evil-window-delete)
-   ("m" delete-other-windows)
-   ("e" balance-windows)
-
-   ;; Window switching
-   ("H" buf-move-left)
-   ("J" buf-move-down)
-   ("K" buf-move-up)
-   ("L" buf-move-right)
-
-   ;; Switch
-   ("b" switch-to-buffer)
-   ;; ("f" counsel-switch-buffersel-find-file)
-   ("P" project-find-file)
-   ("s" ace-swap-window)
-   ("[" previous-buffer)
-   ("]" next-buffer)
-   ("K" kill-this-buffer)
-
-   ;; Resize
-   ("<left>" windresize-left)
-   ("<right>" windresize-right)
-   ("<down>" windresize-down)
-   ("<up>" windresize-up)
-
-   ("q" nil))
-
 (use-package writeroom-mode
   :unless (custom/termux-p))
 
 (defun custom/switch-to-buffer-other-window-for-alist (window)
-  "Kind of `switch-to-buffer-other-window' but can be used in `display-buffer-alist' with body-function parameter"
+  "Kind of `switch-to-buffer-other-window' but can be used in `display-buffer-alist' with body-function parameter."
   (select-window window))
 
 (setq display-buffer-alist
@@ -1517,6 +1349,10 @@ _q_uit        _e_qualize        _K_ill          ^
         ("\\*Org Links\\*"
          (display-buffer-at-bottom)
          (window-height . 1)
+         (window-parameters . ((mode-line-format . none))))
+        ("\\*Org todo\\*"
+         (display-buffer-at-bottom)
+         ;; (window-height . 1)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Agenda Commands\\*"
          (display-buffer-at-bottom)
@@ -1556,4 +1392,4 @@ _q_uit        _e_qualize        _K_ill          ^
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
         )
 
-      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect display-buffer-alist
+      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect `display-buffer-alist'
