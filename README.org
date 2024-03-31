@@ -4,8 +4,6 @@
 * WARNING:
 This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP nixos config. Dependencies might not be available for other distros.
 * PYWAL with hyprland
-I decided to throw away dracula for [[https://github.com/dylanaraps/pywal][pywal]] because I love material you on android
-
 [[file:screenshots/pywal-hypr/2023-09-25_17-57-57.png]]
 
 [[file:screenshots/pywal-hypr/2023-09-25_17-58-30.png]]
@@ -54,39 +52,3 @@ Another way to manage this conveniently is to install [[https://www.gnu.org/soft
 2. Backup your =~/.config= and delete everything inside if necessary.
 3. Inside repo directory do =stow .=
 This will link all files automatically to its corrensponding places
-* UNMAINTAINED :ARCHIVE:
-** (UNMAINTAINED) [[https://github.com/baskerville/bspwm][bspwm]]
-- Dracula [[file:screenshots/bspwm/dracula.png]]
-
-- Catppuccin Latte [[file:screenshots/bspwm/catppuccin-latte.png]]
-
-- Catppuccin Mocha [[file:screenshots/bspwm/catppuccin-mocha.png]]
-
-| Type of program           | my default choice |
-|---------------------------+-------------------|
-| Terminal Emulator         | [[https://github.com/alacritty/alacritty][alacritty]]         |
-| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | pcmanfm           |
-| Web Browser               | firefox           |
-| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
-| Bar                       | [[https://github.com/polybar/polybar][polybar]]           |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
-| Compositor                | [[https://github.com/yshui/picom][picom]]             |
-
-** (UNMAINTAINED) [[https://github.com//hyprwm/hyprland][Hyprland]]
-- Dracula [[file:screenshots/hypr/dracula.png]]
-
-- Catppuccin Latte [[file:screenshots/hypr/catppuccin-latte.png]]
-
-- Catppuccin Mocha [[file:screenshots/hypr/catppuccin-mocha.png]]
-
-| Type of program           | my default choice |
-|---------------------------+-------------------|
-| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
-| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | pcmanfm           |
-| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
-| editor (IDE or something) | ([[https://github.com/doomemacs/doomemacs][doom]]) [[https://www.gnu.org/software/emacs/][Emacs]]      |
-| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
-| Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]          |
