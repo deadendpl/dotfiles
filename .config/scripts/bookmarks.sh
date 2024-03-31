@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-file="$HOME/Documents/bookmarks"
+file="$HOME/Sync/foo/wazne/bookmarks"
 
 if [[ -f $file ]]; then
   sort $file -o $file

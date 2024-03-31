@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-clipboard_cmd="cb paste 0"
-
-bookmark="$($clipboard_cmd)"
-pkill cb
-file="$HOME/Documents/bookmarks"
+bookmark="$(wl-paste)"
+file="$HOME/Sync/foo/wazne/bookmarks"
 
 if grep -q "^$bookmark$" "$file"; then
     notify-send "Oopsie." "Already bookmarked!"

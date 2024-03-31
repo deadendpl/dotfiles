@@ -148,7 +148,7 @@ c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"
 
 config.bind('<ctrl+j>', 'completion-item-focus next', 'command')
 config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
-config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 870444FF', mode='insert')
-config.bind('pw', 'spawn --userscript qute-keepassxc --key 870444FF', mode='normal')
+config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 9989A4EC', mode='insert')
+config.bind('pw', 'spawn --userscript qute-keepassxc --key 9989A4EC', mode='normal')
 config.bind('gr', 'config-source', mode='normal')
 config.bind('cn', 'clear-messages', mode='normal')

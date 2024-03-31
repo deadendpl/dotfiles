@@ -55,14 +55,14 @@ else
   ## aliases
 
   # apt
-  alias ainst='sudo apt install'
-  alias apu='sudo apt purge'
-  alias aautopu='sudo apt autopurge'
-  alias aup='sudo apt update && sudo apt upgrade'
-  alias aupd='sudo apt update'
-  alias aupg='sudo apt upgrade'
-  alias ainstalled='apt list --installed'
-  alias asearch='apt search'
+  # alias ainst='sudo apt install'
+  # alias apu='sudo apt purge'
+  # alias aautopu='sudo apt autopurge'
+  # alias aup='sudo apt update && sudo apt upgrade'
+  # alias aupd='sudo apt update'
+  # alias aupg='sudo apt upgrade'
+  # alias ainstalled='apt list --installed'
+  # alias asearch='apt search'
 
   # pacman and yay on Arch
   alias pinst='yay -S'

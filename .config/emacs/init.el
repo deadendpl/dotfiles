@@ -80,6 +80,13 @@ Most of the stuff will get redirected here.")
 
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
+(keymap-global-set "C-c f c" 'custom/find-config-file)
+
+(defun custom/find-config-file ()
+  "Opens config.org file in `user-emacs-directory'."
+  (interactive)
+  (find-file (expand-file-name "config.org" user-emacs-directory))
+)
 
 ;; make utf-8 the coding system
 (set-terminal-coding-system  'utf-8)
@@ -99,6 +106,9 @@ Most of the stuff will get redirected here.")
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'whitespace-cleanup)
+
+;; returning to normal garbage collection
+(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
 
 (use-package use-package
   :custom
@@ -124,14 +134,14 @@ Most of the stuff will get redirected here.")
 ;; (unless (package-installed-p 'use-package)
 ;;   (package-install 'use-package))
 
-(use-package gcmh
-  :demand
-  :diminish
-  :custom
-    (gcmh-mode 1)
-    (gcmh-idle-delay 10)
-    (gcmh-high-cons-threshold (* 32 1024 1024))
-    (gc-cons-percentage 0.8))
+;; (use-package gcmh
+;;   :demand
+;;   :diminish
+;;   :custom
+;;     (gcmh-mode 1)
+;;     (gcmh-idle-delay 10)
+;;     (gcmh-high-cons-threshold (* 32 1024 1024))
+;;     (gc-cons-percentage 0.8))
 
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
@@ -166,8 +176,8 @@ Most of the stuff will get redirected here.")
      '("9" . meow-digit-argument)
      '("0" . meow-digit-argument)
      '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet)
-     '("TAB" . evilnc-comment-or-uncomment-lines))
+     '("?" . meow-cheatsheet))
+     ;; '("TAB" . evilnc-comment-or-uncomment-lines))
      ;; '("f c" . (find-file "~/.config/emacs/config.org"))
 
     (if (custom/termux-p) (meow-leader-define-key '("s" . save-buffer)))
@@ -276,6 +286,7 @@ Most of the stuff will get redirected here.")
 )
 
 (use-package recentf
+  :hook (after-init . recentf-mode)
   :custom
     (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
     (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
@@ -299,6 +310,38 @@ Most of the stuff will get redirected here.")
 
 (use-package project
   :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory)))
+
+(use-package tab-bar
+  :init
+    (tab-bar-mode 1)
+    (advice-add #'tab-new
+                :after
+                (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
+                                    (call-interactively #'tab-rename))))
+  :custom
+    (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
+    (tab-bar-close-button-show nil)      ;; hide tab close / X button
+    (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
+    (tab-bar-tab-hints t)                ;; show tab numbers
+  ;; :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
+  :bind (
+    ("C-c t TAB" . tab-next)
+    ("C-c t T"   . tab-bar-mode)
+    ("C-c t 1"   . (lambda () (interactive) (tab-select 1)))
+    ("C-c t 2"   . (lambda () (interactive) (tab-select 2)))
+    ("C-c t 3"   . (lambda () (interactive) (tab-select 3)))
+    ("C-c t 4"   . (lambda () (interactive) (tab-select 4)))
+    ("C-c t 5"   . (lambda () (interactive) (tab-select 5)))
+    ("C-c t 6"   . (lambda () (interactive) (tab-select 6)))
+    ("C-c t 7"   . (lambda () (interactive) (tab-select 7)))
+    ("C-c t 8"   . (lambda () (interactive) (tab-select 8)))
+    ("C-c t 9"   . (lambda () (interactive) (tab-select 9)))
+    ("C-c t 0"   . (lambda () (interactive) (tab-select 0)))
+    ("C-c t t"   . tab-new)
+    ("C-c t d"   . tab-bar-close-tab)
+    ("C-c t r"   . tab-rename)
+  )
+)
 
 (set-face-attribute 'default nil
   :font "JetBrainsMono NFM"
@@ -327,7 +370,7 @@ Most of the stuff will get redirected here.")
 ;; This sets the default font on all graphical frames created after restarting Emacs.
 ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
 ;; are not right, idk why
-;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
+(add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
 
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
@@ -437,31 +480,27 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
 (use-package corfu
-  ;; Optional customizations
   :custom
-  ;; (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)                 ;; Enable auto completion
-  ;; (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
-
-  ;; Enable Corfu only for certain modes.
-   :hook ((prog-mode . corfu-mode))
+    (corfu-auto t)
+    (corfu-auto-prefix 1)
+    (corfu-popupinfo-delay nil)
+  ;; it doesn't exit when using meow, the fix was taken from https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads
+  :preface
+  ;; (defun custom/corfu-cleanup ()
+  ;;   "Close corfu popup if it is active."
+  ;;   (if corfu-mode (corfu-quit)))
+   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
+          (prog-mode . corfu-mode)
+          (corfu-mode . corfu-popupinfo-mode))
    :bind (:map corfu-map
                ("C-j" . corfu-next)
-               ("C-k" . corfu-previous)))
-          ;; (shell-mode . corfu-mode)
-          ;; (eshell-mode . corfu-mode))
+               ("C-k" . corfu-previous)
+               ("ESC" . corfu-quit)))
 
-  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-  ;; be used globally (M-/).  See also the customization variable
-  ;; `global-corfu-modes' to exclude certain modes.
-  ;; :init
-  ;; (global-corfu-mode))
+(use-package nerd-icons-corfu
+  :after corfu
+  :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+)
 
 (use-package vertico
   :defer 2
@@ -505,15 +544,15 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package consult
   :after vertico
-  :init
-    ;; Use `consult-completion-in-region' if Vertico is enabled.
-    ;; Otherwise use the default `completion--in-region' function.
-    (setq completion-in-region-function
-          (lambda (&rest args)
-            (apply (if vertico-mode
-                       #'consult-completion-in-region
-                     #'completion--in-region)
-                   args)))
+  ;; :init
+  ;;   ;; Use `consult-completion-in-region' if Vertico is enabled.
+  ;;   ;; Otherwise use the default `completion--in-region' function.
+  ;;   (setq completion-in-region-function
+  ;;         (lambda (&rest args)
+  ;;           (apply (if vertico-mode
+  ;;                      #'consult-completion-in-region
+  ;;                    #'completion--in-region)
+  ;;                  args)))
 )
 
 (use-package marginalia
@@ -527,6 +566,8 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
   :ensure nil
   ;; :init (evil-collection-dired-setup)
   :hook (dired-mode . dired-hide-details-mode)
+  :bind (:map dired-mode-map
+    ("b" . dired-up-directory))
   :custom
     (insert-directory-program "ls")
     (dired-listing-switches "-Hl --almost-all --group-directories-first")
@@ -643,19 +684,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (magit-bury-buffer-function 'magit-restore-window-configuration))
 
 (use-package git-timemachine
-  :hook (evil-normalize-keymaps . git-timemachine-mode)
-  ;; :config
-  ;;   (evil-define-key 'normal git-timemachine-mode-map
-  ;;     (kbd "C-j") 'git-timemachine-show-previous-revision
-  ;;     (kbd "C-k") 'git-timemachine-show-next-revision)
-)
-
-(use-package tetris
-  :ensure nil
-  ;; :config
-  ;;   (evil-set-initial-state 'tetris-mode 'emacs)
-  ;;   (add-hook 'tetris-mode-hook (lambda () (with-current-buffer "*Tetris*" (evil-local-set-key 'emacs "z" 'tetris-rotate-prev)
-  ;;                                                                               (evil-local-set-key 'emacs "x" 'tetris-rotate-next))))
+  :bind (("C-c g t" . git-timemachine))
 )
 
 (use-package org
@@ -665,10 +694,11 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ;; after refiling and archiving tasks agenda files aren't saved, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
+    ;; (org-capture-after-finalize . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
     ([remap org-return] . custom/org-good-return)
-    ("C-c a" . org-agenda)
-    ("C-c c" . org-capture)
+    ("C-c n a" . org-agenda)
+    ("C-c n c" . org-capture)
   :custom-face
     ;; setting size of headers
     (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -943,7 +973,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (with-eval-after-load 'org
   (require 'org-tempo)
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
 )
@@ -1016,8 +1046,8 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
         (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
 
    :bind (
-      ("C-c n a a" . org-roam-alias-add)
-      ("C-c n a r" . org-roam-alias-remove)
+      ("C-c n A a" . org-roam-alias-add)
+      ("C-c n A r" . org-roam-alias-remove)
       ("C-c n d c" . org-roam-dailies-capture-today)
       ("C-c n d t" . org-roam-dailies-goto-today)
       ("C-c n d j" . org-roam-dailies-goto-next-note)
@@ -1092,6 +1122,13 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
      "imghttps"
      :image-data-fun #'custom/org-image-link))
 
+(use-package org-sliced-images
+  :after org
+  :config
+    (defalias 'org-remove-inline-images #'org-sliced-images-remove-inline-images)
+    (defalias 'org-toggle-inline-images #'org-sliced-images-toggle-inline-images)
+    (defalias 'org-display-inline-images #'org-sliced-images-display-inline-images))
+
 (use-package toc-org
   :after org
   :hook (org-mode . #'toc-org-enable))
@@ -1162,13 +1199,12 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package nix-mode)
 
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :config
-    (add-hook 'bash-ts-mode-hook (lambda () (setq-local compile-command (concat "bash " (buffer-name)))))
+  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " (buffer-name)))))
 )
 
 (use-package c-ts-mode
-  :config
-    (add-hook 'c++-ts-mode-hook (lambda () (setq-local compile-command (concat "g++ " (buffer-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
+  :hook
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1176,8 +1212,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package bug-hunter)
 
 (use-package python
-  :config
-    (add-hook 'python-ts-mode-hook (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
+  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
 )
 
 (use-package lorem-ipsum
@@ -1245,7 +1280,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package eshell
   :hook
     (eshell-mode . (lambda () (setq mode-line-format nil)))
-    (eshell-mode . (lambda () (keymap-local-set "C-d" 'eshell-life-is-too-much)))
+  :bind (("C-c s e" . eshell))
   :custom
     (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
     (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell
@@ -1257,14 +1292,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (eshell-hist-ignoredups t)
     (eshell-scroll-to-bottom-on-input nil)
     (eshell-destroy-buffer-when-process-dies t)
-  ;; :bind (:map eshell-mode-map
-  ;;             ("C-d" . 'eshell-life-is-too-much))
   :config
-    ;; (evil-define-key 'insert 'eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
-    ;; (define-key eshell-mode-map (kbd "C-d") 'eshell-life-is-too-much)
-
+    ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
     (defalias 'eshell/clear #'eshell/clear-scrollback)
-
     (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
@@ -1273,49 +1303,20 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package eat
   :after eshell
-  :hook (eshell-mode . eat-eshell-mode))
+  :hook (eshell-load . eat-eshell-mode))
 
 (use-package vterm
   :unless (custom/termux-p)
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
+  :bind (("C-c s v" . vterm))
   :custom
     (shell-file-name "/bin/fish")
     (vterm-max-scrollback 5000)
+    (vterm-always-compile-module t)
 )
 
-(use-package sudo-edit)
-
-(use-package tab-bar
-  :init
-    (tab-bar-mode 1)
-    (advice-add #'tab-new
-                :after
-                (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
-                                    (call-interactively #'tab-rename))))
-  :custom
-    (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
-    (tab-bar-close-button-show nil)      ;; hide tab close / X button
-    (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
-    (tab-bar-tab-hints t)                ;; show tab numbers
-  ;; :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
-  :config
-    (meow-leader-define-key
-      '("= TAB" . tab-next)
-      '("= ="   . tab-bar-mode)
-      '("= 1"   . (lambda () (interactive) (tab-select 1)))
-      '("= 2"   . (lambda () (interactive) (tab-select 2)))
-      '("= 3"   . (lambda () (interactive) (tab-select 3)))
-      '("= 4"   . (lambda () (interactive) (tab-select 4)))
-      '("= 5"   . (lambda () (interactive) (tab-select 5)))
-      '("= 6"   . (lambda () (interactive) (tab-select 6)))
-      '("= 7"   . (lambda () (interactive) (tab-select 7)))
-      '("= 8"   . (lambda () (interactive) (tab-select 8)))
-      '("= 9"   . (lambda () (interactive) (tab-select 9)))
-      '("= 0"   . (lambda () (interactive) (tab-select 0)))
-      '("= t"   . tab-new)
-      '("= d"   . tab-bar-close-tab)
-      '("= r"   . tab-rename))
-)
+(use-package sudo-edit
+  :bind ("C-x C-S-f" . sudo-edit-find-file))
 
 (use-package reverso)
 
@@ -1341,6 +1342,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
          (body-function . custom/switch-to-buffer-other-window-for-alist))
 
         ("\\*Agenda Commands\\*"
+         (display-buffer-at-bottom)
+         (window-height . 12))
+        (" \\*Agenda Commands\\*"
          (display-buffer-at-bottom)
          (window-height . 12))
         ("\\*Org Select\\*"
