@@ -179,8 +179,6 @@ Most of the stuff will get redirected here.")
      ;; '("TAB" . evilnc-comment-or-uncomment-lines))
      ;; '("f c" . (find-file "~/.config/emacs/config.org"))
 
-    (if (custom/termux-p) (meow-leader-define-key '("s" . save-buffer)))
-
     (meow-normal-define-key
      '("0" . meow-expand-0)
      '("9" . meow-expand-9)
@@ -287,6 +285,7 @@ Most of the stuff will get redirected here.")
 
 (use-package recentf
   :hook (after-init . recentf-mode)
+  :bind (("C-c f r" . recentf))
   :custom
     (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
     (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
@@ -508,12 +507,16 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ("C-j" . vertico-next)
     ("C-k" . vertico-previous)
     ("C-l" . vertico-exit)
-    ("M-F" . vertico-buffer-mode))
+    ;; ("M-F" . vertico-buffer-mode)
+    )
   :custom
     (enable-recursive-minibuffers t)
   :config
     (vertico-mode)
     (vertico-mouse-mode t)
+    (setq vertico-multiform-commands
+      '((recentf-open (vertico-sort-function . nil))))
+    (vertico-multiform-mode)
 )
 
 (use-package vertico-directory
@@ -1111,13 +1114,6 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package toc-org
   :after org
   :hook (org-mode . #'toc-org-enable))
-  ;; :commands toc-org-enable
-  ;; :init (add-hook 'org-mode-hook 'toc-org-enable))
-
-(defun custom/org-notes-dired ()
-  "Opens org-directory in Dired."
-  (interactive)
-  (dired org-directory))
 
 (defun custom/org-roam-notes-dired ()
   "Opens org-roam-directory in Dired."
@@ -1178,12 +1174,12 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package nix-mode)
 
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " (buffer-name)))))
+  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " buffer-file-truename))))
 )
 
 (use-package c-ts-mode
   :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-file-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " buffer-file-truename " -o " (file-name-sans-extension buffer-file-truename) " && " (file-name-sans-extension buffer-file-truename)))))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1191,7 +1187,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package bug-hunter)
 
 (use-package python
-  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
+  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " buffer-file-truename))))
 )
 
 (use-package lorem-ipsum

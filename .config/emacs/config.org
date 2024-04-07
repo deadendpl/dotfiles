@@ -31,7 +31,7 @@ Credits to:
 - System Crafters with his Emacs from Scratch [[https://youtube.com/playlist?list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ][videos]] and [[https://systemcrafters.net/emacs-from-scratch/][web articles]]
 - [[https://sachachua.com/blog/][Sacha Chua]] for giving sum of Emacs news and content per week
 
-This config is used on Emacs _29.2_ and is intended for use with that version.
+This config is used on Emacs _29.3_ and is intended for use with that version.
 * Early Init
 #+begin_src emacs-lisp :tangle ./early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
@@ -584,8 +584,6 @@ Other keybindings are defined in other sections with =:general= use-package keyw
      ;; '("TAB" . evilnc-comment-or-uncomment-lines))
      ;; '("f c" . (find-file "~/.config/emacs/config.org"))
 
-    (if (custom/termux-p) (meow-leader-define-key '("s" . save-buffer)))
-
     (meow-normal-define-key
      '("0" . meow-expand-0)
      '("9" . meow-expand-9)
@@ -707,6 +705,7 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
 #+begin_src emacs-lisp
 (use-package recentf
   :hook (after-init . recentf-mode)
+  :bind (("C-c f r" . recentf))
   :custom
     (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
     (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
@@ -1055,12 +1054,16 @@ I don't need it loading immediately so I defer it by 2 seconds.
     ("C-j" . vertico-next)
     ("C-k" . vertico-previous)
     ("C-l" . vertico-exit)
-    ("M-F" . vertico-buffer-mode))
+    ;; ("M-F" . vertico-buffer-mode)
+    )
   :custom
     (enable-recursive-minibuffers t)
   :config
     (vertico-mode)
     (vertico-mouse-mode t)
+    (setq vertico-multiform-commands
+      '((recentf-open (vertico-sort-function . nil))))
+    (vertico-multiform-mode)
 )
 #+end_src
 
@@ -1265,9 +1268,6 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
 #+end_src
 ** Git stuff
 [[https://magit.vc/][Magit]] is the best git client in Emacs.
-#+begin_quote
-A Git Porcelain inside Emacs
-#+end_quote
 #+begin_src emacs-lisp
 (use-package magit
   :custom
@@ -1841,17 +1841,10 @@ Table of contents after after typing =:toc:= in header
 (use-package toc-org
   :after org
   :hook (org-mode . #'toc-org-enable))
-  ;; :commands toc-org-enable
-  ;; :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 *** Notes
 Here are some functions.
 #+begin_src emacs-lisp
-(defun custom/org-notes-dired ()
-  "Opens org-directory in Dired."
-  (interactive)
-  (dired org-directory))
-
 (defun custom/org-roam-notes-dired ()
   "Opens org-roam-directory in Dired."
   (interactive)
@@ -1964,14 +1957,14 @@ Here will probably be smaller or bigger functions and tweaks as time goes on to 
 **** Bash
 #+begin_src emacs-lisp
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " (buffer-name)))))
+  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " buffer-file-truename))))
 )
 #+end_src
 **** C++
 #+begin_src emacs-lisp
 (use-package c-ts-mode
   :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-file-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " buffer-file-truename " -o " (file-name-sans-extension buffer-file-truename) " && " (file-name-sans-extension buffer-file-truename)))))
 )
 #+end_src
 **** Elisp
@@ -1985,7 +1978,7 @@ If I'll not forget about it then probably I will get the most use out of [[https
 **** Python
 #+begin_src emacs-lisp
 (use-package python
-  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (buffer-name)))))
+  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " buffer-file-truename))))
 )
 #+end_src
 *** Lorem ipsum generator
