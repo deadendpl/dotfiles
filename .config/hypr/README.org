@@ -66,10 +66,10 @@ $editor2 = $terminal -e nvim
 #+BEGIN_SRC conf
 # boot stuff
 exec-once = swaync &
-exec-once = udiskie &
+# exec-once = udiskie &
 exec-once = ~/.local/bin/pyrice &
-exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 exec-once = $script/emacs.sh &
+exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 #+END_SRC
 * Input stuff
@@ -304,7 +304,7 @@ bind = $mainMod ALT, R,            exec, ~/.local/bin/pyrice
 bind = $mainMod, 61,               exec, $script/web-search.sh
 bind = $mainMod SHIFT, 61,         exec, $script/bookmarks.sh
 bind = $mainMod ALT, 61,           exec, $script/bookmarking.sh
-bind = $mainMod ALT SHIFT, 61,     exec, emacsclient -c -a 'nvim' ~/Documents/bookmarks
+bind = $mainMod ALT SHIFT, 61,     exec, emacsclient -c -a 'nvim' ~/Sync/foo/wazne/bookmarks
 
 # laptop keys
 binde = ,XF86AudioRaiseVolume,     exec, pactl set-sink-volume @DEFAULT_SINK@ +5%

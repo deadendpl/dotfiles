@@ -2,7 +2,7 @@
 #+STARTUP: noinlineimages
 
 * WARNING:
-This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP nixos config. Dependencies might not be available for other distros.
+This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP NixOS config. Dependencies might not be available for other distros.
 * PYWAL with hyprland
 [[file:screenshots/pywal-hypr/2023-09-25_17-57-57.png]]
 
@@ -26,7 +26,7 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
-Software riced with pywal [12/13]:
+Software riced with pywal [10/11]:
 - [X] foot
 - [X] rofi
 - [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
@@ -35,15 +35,12 @@ Software riced with pywal [12/13]:
 - [X] emacs
 - [X] qutebrowser
 - [X] waybar
-- [X] mako
 - [X] nvim
 - [X] hyprland
 - [X] zathura
-- [X] sioyek
 * INSTALLING
 ** DEPENDENCIES
-Go into =install= folder and execute =arcolinux-repo.sh=. The script will add Arco Linux repos to your =/etc/pacman.conf=.
-Then go to =install/README.org= to look at the dependencies and other tweaks.
+Go to [[file:install/README.org][install/README.org]] to look at the dependencies and other tweaks.
 ** CONFIG FILES
 Copy/move all files to your =$HOME= directory.
 
@@ -51,4 +48,4 @@ Another way to manage this conveniently is to install [[https://www.gnu.org/soft
 1. Move cloned repo into =~/repo-name=.
 2. Backup your =~/.config= and delete everything inside if necessary.
 3. Inside repo directory do =stow .=
-This will link all files automatically to its corrensponding places
+This will link all files automatically to its corresponding places.

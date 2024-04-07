@@ -64,13 +64,11 @@ Those =fbound= are because Termux Emacs doesn't have some functions at all and t
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-;; (add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
 (display-battery-mode 1)             ; Setting battery percentage in modeline
-;; (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 #+end_src
 *** Uncluttering user-emacs-directory
 #+begin_src emacs-lisp
@@ -554,9 +552,10 @@ Other keybindings are defined in other sections with =:general= use-package keyw
 #+begin_src emacs-lisp
 (use-package meow
   :demand
+  :init
+    (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
   :custom
     (meow-use-clipboard t)
-    (initial-buffer-choice (lambda () (meow-cheatsheet)))
     (meow-expand-hint-remove-delay 0)
   :config
   (defun meow-setup ()
@@ -671,6 +670,7 @@ When I do =C-u= or =C-d= I will get a flash at the current line.
                        ;; evil-window-left
                        ;; evil-window-up
                        ;; evil-window-down
+                       other-window
                        scroll-up-command
                        scroll-down-command
                        tab-select
@@ -718,7 +718,7 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
 #+end_src
 *** Remembering file place
 #+begin_src emacs-lisp
-(use-package save-place
+(use-package saveplace
   :ensure nil
   :hook (after-init . save-place-mode)
 )
@@ -1137,7 +1137,7 @@ I still do some configurations because dirvish at its core uses dired and its ke
     ("b" . dired-up-directory))
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-Hl --almost-all --group-directories-first")
+    (dired-listing-switches "-lv --almost-all --group-directories-first --human-readable")
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
@@ -1187,7 +1187,7 @@ I still do some configurations because dirvish at its core uses dired and its ke
 ;;       [remap evil-yank] 'dired-ranger-copy
 ;;       "p" 'dired-ranger-paste))
 #+end_src
-*** Dirvish
+*** Dirvish :ARCHIVE:
 [[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
 +I don't currently use that since it displays all files as buffers and doesn't kill them.+
 It kills the buffers when =dirvish-quit= is called or when you enter the file.
@@ -1214,7 +1214,8 @@ It kills the buffers when =dirvish-quit= is called or when you enter the file.
     (add-hook 'dirvish-find-entry-hook
         (lambda (&rest _) (setq-local truncate-lines t)))
     ;; rebinds all dired commands to `dirvish-dwim' so when I only have 1 window dirvish will have 3 pane view
-    (defalias 'dired 'dirvish-dwim))
+    ;; (defalias 'dired 'dirvish-dwim)
+    )
 #+end_src
 ** Docs
 *** Helpful
@@ -1227,6 +1228,7 @@ It kills the buffers when =dirvish-quit= is called or when you enter the file.
     ([remap describe-symbol] . helpful-symbol)
     ([remap describe-variable] . helpful-variable)
     ([remap describe-key] . helpful-key)
+  :custom (helpful-max-buffers nil)
 )
 #+end_src
 *** Which-key
@@ -1405,6 +1407,7 @@ A whole lot of stuff.
     ;; (org-export-with-properties t)
     (org-startup-folded t)
     ;; (org-ellipsis "󱞣")
+    (org-link-file-path-type 'relative)
   :config
     ;; live latex preview
     (defun custom/org-resize-latex-overlays ()
@@ -1825,6 +1828,7 @@ This [[https://github.com/jdtsmith/org-modern-indent][package]] adds borders to 
 That makes the images scroll nicely, instead of skipping over them.
 #+begin_src emacs-lisp
 (use-package org-sliced-images
+  :unless (custom/termux-p)
   :after org
   :config
     (defalias 'org-remove-inline-images #'org-sliced-images-remove-inline-images)
@@ -1967,7 +1971,7 @@ Here will probably be smaller or bigger functions and tweaks as time goes on to 
 #+begin_src emacs-lisp
 (use-package c-ts-mode
   :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-file-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
 )
 #+end_src
 **** Elisp
@@ -2100,7 +2104,6 @@ Eshell is an Emacs /shell/ that is written in Elisp.
     (eshell-destroy-buffer-when-process-dies t)
   :config
     ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
-    (defalias 'eshell/clear #'eshell/clear-scrollback)
     (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
@@ -2256,6 +2259,9 @@ This variable desribes the way chosen buffers are displaying and behaving.
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
 
+        ("^CAPTURE"
+         (display-buffer-at-bottom)
+         (window-height . 12))
         ("\\*Agenda Commands\\*"
          (display-buffer-at-bottom)
          (window-height . 12))
@@ -2311,5 +2317,6 @@ This variable desribes the way chosen buffers are displaying and behaving.
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
         )
 
-      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect `display-buffer-alist'
+      switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
+      switch-to-buffer-in-dedicated-window t) ; `switch-to-buffer' will work on dedicated window
 #+end_src

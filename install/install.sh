@@ -79,7 +79,6 @@ else
                              zathura-pdf-mupdf \
                              gammastep \
                              lolcat \
-                             otf-codenewroman-nerd \
                              ttf-ubuntu-nerd \
                              ttf-jetbrains-mono-nerd \
                              noto-fonts-emoji \
@@ -112,6 +111,7 @@ else
                              udiskie \
                              swaylock
                              # neovim \
+                             # otf-codenewroman-nerd \
 fi
 
 if $(pacman -Q yay >> /dev/null); then

@@ -95,7 +95,7 @@ else
   alias man='batman'
   alias mv='mv-p'
   alias v='emacsclient -t -a "nvim"'
-  alias vim='nvim'
+  # alias vim='nvim'
   alias RGB="cat /dev/urandom | tr -dc 'a-z A-Z' | lolcat"
   alias demacs='emacs --daemon'
   alias remacs='pkill emacs && emacs --daemon'

@@ -15,6 +15,7 @@
 // @match       *://genius.com/*
 // @match       *://google.*/*
 // @match       *://*.google.*/*
+// @match       *://*.imdb.com/*
 // @match       *://imgur.com/*
 // @match       *://*.imgur.com/*
 // @match       *://instagram.com/*
@@ -213,6 +214,13 @@ switch (true) {
   site = [
     // dumb
     'gen,https://farside.link/dumb'];
+  break;
+
+  case hostname.endsWith('imdb.com'):
+
+  site = [
+    // libremdb
+    'lid,https://farside.link/libremdb'];
   break;
 
   case hostname.endsWith('youtube.com'):

@@ -15,13 +15,11 @@
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
-;; (add-hook 'prog-mode-hook #'display-line-numbers-mode) ;; Line numbers in programming modes
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 (electric-pair-mode 0)               ; Turns off automatic parens pairing
 (electric-indent-mode -1)            ; Turn off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
 (display-battery-mode 1)             ; Setting battery percentage in modeline
-;; (indent-tabs-mode 0)                 ; Using spaces instead of tabs for indentation
 
 (defvar custom/user-share-emacs-directory "~/.local/share/emacs/"
   "Directory to redirect cache/dump files.
@@ -149,9 +147,10 @@ Most of the stuff will get redirected here.")
 
 (use-package meow
   :demand
+  :init
+    (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
   :custom
     (meow-use-clipboard t)
-    (initial-buffer-choice (lambda () (meow-cheatsheet)))
     (meow-expand-hint-remove-delay 0)
   :config
   (defun meow-setup ()
@@ -263,6 +262,7 @@ Most of the stuff will get redirected here.")
                        ;; evil-window-left
                        ;; evil-window-up
                        ;; evil-window-down
+                       other-window
                        scroll-up-command
                        scroll-down-command
                        tab-select
@@ -296,7 +296,7 @@ Most of the stuff will get redirected here.")
   ;;     "f r" '(recentf :wk "Find recent files"))
 )
 
-(use-package save-place
+(use-package saveplace
   :ensure nil
   :hook (after-init . save-place-mode)
 )
@@ -570,7 +570,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ("b" . dired-up-directory))
   :custom
     (insert-directory-program "ls")
-    (dired-listing-switches "-Hl --almost-all --group-directories-first")
+    (dired-listing-switches "-lv --almost-all --group-directories-first --human-readable")
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
@@ -620,30 +620,6 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 ;;       [remap evil-yank] 'dired-ranger-copy
 ;;       "p" 'dired-ranger-paste))
 
-(use-package dirvish
-  :unless (custom/termux-p)
-  :init (dirvish-override-dired-mode t) ; dirvish takes over dired
-  :custom
-    (dirvish-cache-dir (expand-file-name "dirvish" custom/user-share-emacs-directory))
-    (dirvish-attributes '(collapse git-msg file-time file-size))
-    (dirvish-default-layout '(1 0.15 0.5))
-  :config
-    ;; (evil-collection-define-key 'normal 'dirvish-mode-map
-    ;;   "p" 'dirvish-yank-menu
-    ;;   "q" 'dirvish-quit)
-    ;; (dirvish-define-preview eza (file)
-    ;;   "Use `eza' to generate directory preview."
-    ;;   :require ("eza") ; tell Dirvish to check if we have the executable
-    ;;   (when (file-directory-p file) ; we only interest in directories here
-    ;;     `(shell . ("eza" "-al" "--color=always" "--icons"
-    ;;                "--group-directories-first" ,file))))
-    ;; (add-to-list 'dirvish-preview-dispatchers 'eza)
-    ;; lines not wrapping
-    (add-hook 'dirvish-find-entry-hook
-        (lambda (&rest _) (setq-local truncate-lines t)))
-    ;; rebinds all dired commands to `dirvish-dwim' so when I only have 1 window dirvish will have 3 pane view
-    (defalias 'dired 'dirvish-dwim))
-
 (use-package helpful
   :bind
     ([remap describe-function] . helpful-function)
@@ -651,6 +627,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ([remap describe-symbol] . helpful-symbol)
     ([remap describe-variable] . helpful-variable)
     ([remap describe-key] . helpful-key)
+  :custom (helpful-max-buffers nil)
 )
 
 (use-package which-key
@@ -806,6 +783,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ;; (org-export-with-properties t)
     (org-startup-folded t)
     ;; (org-ellipsis "󱞣")
+    (org-link-file-path-type 'relative)
   :config
     ;; live latex preview
     (defun custom/org-resize-latex-overlays ()
@@ -1123,6 +1101,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
      :image-data-fun #'custom/org-image-link))
 
 (use-package org-sliced-images
+  :unless (custom/termux-p)
   :after org
   :config
     (defalias 'org-remove-inline-images #'org-sliced-images-remove-inline-images)
@@ -1204,7 +1183,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 
 (use-package c-ts-mode
   :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (buffer-file-name) " -o " (file-name-sans-extension (buffer-name)) " && ./" (file-name-sans-extension (buffer-name))))))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1294,7 +1273,6 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     (eshell-destroy-buffer-when-process-dies t)
   :config
     ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
-    (defalias 'eshell/clear #'eshell/clear-scrollback)
     (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
@@ -1341,6 +1319,9 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
 
+        ("^CAPTURE"
+         (display-buffer-at-bottom)
+         (window-height . 12))
         ("\\*Agenda Commands\\*"
          (display-buffer-at-bottom)
          (window-height . 12))
@@ -1396,4 +1377,5 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
         )
 
-      switch-to-buffer-obey-display-actions t) ; `switch-to-buffer' will respect `display-buffer-alist'
+      switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
+      switch-to-buffer-in-dedicated-window t) ; `switch-to-buffer' will work on dedicated window

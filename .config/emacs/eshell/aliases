@@ -2,6 +2,7 @@ alias vim find-file $1
 
 alias ip ip -color=auto $*
 
+alias clear clear t
 alias cllr clear && l $*
 alias clr clear
 
