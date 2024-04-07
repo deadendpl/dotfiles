@@ -27,6 +27,7 @@ if set -q TERMUX_VERSION
   alias pinstalled='pkg list --installed'
   alias psearch='pkg search'
 else
+  starship init fish | source
   alias fetch='fastfetch'
   alias lf='lfcd'
   alias cp='cp-p'
@@ -46,7 +47,6 @@ end
 if status is-interactive
   set fish_greeting
 end
-starship init fish | source
 
 set PATH ~/.config/emacs/bin $PATH
 set PATH ~/.local/bin $PATH
