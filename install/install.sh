@@ -147,7 +147,7 @@ fi
 if $(pacman -Q wpgtk >> /dev/null); then
   echo "It seems pywal packages are installed."
 else
-  yay -S --noconfirm pywal \
+  yay -S --noconfirm pywal-16-colors \
                      python-inotify-simple \
                      python-psutil \
                      python-prctl \
@@ -213,7 +213,7 @@ cd ../
 rm -rf grub_gtg
 
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
-sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\""
+sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 
 xdg-mime default org.pwmt.zathura.desktop application/pdf
 xdg-mime default org.pwmt.zathura.desktop application/epub+zip

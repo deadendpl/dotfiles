@@ -1,3 +1,4 @@
+// -*- mode: js-json -*-
 {
   "layer": "top",
   "position": "top",
@@ -94,8 +95,9 @@
       "format-plugged": " {capacity}%  ",
       "format-alt": " {time} {icon} ",
       // "format-good": "", // An empty format will hide the module
-      "format-full": " {capacity}% 󱈑 ",
-      "format-icons": [" ", " ", " ", " ", " "]
+      "format-full": " {capacity}% 󱈑",
+      // "format-icons": [" ", " ", " ", " ", " "]
+      "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂"]
   },
 
   "network": {

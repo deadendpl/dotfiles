@@ -188,7 +188,7 @@ Pywal is like Material You from Android but on Linux
 if $(pacman -Q wpgtk >> /dev/null); then
   echo "It seems pywal packages are installed."
 else
-  yay -S --noconfirm pywal \
+  yay -S --noconfirm pywal-16-colors \
                      python-inotify-simple \
                      python-psutil \
                      python-prctl \
@@ -267,7 +267,7 @@ rm -rf grub_gtg
 * QT apps follow GTK theme
 #+begin_src shell
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
-sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\""
+sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 #+end_src
 * Setting defaults
 It sets some apps to be defaults for some files
@@ -278,8 +278,8 @@ xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 xdg-mime default pcmanfm.desktop inode/directory
 #+end_src
 
-This sets GTK theming and sets fonts, on bigger screen you might want to increase the size.
-#+begin_src shell
+This sets GTK theming and fonts, on bigger screen you might want to increase the size.
+#+begin_src sh
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 gsettings set org.gnome.desktop.interface cursor-theme "Dracula-cursors"

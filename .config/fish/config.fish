@@ -1,5 +1,3 @@
-# -*- mode: sh -*-
-
 alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
 alias clr='clear'
 alias cllr='clear && l'
@@ -53,7 +51,6 @@ set PATH ~/.local/bin $PATH
 
 set EDITOR emacsclient -t -a ""
 set VISUAL emacsclient -c -a ""
-# fish_vi_key_bindings
 
 # going to last directory from lf
 function lfcd

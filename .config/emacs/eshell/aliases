@@ -17,7 +17,7 @@ alias listaur yay -Qqem $*
 alias yinst yay -S $*
 alias nup sudo nixos-rebuild switch $*
 alias nclean sudo nix-collect-garbage -d $*
-alias l exa --all --long --header --icons --git --group-directories-first --color-scale $*
+alias l eza --all --long --header --icons --git --group-directories-first --color-scale $*
 alias clr clear
 alias cllr clear && l $*
 alias clear clear t

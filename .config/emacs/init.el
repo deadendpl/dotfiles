@@ -50,9 +50,8 @@ Most of the stuff will get redirected here.")
               scroll-conservatively 1000 ; Scroll one line at a time
               scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
               vc-follow-symlinks t ; Enable follow symlinks
-              tab-always-indent 'complete
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
-              standard-indent 2 ; indenting set to 2
+              ;; standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
               use-short-answers t ; replace yes-no prompts with y-n
               fast-but-imprecise-scrolling t ; fast scrolling
@@ -68,7 +67,7 @@ Most of the stuff will get redirected here.")
   (setq browse-url-browser-function 'browse-url-xdg-open))
 
 ;; Some file extensions set for certain modes
-(add-to-list 'auto-mode-alist '("\\.rasi\\'" . conf-colon-mode))
+(add-to-list 'auto-mode-alist '("\\.rasi\\'" . js-json-mode))
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*"
@@ -90,10 +89,9 @@ Most of the stuff will get redirected here.")
 (set-terminal-coding-system  'utf-8)
 (set-keyboard-coding-system  'utf-8)
 (set-language-environment    'utf-8)
-(set-selection-coding-system 'utf-8)
-(setq locale-coding-system   'utf-8)
-(prefer-coding-system        'utf-8)
 (set-default-coding-systems  'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system        'utf-8)
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -323,23 +321,23 @@ Most of the stuff will get redirected here.")
     (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
     (tab-bar-tab-hints t)                ;; show tab numbers
   ;; :custom-face (tab-bar ((t (:box (:line-width 2 :style flat-button)))))
-  :bind (
-    ("C-c t TAB" . tab-next)
-    ("C-c t T"   . tab-bar-mode)
-    ("C-c t 1"   . (lambda () (interactive) (tab-select 1)))
-    ("C-c t 2"   . (lambda () (interactive) (tab-select 2)))
-    ("C-c t 3"   . (lambda () (interactive) (tab-select 3)))
-    ("C-c t 4"   . (lambda () (interactive) (tab-select 4)))
-    ("C-c t 5"   . (lambda () (interactive) (tab-select 5)))
-    ("C-c t 6"   . (lambda () (interactive) (tab-select 6)))
-    ("C-c t 7"   . (lambda () (interactive) (tab-select 7)))
-    ("C-c t 8"   . (lambda () (interactive) (tab-select 8)))
-    ("C-c t 9"   . (lambda () (interactive) (tab-select 9)))
-    ("C-c t 0"   . (lambda () (interactive) (tab-select 0)))
-    ("C-c t t"   . tab-new)
-    ("C-c t d"   . tab-bar-close-tab)
-    ("C-c t r"   . tab-rename)
-  )
+  ;; :bind (
+  ;;   ("C-c t TAB" . tab-next)
+  ;;   ("C-c t T"   . tab-bar-mode)
+  ;;   ("C-c t 1"   . (lambda () (interactive) (tab-select 1)))
+  ;;   ("C-c t 2"   . (lambda () (interactive) (tab-select 2)))
+  ;;   ("C-c t 3"   . (lambda () (interactive) (tab-select 3)))
+  ;;   ("C-c t 4"   . (lambda () (interactive) (tab-select 4)))
+  ;;   ("C-c t 5"   . (lambda () (interactive) (tab-select 5)))
+  ;;   ("C-c t 6"   . (lambda () (interactive) (tab-select 6)))
+  ;;   ("C-c t 7"   . (lambda () (interactive) (tab-select 7)))
+  ;;   ("C-c t 8"   . (lambda () (interactive) (tab-select 8)))
+  ;;   ("C-c t 9"   . (lambda () (interactive) (tab-select 9)))
+  ;;   ("C-c t 0"   . (lambda () (interactive) (tab-select 0)))
+  ;;   ("C-c t t"   . tab-new)
+  ;;   ("C-c t d"   . tab-bar-close-tab)
+  ;;   ("C-c t r"   . tab-rename)
+  ;; )
 )
 
 (set-face-attribute 'default nil
@@ -458,43 +456,47 @@ Most of the stuff will get redirected here.")
         :inherit 'default)
       (set-face-attribute 'line-number nil
         :foreground (ewal--get-base-color 'green)
-        :inherit 'default))
+        :inherit 'default)
+      (load-theme 'ewal-doom-one t))
 )
 
-(defvar custom/real-theme nil
-  "It represents theme to load at startup.
-It will be loaded st startup with `custom/load-real-theme' and restarted with 'SPC-h-r-t'.")
+;; (defvar custom/real-theme nil
+;;   "It represents theme to load at startup.
+;; It will be loaded st startup with `custom/load-real-theme' and restarted with 'SPC-h-r-t'.")
 
-(defun custom/load-real-theme ()
-  "Loads `real-theme'."
-  (interactive)
-  (load-theme custom/real-theme t))
+;; (defun custom/load-real-theme ()
+;;   "Loads `real-theme'."
+;;   (interactive)
+;;   (load-theme custom/real-theme t))
 
-(if (custom/termux-p)
-    (setq custom/real-theme 'doom-dracula) ;; for termux
-  (setq custom/real-theme 'ewal-doom-one)) ;; for PC
+;; (if (custom/termux-p)
+;;     (setq custom/real-theme 'doom-dracula) ;; for termux
+;;   (setq custom/real-theme 'ewal-doom-one)) ;; for PC
 
-(custom/load-real-theme)
+;; (custom/load-real-theme)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
 (use-package corfu
+  :init (add-hook 'meow-insert-exit-hook #'custom/corfu-cleanup)
   :custom
     (corfu-auto t)
     (corfu-auto-prefix 1)
     (corfu-popupinfo-delay nil)
-  ;; it doesn't exit when using meow, the fix was taken from https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads
+    (tab-always-indent 'complete)
+  ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
   :preface
-  ;; (defun custom/corfu-cleanup ()
-  ;;   "Close corfu popup if it is active."
-  ;;   (if corfu-mode (corfu-quit)))
-   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-          (prog-mode . corfu-mode)
-          (corfu-mode . corfu-popupinfo-mode))
-   :bind (:map corfu-map
-               ("C-j" . corfu-next)
-               ("C-k" . corfu-previous)
-               ("ESC" . corfu-quit)))
+  (defun custom/corfu-cleanup ()
+    "Close corfu popup if it is active."
+    (if (boundp 'corfu-mode)
+        (if corfu-mode (corfu-quit))))
+  :hook ((meow-insert-exit . custom/corfu-cleanup)
+         (prog-mode . corfu-mode)
+         (corfu-mode . corfu-popupinfo-mode))
+  :bind (:map corfu-map
+              ("C-j" . corfu-next)
+              ("C-k" . corfu-previous)
+              ("ESC" . corfu-quit)))
 
 (use-package nerd-icons-corfu
   :after corfu
@@ -511,6 +513,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     )
   :custom
     (enable-recursive-minibuffers t)
+    ;; (vertico-sort-function nil)
   :config
     (vertico-mode)
     (vertico-mouse-mode t)
@@ -548,14 +551,14 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package consult
   :after vertico
   ;; :init
-  ;;   ;; Use `consult-completion-in-region' if Vertico is enabled.
-  ;;   ;; Otherwise use the default `completion--in-region' function.
-  ;;   (setq completion-in-region-function
-  ;;         (lambda (&rest args)
-  ;;           (apply (if vertico-mode
-  ;;                      #'consult-completion-in-region
-  ;;                    #'completion--in-region)
-  ;;                  args)))
+     ;; Use `consult-completion-in-region' if Vertico is enabled.
+     ;; Otherwise use the default `completion--in-region' function.
+     ;; (setq completion-in-region-function
+     ;;       (lambda (&rest args)
+     ;;         (apply (if vertico-mode
+     ;;                    #'consult-completion-in-region
+     ;;                  #'completion--in-region)
+     ;;                args)))
 )
 
 (use-package marginalia
@@ -671,6 +674,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
   :ensure nil
   :hook
     (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+    (org-mode . electric-pair-mode)
     ;; after refiling and archiving tasks agenda files aren't saved, I fix that
     (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
     (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
@@ -679,6 +683,8 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
     ([remap org-return] . custom/org-good-return)
     ("C-c n a" . org-agenda)
     ("C-c n c" . org-capture)
+    (:map org-mode-map
+          ("C-x n t" . org-toggle-narrow-to-subtree))
   :custom-face
     ;; setting size of headers
     (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -957,6 +963,12 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
   (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+  ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
+  ;; Otherwise, org-tempo is broken when you try to <s TAB...
+  (add-hook 'org-mode-hook (lambda ()
+                             (setq-local electric-pair-inhibit-predicate
+                                         `(lambda (c)
+                                            (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 )
 
 (use-package org-appear
@@ -1174,12 +1186,12 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package nix-mode)
 
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "bash " buffer-file-truename))))
+  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name))))))
 )
 
 (use-package c-ts-mode
   :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " buffer-file-truename " -o " (file-name-sans-extension buffer-file-truename) " && " (file-name-sans-extension buffer-file-truename)))))
+    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1187,7 +1199,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
 (use-package bug-hunter)
 
 (use-package python
-  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " buffer-file-truename))))
+  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
 )
 
 (use-package lorem-ipsum
@@ -1203,7 +1215,7 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
      ;; (go "https://github.com/tree-sitter/tree-sitter-go")
      ;; (html "https://github.com/tree-sitter/tree-sitter-html")
      ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-     ;; (json "https://github.com/tree-sitter/tree-sitter-json")
+     (json "https://github.com/tree-sitter/tree-sitter-json")
      ;; (make "https://github.com/alemuller/tree-sitter-make")
      ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
      (python "https://github.com/tree-sitter/tree-sitter-python")))
@@ -1221,7 +1233,8 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
    (c++-mode . c++-ts-mode)
    (css-mode . css-ts-mode)
    (python-mode . python-ts-mode)
-   (sh-mode . bash-ts-mode)))
+   (sh-mode . bash-ts-mode)
+   (js-json-mode . json-ts-mode)))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -1284,9 +1297,11 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   :bind (("C-c s v" . vterm))
   :custom
-    (shell-file-name "/bin/fish")
+    ;; (shell-file-name "/bin/fish")
     (vterm-max-scrollback 5000)
     (vterm-always-compile-module t)
+  :config
+    (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
 )
 
 (use-package sudo-edit
@@ -1318,12 +1333,10 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
         ("^CAPTURE"
          (display-buffer-at-bottom)
          (window-height . 12))
-        ("\\*Agenda Commands\\*"
-         (display-buffer-at-bottom)
-         (window-height . 12))
         (" \\*Agenda Commands\\*"
          (display-buffer-at-bottom)
-         (window-height . 12))
+         (window-height . 12)
+         (window-parameters . ((mode-line-format . none))))
         ("\\*Org Select\\*"
          (display-buffer-at-bottom)
          (window-height . 12))
@@ -1333,13 +1346,14 @@ It will be loaded st startup with `custom/load-real-theme' and restarted with 'S
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org todo\\*"
          (display-buffer-at-bottom)
-         ;; (window-height . 1)
-         (window-parameters . ((mode-line-format . none))))
-        ("\\*Agenda Commands\\*"
-         (display-buffer-at-bottom)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Babel Results\\*"
          (display-buffer-at-bottom))
+        ("\\*org-roam\\*"
+         (display-buffer-in-direction)
+         (direction . right)
+         (window-width . 0.33)
+         (window-height . fit-window-to-buffer))
 
         ("\\*compilation\\*"
          (display-buffer-at-bottom)

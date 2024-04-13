@@ -110,7 +110,7 @@ c.url.start_pages = '~/.config/qutebrowser/start/start.html'
 c.url.default_page = '~/.config/qutebrowser/start/start.html'
 
 # dark mode
-#c.colors.webpage.darkmode.enabled = True
+c.colors.webpage.darkmode.enabled = True
 c.colors.webpage.preferred_color_scheme = "dark"
 c.colors.webpage.darkmode.enabled = False
 c.colors.webpage.darkmode.policy.images = "smart"
@@ -136,6 +136,7 @@ config.source('qutewal.py')
 c.tabs.position = "left"
 c.tabs.show = "multiple"
 c.tabs.last_close = "close"
+c.tabs.width = 30
 
 c.auto_save.session = True
 
@@ -148,7 +149,7 @@ c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"
 
 config.bind('<ctrl+j>', 'completion-item-focus next', 'command')
 config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
-config.bind('<Alt-Shift-u>', 'spawn --userscript qute-keepassxc --key 9989A4EC', mode='insert')
+config.bind('<ctrl+shift+l>', 'spawn --userscript qute-keepassxc --key 9989A4EC', mode='insert')
 config.bind('pw', 'spawn --userscript qute-keepassxc --key 9989A4EC', mode='normal')
 config.bind('gr', 'config-source', mode='normal')
 config.bind('cn', 'clear-messages', mode='normal')
