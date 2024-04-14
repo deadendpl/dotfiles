@@ -55,9 +55,9 @@ $script = ~/.config/scripts
 $terminal = foot
 $web_browser = qutebrowser
 $file_manager = pcmanfm
-$file_manager2 = $terminal -e lf
+$file_manager2 = $terminal -e fish -c lf
 $editor = emacsclient -c -a ''
-$editor2 = $terminal -e nvim
+# $editor2 = $terminal -e nvim
 
 # For all categories, see https://wiki.hyprland.org/Configuring/Variables/
 
@@ -200,18 +200,17 @@ windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 Probably the most important thing in here
 
 - Basics
-| Keybinding            | command                                    |
-|-----------------------+--------------------------------------------|
-| SUPER + T             | launches terminal                          |
-| SUPER + W             | launches web browser                       |
-| SUPER + E             | launches first IDE (emacs)                 |
-| SUPER + Alt + E       | launches first IDE (emacs) as a scratchpad |
-| SUPER + Shift + E     | launches second IDE (neovim)               |
-| SUPER + F             | launches file manager (pcmanfm)            |
-| SUPER + Shift + F     | launches second file manager (lf)          |
-| SUPER + Enter         | launches rofi (app launcher)               |
-| SUPER + Tab           | launches rofi in window mode               |
-| SUPER + Shift + Enter | launches script hub                        |
+| Keybinding            | command                              |
+|-----------------------+--------------------------------------|
+| SUPER + T             | launches terminal                    |
+| SUPER + W             | launches web browser                 |
+| SUPER + E             | launches IDE (emacs)                 |
+| SUPER + Alt + E       | launches IDE (emacs) as a scratchpad |
+| SUPER + F             | launches file manager (pcmanfm)      |
+| SUPER + Shift + F     | launches second file manager (lf)    |
+| SUPER + Enter         | launches rofi (app launcher)         |
+| SUPER + Tab           | launches rofi in window mode         |
+| SUPER + Shift + Enter | launches script hub                  |
 
 - Other stuff
 | Keybinding        | command                                     |
@@ -320,7 +319,7 @@ bind = $mainMod, F2,               exec, $script/volume.sh
 bind = $mainMod, F7,               exec, networkmanager_dmenu
 bind = $mainMod SHIFT, F7,         exec, rofi-bluetooth
 bind = $mainMod, F10,              exec, wdisplays
-bind = $mainMod, F9,               exec, udiskie-dmenu
+bind = $mainMod, F9,               exec, $script/udiskie-unmount.sh
 bind = $mainMod, Delete,           exec, hyprctl kill
 
 # changing theme

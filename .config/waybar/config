@@ -38,9 +38,9 @@
     "format": "{icon}",
     "format-icons" : {
       "1": "󰖟",
-      "2": "",
+      "2": "󰅩",
       "active": "",
-      "default": "",
+      "default": "",
     },
 
     "persistent-workspaces": {

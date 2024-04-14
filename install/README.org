@@ -171,14 +171,14 @@ else
                      ctpv-git \
                      cp-p-git \
                      rofi-lbonn-wayland-git \
-                     pokemonsay-newgenerations-git \
-                     fortune-mod-vimtips \
-                     udiskie-dmenu-git
+                     # pokemonsay-newgenerations-git \
+                     # fortune-mod-vimtips \
+                     # udiskie-dmenu-git \
                      # sioyek \
                      # krabby-bin \
-                     # dracula-gtk-theme
-                     # catppuccin-gtk-theme-mocha
-                     # catppuccin-gtk-theme-latte
+                     # dracula-gtk-theme \
+                     # catppuccin-gtk-theme-mocha \
+                     # catppuccin-gtk-theme-latte \
                      # bitwarden-rofi-git \
 fi
 #+end_src

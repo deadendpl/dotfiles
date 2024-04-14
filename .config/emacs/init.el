@@ -78,6 +78,11 @@ Most of the stuff will get redirected here.")
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
+(keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-c w j" 'windmove-down)
+(keymap-global-set "C-c w h" 'windmove-left)
+(keymap-global-set "C-c w k" 'windmove-up)
+(keymap-global-set "C-c w l" 'windmove-right)
 
 (defun custom/find-config-file ()
   "Opens config.org file in `user-emacs-directory'."
@@ -446,18 +451,20 @@ Most of the stuff will get redirected here.")
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 
-(unless (custom/termux-p)
-  (use-package ewal-doom-themes :demand)
-  (use-package ewal
-    :demand
-    :config
+(if (custom/termux-p)
+    (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
+  (progn
+    (use-package ewal-doom-themes :demand)
+    (use-package ewal
+      :demand
+      :config
       (set-face-attribute 'line-number-current-line nil
-        :foreground (ewal-load-color 'comment)
-        :inherit 'default)
+                          :foreground (ewal-load-color 'comment)
+                          :inherit 'default)
       (set-face-attribute 'line-number nil
-        :foreground (ewal--get-base-color 'green)
-        :inherit 'default)
-      (load-theme 'ewal-doom-one t))
+                          :foreground (ewal--get-base-color 'green)
+                          :inherit 'default)
+      (load-theme 'ewal-doom-one t)))
 )
 
 ;; (defvar custom/real-theme nil
@@ -963,6 +970,7 @@ Most of the stuff will get redirected here.")
   (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+  (add-to-list 'org-structure-template-alist '("html" . "src html"))
   ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
   ;; Otherwise, org-tempo is broken when you try to <s TAB...
   (add-hook 'org-mode-hook (lambda ()
@@ -1190,8 +1198,7 @@ Most of the stuff will get redirected here.")
 )
 
 (use-package c-ts-mode
-  :hook
-    (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
+  :hook (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1228,13 +1235,13 @@ Most of the stuff will get redirected here.")
   (message "Installing tree-sitter parsers")
   (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
 
-(setq major-mode-remap-alist
- '((c-or-c++-mode . c-or-c++-ts-mode)
-   (c++-mode . c++-ts-mode)
-   (css-mode . css-ts-mode)
-   (python-mode . python-ts-mode)
-   (sh-mode . bash-ts-mode)
-   (js-json-mode . json-ts-mode)))
+;; (setq major-mode-remap-alist
+;;  '((c-or-c++-mode . c-or-c++-ts-mode)
+;;    (c++-mode . c++-ts-mode)
+;;    (css-mode . css-ts-mode)
+;;    (python-mode . python-ts-mode)
+;;    (sh-mode . bash-ts-mode)
+;;    (js-json-mode . json-ts-mode)))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -1264,6 +1271,9 @@ Most of the stuff will get redirected here.")
 ;;       "TAB" 'emmet-expand-line))
 
 )
+
+(use-package fish-mode
+  :mode ("\\.fish\\'"))
 
 (use-package eshell
   :hook

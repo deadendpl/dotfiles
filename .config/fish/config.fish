@@ -27,7 +27,7 @@ if set -q TERMUX_VERSION
 else
   starship init fish | source
   alias fetch='fastfetch'
-  alias lf='lfcd'
+  alias lf='lfcd;pgrep "lf" | xargs kill'
   alias cp='cp-p'
   alias man='batman'
   alias mv='mv-p'
