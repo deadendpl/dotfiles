@@ -23,7 +23,7 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                 |
 | Compositor                | [[https://github.com/hyprwm/Hyprland][Hyprland]]             |
 
-At hyprland's startup the script =~/.local/bin/pyrice= will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
+At hyprland's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
 Software riced with pywal [10/11]:

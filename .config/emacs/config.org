@@ -1,5 +1,5 @@
 #+title: GNU Emacs Configuration
-#+STARTUP: fold
+#+STARTUP: content
 #+auto_tangle: t
 
 * Table of Contents :toc:
@@ -146,6 +146,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-x B" 'ibuffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
 (keymap-global-set "C-c w k" 'windmove-up)
@@ -199,7 +200,8 @@ Default package management using =package.el=
     (package-gnupghome-dir (expand-file-name "gpg" custom/user-share-emacs-directory))
     (package-archives '(("melpa" . "https://melpa.org/packages/")
                         ("elpa" . "https://elpa.gnu.org/packages/")
-                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")))
+                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")
+                        ("jcs-elpa" . "https://jcs-emacs.github.io/jcs-elpa/packages/")))
     (package-async t)
   :init
     (package-initialize)
@@ -671,6 +673,10 @@ When I do =C-u= or =C-d= I will get a flash at the current line.
                        ;; evil-window-left
                        ;; evil-window-up
                        ;; evil-window-down
+                       windmove-up
+                       windmove-down
+                       windmove-left
+                       windmove-right
                        other-window
                        scroll-up-command
                        scroll-down-command
@@ -917,20 +923,16 @@ Adding highlights to TODO and related words.
   :custom (doom-modeline-battery t))
 #+end_src
 *** Rainbow delimiters
-Adding rainbow coloring to parentheses.
+Adding coloring to parentheses.
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
-*** Rainbow mode
-It displays the actual color as a background for any hex color value (ex. #ffffff).
+*** Dispaly color codes
+[[https://github.com/DevelopmentCool2449/colorful-mode][colorful-mode]] displays the actual color as a background for any hex color value (ex. #ffffff).
 #+begin_src emacs-lisp
-(use-package rainbow-mode
-  :diminish
-  :hook org-mode prog-mode conf-mode
-  ;; :general
-  ;;   (custom/leader-keys
-  ;;     "t r" '(rainbow-mode :wk "Rainbow mode"))
+(use-package colorful-mode
+  :hook (prog-mode text-mode)
 )
 #+end_src
 *** Theme
@@ -1139,6 +1141,8 @@ Built-in =savehist-mode= saves minibuffer history
 #+end_src
 ** Dired
 Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories.
+I don't know why, but I always think that dired doesn't have moving file functionality.
+It has with renaming function by pressing =R=. You can rename the file and/or move it to some other directory just like =mv= shell command.
 *** Dired
 I still do some configurations because dirvish at its core uses dired and its keybindings.
 #+begin_src emacs-lisp
@@ -1154,6 +1158,7 @@ I still do some configurations because dirvish at its core uses dired and its ke
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
+    (dired-hide-details-hide-symlink-targets nil)
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
@@ -1273,8 +1278,10 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
   :unless (custom/termux-p)
   :custom
     (elfeed-db-directory (expand-file-name "elfeed" custom/user-share-emacs-directory)) ; cache? directory
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
-    (elfeed-search-filter "@6-months-ago"))
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://planet.emacslife.com/atom.xml"))
+    (elfeed-search-filter "@6-months-ago")
+   :bind (:map elfeed-search-mode-map)
+   ("f" . elfeed-search-show-entry))
 #+end_src
 ** Git stuff
 [[https://magit.vc/][Magit]] is the best git client in Emacs.
@@ -1472,9 +1479,13 @@ A whole lot of stuff.
       ;; Moving between headlines
       '("k" .  org-previous-visible-heading)
       '("j" .  org-next-visible-heading)
+      '("<up>" .  org-previous-visible-heading)
+      '("<down>" .  org-next-visible-heading)
       ;; Moving between headings at the same level
       '("p" .  org-backward-heading-same-level)
       '("n" .  org-forward-heading-same-level)
+      '("<left>" .  org-backward-heading-same-level)
+      '("<right>" .  org-forward-heading-same-level)
       ;; Moving subtrees themselves
       '("K" .  org-subtree-up)
       '("J" .  org-subtree-down)
@@ -1998,24 +2009,37 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 (use-package nix-mode)
 #+end_src
 *** Languages
-Here will probably be smaller or bigger functions and tweaks as time goes on to improve my programming experience.
-**** Bash
+**** Shells
 #+begin_src emacs-lisp
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name))))))
+  :hook ((bash-ts-mode fish-mode)  . custom/sh-set-compile-command)
+  :preface
+    (defun custom/sh-set-compile-command ()
+      "The curent buffer gets `compile-command' changed to the following:
+- Current file gets an executable permission by using shell chmod, not Emacs `chmod'
+- The current file gets executed"
+      (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name)))))
+
+  :custom (sh-basic-offset 2)
 )
 #+end_src
 **** C++
 #+begin_src emacs-lisp
-(use-package c-ts-mode
-  :hook (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
+(use-package cc-mode
+  :hook ((c++-mode c++-ts-mode) .  custom/c++-set-compile-command)
+  :preface
+  (defun custom/c++-set-compile-command ()
+    "The curent buffer gets `compile-command' changed to the following:
+- The current file gets compiled using g++
+- The compiled file gets executed"
+    (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out")))
 )
 #+end_src
 **** Elisp
 #+begin_src emacs-lisp
 (defalias 'elisp-mode 'emacs-lisp-mode)
 #+end_src
-If I'll not forget about it then probably I will get the most use out of [[https://github.com/Malabarba/elisp-bug-hunter][it]] with checking errors in my config.
+If I'll not forget about it then probably I will get the most use out of [[https://github.com/Malabarba/elisp-bug-hunter][bug-hunter]] with checking errors in my config.
 #+begin_src emacs-lisp
 (use-package bug-hunter)
 #+end_src
@@ -2024,6 +2048,25 @@ If I'll not forget about it then probably I will get the most use out of [[https
 (use-package python
   :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
 )
+#+end_src
+**** Web
+[[https://github.com/netguy204/imp.el][impatient-mode]] allows for nice website development where the website reacts immediately to any edits.
+Since it requires manual https startup and website opening, I automated this in one function.
+#+begin_src emacs-lisp
+(use-package impatient-mode
+  :hook (impatient-mode . custom/impatient-open)
+  :preface
+  (defun custom/impatient-open ()
+    "Depending on `impatient-mode''s (variable) state,
+httpd gets started/stopped and the impatient website gets opened
+using `browse-url'."
+    (if impatient-mode
+        (if (httpd-running-p)
+            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))
+          (progn
+            (httpd-start)
+            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
+      (httpd-stop))))
 #+end_src
 *** Lorem ipsum generator
 #+begin_src emacs-lisp
@@ -2084,6 +2127,7 @@ This remaps specified major modes to its tree-sitter counterparts
     (auto-insert-query nil)
   :config
     (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
+    (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
     (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
     (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp")))
 #+end_src
@@ -2116,7 +2160,8 @@ This is the end of =unless= statement.
 *** Shell
 #+begin_src emacs-lisp
 (use-package fish-mode
-  :mode ("\\.fish\\'"))
+  :mode ("\\.fish\\'")
+  :custom (fish-indent-offset 2))
 #+end_src
 *** Eshell
 Eshell is an Emacs /shell/ that is written in Elisp.

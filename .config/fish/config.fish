@@ -1,3 +1,6 @@
+# emacs keybindings
+fish_default_key_bindings
+
 alias l='eza --all --long --header --icons --git --group-directories-first --color-scale all'
 alias clr='clear'
 alias cllr='clear && l'

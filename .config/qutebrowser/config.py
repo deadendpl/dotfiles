@@ -98,10 +98,10 @@ c.content.javascript.clipboard = "access-paste"
 
 # search
 c.url.searchengines = {
-  'DEFAULT': 'https://www.ecosia.org/search?method=index&q={}',
+  'DEFAULT': 'https://farside.link/searxng/search?q={}',
+  'eco': 'https://www.ecosia.org/search?method=index&q={}',
   'whoo': 'https://farside.link/whoogle/search?q={}&lang_interface=en',
   'ph': 'https://www.phind.com/search?q={}',
-  'xn': 'https://farside.link/searxng/search?q={}',
 }
 
 # Page(s) to open at the start.
@@ -110,9 +110,8 @@ c.url.start_pages = '~/.config/qutebrowser/start/start.html'
 c.url.default_page = '~/.config/qutebrowser/start/start.html'
 
 # dark mode
-c.colors.webpage.darkmode.enabled = True
+# c.colors.webpage.darkmode.enabled = True
 c.colors.webpage.preferred_color_scheme = "dark"
-c.colors.webpage.darkmode.enabled = False
 c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 
@@ -123,7 +122,7 @@ c.fonts.web.family.fixed = "jetbrainsmononerdfont"
 c.fonts.web.family.serif = "gomononerdfont"
 
 c.scrolling.smooth = False
-c.scrolling.bar = "overlay"
+c.scrolling.bar = "when-searching"
 
 # custom bindings
 # bindings = {

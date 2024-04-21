@@ -79,6 +79,7 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-x B" 'ibuffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
 (keymap-global-set "C-c w k" 'windmove-up)
@@ -123,7 +124,8 @@ Most of the stuff will get redirected here.")
     (package-gnupghome-dir (expand-file-name "gpg" custom/user-share-emacs-directory))
     (package-archives '(("melpa" . "https://melpa.org/packages/")
                         ("elpa" . "https://elpa.gnu.org/packages/")
-                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")))
+                        ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")
+                        ("jcs-elpa" . "https://jcs-emacs.github.io/jcs-elpa/packages/")))
     (package-async t)
   :init
     (package-initialize)
@@ -263,6 +265,10 @@ Most of the stuff will get redirected here.")
                        ;; evil-window-left
                        ;; evil-window-up
                        ;; evil-window-down
+                       windmove-up
+                       windmove-down
+                       windmove-left
+                       windmove-right
                        other-window
                        scroll-up-command
                        scroll-down-command
@@ -427,12 +433,8 @@ Most of the stuff will get redirected here.")
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 
-(use-package rainbow-mode
-  :diminish
-  :hook org-mode prog-mode conf-mode
-  ;; :general
-  ;;   (custom/leader-keys
-  ;;     "t r" '(rainbow-mode :wk "Rainbow mode"))
+(use-package colorful-mode
+  :hook (prog-mode text-mode)
 )
 
 (use-package doom-themes
@@ -587,6 +589,7 @@ Most of the stuff will get redirected here.")
     (dired-kill-when-opening-new-dired-buffer t)
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
+    (dired-hide-details-hide-symlink-targets nil)
   :config
     (defun custom/dired-go-to-home ()
       (interactive)
@@ -665,8 +668,10 @@ Most of the stuff will get redirected here.")
   :unless (custom/termux-p)
   :custom
     (elfeed-db-directory (expand-file-name "elfeed" custom/user-share-emacs-directory)) ; cache? directory
-    (elfeed-feeds  '("https://sachachua.com/blog/feed/"))
-    (elfeed-search-filter "@6-months-ago"))
+    (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://planet.emacslife.com/atom.xml"))
+    (elfeed-search-filter "@6-months-ago")
+   :bind (:map elfeed-search-mode-map)
+   ("f" . elfeed-search-show-entry))
 
 (use-package magit
   :custom
@@ -851,9 +856,13 @@ Most of the stuff will get redirected here.")
       ;; Moving between headlines
       '("k" .  org-previous-visible-heading)
       '("j" .  org-next-visible-heading)
+      '("<up>" .  org-previous-visible-heading)
+      '("<down>" .  org-next-visible-heading)
       ;; Moving between headings at the same level
       '("p" .  org-backward-heading-same-level)
       '("n" .  org-forward-heading-same-level)
+      '("<left>" .  org-backward-heading-same-level)
+      '("<right>" .  org-forward-heading-same-level)
       ;; Moving subtrees themselves
       '("K" .  org-subtree-up)
       '("J" .  org-subtree-down)
@@ -1194,11 +1203,25 @@ Most of the stuff will get redirected here.")
 (use-package nix-mode)
 
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook (bash-ts-mode . (lambda () (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name))))))
+  :hook ((bash-ts-mode fish-mode)  . custom/sh-set-compile-command)
+  :preface
+    (defun custom/sh-set-compile-command ()
+      "The curent buffer gets `compile-command' changed to the following:
+- Current file gets an executable permission by using shell chmod, not Emacs `chmod'
+- The current file gets executed"
+      (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name)))))
+
+  :custom (sh-basic-offset 2)
 )
 
-(use-package c-ts-mode
-  :hook (c++-ts-mode . (lambda () (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
+(use-package cc-mode
+  :hook ((c++-mode c++-ts-mode) .  custom/c++-set-compile-command)
+  :preface
+  (defun custom/c++-set-compile-command ()
+    "The curent buffer gets `compile-command' changed to the following:
+- The current file gets compiled using g++
+- The compiled file gets executed"
+    (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out")))
 )
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1208,6 +1231,21 @@ Most of the stuff will get redirected here.")
 (use-package python
   :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
 )
+
+(use-package impatient-mode
+  :hook (impatient-mode . custom/impatient-open)
+  :preface
+  (defun custom/impatient-open ()
+    "Depending on `impatient-mode''s (variable) state,
+httpd gets started/stopped and the impatient website gets opened
+using `browse-url'."
+    (if impatient-mode
+        (if (httpd-running-p)
+            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))
+          (progn
+            (httpd-start)
+            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
+      (httpd-stop))))
 
 (use-package lorem-ipsum
   :custom (lorem-ipsum-sentence-separator " "))
@@ -1250,6 +1288,7 @@ Most of the stuff will get redirected here.")
     (auto-insert-query nil)
   :config
     (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
+    (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
     (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
     (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp")))
 
@@ -1273,7 +1312,8 @@ Most of the stuff will get redirected here.")
 )
 
 (use-package fish-mode
-  :mode ("\\.fish\\'"))
+  :mode ("\\.fish\\'")
+  :custom (fish-indent-offset 2))
 
 (use-package eshell
   :hook

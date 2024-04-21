@@ -46,7 +46,7 @@ file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath
 
 # reloading bunch of stuff
 killall swaybg
-swaybg -m fill -i "$(< "${HOME}/.cache/wal/wal")" &
+swaybg -m fit -i "$(< "${HOME}/.cache/wal/wal")" &
 $HOME/.config/scripts/hypr/waybar-start.sh
 swaync-client -rs
 swaync-client -R
