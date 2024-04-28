@@ -149,7 +149,7 @@
 
   "custom/gammastep": {
     "format": " 󰛐 ",
-    "tooltip": true,
+    // "tooltip": true,
     // "tooltip-format": "Turn on eye protection!",
     "on-click": "~/.config/scripts/hypr/gammastep.sh",
   },

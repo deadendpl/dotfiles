@@ -156,7 +156,8 @@ else
                      wpgtk \
                      gtk-theme-flat-color-git \
                      qt5-styleplugins \
-                     qt6gtk2
+                     qt6gtk2 \
+                     gradience
 
   wpg-install.sh -g
 fi

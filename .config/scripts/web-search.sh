@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "Anna's Archive" "AUR (Arch User Repository)" "Arch Wiki" "Arch Packages" "Brave Search" "Ecosia" "GameFAQs" "Github" "Invidious (YouTube)" "Melpa" "Nitter (Twitter/X)" "Nix Packages" "NixOS Wiki" "Piped (YouTube)" "Phind" "SearXNG" "Whoogle" ) # add or remove search engines here
+declare -a search_engines=( "Anna's Archive" "AUR (Arch User Repository)" "Arch Wiki" "Arch Packages" "Brave Search" "Ecosia" "GameFAQs" "Github" "Melpa" "Nitter (Twitter/X)" "Nix Packages" "NixOS Wiki" "YouTube (Invidious)" "YouTube (Piped)" "Phind" "SearXNG" "Whoogle" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 

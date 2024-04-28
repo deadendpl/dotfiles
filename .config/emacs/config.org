@@ -36,6 +36,11 @@ This config is used on Emacs _29.3_ and is intended for use with that version.
 #+begin_src emacs-lisp :tangle ./early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
       gc-cons-threshold most-positive-fixnum)
+
+;; Faster to disable these here (before they've been initialized)
+(push '(menu-bar-lines . 0) default-frame-alist)
+(push '(tool-bar-lines . 0) default-frame-alist)
+(push '(vertical-scroll-bars) default-frame-alist)
 #+end_src
 * The rest
 #+PROPERTY: header-args :tangle init.el
@@ -108,6 +113,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (setq-default visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
+              use-file-dialog nil
               initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
               initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-scratch-message nil ; scratch buffer message
@@ -146,7 +152,6 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-x K" 'kill-this-buffer)
-(keymap-global-set "C-x B" 'ibuffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
 (keymap-global-set "C-c w k" 'windmove-up)
@@ -159,12 +164,7 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 )
 
 ;; make utf-8 the coding system
-(set-terminal-coding-system  'utf-8)
-(set-keyboard-coding-system  'utf-8)
-(set-language-environment    'utf-8)
-(set-default-coding-systems  'utf-8)
-(set-selection-coding-system 'utf-8)
-(prefer-coding-system        'utf-8)
+(set-language-environment "UTF-8")
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -178,6 +178,8 @@ This function ignores the information stored in WINDOW's `quit-restore' window p
 
 ;; returning to normal garbage collection
 (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
+
+(add-hook 'after-init-hook 'global-hl-line-mode)
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -557,8 +559,8 @@ Other keybindings are defined in other sections with =:general= use-package keyw
 #+begin_src emacs-lisp
 (use-package meow
   :demand
-  :init
-    (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
+  ;; :init
+  ;;   (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
   :custom
     (meow-use-clipboard t)
     (meow-expand-hint-remove-delay 0)
@@ -783,6 +785,12 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
   ;;   ("C-c t r"   . tab-rename)
   ;; )
 )
+#+end_src
+*** Ibuffer
+#+begin_src emacs-lisp
+(use-package ibuffer
+  :bind ("C-x B" . ibuffer)
+  :custom (ibuffer-default-sorting-mode 'filename/process))
 #+end_src
 ** Appearance
 *** Fonts
@@ -1057,10 +1065,10 @@ Completion will start automatically after you type a few letters.
 The completion that you get when doing =M-x= for example that lists candidates to choose from.
 **** Vertico
 I switched from [[https://github.com/abo-abo/swiper#ivy][Ivy]] to [[https://github.com/minad/vertico][Vertico]] because it's simpler.
-I don't need it loading immediately so I defer it by 2 seconds.
+I don't need it loading immediately so I defer it by a second.
 #+begin_src emacs-lisp
 (use-package vertico
-  :defer 2
+  :defer 1
   :bind (:map vertico-map
     ("C-j" . vertico-next)
     ("C-k" . vertico-previous)
@@ -1118,15 +1126,15 @@ Built-in =savehist-mode= saves minibuffer history
 #+begin_src emacs-lisp
 (use-package consult
   :after vertico
-  ;; :init
+  :init
      ;; Use `consult-completion-in-region' if Vertico is enabled.
      ;; Otherwise use the default `completion--in-region' function.
-     ;; (setq completion-in-region-function
-     ;;       (lambda (&rest args)
-     ;;         (apply (if vertico-mode
-     ;;                    #'consult-completion-in-region
-     ;;                  #'completion--in-region)
-     ;;                args)))
+     (setq completion-in-region-function
+           (lambda (&rest args)
+             (apply (if vertico-mode
+                        #'consult-completion-in-region
+                      #'completion--in-region)
+                    args)))
 )
 #+end_src
 **** Annotations (marginalia)
@@ -1159,11 +1167,11 @@ I still do some configurations because dirvish at its core uses dired and its ke
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
     (dired-hide-details-hide-symlink-targets nil)
-  :config
-    (defun custom/dired-go-to-home ()
-      (interactive)
-      "Spawns `dired' in user's home directory."
-      (dired "~/"))
+  ;; :config
+  ;;   (defun custom/dired-go-to-home ()
+  ;;     (interactive)
+  ;;     "Spawns `dired' in user's home directory."
+  ;;     (dired "~/"))
     ;; (evil-collection-define-key 'normal 'dired-mode-map
     ;;   [remap evil-yank] 'dired-ranger-copy
     ;;   "gh" 'custom/dired-go-to-home
@@ -1745,7 +1753,7 @@ This [[https://github.com/jdtsmith/org-modern-indent][package]] adds borders to 
          :unnarrowed t)
         ("a" "animanga" plain "%?"
          :target (file+head "animan/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime: \n* Manga :manga:")
+                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
          :unnarrowed t)
     ))
     (org-roam-dailies-capture-templates
@@ -1972,12 +1980,11 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
                    (display-buffer-at-bottom)
                    (window-height . 5))))
 #+end_src
-*** Flycheck
+*** Flycheck :ARCHIVE:
 [[https://www.flycheck.org][Flycheck]] is on the fly syntax checker.
 For more information on language support, [[https://www.flycheck.org/en/latest/languages.html][read this]].
 #+begin_src emacs-lisp
 (use-package flycheck
-  :after prog-mode
   :hook (prog-mode . flycheck-mode))
 #+end_src
 *** LSP :ARCHIVE:
@@ -2374,6 +2381,9 @@ This variable desribes the way chosen buffers are displaying and behaving.
          (display-buffer-at-bottom)
          (window-height . 12)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
+
+        ("\\*which-key\\*"
+         (window-parameters . ((mode-line-format . none))))
 
         ("\\*Messages\\*"
          (display-buffer-at-bottom)

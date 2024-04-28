@@ -43,6 +43,7 @@ Most of the stuff will get redirected here.")
 (setq-default visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
               use-dialog-box nil ; turns off graphical dialog boxes
+              use-file-dialog nil
               initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
               initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
               initial-scratch-message nil ; scratch buffer message
@@ -79,7 +80,6 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-x K" 'kill-this-buffer)
-(keymap-global-set "C-x B" 'ibuffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
 (keymap-global-set "C-c w k" 'windmove-up)
@@ -92,12 +92,7 @@ Most of the stuff will get redirected here.")
 )
 
 ;; make utf-8 the coding system
-(set-terminal-coding-system  'utf-8)
-(set-keyboard-coding-system  'utf-8)
-(set-language-environment    'utf-8)
-(set-default-coding-systems  'utf-8)
-(set-selection-coding-system 'utf-8)
-(prefer-coding-system        'utf-8)
+(set-language-environment "UTF-8")
 
 (defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
   "Create parent directory if not exists while visiting file."
@@ -111,6 +106,8 @@ Most of the stuff will get redirected here.")
 
 ;; returning to normal garbage collection
 (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
+
+(add-hook 'after-init-hook 'global-hl-line-mode)
 
 (use-package use-package
   :custom
@@ -152,8 +149,8 @@ Most of the stuff will get redirected here.")
 
 (use-package meow
   :demand
-  :init
-    (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
+  ;; :init
+  ;;   (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
   :custom
     (meow-use-clipboard t)
     (meow-expand-hint-remove-delay 0)
@@ -351,6 +348,10 @@ Most of the stuff will get redirected here.")
   ;; )
 )
 
+(use-package ibuffer
+  :bind ("C-x B" . ibuffer)
+  :custom (ibuffer-default-sorting-mode 'filename/process))
+
 (set-face-attribute 'default nil
   :font "JetBrainsMono NFM"
   :height 90
@@ -513,7 +514,7 @@ Most of the stuff will get redirected here.")
 )
 
 (use-package vertico
-  :defer 2
+  :defer 1
   :bind (:map vertico-map
     ("C-j" . vertico-next)
     ("C-k" . vertico-previous)
@@ -559,15 +560,15 @@ Most of the stuff will get redirected here.")
 
 (use-package consult
   :after vertico
-  ;; :init
+  :init
      ;; Use `consult-completion-in-region' if Vertico is enabled.
      ;; Otherwise use the default `completion--in-region' function.
-     ;; (setq completion-in-region-function
-     ;;       (lambda (&rest args)
-     ;;         (apply (if vertico-mode
-     ;;                    #'consult-completion-in-region
-     ;;                  #'completion--in-region)
-     ;;                args)))
+     (setq completion-in-region-function
+           (lambda (&rest args)
+             (apply (if vertico-mode
+                        #'consult-completion-in-region
+                      #'completion--in-region)
+                    args)))
 )
 
 (use-package marginalia
@@ -590,11 +591,11 @@ Most of the stuff will get redirected here.")
     (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
     (dired-auto-revert-buffer t)
     (dired-hide-details-hide-symlink-targets nil)
-  :config
-    (defun custom/dired-go-to-home ()
-      (interactive)
-      "Spawns `dired' in user's home directory."
-      (dired "~/"))
+  ;; :config
+  ;;   (defun custom/dired-go-to-home ()
+  ;;     (interactive)
+  ;;     "Spawns `dired' in user's home directory."
+  ;;     (dired "~/"))
     ;; (evil-collection-define-key 'normal 'dired-mode-map
     ;;   [remap evil-yank] 'dired-ranger-copy
     ;;   "gh" 'custom/dired-go-to-home
@@ -1048,7 +1049,7 @@ Most of the stuff will get redirected here.")
          :unnarrowed t)
         ("a" "animanga" plain "%?"
          :target (file+head "animan/${slug}.org"
-                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime: \n* Manga :manga:")
+                            "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
          :unnarrowed t)
     ))
     (org-roam-dailies-capture-templates
@@ -1194,10 +1195,6 @@ Most of the stuff will get redirected here.")
 ;;   ;; (switch-to-buffer-other-window "*Async Shell Command*")
 ;;   (evil-change-state 'normal)
 ;;   (evil-local-set-key 'normal (kbd "q") 'quit-window))
-
-(use-package flycheck
-  :after prog-mode
-  :hook (prog-mode . flycheck-mode))
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1414,6 +1411,9 @@ using `browse-url'."
          (display-buffer-at-bottom)
          (window-height . 12)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
+
+        ("\\*which-key\\*"
+         (window-parameters . ((mode-line-format . none))))
 
         ("\\*Messages\\*"
          (display-buffer-at-bottom)
