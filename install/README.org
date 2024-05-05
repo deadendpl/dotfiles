@@ -216,7 +216,8 @@ else
                      freefilesync \
                      picard \
                      rsgain \
-                     nicotine+
+                     nicotine+ \
+                     xdg-ninja
                      # syncthing-gtk
 fi
 #+end_src
@@ -270,16 +271,18 @@ rm -rf grub_gtg
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
 sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 #+end_src
+* Fish setup
+#+begin_src sh
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+fish -c "omf install foreign-env"
+#+end_src
 * Setting defaults
 It sets some apps to be defaults for some files
 #+begin_src sh
-xdg-mime default org.pwmt.zathura.desktop application/pdf
-xdg-mime default org.pwmt.zathura.desktop application/epub+zip
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
-xdg-mime default pcmanfm.desktop inode/directory
 #+end_src
 
-This sets GTK theming and fonts, on bigger screen you might want to increase the size.
+This sets GTK theming and fonts, on bigger screen you might want to increase the size of fonts.
 #+begin_src sh
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"

@@ -999,14 +999,15 @@ Most of the stuff will get redirected here.")
 (use-package bug-hunter)
 
 (use-package python
-  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
+  :hook (python-base-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
   )
 
 (use-package impatient-mode
   :hook (impatient-mode . custom/impatient-open)
   :preface
   (defun custom/impatient-open ()
-    "Depending on `impatient-mode''s (variable) state,
+    "Opens/closes impatient-mode website.
+Depending on `impatient-mode''s (variable) state,
 httpd gets started/stopped and the impatient website gets opened
 using `browse-url'."
     (if impatient-mode
@@ -1017,39 +1018,19 @@ using `browse-url'."
             (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
       (httpd-stop))))
 
+(use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
+  :hook (html-mode . (lambda () (smartparens-mode 0)))
+  :preface
+  (defun html-close-tag ()
+    "Inserts > and closes tag."
+    (interactive)
+    (insert ">")
+    (sgml-close-tag))
+  :bind (:map html-mode-map
+              (">" . html-close-tag)))
+
 (use-package lorem-ipsum
   :custom (lorem-ipsum-sentence-separator " "))
-
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-        (c "https://github.com/tree-sitter/tree-sitter-c")
-        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-        (css "https://github.com/tree-sitter/tree-sitter-css")
-        ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        ;; (go "https://github.com/tree-sitter/tree-sitter-go")
-        ;; (html "https://github.com/tree-sitter/tree-sitter-html")
-        ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-        (json "https://github.com/tree-sitter/tree-sitter-json")
-        ;; (make "https://github.com/alemuller/tree-sitter-make")
-        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (python "https://github.com/tree-sitter/tree-sitter-python")))
-;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
-;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-
-(unless (treesit-language-available-p 'bash)
-  (message "Installing tree-sitter parsers")
-  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
-
-;; (setq major-mode-remap-alist
-;;  '((c-or-c++-mode . c-or-c++-ts-mode)
-;;    (c++-mode . c++-ts-mode)
-;;    (css-mode . css-ts-mode)
-;;    (python-mode . python-ts-mode)
-;;    (sh-mode . bash-ts-mode)
-;;    (js-json-mode . json-ts-mode)))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)

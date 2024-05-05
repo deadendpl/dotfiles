@@ -172,7 +172,8 @@ else
                      freefilesync \
                      picard \
                      rsgain \
-                     nicotine+
+                     nicotine+ \
+                     xdg-ninja
                      # syncthing-gtk
 fi
 
@@ -216,10 +217,10 @@ rm -rf grub_gtg
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
 sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 
-xdg-mime default org.pwmt.zathura.desktop application/pdf
-xdg-mime default org.pwmt.zathura.desktop application/epub+zip
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+fish -c "omf install foreign-env"
+
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
-xdg-mime default pcmanfm.desktop inode/directory
 
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"

@@ -1,10 +1,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-export PATH=~/.config/emacs/bin:~/.local/bin:$PATH
-EDITOR='emacsclient -t -a "nvim"'
-VISUAL='emacsclient -c -a "emacs"'
-export HISTFILE="~/.local/share/bash/bash-history"
+source .profile
 
 # apt
 alias ainst='sudo apt install'
@@ -55,7 +52,7 @@ alias demacs='emacs --daemon'
 alias remacs='pkill emacs && emacs --daemon'
 alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 alias myip='curl "https://wtfismyip.com/text"'
-PS1='[\u@\h \W]\$'
+# PS1='[\u@\h \W]\$'
 
 if [ -n "$PS1" ]; then
   fortune | pokemonsay

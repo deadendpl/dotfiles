@@ -16,7 +16,7 @@
   - [[#git-stuff][Git stuff]]
   - [[#org-mode][Org Mode]]
   - [[#parenthesis][Parenthesis]]
-  - [[#real-programming][Real programming]]
+  - [[#programming][Programming]]
   - [[#shells-and-terminals][Shells and terminals]]
   - [[#sudo-edit][Sudo edit]]
   - [[#translation][Translation]]
@@ -1291,7 +1291,7 @@ Table of contents after after typing =:toc:= in header
   :hook (prog-mode) ;; add `smartparens-mode' to these hooks
   :config (require 'smartparens-config)) ;; load default config
 #+end_src
-** Real programming
+** Programming
 This bit is not intended for Termux usage. That's why I include =unless= statement here.
 #+begin_src emacs-lisp
 (unless (custom/termux-p)
@@ -1325,12 +1325,11 @@ For more information on language support, [[https://www.flycheck.org/en/latest/l
 #+begin_src emacs-lisp
 (use-package eglot
   :ensure nil
-  :after prog-mode
   :custom (eglot-autoshutdown t))
 
-(use-package flycheck-eglot
-  :after eglot
-  :hook (eglot-managed-mode . flycheck-eglot-mode))
+;; (use-package flycheck-eglot
+;;   :after eglot
+;;   :hook (eglot-managed-mode . flycheck-eglot-mode))
 #+end_src
 
 With this major modes automatically turn on eglot.
@@ -1393,7 +1392,7 @@ If I'll not forget about it then probably I will get the most use out of [[https
 **** Python
 #+begin_src emacs-lisp
 (use-package python
-  :hook (python-ts-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
+  :hook (python-base-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
   )
 #+end_src
 **** Web
@@ -1404,7 +1403,8 @@ Since it requires manual https startup and website opening, I automated this in 
   :hook (impatient-mode . custom/impatient-open)
   :preface
   (defun custom/impatient-open ()
-    "Depending on `impatient-mode''s (variable) state,
+    "Opens/closes impatient-mode website.
+Depending on `impatient-mode''s (variable) state,
 httpd gets started/stopped and the impatient website gets opened
 using `browse-url'."
     (if impatient-mode
@@ -1415,12 +1415,26 @@ using `browse-url'."
             (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
       (httpd-stop))))
 #+end_src
+
+Here I add autocompletion when typing =>= in html modes.
+#+begin_src emacs-lisp
+(use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
+  :hook (html-mode . (lambda () (smartparens-mode 0)))
+  :preface
+  (defun html-close-tag ()
+    "Inserts > and closes tag."
+    (interactive)
+    (insert ">")
+    (sgml-close-tag))
+  :bind (:map html-mode-map
+              (">" . html-close-tag)))
+#+end_src
 *** Lorem ipsum generator
 #+begin_src emacs-lisp
 (use-package lorem-ipsum
   :custom (lorem-ipsum-sentence-separator " "))
 #+end_src
-*** Treesitter
+*** Tree-sitter :ARCHIVE:
 Emacs from version 29 supports tree-sitter.
 Tree-sitter is fast parser and smart syntax highlighter for languages.
 You need to have ~tree-sitter~ package installed on your system.
@@ -1455,13 +1469,13 @@ This checks if parsers (only bash) are installed and if not then bulk installs t
 
 This remaps specified major modes to its tree-sitter counterparts.
 #+begin_src emacs-lisp
-;; (setq major-mode-remap-alist
-;;  '((c-or-c++-mode . c-or-c++-ts-mode)
-;;    (c++-mode . c++-ts-mode)
-;;    (css-mode . css-ts-mode)
-;;    (python-mode . python-ts-mode)
-;;    (sh-mode . bash-ts-mode)
-;;    (js-json-mode . json-ts-mode)))
+(setq major-mode-remap-alist
+ '((c-or-c++-mode . c-or-c++-ts-mode)
+   (c++-mode . c++-ts-mode)
+   (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)
+   (sh-mode . bash-ts-mode)
+   (js-json-mode . json-ts-mode)))
 #+end_src
 *** Templates
 **** Startup templates

@@ -15,6 +15,11 @@ wpg-tile() {
   wal --cols16 --backend haishoku -ne -i "$wallpaper_path"
 }
 
+gradience-wrap () {
+  gradience-cli monet -n pywal -p $(cat ~/.cache/wal/wal) --theme dark
+  gradience-cli apply -n pywal --gtk gtk4
+}
+
 # file-line-change() {
 #   arg1=$(realpath "$1")  # file name
 #   arg2=$2                # string in a line that will be replaced
@@ -45,19 +50,19 @@ wpg-tile() {
 wpg-tile "$1"
 
 cp -f ~/.cache/wal/pywal.json ~/.config/presets/user/pywal.json
-gradience-cli apply -n pywal --gtk gtk4 &
+
+gradience-wrap &
 
 # reloading bunch of stuff
-killall swaybg
+if pgrep "swaybg" > /dev/null; then
+  killall swaybg
+fi
 swaybg -m fit -i "$(< "${HOME}/.cache/wal/wal")" &
 $HOME/.config/scripts/hypr/waybar-start.sh
-swaync-client -rs
-swaync-client -R
-emacsclient --eval "(load-theme 'ewal-doom-one t)"
+swaync-client -rs &
+swaync-client -R &
+emacsclient --eval "(load-theme 'ewal-doom-one t)" &
 
-notify-send "New rice applied"
-
-# I do it after notification confirmation because it takes few seconds
 if pgrep "qutebrowser" > /dev/null; then
   qutebrowser :config-source &
 fi
@@ -65,3 +70,5 @@ fi
 if pgrep "firefox" > /dev/null; then
   pywalfox update &
 fi
+
+notify-send "New rice applied"
