@@ -13,3 +13,7 @@ ln -s $PREFIX/../home/.dotfiles/termux/.termux $PREFIX/../home/
 cd ~/.termux
 wget "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFontMono-Regular.ttf"
 mv JetBrainsMonoNerdFontMono-Regular.ttf font.ttf
+
+# importing .profile
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+fish -c "omf install foreign-env"
