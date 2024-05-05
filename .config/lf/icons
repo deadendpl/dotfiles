@@ -1,4 +1,4 @@
-# -*- mode: conf-unix -*-
+# -*- mode: conf -*-
 # vim:ft=conf
 
 # These examples require Nerd Fonts or a compatible font to be used.
@@ -40,7 +40,7 @@ fi             # FILE
 *.apk           
 *.lock          
 *.iso           
-*.org            
+*.org           
 *.styl          
 *.sass          
 *.scss          

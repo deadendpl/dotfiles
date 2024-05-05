@@ -3,8 +3,6 @@
 file="$HOME/Sync/foo/wazne/bookmarks"
 
 if [[ -f $file ]]; then
-  sort $file -o $file
-
   options="$(cat $file)"
 
   QUERY=$(echo -e "$options" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -p Bookmarks)

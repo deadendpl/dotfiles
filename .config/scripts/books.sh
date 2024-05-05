@@ -14,5 +14,5 @@ file_count=${#files[@]}
 book=$(printf '%s\n' "${files[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l "$file_count" -p "Books")
 
 if [[ -n "$book" ]]; then
-  sioyek "$book"
+  zathura "$book"
 fi

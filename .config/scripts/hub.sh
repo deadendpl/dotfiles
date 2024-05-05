@@ -2,8 +2,6 @@
 
 if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
   terminal=foot
-else
-  terminal=alacritty
 fi
 
 dir="$HOME/.config/scripts"
@@ -14,48 +12,50 @@ declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Toggle 
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
-if [[ $choice == "(hypr) Screen orientation" ]]; then
-  hypr/screen-orientation.sh
-
-elif [[ $choice == "(hypr) Notification center" ]]; then
-  swaync-client -t
-
-elif [[ $choice == "(hypr) New wallpaper" ]]; then
-  ~/.local/bin/pyrice
-
-elif [[ $choice == "(hypr) Toggle warm colors" ]]; then
-  hypr/gammastep.sh
-
-elif [[ $choice == "(hypr) Waybar re/start" ]]; then
-  hypr/waybar-start.sh
-
-elif [[ $choice == "NVIM config as root" ]]; then
-  cd tweaks && $terminal -e ./nvim-as-root.sh
-
-elif [[ $choice == "Bookmarks" ]]; then
-  ./bookmarks.sh
-
-elif [[ $choice == "Books" ]]; then
-  ./books.sh
-
-elif [[ $choice == "Power menu" ]]; then
-  ./power.sh
-
-elif [[ $choice == "Sxhkd help"  ]]; then
-  bspwm/sxhkd-help.sh
-
-elif [[ $choice == "Web search" ]]; then
-  ./web-search.sh
-
-elif [[ $choice == "Changing root shell" ]]; then
-  cd tweaks && $terminal -e ./the-same-shell-as-root.sh
-
-elif [[ $choice == "Touchpad on Xorg" ]]; then
-  cd tweaks && $terminal -e ./touchpad-on-xorg.sh
-
-elif [[ $choice == "Emacs server re/start" ]]; then
-  ./emacs.sh
-
-else
-  exit
-fi
+case $choice in
+  "(hypr) Screen orientation")
+    hypr/screen-orientation.sh
+    ;;
+  "(hypr) Notification center")
+    swaync-client -t
+    ;;
+  "(hypr) New wallpaper")
+    ~/.local/bin/pyrice
+    ;;
+  "(hypr) Toggle warm colors")
+    hypr/gammastep.sh
+    ;;
+  "(hypr) Waybar re/start")
+    hypr/waybar-start.sh
+    ;;
+  "NVIM config as root")
+    cd tweaks && $terminal -e ./nvim-as-root.sh
+    ;;
+  "Bookmarks")
+    ./bookmarks.sh
+    ;;
+  "Books")
+    ./books.sh
+    ;;
+  "Power menu")
+    ./power.sh
+    ;;
+  "Sxhkd help" )
+    bspwm/sxhkd-help.sh
+    ;;
+  "Web search")
+    ./web-search.sh
+    ;;
+  "Changing root shell")
+    cd tweaks && $terminal -e ./the-same-shell-as-root.sh
+    ;;
+  "Touchpad on Xorg")
+    cd tweaks && $terminal -e ./touchpad-on-xorg.sh
+    ;;
+  "Emacs server re/start")
+    ./emacs.sh
+    ;;
+  *)
+    exit 0
+    ;;
+esac

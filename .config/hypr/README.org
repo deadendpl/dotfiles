@@ -186,13 +186,14 @@ Then we have window rules and border color for floating windows
 windowrule = float, wdisplays
 windowrule = float, blueberry
 windowrule = float, pavucontrol
-windowrule = float, feh
 windowrule = float, swayimg
 windowrule = float, gcolor3
-windowrule = float, org.keepassxc.KeePassXC
+# windowrule = float, org.keepassxc.KeePassXC
 windowrule = fullscreen, Waydroid
 windowrule = opacity 1.0 override 0.05 override,^(scratch)$
-windowrulev2 = float,class:^(scratch)$
+# windowrulev2 = float,class:^(scratch)$
+windowrulev2 = float,title:^(Unlock Database - KeePassXC)$
+windowrulev2 = float,title:^(KeePassXC - Browser Access Request)$
 windowrulev2 = float,class:^(firefox)$,title:^(Picture-in-Picture)$
 windowrulev2 = bordercolor rgb(FF5555) rgb(880808),floating:1
 

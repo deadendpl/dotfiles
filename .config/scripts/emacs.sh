@@ -2,15 +2,9 @@
 
 cd $HOME
 
-while pgrep "emacs"
-do
-  pgrep "emacs" | xargs kill
-  echo "Emacs launches..."
-  emacs --daemon
-  notify-send -i emacs "Emacs has started."
-  exit
-done
+if pgrep "emacs" > /dev/null; then
+  pkill emacs
+fi
 
-echo "Emacs launches..."
 emacs --daemon
 notify-send -i emacs "Emacs has started."

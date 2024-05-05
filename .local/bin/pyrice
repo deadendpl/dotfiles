@@ -11,7 +11,7 @@ wpg-tile() {
 
   wallpaper_path=$(realpath "$wallpaper_path")
 
-  wpg --backend haishoku -n -s "$wallpaper_path"
+  wpg --noreload --backend haishoku -n -s "$wallpaper_path"
   wal --cols16 --backend haishoku -ne -i "$wallpaper_path"
 }
 
@@ -20,10 +20,10 @@ wpg-tile() {
 #   arg2=$2                # string in a line that will be replaced
 #   arg3=$3                # string that will replace the line
 
-#   # Get the line containing "@import"
+    # Get the line containing "@import"
 #   old_line=$(grep "$arg2" "$arg1")
 
-#   # Check if the old line exists in the file
+    # Check if the old line exists in the file
 #   if [ -n "$old_line" ]; then
 #     # Replace the line using sed
 #     new_line="$arg3"
@@ -34,18 +34,18 @@ wpg-tile() {
 #   fi
 # }
 
+# waybar
+# file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
+# qutebrowser
+# file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
+# zathura
+# file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
+
 # # Use the wpg-tile function with the provided or default wallpaper file path
 wpg-tile "$1"
 
 cp -f ~/.cache/wal/pywal.json ~/.config/presets/user/pywal.json
 gradience-cli apply -n pywal --gtk gtk4 &
-
-# # waybar
-# file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
-# # qutebrowser
-# file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
-# # zathura
-# file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
 # reloading bunch of stuff
 killall swaybg

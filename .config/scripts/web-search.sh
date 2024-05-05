@@ -26,10 +26,10 @@ case $selected_engine in
     "Github")
         URL="https://github.com/search?q="
         ;;
-    "Invidious (YouTube)")
+    "YouTube (Invidious)")
         URL="https://farside.link/invidious/search?q="
         ;;
-    "Piped (YouTube)")
+    "YouTube (Piped)")
         URL="https://farside.link/piped/results?search_query="
         ;;
     "Nix Packages")

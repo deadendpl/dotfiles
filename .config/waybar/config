@@ -1,156 +1,156 @@
 // -*- mode: js-json -*-
 {
-  "layer": "top",
-  "position": "top",
-  "height": 24,
-  "spacing": 7,
+    "layer": "top",
+    "position": "top",
+    "height": 24,
+    "spacing": 7,
 
-  "modules-left": [
-    "hyprland/workspaces",
-    "wlr/taskbar",
-  ],
+    "modules-left": [
+        "hyprland/workspaces",
+        "wlr/taskbar",
+    ],
 
-  "modules-center": [
-    "hyprland/window",
-  ],
+    "modules-center": [
+        "hyprland/window",
+    ],
 
-  "modules-right": [
-    "tray",
-    "pulseaudio",
-    "backlight",
-    "custom/gammastep",
-    "network",
-    "bluetooth",
-    "battery",
-    "clock",
-  ],
+    "modules-right": [
+        "tray",
+        "pulseaudio",
+        "backlight",
+        "custom/gammastep",
+        "network",
+        "bluetooth",
+        "battery",
+        "clock",
+    ],
 
 
-  "wlr/taskbar": {
-    "on-click": "activate",
-    "on-click-right": "close",
-  },
-
-  "hyprland/workspaces": {
-    "on-click": "activate",
-    "on-scroll-up": "hyprctl dispatch workspace e-1",
-    "on-scroll-down": "hyprctl dispatch workspace e+1",
-    "format": "{icon}",
-    "format-icons" : {
-      "1": "󰖟",
-      "2": "󰅩",
-      "active": "",
-      "default": "",
+    "wlr/taskbar": {
+        "on-click": "activate",
+        "on-click-right": "close",
     },
 
-    "persistent-workspaces": {
-      "*": 5, // 2 workspaces by default on every monitor
-      // "1": [],
-      // "2": [],
-      // "3": [],
-      // "4": [],
-      // "5": [],
-      // "6": [],
-      // "7": [],
-      // "8": [],
-      // "9": [],
+    "hyprland/workspaces": {
+        "on-click": "activate",
+        "on-scroll-up": "hyprctl dispatch workspace e-1",
+        "on-scroll-down": "hyprctl dispatch workspace e+1",
+        "format": "{icon}",
+        "format-icons" : {
+            "1": "󰖟",
+            "2": "󰅩",
+            "active": "",
+            "default": "",
+        },
+
+        "persistent-workspaces": {
+            "*": 5, // 2 workspaces by default on every monitor
+            // "1": [],
+            // "2": [],
+            // "3": [],
+            // "4": [],
+            // "5": [],
+            // "6": [],
+            // "7": [],
+            // "8": [],
+            // "9": [],
+        },
     },
-  },
 
-  "hyprland/window": {
-    "format": "{}",
-    "rewrite": {
-      "(.*) GNU Emacs (.*)": "$1 ",
-      "(.*) qutebrowser": "$1 ",
+    "hyprland/window": {
+        "format": "{}",
+        "rewrite": {
+            "(.*) GNU Emacs (.*)": "$1 ",
+            "(.*) qutebrowser": "$1 ",
+        },
     },
-  },
 
-  "tray": {
-    "spacing": 4
-    // "icon-size": 21,
-  },
-
-  "backlight": {
-    // "device": "acpi_video1",
-    "format": " {percent}% {icon} ",
-    "format-icons": ["", "", "", "", "", "", "", "", ""]
-  },
-
-  "clock": {
-    // "timezone": "America/New_York",
-    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-    "format": "{:%H:%M}",
-    "format-alt": "{:%a %d %b}"
-  },
-
-  "battery": {
-    "states": {
-      "full": 100,
-      "good": 99,
-      "warning": 30,
-      "critical": 15
+    "tray": {
+        "spacing": 4
+        // "icon-size": 21,
     },
-    "format": " {capacity}% {icon} ",
-    "format-charging": " {capacity}% 󰂄 ",
-    "format-plugged": " {capacity}%  ",
-    "format-alt": " {time} {icon} ",
-    // "format-good": "", // An empty format will hide the module
-    "format-full": " {capacity}% 󱈑 ",
-    // "format-icons": [" ", " ", " ", " ", " "]
-    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂"]
-  },
 
-  "network": {
-    // "interface": "wlp2*", // (Optional) To force the use of this interface
-    "format-wifi": " {essid} ({signalStrength}%) 󰖩 ",
-    "format-ethernet": " {ipaddr}/{cidr} 󰈀 ",
-    "tooltip-format": "{ifname} via {gwaddr} 󰛳",
-    "format-linked": " {ifname} (No IP) 󱚵 ",
-    "format-disconnected": " Disconnected  ",
-    "format-disabled": " 󰖪 ",
-    "format-alt": " {ifname}: {ipaddr}/{cidr} ",
-    "on-click-right": "networkmanager_dmenu"
-  },
-
-  "bluetooth": {
-    "format-on": "  ",
-    "format-disabled": " 󰂲 ",
-    "format-off": " 󰂲 ",
-    "format-connected": "  {device_alias} ",
-    "format-connected-battery": "  {device_alias} 󰥉{device_battery_percentage}%",
-    // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
-    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
-    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
-    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
-    "on-click": "blueberry"
-  },
-
-  "pulseaudio": {
-    // "scroll-step": 1, // %, can be a float
-    "format": " {volume}% {icon} {format_source} ",
-    "format-bluetooth": " {volume}% {icon} {format_source} ",
-    "format-bluetooth-muted": " 󰝟 {icon} {format_source} ",
-    "format-muted": " 󰝟 {format_source} ",
-    "format-source": " {volume}%  ",
-    "format-source-muted": "  ",
-    "format-icons": {
-      "headphone": "",
-      "hands-free": "󰋋",
-      "headset": "󰋎",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["󰕿", "󰖀", "󰕾"]
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": " {percent}% {icon} ",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
     },
-    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    "on-click-right": "pavucontrol"
-  },
 
-  "custom/gammastep": {
-    "format": " 󰛐 ",
-    // "tooltip": true,
-    // "tooltip-format": "Turn on eye protection!",
-    "on-click": "~/.config/scripts/hypr/gammastep.sh",
-  },
+    "clock": {
+        // "timezone": "America/New_York",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format": "{:%H:%M}",
+        "format-alt": "{:%a %d %b}"
+    },
+
+    "battery": {
+        "states": {
+            "full": 100,
+            "good": 99,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": " {capacity}% {icon} ",
+        "format-charging": " {capacity}% 󰂄 ",
+        "format-plugged": " {capacity}%  ",
+        "format-alt": " {time} {icon} ",
+        // "format-good": "", // An empty format will hide the module
+        "format-full": " {capacity}% 󱈑 ",
+        // "format-icons": [" ", " ", " ", " ", " "]
+        "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂"]
+    },
+
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": " {essid} ({signalStrength}%) 󰖩 ",
+        "format-ethernet": " {ipaddr}/{cidr} 󰈀 ",
+        "tooltip-format": "{ifname} via {gwaddr} 󰛳",
+        "format-linked": " {ifname} (No IP) 󱚵 ",
+        "format-disconnected": " Disconnected  ",
+        "format-disabled": " 󰖪 ",
+        "format-alt": " {ifname}: {ipaddr}/{cidr} ",
+        "on-click-right": "networkmanager_dmenu"
+    },
+
+    "bluetooth": {
+        "format-on": "  ",
+        "format-disabled": " 󰂲 ",
+        "format-off": " 󰂲 ",
+        "format-connected": "  {device_alias} ",
+        "format-connected-battery": "  {device_alias} 󰥉{device_battery_percentage}%",
+        // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+        "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+        "on-click": "blueberry"
+    },
+
+    "pulseaudio": {
+        // "scroll-step": 1, // %, can be a float
+        "format": " {volume}% {icon} {format_source} ",
+        "format-bluetooth": " {volume}% {icon} {format_source} ",
+        "format-bluetooth-muted": " 󰝟 {icon} {format_source} ",
+        "format-muted": " 󰝟 {format_source} ",
+        "format-source": " {volume}%  ",
+        "format-source-muted": "  ",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "󰋋",
+            "headset": "󰋎",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-click-right": "pavucontrol"
+    },
+
+    "custom/gammastep": {
+        "format": " 󰛐 ",
+        // "tooltip": true,
+        // "tooltip-format": "Turn on eye protection!",
+        "on-click": "~/.config/scripts/hypr/gammastep.sh",
+    },
 }

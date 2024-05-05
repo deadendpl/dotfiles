@@ -6,15 +6,14 @@ CHOICE=$(printf "Full Screen\nSelect Area\nColor Picker" | rofi -config ~/.confi
 
 mkdir -p ~/Pictures
 
-if [ "$CHOICE" = "Full Screen" ]; then
-  sleep 0.4s && grimshot --notify save screen ~/Pictures/$filename
-
-elif [ "$CHOICE" = "Select Area" ]; then
-  grimshot --notify save area ~/Pictures/$filename
-
-elif [ "$CHOICE" = "Color Picker" ]; then
-  sleep 0.4 && hyprpicker -a
-
-else
-  exit
-fi
+case $CHOICE in
+  "Full Screen")
+    sleep 0.4s && grimshot --notify save screen ~/Pictures/$filename
+    ;;
+  "Select Area")
+    grimshot --notify save area ~/Pictures/$filename
+    ;;
+  "Color Picker")
+    sleep 0.4 && hyprpicker -a
+    ;;
+esac
