@@ -136,11 +136,11 @@ if $(pacman -Q rofi-lbonn-wayland-git >> /dev/null); then
   echo "AUR essential packages are installed."
 else
   yay -S --noconfirm networkmanager-dmenu-git \
-                     clipboard \
                      rofi-bluetooth-git \
                      ctpv-git \
                      cp-p-git \
                      rofi-lbonn-wayland-git \
+                     # clipboard \
                      # pokemonsay-newgenerations-git \
                      # fortune-mod-vimtips \
                      # udiskie-dmenu-git \
