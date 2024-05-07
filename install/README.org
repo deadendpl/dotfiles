@@ -81,69 +81,79 @@ sudo bash -c "echo '$repo_lines' >> /etc/pacman.conf"
 
 sudo pacman -Syyu
 #+end_src
+** Chaotic AUR pacman repo
+#+begin_src sh
+sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+sudo pacman-key --lsign-key 3056513887B78AEB
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
+sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
+#+end_src
 ** Dependencies
 *** Normal dependencies
 #+BEGIN_SRC sh
 if $(pacman -Q hyprland >> /dev/null); then
   echo "Normal packages are installed."
 else
-  sudo pacman -S --noconfirm hyprland \
-                             htop \
-                             papirus-icon-theme \
-                             waybar \
-                             eza \
-                             qt5-wayland \
-                             swaybg \
-                             blueberry \
-                             swaync \
-                             wdisplays-git \
-                             wl-clipboard \
-                             grim \
-                             slurp \
-                             bat-extras \
-                             fish \
-                             starship \
-                             pcmanfm-gtk3 \
-                             file-roller \
-                             p7zip \
-                             unrar \
-                             zathura \
-                             zathura-pdf-mupdf \
-                             gammastep \
-                             lolcat \
-                             ttf-ubuntu-nerd \
-                             ttf-jetbrains-mono-nerd \
-                             noto-fonts-emoji \
-                             pavucontrol \
-                             qt5ct \
-                             foot \
-                             networkmanager \
-                             qutebrowser \
-                             python-adblock \
-                             mpv \
-                             mpv-mpris \
-                             polkit-gnome \
-                             grimshot \
-                             dracula-cursors-git \
-                             light \
-                             chafa \
-                             ripgrep \
-                             fzf \
-                             hyprpicker-git \
-                             swayimg \
-                             emacs \
-                             lf \
-                             stow \
-                             expac \
-                             python-tldextract \
-                             python-pynacl \
-                             fastfetch \
-                             git \
-                             tree-sitter \
-                             udiskie \
-                             swaylock
-                             # neovim \
-                             # otf-codenewroman-nerd \
+  sudo pacman -Syu --noconfirm hyprland \
+                               htop \
+                               papirus-icon-theme \
+                               waybar \
+                               eza \
+                               qt5-wayland \
+                               swaybg \
+                               blueberry \
+                               swaync \
+                               wdisplays-git \
+                               wl-clipboard \
+                               grim \
+                               slurp \
+                               bat-extras \
+                               fish \
+                               starship \
+                               pcmanfm-gtk3 \
+                               file-roller \
+                               p7zip \
+                               unrar \
+                               zathura \
+                               zathura-pdf-mupdf \
+                               gammastep \
+                               lolcat \
+                               ttf-ubuntu-nerd \
+                               ttf-jetbrains-mono-nerd \
+                               noto-fonts-emoji \
+                               pavucontrol \
+                               qt5ct \
+                               foot \
+                               networkmanager \
+                               qutebrowser \
+                               python-adblock \
+                               mpv \
+                               mpv-mpris \
+                               polkit-gnome \
+                               grimshot \
+                               dracula-cursors-git \
+                               light \
+                               chafa \
+                               ripgrep \
+                               fzf \
+                               hyprpicker-git \
+                               swayimg \
+                               emacs \
+                               lf \
+                               stow \
+                               expac \
+                               python-tldextract \
+                               python-pynacl \
+                               fastfetch \
+                               git \
+                               tree-sitter \
+                               udiskie \
+                               swaylock
+                               # neovim \
+                               # otf-codenewroman-nerd \
 fi
 #+end_src
 *** Yay dependencies
