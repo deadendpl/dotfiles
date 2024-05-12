@@ -14,6 +14,7 @@ fi
 if $(pacman -Q sddm >> /dev/null); then
   echo "It seems SDDM is installed."
 else
+  echo "Installing SDDM"
   sudo pacman -S --noconfirm sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
   sudo systemctl enable sddm
 fi
@@ -63,61 +64,61 @@ sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/p
 if $(pacman -Q hyprland >> /dev/null); then
   echo "Normal packages are installed."
 else
-  sudo pacman -Syu --noconfirm hyprland \
-                               htop \
-                               papirus-icon-theme \
-                               waybar \
-                               eza \
-                               qt5-wayland \
-                               swaybg \
-                               blueberry \
-                               swaync \
-                               wdisplays-git \
-                               wl-clipboard \
-                               grim \
-                               slurp \
-                               bat-extras \
-                               fish \
-                               starship \
-                               pcmanfm-gtk3 \
-                               file-roller \
-                               p7zip \
-                               unrar \
-                               zathura \
-                               zathura-pdf-mupdf \
-                               gammastep \
-                               lolcat \
-                               ttf-ubuntu-nerd \
-                               ttf-jetbrains-mono-nerd \
-                               noto-fonts-emoji \
-                               pavucontrol \
-                               qt5ct \
-                               foot \
-                               networkmanager \
-                               qutebrowser \
-                               python-adblock \
-                               mpv \
-                               mpv-mpris \
-                               polkit-gnome \
-                               grimshot \
-                               dracula-cursors-git \
-                               light \
-                               chafa \
-                               ripgrep \
-                               fzf \
-                               hyprpicker-git \
-                               swayimg \
-                               emacs \
-                               lf \
-                               stow \
-                               expac \
-                               python-tldextract \
-                               python-pynacl \
-                               fastfetch \
-                               git \
-                               tree-sitter \
-                               udiskie \
-                               swaylock
+  sudo pacman -Syyu --noconfirm hyprland \
+                                htop \
+                                papirus-icon-theme \
+                                waybar \
+                                eza \
+                                qt5-wayland \
+                                swaybg \
+                                blueberry \
+                                swaync \
+                                wdisplays \
+                                wl-clipboard \
+                                grim \
+                                slurp \
+                                bat-extras \
+                                fish \
+                                starship \
+                                pcmanfm-gtk3 \
+                                file-roller \
+                                p7zip \
+                                unrar \
+                                zathura \
+                                zathura-pdf-mupdf \
+                                gammastep \
+                                lolcat \
+                                ttf-ubuntu-nerd \
+                                ttf-jetbrains-mono-nerd \
+                                noto-fonts-emoji \
+                                pavucontrol \
+                                qt5ct \
+                                foot \
+                                networkmanager \
+                                qutebrowser \
+                                python-adblock \
+                                mpv \
+                                mpv-mpris \
+                                polkit-gnome \
+                                grimshot \
+                                dracula-cursors-git \
+                                light \
+                                chafa \
+                                ripgrep \
+                                fzf \
+                                hyprpicker-git \
+                                swayimg \
+                                emacs \
+                                lf \
+                                stow \
+                                expac \
+                                python-tldextract \
+                                python-pynacl \
+                                fastfetch \
+                                git \
+                                tree-sitter \
+                                udiskie \
+                                swaylock
                                # neovim \
                                # otf-codenewroman-nerd \
 fi
@@ -155,19 +156,22 @@ fi
 if $(pacman -Q wpgtk >> /dev/null); then
   echo "It seems pywal packages are installed."
 else
+  echo "Installing pywal packages."
   yay -S --noconfirm pywal-16-colors \
                      python-inotify-simple \
                      python-psutil \
                      python-prctl \
                      python-daemon \
                      python-haishoku \
-                     wpgtk \
-                     gtk-theme-flat-color-git \
-                     qt5-styleplugins \
-                     qt6gtk2 \
-                     gradience
+                     chaotic-aur/qt5-styleplugins \
+                     chaotic-aur/qt6gtk2 \
+                     chaotic-aur/gradience \
+                     chaotic-aur/adw-gtk3
+                     # wpgtk
+                     # gtk-theme-flat-color-git
 
-  wpg-install.sh -g
+  # wpg-install.sh -g
+  mkdir -p $HOME/.config/presets/users
 fi
 
 if $(pacman -Q picard >> /dev/null); then
@@ -225,15 +229,21 @@ rm -rf grub_gtg
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
 sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 
-curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+chsh -s $(which fish)
+curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o "omf"
+fish omf --noninteractive
 fish -c "omf install foreign-env"
+rm omf
 
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 
-gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
+gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 gsettings set org.gnome.desktop.interface cursor-theme "Dracula-cursors"
 gsettings set org.gnome.desktop.interface font-name "Ubuntu Nerd Font 10"
 gsettings set org.gnome.desktop.interface document-font-name "Ubuntu Nerd Font 10"
 gsettings set org.gnome.desktop.interface monospace-font-name "JetBrainsMono NFM 10"
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+
+yay -S --noconfirm xdg-user-dirs
+xdg-user-dirs-update

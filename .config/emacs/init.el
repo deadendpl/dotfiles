@@ -80,6 +80,7 @@ Most of the stuff will get redirected here.")
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
+(keymap-global-set "C-c f ." 'find-file-at-point)
 (keymap-global-set "C-x K" 'kill-this-buffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
@@ -282,10 +283,12 @@ Most of the stuff will get redirected here.")
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
-  :config
-  (define-abbrev global-abbrev-table "btw" "by the way")
-  (define-abbrev global-abbrev-table "idk" "I don't know")
-  (define-abbrev global-abbrev-table "tbh" "to be honest")
+  :custom (abbrev-file-name "~/Sync/backup/abbrev_defs.el")
+  ;; :config
+  ;; (define-abbrev global-abbrev-table "btw" "by the way")
+  ;; (define-abbrev global-abbrev-table "idk" "I don't know")
+  ;; (define-abbrev global-abbrev-table "tbh" "to be honest")
+  ;; (define-abbrev global-abbrev-table "yt" "YouTube")
   )
 
 (use-package recentf
@@ -420,8 +423,7 @@ Most of the stuff will get redirected here.")
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
   (progn
-    (use-package ewal-doom-themes :demand)
-    (use-package ewal
+    (use-package ewal-doom-themes
       :demand
       :config
       (set-face-attribute 'line-number-current-line nil
@@ -430,13 +432,13 @@ Most of the stuff will get redirected here.")
       (set-face-attribute 'line-number nil
                           :foreground (ewal--get-base-color 'green)
                           :inherit 'default)
-      (load-theme 'ewal-doom-one t)))
+      (load-theme 'ewal-doom-one t))
+    )
   )
 
 (add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
 
 (use-package corfu
-  ;; :init (add-hook 'meow-insert-exit-hook #'custom/corfu-cleanup)
   :hook ((meow-insert-exit . custom/corfu-cleanup)
          (prog-mode . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
@@ -911,33 +913,6 @@ Most of the stuff will get redirected here.")
 (use-package org-roam-ui
   :custom (org-roam-ui-sync-theme t))
 
-(use-package org-yt
-  :unless (custom/termux-p)
-  :after org
-  :vc (:fetcher github :repo "TobiasZawada/org-yt")
-  :config
-  (require 'org-yt)
-
-  (defun custom/org-image-link (protocol link _description)
-    "Interpret LINK as base64-encoded image data."
-    (cl-assert (string-match "\\`img" protocol) nil
-               "Expected protocol type starting with img")
-    (let ((buf (url-retrieve-synchronously (concat (substring protocol 3) ":" link))))
-      (cl-assert buf nil
-                 "Download of image \"%s\" failed." link)
-      (with-current-buffer buf
-        (goto-char (point-min))
-        (re-search-forward "\r?\n\r?\n")
-        (buffer-substring-no-properties (point) (point-max)))))
-
-  (org-link-set-parameters
-   "imghttp"
-   :image-data-fun #'custom/org-image-link)
-
-  (org-link-set-parameters
-   "imghttps"
-   :image-data-fun #'custom/org-image-link))
-
 (use-package toc-org
   :after org
   :hook (org-mode . #'toc-org-enable))
@@ -1032,6 +1007,37 @@ using `browse-url'."
 (use-package lorem-ipsum
   :custom (lorem-ipsum-sentence-separator " "))
 
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (c "https://github.com/tree-sitter/tree-sitter-c")
+        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        ;; (go "https://github.com/tree-sitter/tree-sitter-go")
+        ;; (html "https://github.com/tree-sitter/tree-sitter-html")
+        ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        ;; (make "https://github.com/alemuller/tree-sitter-make")
+        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (python "https://github.com/tree-sitter/tree-sitter-python")))
+;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
+;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+(unless (treesit-language-available-p 'bash)
+  (message "Installing tree-sitter parsers")
+  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
+
+(setq major-mode-remap-alist
+ '((c-or-c++-mode . c-or-c++-ts-mode)
+   (c++-mode . c++-ts-mode)
+   (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)
+   (sh-mode . bash-ts-mode)
+   (js-json-mode . json-ts-mode)))
+
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
   :custom
@@ -1087,7 +1093,15 @@ using `browse-url'."
 
 (use-package vterm
   :unless (custom/termux-p)
-  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
+  :hook ((vterm-mode . (lambda () (setq mode-line-format nil)))
+         (meow-normal-mode . (lambda ()
+                               (if (string-equal major-mode "vterm-mode")
+                                   (unless vterm-copy-mode
+                                     (vterm-copy-mode 1)))))
+         (meow-insert-mode . (lambda ()
+                               (if (string-equal major-mode "vterm-mode")
+                                   (if vterm-copy-mode
+                                       (vterm-copy-mode 0))))))
   :bind (("C-c s v" . vterm))
   :custom
   ;; (shell-file-name "/bin/fish")

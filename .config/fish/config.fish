@@ -1,7 +1,7 @@
 # emacs keybindings
 fish_default_key_bindings
 
-fenv source ~/.profile
+fenv source "$HOME"/.profile
 
 alias l='eza -a -l -h --icons --git --group-directories-first --color-scale all'
 alias clr='clear'
@@ -26,9 +26,6 @@ end
 if status is-interactive
   set fish_greeting
 end
-
-set PATH ~/.config/emacs/bin $PATH
-set PATH ~/.local/bin $PATH
 
 set EDITOR emacsclient -t -a ""
 set VISUAL emacsclient -c -a ""
@@ -64,6 +61,7 @@ end
 # pacman and yay on Arch
 if which pacman > /dev/null 2>&1
   alias pinst='yay -S'
+  alias pinsty='yay -S --noconfirm'
   alias ppu='yay -Rs'
   alias ppuy='yay -Rs --noconfirm'
   alias pup='yay -Syu'

@@ -11,14 +11,14 @@ wpg-tile() {
 
   wallpaper_path=$(realpath "$wallpaper_path")
 
-  wpg --noreload --backend haishoku -n -s "$wallpaper_path"
-  wal --cols16 --backend haishoku -ne -i "$wallpaper_path"
+  wal --cols16 --backend haishoku -ne -b "#151515" -i "$wallpaper_path"
+  # wpg --noreload --backend haishoku -n -s "$wallpaper_path" -i "$wallpaper_path" "$XDG_CACHE_HOME/wal/colors.json"
 }
 
 gradience-wrap () {
-  cp -f ~/.cache/wal/pywal.json ~/.config/presets/user/pywal.json
+  cp -f "$HOME/.cache/wal/pywal.json" "$HOME/.config/presets/user/pywal.json"
   # gradience-cli monet -n pywal -p "$wallpaper_path" --theme dark
-  gradience-cli apply -n pywal --gtk gtk4
+  gradience-cli apply -n pywal --gtk both
 }
 
 # file-line-change() {

@@ -139,6 +139,7 @@ Most of the stuff will get redirected here.")
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
+(keymap-global-set "C-c f ." 'find-file-at-point)
 (keymap-global-set "C-x K" 'kill-this-buffer)
 (keymap-global-set "C-c w j" 'windmove-down)
 (keymap-global-set "C-c w h" 'windmove-left)
@@ -370,10 +371,12 @@ Built-in =abbrev-mode= allows for abbreviations.
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
-  :config
-  (define-abbrev global-abbrev-table "btw" "by the way")
-  (define-abbrev global-abbrev-table "idk" "I don't know")
-  (define-abbrev global-abbrev-table "tbh" "to be honest")
+  :custom (abbrev-file-name "~/Sync/backup/abbrev_defs.el")
+  ;; :config
+  ;; (define-abbrev global-abbrev-table "btw" "by the way")
+  ;; (define-abbrev global-abbrev-table "idk" "I don't know")
+  ;; (define-abbrev global-abbrev-table "tbh" "to be honest")
+  ;; (define-abbrev global-abbrev-table "yt" "YouTube")
   )
 #+end_src
 
@@ -598,8 +601,7 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
   (progn
-    (use-package ewal-doom-themes :demand)
-    (use-package ewal
+    (use-package ewal-doom-themes
       :demand
       :config
       (set-face-attribute 'line-number-current-line nil
@@ -608,7 +610,8 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
       (set-face-attribute 'line-number nil
                           :foreground (ewal--get-base-color 'green)
                           :inherit 'default)
-      (load-theme 'ewal-doom-one t)))
+      (load-theme 'ewal-doom-one t))
+    )
   )
 #+end_src
 
@@ -621,7 +624,6 @@ With Emacs 29, true transparency has been added.
 [[https://github.com/minad/corfu][corfu]] is minimal completion provider aligning with Emacs built-in tools.
 #+begin_src emacs-lisp
 (use-package corfu
-  ;; :init (add-hook 'meow-insert-exit-hook #'custom/corfu-cleanup)
   :hook ((meow-insert-exit . custom/corfu-cleanup)
          (prog-mode . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
@@ -1237,7 +1239,7 @@ Taken from https://edstrom.dev/czdfr/org-roam-fixes#jxbqt
   (memoize #'vulpea-db-query)
   (advice-add 'org-roam-db-update-file :after 'custom/vulpea-memo-schedule-refresh))
 #+end_src
-*** Org yt
+*** Org yt :ARCHIVE:
 It creates and displays YouTube links but with some tinkering it can display web images.
 #+begin_src emacs-lisp
 (use-package org-yt
@@ -1434,7 +1436,7 @@ Here I add autocompletion when typing =>= in html modes.
 (use-package lorem-ipsum
   :custom (lorem-ipsum-sentence-separator " "))
 #+end_src
-*** Tree-sitter :ARCHIVE:
+*** Tree-sitter
 Emacs from version 29 supports tree-sitter.
 Tree-sitter is fast parser and smart syntax highlighter for languages.
 You need to have ~tree-sitter~ package installed on your system.
@@ -1555,7 +1557,15 @@ The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x
 #+begin_src emacs-lisp
 (use-package vterm
   :unless (custom/termux-p)
-  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
+  :hook ((vterm-mode . (lambda () (setq mode-line-format nil)))
+         (meow-normal-mode . (lambda ()
+                               (if (string-equal major-mode "vterm-mode")
+                                   (unless vterm-copy-mode
+                                     (vterm-copy-mode 1)))))
+         (meow-insert-mode . (lambda ()
+                               (if (string-equal major-mode "vterm-mode")
+                                   (if vterm-copy-mode
+                                       (vterm-copy-mode 0))))))
   :bind (("C-c s v" . vterm))
   :custom
   ;; (shell-file-name "/bin/fish")

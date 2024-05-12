@@ -1,7 +1,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-source .profile
+source "$HOME"/.profile
 
 # apt
 alias ainst='sudo apt install'
@@ -55,6 +55,6 @@ alias myip='curl "https://wtfismyip.com/text"'
 # PS1='[\u@\h \W]\$'
 
 if [ -n "$PS1" ]; then
-  fortune | pokemonsay
+  # fortune | pokemonsay
   eval "$(starship init bash)"
 fi
