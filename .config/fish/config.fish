@@ -98,15 +98,3 @@ else
   alias swaylock='~/.cache/wal/swaylock.sh'
   alias connect='nmcli device wifi connect'
 end
-
-# if set -q INSIDE_EMACS
-#   or set -q NVIM
-#     fish_default_key_bindings
-# else
-#   fish_vi_key_bindings
-#   set fish_cursor_replace_one underscore
-#   set fish_cursor_insert line
-#   if string match -rq 'wezterm|foot|tmux' -- $TERM
-#     set fish_vi_force_cursor true
-#   end
-# end

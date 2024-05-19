@@ -77,16 +77,6 @@ Most of the stuff will get redirected here.")
 (with-current-buffer "*Messages*"
   (emacs-lock-mode 'kill))
 
-;; Make ESC quit prompts immediately
-(keymap-global-set "<escape>" 'keyboard-escape-quit)
-(keymap-global-set "C-c f c" 'custom/find-config-file)
-(keymap-global-set "C-c f ." 'find-file-at-point)
-(keymap-global-set "C-x K" 'kill-this-buffer)
-(keymap-global-set "C-c w j" 'windmove-down)
-(keymap-global-set "C-c w h" 'windmove-left)
-(keymap-global-set "C-c w k" 'windmove-up)
-(keymap-global-set "C-c w l" 'windmove-right)
-;; (keymap-global-set "M-/" 'hippie-expand)
 
 (defun custom/find-config-file ()
   "Opens config.org file in `user-emacs-directory'."
@@ -155,11 +145,9 @@ Most of the stuff will get redirected here.")
 
 (use-package meow
   :demand
-  ;; :init
-  ;;   (unless (custom/termux-p) (setq initial-buffer-choice (lambda () (meow-cheatsheet))))
   :custom
   (meow-use-clipboard t)
-  (meow-expand-hint-remove-delay 0)
+  (meow-expand-hint-remove-delay 0) ;; when set to 0, it disables numbers popup
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -184,8 +172,6 @@ Most of the stuff will get redirected here.")
      '("0" . meow-digit-argument)
      '("/" . meow-keypad-describe-key)
      '("?" . meow-cheatsheet))
-    ;; '("TAB" . evilnc-comment-or-uncomment-lines))
-    ;; '("f c" . (find-file "~/.config/emacs/config.org"))
 
     (meow-normal-define-key
      '("0" . meow-expand-0)
@@ -204,6 +190,8 @@ Most of the stuff will get redirected here.")
      '("." . meow-bounds-of-thing)
      '("[" . meow-beginning-of-thing)
      '("]" . meow-end-of-thing)
+     '("{" . tab-previous)
+     '("}" . tab-next)
      '("a" . meow-append)
      '("A" . meow-open-below)
      '("b" . meow-back-word)
@@ -270,10 +258,32 @@ Most of the stuff will get redirected here.")
                      scroll-up-command
                      scroll-down-command
                      tab-select
-                     tab-next))
+                     tab-next
+                     tab-previous))
     (advice-add command :after #'custom/pulse-line))
   )
 
+;; Make ESC quit prompts immediately
+(keymap-global-set "<escape>" 'keyboard-escape-quit)
+(keymap-global-set "C-c f c" 'custom/find-config-file)
+(keymap-global-set "C-c f ." 'find-file-at-point)
+(keymap-global-set "C-x K" 'kill-this-buffer)
+;; I don't like default window management keybindings so I set my own
+;; They are inspired by Doom Emacs keybindings
+(keymap-global-set "C-c w j" 'windmove-down)
+(keymap-global-set "C-c w h" 'windmove-left)
+(keymap-global-set "C-c w k" 'windmove-up)
+(keymap-global-set "C-c w l" 'windmove-right)
+(keymap-global-set "C-c w v" 'split-window-right)
+(keymap-global-set "C-c w s" 'split-window-below)
+(keymap-global-set "C-c w c" 'delete-window)
+(keymap-global-set "C-c w w" 'other-window)
+(keymap-global-set "C-c w q l" 'windmove-delete-right)
+(keymap-global-set "C-c w q h" 'windmove-delete-left)
+(keymap-global-set "C-c w q j" 'windmove-delete-down)
+(keymap-global-set "C-c w q k" 'windmove-delete-up)
+(keymap-global-set "M-/" 'hippie-expand)
+;; resizing buffer
 (keymap-global-set "C-=" 'text-scale-increase)
 (keymap-global-set "C-+" 'text-scale-increase)
 (keymap-global-set "C--" 'text-scale-decrease)
@@ -284,11 +294,6 @@ Most of the stuff will get redirected here.")
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
   :custom (abbrev-file-name "~/Sync/backup/abbrev_defs.el")
-  ;; :config
-  ;; (define-abbrev global-abbrev-table "btw" "by the way")
-  ;; (define-abbrev global-abbrev-table "idk" "I don't know")
-  ;; (define-abbrev global-abbrev-table "tbh" "to be honest")
-  ;; (define-abbrev global-abbrev-table "yt" "YouTube")
   )
 
 (use-package recentf
@@ -389,7 +394,25 @@ Most of the stuff will get redirected here.")
 
 (use-package nerd-icons-dired
   :after dired
-  :hook (dired-mode . nerd-icons-dired-mode))
+  :hook (dired-mode . nerd-icons-dired-mode)
+  :config
+  (advice-add #'wdired-change-to-wdired-mode :before
+              (lambda ()
+                (if nerd-icons-dired-mode
+                    (nerd-icons-dired-mode -1))))
+  (advice-add #'wdired-finish-edit :after
+              (lambda ()
+                (unless nerd-icons-dired-mode
+                  (nerd-icons-dired-mode 1))))
+  (advice-add #'wdired-exit :after
+              (lambda ()
+                (unless nerd-icons-dired-mode
+                  (nerd-icons-dired-mode 1))))
+  (advice-add #'wdired-abort-changes :after
+              (lambda ()
+                (unless nerd-icons-dired-mode
+                  (nerd-icons-dired-mode 1))))
+  )
 
 (use-package nerd-icons-ibuffer
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
@@ -436,7 +459,7 @@ Most of the stuff will get redirected here.")
     )
   )
 
-(add-to-list 'default-frame-alist '(alpha-background . 90)) ; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
 
 (use-package corfu
   :hook ((meow-insert-exit . custom/corfu-cleanup)
@@ -541,6 +564,7 @@ Most of the stuff will get redirected here.")
   (dired-hide-details-hide-symlink-targets nil)
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)
+  (dired-vc-rename-file t)
   )
 
 (use-package diredfl
@@ -729,7 +753,7 @@ Most of the stuff will get redirected here.")
   (plist-put org-format-latex-options :foreground nil)
   (plist-put org-format-latex-options :background nil)
 
-  ;; meow custom state (taken from https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
+  ;; meow custom state (inspired by https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
   (setq meow-org-motion-keymap (make-keymap))
   (meow-define-state org-motion
     "Org-mode structural motion"
@@ -752,8 +776,8 @@ Most of the stuff will get redirected here.")
     '("<left>" .  org-backward-heading-same-level)
     '("<right>" .  org-forward-heading-same-level)
     ;; Moving subtrees themselves
-    '("K" .  org-subtree-up)
-    '("J" .  org-subtree-down)
+    '("K" .  org-move-subtree-up)
+    '("J" .  org-move-subtree-down)
     ;; Subtree de/promotion
     '("L" .  org-demote-subtree)
     '("H" .  org-promote-subtree)
@@ -786,11 +810,18 @@ Most of the stuff will get redirected here.")
           (org-return))
       (org-return)))
 
-  ;; saving agenda files after changing TODO state in org-agenda
+  ;; saving agenda files after changing TODO state in `org-agenda'
   (advice-add 'org-agenda-todo :after
               (lambda (&rest _)
                 (when (called-interactively-p 'any)
                   (save-some-buffers (list org-agenda-files)))))
+
+  ;; unfolding every header when using `meow-visit'
+  (advice-add 'meow-visit :before
+              (lambda (&rest _)
+                (if (eq major-mode 'org-mode)
+                    (unless (eq org-cycle-global-status 'all)
+                      (org-fold-show-all)))))
   )
 
 ;; it's for html source block syntax highlighting
@@ -924,6 +955,8 @@ Most of the stuff will get redirected here.")
 (unless (custom/termux-p)
 
 (use-package compile
+  :bind (("C-c c c" . compile)
+         ("C-c c r" . recompile))
   :custom
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)

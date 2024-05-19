@@ -29,8 +29,8 @@ After that you can execute the script from terminal or by pressing =Super+ALT+R=
 Software riced with pywal [11/11]:
 - [X] foot
 - [X] rofi
-- [X] gtk3 [[https://github.com/deviantfero/wpgtk][wpgtk]]
-- [X] gtk4 (partially)
+- [X] gtk3
+- [X] gtk4 (libadwaita, I think)
 - [X] qt
 - [X] emacs
 - [X] qutebrowser

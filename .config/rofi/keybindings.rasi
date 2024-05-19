@@ -1,10 +1,12 @@
 configuration {
-  kb-move-word-back: "";
+  kb-move-word-back: "Alt+b";
+  kb-move-word-forward: "Alt+f";
   kb-remove-to-eol: "";
   kb-remove-to-sol: "";
   kb-mode-complete: "";
   kb-remove-char-forward: "Delete";
   kb-remove-char-back: "BackSpace,Shift+BackSpace,Control+h";
+  kb-remove-word-back: "Alt+BackSpace,Control+BackSpace";
 
   kb-accept-entry: "Control+l,Return";
   kb-row-up: "Up,Control+k";

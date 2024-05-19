@@ -209,11 +209,11 @@ else
                      chaotic-aur/qt5-styleplugins \
                      chaotic-aur/qt6gtk2 \
                      chaotic-aur/gradience \
-                     chaotic-aur/adw-gtk3
-                     # wpgtk
-                     # gtk-theme-flat-color-git
+                     wpgtk \
+                     gtk-theme-flat-color-git
+                     # chaotic-aur/adw-gtk3
 
-  # wpg-install.sh -g
+  wpg-install.sh -g
   mkdir -p $HOME/.config/presets/users
 fi
 #+end_src
@@ -301,7 +301,7 @@ xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 
 This sets GTK theming and fonts, on bigger screen you might want to increase the size of fonts.
 #+begin_src sh
-gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
+gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 gsettings set org.gnome.desktop.interface cursor-theme "Dracula-cursors"
 gsettings set org.gnome.desktop.interface font-name "Ubuntu Nerd Font 10"

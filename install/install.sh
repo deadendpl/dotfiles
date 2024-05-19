@@ -166,11 +166,11 @@ else
                      chaotic-aur/qt5-styleplugins \
                      chaotic-aur/qt6gtk2 \
                      chaotic-aur/gradience \
-                     chaotic-aur/adw-gtk3
-                     # wpgtk
-                     # gtk-theme-flat-color-git
+                     wpgtk \
+                     gtk-theme-flat-color-git
+                     # chaotic-aur/adw-gtk3
 
-  # wpg-install.sh -g
+  wpg-install.sh -g
   mkdir -p $HOME/.config/presets/users
 fi
 
@@ -237,7 +237,7 @@ rm omf
 
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 
-gsettings set org.gnome.desktop.interface gtk-theme "adw-gtk3-dark"
+gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 gsettings set org.gnome.desktop.interface cursor-theme "Dracula-cursors"
 gsettings set org.gnome.desktop.interface font-name "Ubuntu Nerd Font 10"

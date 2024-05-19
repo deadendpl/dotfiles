@@ -11,14 +11,27 @@ wpg-tile() {
 
   wallpaper_path=$(realpath "$wallpaper_path")
 
-  wal --cols16 --backend haishoku -ne -b "#151515" -i "$wallpaper_path"
-  # wpg --noreload --backend haishoku -n -s "$wallpaper_path" -i "$wallpaper_path" "$XDG_CACHE_HOME/wal/colors.json"
+  wpg \
+    --noreload \
+    --backend haishoku \
+    -n \
+    -s "$wallpaper_path"
+  wal \
+    --cols16 \
+    --backend haishoku \
+    -ne \
+    -b "#151515" \
+    -i "$wallpaper_path" \
+    # -p pywal16
 }
 
 gradience-wrap () {
-  cp -f "$HOME/.cache/wal/pywal.json" "$HOME/.config/presets/user/pywal.json"
+  if [ ! -d "$XDG_CONFIG_HOME/presets/user" ]; then
+    mkdir -p "$XDG_CONFIG_HOME/presets/user"
+  fi
+  cp -f "$XDG_CACHE_HOME/wal/pywal.json" "$XDG_CONFIG_HOME/presets/user/pywal.json"
   # gradience-cli monet -n pywal -p "$wallpaper_path" --theme dark
-  gradience-cli apply -n pywal --gtk both
+  gradience-cli apply -n pywal --gtk gtk3
 }
 
 # file-line-change() {
@@ -56,7 +69,7 @@ gradience-wrap &
 if pgrep "swaybg" > /dev/null; then
   killall swaybg
 fi
-swaybg -m fit -i "$(< "${HOME}/.cache/wal/wal")" &
+swaybg -m fit -i "$(< "${XDG_CACHE_HOME}/wal/wal")" &
 if ! pgrep "waybar" > /dev/null; then
   waybar &
 fi

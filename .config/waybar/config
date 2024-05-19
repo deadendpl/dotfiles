@@ -45,7 +45,7 @@
         },
 
         "persistent-workspaces": {
-            "*": 5, // 2 workspaces by default on every monitor
+            "*": 5, // 5 workspaces by default on every monitor
             // "1": [],
             // "2": [],
             // "3": [],
@@ -150,8 +150,8 @@
 
     "custom/gammastep": {
         "format": " 󰛐 ",
-        // "tooltip": true,
-        // "tooltip-format": "Turn on eye protection!",
+        "tooltip": true,
+        "tooltip-format": "Turn on/off eye protection!",
         "on-click": "~/.config/scripts/hypr/gammastep.sh",
     },
 }
