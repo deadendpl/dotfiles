@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 bookmark="$(wl-paste)"
-file="$HOME/Sync/foo/wazne/bookmarks"
+file="${HOME}/Sync/foo/wazne/bookmarks"
 
 if grep -q "^$bookmark$" "$file"; then
     notify-send "Oopsie." "Already bookmarked!"

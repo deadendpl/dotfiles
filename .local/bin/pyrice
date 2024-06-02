@@ -5,7 +5,7 @@ wpg-tile() {
 
   # If no wallpaper path is provided, choose a random one
   if [ -z "$wallpaper_path" ]; then
-    local walls_dir="$HOME/Pictures/bg"
+    local walls_dir="${HOME}/Pictures/bg"
     wallpaper_path="$(find "$walls_dir" -type f | shuf -n 1)"
   fi
 
@@ -26,12 +26,12 @@ wpg-tile() {
 }
 
 gradience-wrap () {
-  if [ ! -d "$XDG_CONFIG_HOME/presets/user" ]; then
-    mkdir -p "$XDG_CONFIG_HOME/presets/user"
+  if [ ! -d "${XDG_CONFIG_HOME}/presets/user" ]; then
+    mkdir -p "${XDG_CONFIG_HOME}/presets/user"
   fi
-  cp -f "$XDG_CACHE_HOME/wal/pywal.json" "$XDG_CONFIG_HOME/presets/user/pywal.json"
+  cp -f "${XDG_CACHE_HOME}/wal/pywal.json" "${XDG_CONFIG_HOME}/presets/user/pywal.json"
   # gradience-cli monet -n pywal -p "$wallpaper_path" --theme dark
-  gradience-cli apply -n pywal --gtk gtk3
+  gradience-cli apply -n pywal --gtk gtk4
 }
 
 # file-line-change() {

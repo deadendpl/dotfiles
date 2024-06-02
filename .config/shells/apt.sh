@@ -1,0 +1,8 @@
+alias pinst='sudo apt install'
+alias ppu='sudo apt purge'
+alias pclean='sudo apt autopurge'
+alias pup='sudo apt update && sudo apt upgrade'
+alias pupd='sudo apt update'
+alias pupg='sudo apt upgrade'
+alias pinstalled='apt list --installed'
+alias psearch='apt search'

@@ -1,60 +1,36 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-source "$HOME"/.profile
+source "${HOME}"/.profile
+
+SHELLS_CONFIG_DIR="${XDG_CONFIG_HOME}/shells"
+
+source "${SHELLS_CONFIG_DIR}/default.sh"
 
 # apt
-alias ainst='sudo apt install'
-alias apu='sudo apt purge'
-alias aautopu='sudo apt autopurge'
-alias aup='sudo apt update && sudo apt upgrade'
-alias aupd='sudo apt update'
-alias aupg='sudo apt upgrade'
-alias ainstalled='apt list --installed'
-alias asearch='apt search'
+if which apt > /dev/null 2>&1; then
+  source "${SHELLS_CONFIG_DIR}/apt.sh"
+fi
 
 # pacman
-alias pinst='yay -S'
-alias ppu='yay -Rs'
-alias pup='yay -Syu'
-alias pinstalled='yay -Q'
-pinsearch() {
-  yay -Q | grep "$@"
-}
-alias psearch='yay -F'
-alias porphan='yay -Qtdq'
-alias pclean='yay --noconfirm -Sc && porphan | yay --noconfirm -Rns -'
-alias listaur="yay -Qqem"
-
-# yay
-alias yinst='yay -S'
+if which pacman > /dev/null 2>&1; then
+  source "${SHELLS_CONFIG_DIR}/pacman.sh"
+fi
 
 # nix
-alias ninst='nix-env -iA'
-alias nup='sudo nixos-rebuild switch'
-alias nclean='sudo nix-collect-garbage -d'
+if which nixos-rebuild > /dev/null 2>&1; then
+  source "${SHELLS_CONFIG_DIR}/nix.sh"
+fi
 
 # other
-alias cp='cp -v'
-alias connect='nmcli device wifi connect'
-alias l='exa --all --long --header --icons --git --group-directories-first --color-scale all'
-alias clr='clear'
-alias cllr='clear && l'
-alias fetch='fastfetch'
-alias grep='grep --color=auto'
-alias ip='ip -color=auto'
-alias man='batman'
-alias mv='mv-p'
-alias v='$EDITOR'
-alias vim='nvim'
-alias RGB="cat /dev/urandom | tr -dc 'a-z A-Z' | lolcat"
-alias demacs='emacs --daemon'
-alias remacs='pkill emacs && emacs --daemon'
-alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
-alias myip='curl "https://wtfismyip.com/text"'
-# PS1='[\u@\h \W]\$'
+if test -n "$TERMUX_VERSION"; then
+  # termux config
+  source "${XDG_CONFIG_HOME}/shells/termux"
+else
+  source "${SHELLS_CONFIG_DIR}/desktop.sh"
+fi
+
 
 if [ -n "$PS1" ]; then
-  # fortune | pokemonsay
   eval "$(starship init bash)"
 fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a search_engines=( "Anna's Archive" "AUR (Arch User Repository)" "Arch Wiki" "Arch Packages" "Brave Search" "Ecosia" "GameFAQs" "Github" "Melpa" "Nitter (Twitter/X)" "Nix Packages" "NixOS Wiki" "YouTube (Invidious)" "YouTube (Piped)" "Phind" "SearXNG" "Whoogle" ) # add or remove search engines here
+declare -a search_engines=( "Anna's Archive" "AUR (Arch User Repository)" "Arch Wiki" "Arch Packages" "Brave Search" "Ecosia" "GameFAQs" "Github" "MusicBrainz" "Nitter (Twitter/X)" "Nix Packages" "NixOS Wiki" "YouTube (Invidious)" "YouTube (Piped)" "Phind" "SearXNG" "Whoogle" ) # add or remove search engines here
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
 
@@ -47,16 +47,20 @@ case $selected_engine in
     "Nitter (Twitter/X)")
         URL="https://farside.link/nitter/search?&q="
         ;;
-    "Melpa")
-        URL="https://melpa.org/#/?q="
-        ;;
+    # "Melpa")
+    #     URL="https://melpa.org/#/?q="
+    #     ;;
     "Anna's Archive")
         URL="https://annas-archive.org/search?q="
         ;;
     "Ecosia")
         URL="https://www.ecosia.org/search?method=index&q="
         ;;
-  *)
+    "MusicBrainz")
+        ${XDG_CONFIG_HOME}/scripts/mb-search.sh
+        exit 0
+        ;;
+    *)
         exit 0
         ;;
 esac

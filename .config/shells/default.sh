@@ -1,0 +1,12 @@
+alias l='eza -a -l -h --icons --git --group-directories-first --color-scale all'
+alias clr='clear'
+alias cllr='clear && l'
+alias grep='grep --color=auto'
+alias ip='ip --color=auto'
+alias v='$EDITOR'
+alias RGB="cat /dev/urandom | tr -dc 'a-z A-Z' | lolcat"
+alias demacs='emacs --daemon'
+alias remacs='pkill emacs && emacs --daemon'
+alias rickroll='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
+alias myip='curl "https://wtfismyip.com/text"'
+alias pi='ping wp.pl'

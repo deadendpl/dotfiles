@@ -154,11 +154,16 @@ Most of the stuff will get redirected here.")
     (meow-motion-overwrite-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
-     '("<escape>" . ignore))
+     '("<escape>" . ignore)
+     '("{" . tab-previous)
+     '("}" . tab-next))
+
     (meow-leader-define-key
      ;; SPC j/k will run the original command in MOTION state.
      '("j" . "H-j")
      '("k" . "H-k")
+     '("{" . "H-{")
+     '("}" . "H-}")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -331,6 +336,7 @@ Most of the stuff will get redirected here.")
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
   (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
   (tab-bar-tab-hints t)                ;; show tab numbers
+  (tab-bar-auto-width-max nil)
   )
 
 (use-package ibuffer
@@ -762,6 +768,7 @@ Most of the stuff will get redirected here.")
 
   (meow-define-keys 'org-motion
     '("<escape>" . meow-normal-mode)
+    '("SPC" . meow-keypad)
     '("i" . meow-insert-mode)
     '("g" . meow-normal-mode)
     '("u" .  meow-undo)
@@ -1030,7 +1037,9 @@ using `browse-url'."
   :hook (html-mode . (lambda () (smartparens-mode 0)))
   :preface
   (defun html-close-tag ()
-    "Inserts > and closes tag."
+    "Inserts > and closes tag.
+NOTE that it will each time close a tag.
+I need to fix it."
     (interactive)
     (insert ">")
     (sgml-close-tag))

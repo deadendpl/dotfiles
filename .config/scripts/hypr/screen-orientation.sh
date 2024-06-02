@@ -23,7 +23,9 @@ sed -i "s|^$vertical_line$|#&|" "$config_file"
 if [[ "$selected_option" == "Vertical |" ]]; then
     # Uncomment the vertical line
     sed -i "s|^#$vertical_line$|$vertical_line|" "$config_file"
+    hyprctl reload
 elif [[ "$selected_option" == "Horizontal -" ]]; then
     # Uncomment the horizontal line
     sed -i "s|^#$horizontal_line$|$horizontal_line|" "$config_file"
+    hyprctl reload
 fi
