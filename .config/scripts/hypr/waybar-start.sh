@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if pgrep "waybar" > /dev/null; then
   pkill "waybar"

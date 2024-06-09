@@ -8,7 +8,7 @@ color5_value="{color5}"
 background_value="{background}"
 
 swaylock \
-  --image "~/.config/wpg/.current" \
+  --image "${{XDG_CONFIG_HOME}}/wpg/.current" \
   --indicator-radius 160 \
   --indicator-thickness 20 \
   --inside-color 00000000 \

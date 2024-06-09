@@ -2,7 +2,7 @@
 
 # this script will copy your current neovim cofiguration to root account
 
-src=$HOME/.config/nvim
+src=${XDG_CONFIG_HOME}/nvim
 destination=/root/.config/nvim
 
 sudo mkdir -p $destination

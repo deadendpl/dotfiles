@@ -59,7 +59,8 @@ Most of the stuff will get redirected here.")
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil) ; no files wiht ".#"
+              create-lockfiles nil ; no files wiht ".#"
+              require-final-newline t)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -298,11 +299,15 @@ Most of the stuff will get redirected here.")
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
-  :custom (abbrev-file-name "~/Sync/backup/abbrev_defs.el")
+  :config
+  (if (custom/termux-p)
+      (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
+    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
   )
 
 (use-package recentf
-  :hook (after-init . recentf-mode)
+  :hook ((after-init . recentf-mode)
+         (kill-emacs . #'recentf-save-list))
   :bind (("C-c f r" . recentf-open))
   :custom
   (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
@@ -327,14 +332,16 @@ Most of the stuff will get redirected here.")
 (use-package tab-bar
   :init
   (tab-bar-mode 1)
-  (advice-add #'tab-new
-              :after
-              (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
-                                  (call-interactively #'tab-rename))))
+  ;; (advice-add #'tab-new
+  ;;             :after
+  ;;             (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
+  ;;                                 (call-interactively #'tab-rename))))
+  :custom-face
+  (tab-bar-tab ((nil (:foreground "#151515" :background "#c8c5c7"))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
-  (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
+  (tab-bar-new-button-show nil)      ;; hide tab close / X button
   (tab-bar-tab-hints t)                ;; show tab numbers
   (tab-bar-auto-width-max nil)
   )
@@ -342,6 +349,25 @@ Most of the stuff will get redirected here.")
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
   :custom (ibuffer-default-sorting-mode 'filename/process))
+
+(use-package enlight
+  :custom
+  (initial-buffer-choice #'enlight)
+  (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
+  (enlight-content
+   (concat
+    (propertize "Welcome to the Church of Emacs" 'face 'success)
+    "\n"
+    (enlight-menu
+     '(("Org Mode"
+        ("Org-Agenda (current day)" (org-agenda nil "a") "a")
+        ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
+        ("Org-Roam notes" (org-roam-node-find) "n")
+        ("Org-Roam today daily" (org-roam-dailies-goto-today) "d"))
+       ("Other"
+        ("Projects" project-switch-project "p"))
+       ("Notes to self"
+        ("Press q instead of killing buffers")))))))
 
 (set-face-attribute 'default nil
                     :font "JetBrainsMono NFM"
@@ -451,18 +477,18 @@ Most of the stuff will get redirected here.")
 
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
-  (progn
-    (use-package ewal-doom-themes
-      :demand
-      :config
-      (set-face-attribute 'line-number-current-line nil
-                          :foreground (ewal-load-color 'comment)
-                          :inherit 'default)
-      (set-face-attribute 'line-number nil
-                          :foreground (ewal--get-base-color 'green)
-                          :inherit 'default)
-      (load-theme 'ewal-doom-one t))
-    )
+  ;; (progn
+  (use-package ewal-doom-themes
+    :demand
+    :config
+    (set-face-attribute 'line-number-current-line nil
+                        :foreground (ewal-load-color 'comment)
+                        :inherit 'default)
+    (set-face-attribute 'line-number nil
+                        :foreground (ewal--get-base-color 'green)
+                        :inherit 'default)
+    (load-theme 'ewal-doom-one t))
+  ;; )
   )
 
 (add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
@@ -536,7 +562,7 @@ Most of the stuff will get redirected here.")
   :custom (savehist-file (expand-file-name "history" custom/user-share-emacs-directory)))
 
 (use-package consult
-  :after vertico
+  ;; :after vertico
   :init
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
@@ -546,6 +572,16 @@ Most of the stuff will get redirected here.")
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
+  :bind
+  ;; ([remap project-find-file] . consult-project-buffer)
+  ([remap meow-goto-line] . consult-line)
+  :config
+  ;; disabling `display-buffer-alist' for a command
+  (advice-add 'consult-project-buffer :around
+              (lambda (orig-fun &rest args)
+                (let ((display-buffer-alist nil))
+                  (apply orig-fun args))))
+  (defalias 'project-find-file 'consult-project-buffer)
   )
 
 (use-package marginalia
@@ -677,10 +713,11 @@ Most of the stuff will get redirected here.")
       "YES(y)"
       "NO(n)")))
   (org-capture-templates
-   '(("t" "Todo" entry (file "inbox.org")
+   '(("t" "Todo" entry (file "agenda/inbox.org")
       "* TODO %?\n %a")))
   ;; ============ org agenda ============
-  (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "inbox.org" org-roam-directory)))
+  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
+  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-agenda-prefix-format ;; format at which tasks are displayed
    '((agenda . " %i ")
      (todo . " %i ")
@@ -708,7 +745,6 @@ Most of the stuff will get redirected here.")
   (org-agenda-window-setup 'current-window)
   (org-refile-targets '((org-agenda-files :maxlevel . 1)))
   (org-refile-use-outline-path nil)
-  (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
   (org-hide-emphasis-markers t)
   ;; (org-hide-leading-stars t)
   (org-html-validation-link nil)
@@ -855,15 +891,6 @@ Most of the stuff will get redirected here.")
   (org-appear-trigger 'manual)
   (org-appear-autolinks t)
   :config
-  ;;   (add-hook 'org-appear-mode-hook (lambda ()
-  ;;     (add-hook 'evil-insert-state-entry-hook
-  ;;       #'org-appear-manual-start
-  ;;       nil
-  ;;       t)
-  ;;     (add-hook 'evil-insert-state-exit-hook
-  ;;       #'org-appear-manual-stop
-  ;;         nil
-  ;;        t)))
   (add-hook 'org-appear-mode-hook (lambda ()
                                     (add-hook 'meow-insert-enter-hook
                                               #'org-appear-manual-start
@@ -919,6 +946,7 @@ Most of the stuff will get redirected here.")
          ("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
+         ("C-c n d f" . org-roam-dailies-find-date)
          ("C-c n d t" . org-roam-dailies-goto-today)
          ("C-c n d j" . org-roam-dailies-goto-next-note)
          ("C-c n d k" . org-roam-dailies-goto-previous-note)
@@ -1168,35 +1196,35 @@ I need to fix it."
 
 (setq display-buffer-alist
       '(
-        ("^\\*helpful"
-         (display-buffer-at-bottom)
-         (window-height . 12)
-         (dedicated . t))
-        ("\\*Help\\*"
-         (display-buffer-at-bottom)
-         (window-height . 12)
-         (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
+        ;; ("^\\*helpful"
+        ;;  (display-buffer--maybe-at-bottom)
+        ;;  (window-height . 12)
+        ;;  (dedicated . t))
+        ;; ("\\*Help\\*"
+        ;;  (display-buffer--maybe-at-bottom)
+        ;;  (window-height . 12)
+        ;;  ;; (dedicated . t)
+        ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
 
         ("^CAPTURE"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12))
         (" \\*Agenda Commands\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Select\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12))
         ("\\*Org Links\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 1)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org todo\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Babel Results\\*"
-         (display-buffer-at-bottom))
+         (display-buffer--maybe-at-bottom))
         ("\\*org-roam\\*"
          (display-buffer-in-direction)
          (direction . right)
@@ -1204,12 +1232,13 @@ I need to fix it."
          (window-height . fit-window-to-buffer))
 
         ("\\*compilation\\*"
-         (display-buffer-at-bottom)
+         ;; (display-buffer--maybe-at-bottom)
+         (display-buffer-below-selected)
          (window-height . 12)
-         (dedicated . t)
+         ;; (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Compile-log\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
 
@@ -1217,22 +1246,22 @@ I need to fix it."
          (window-parameters . ((mode-line-format . none))))
 
         ("\\*Messages\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Backtrace\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Warnings\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ;; ("\\*Async Shell Command\\*"
-        ;;  (display-buffer-at-bottom)
+        ;;  (display-buffer--maybe-at-bottom)
         ;;  (window-height . 12)
         ;;  (dedicated . t)
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))

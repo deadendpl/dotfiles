@@ -116,7 +116,8 @@ Most of the stuff will get redirected here.")
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil) ; no files wiht ".#"
+              create-lockfiles nil ; no files wiht ".#"
+              require-final-newline t)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -386,7 +387,10 @@ Built-in =abbrev-mode= allows for abbreviations.
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
-  :custom (abbrev-file-name "~/Sync/backup/abbrev_defs.el")
+  :config
+  (if (custom/termux-p)
+      (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
+    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
   )
 #+end_src
 
@@ -396,7 +400,8 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
 =recentf= is built-in package for remembering file visit history.
 #+begin_src emacs-lisp
 (use-package recentf
-  :hook (after-init . recentf-mode)
+  :hook ((after-init . recentf-mode)
+         (kill-emacs . #'recentf-save-list))
   :bind (("C-c f r" . recentf-open))
   :custom
   (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
@@ -434,14 +439,16 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
 (use-package tab-bar
   :init
   (tab-bar-mode 1)
-  (advice-add #'tab-new
-              :after
-              (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
-                                  (call-interactively #'tab-rename))))
+  ;; (advice-add #'tab-new
+  ;;             :after
+  ;;             (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
+  ;;                                 (call-interactively #'tab-rename))))
+  :custom-face
+  (tab-bar-tab ((nil (:foreground "#151515" :background "#c8c5c7"))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
-  (tab-bar-new-tab-choice "*scratch*") ;; buffer to show in new tabs
+  (tab-bar-new-button-show nil)      ;; hide tab close / X button
   (tab-bar-tab-hints t)                ;; show tab numbers
   (tab-bar-auto-width-max nil)
   )
@@ -453,6 +460,28 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
   :custom (ibuffer-default-sorting-mode 'filename/process))
 #+end_src
 ** Appearance
+*** Dashboard
+I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for a very minimal dashboard.
+#+begin_src emacs-lisp
+(use-package enlight
+  :custom
+  (initial-buffer-choice #'enlight)
+  (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
+  (enlight-content
+   (concat
+    (propertize "Welcome to the Church of Emacs" 'face 'success)
+    "\n"
+    (enlight-menu
+     '(("Org Mode"
+        ("Org-Agenda (current day)" (org-agenda nil "a") "a")
+        ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
+        ("Org-Roam notes" (org-roam-node-find) "n")
+        ("Org-Roam today daily" (org-roam-dailies-goto-today) "d"))
+       ("Other"
+        ("Projects" project-switch-project "p"))
+       ("Notes to self"
+        ("Press q instead of killing buffers")))))))
+#+end_src
 *** Fonts
 **** Setting fonts
 #+begin_src emacs-lisp
@@ -629,18 +658,18 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
 
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
-  (progn
-    (use-package ewal-doom-themes
-      :demand
-      :config
-      (set-face-attribute 'line-number-current-line nil
-                          :foreground (ewal-load-color 'comment)
-                          :inherit 'default)
-      (set-face-attribute 'line-number nil
-                          :foreground (ewal--get-base-color 'green)
-                          :inherit 'default)
-      (load-theme 'ewal-doom-one t))
-    )
+  ;; (progn
+  (use-package ewal-doom-themes
+    :demand
+    :config
+    (set-face-attribute 'line-number-current-line nil
+                        :foreground (ewal-load-color 'comment)
+                        :inherit 'default)
+    (set-face-attribute 'line-number nil
+                        :foreground (ewal--get-base-color 'green)
+                        :inherit 'default)
+    (load-theme 'ewal-doom-one t))
+  ;; )
   )
 #+end_src
 
@@ -739,7 +768,7 @@ Built-in =savehist-mode= saves minibuffer history
 [[https://github.com/minad/consult][Consult]] has lots of useful commands with minibuffer completion.
 #+begin_src emacs-lisp
 (use-package consult
-  :after vertico
+  ;; :after vertico
   :init
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
@@ -749,6 +778,16 @@ Built-in =savehist-mode= saves minibuffer history
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
+  :bind
+  ;; ([remap project-find-file] . consult-project-buffer)
+  ([remap meow-goto-line] . consult-line)
+  :config
+  ;; disabling `display-buffer-alist' for a command
+  (advice-add 'consult-project-buffer :around
+              (lambda (orig-fun &rest args)
+                (let ((display-buffer-alist nil))
+                  (apply orig-fun args))))
+  (defalias 'project-find-file 'consult-project-buffer)
   )
 #+end_src
 **** Annotations (marginalia)
@@ -941,10 +980,11 @@ A whole lot of stuff.
       "YES(y)"
       "NO(n)")))
   (org-capture-templates
-   '(("t" "Todo" entry (file "inbox.org")
+   '(("t" "Todo" entry (file "agenda/inbox.org")
       "* TODO %?\n %a")))
   ;; ============ org agenda ============
-  (org-agenda-files (list (expand-file-name "agenda.org" org-roam-directory)(expand-file-name "inbox.org" org-roam-directory)))
+  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
+  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-agenda-prefix-format ;; format at which tasks are displayed
    '((agenda . " %i ")
      (todo . " %i ")
@@ -972,7 +1012,6 @@ A whole lot of stuff.
   (org-agenda-window-setup 'current-window)
   (org-refile-targets '((org-agenda-files :maxlevel . 1)))
   (org-refile-use-outline-path nil)
-  (org-archive-location (expand-file-name "agenda-archive.org::" org-roam-directory))
   (org-hide-emphasis-markers t)
   ;; (org-hide-leading-stars t)
   (org-html-validation-link nil)
@@ -1141,15 +1180,6 @@ It's set up so it will display markers when entering insert mode.
   (org-appear-trigger 'manual)
   (org-appear-autolinks t)
   :config
-  ;;   (add-hook 'org-appear-mode-hook (lambda ()
-  ;;     (add-hook 'evil-insert-state-entry-hook
-  ;;       #'org-appear-manual-start
-  ;;       nil
-  ;;       t)
-  ;;     (add-hook 'evil-insert-state-exit-hook
-  ;;       #'org-appear-manual-stop
-  ;;         nil
-  ;;        t)))
   (add-hook 'org-appear-mode-hook (lambda ()
                                     (add-hook 'meow-insert-enter-hook
                                               #'org-appear-manual-start
@@ -1211,6 +1241,7 @@ It's set up so it will display markers when entering insert mode.
          ("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
+         ("C-c n d f" . org-roam-dailies-find-date)
          ("C-c n d t" . org-roam-dailies-goto-today)
          ("C-c n d j" . org-roam-dailies-goto-next-note)
          ("C-c n d k" . org-roam-dailies-goto-previous-note)
@@ -1245,37 +1276,6 @@ It's set up so it will display markers when entering insert mode.
 #+begin_src emacs-lisp
 (use-package org-roam-ui
   :custom (org-roam-ui-sync-theme t))
-#+end_src
-**** If the database will get too big :ARCHIVE:
-Taken from https://edstrom.dev/czdfr/org-roam-fixes#jxbqt
-#+begin_src emacs-lisp
-;; Make the commands `org-roam-node-find' & `org-roam-node-insert' faster and
-;; often instant.
-
-;; Small drawback: after you just created a node, you can't immediately
-;; find it as it won't be in the cache.  You must leave Emacs alone for
-;; 10 seconds, then it'll enter the cache.
-
-(defun custom/vulpea-memo-refresh ()
-  (memoize-restore #'vulpea-db-query)
-  (memoize         #'vulpea-db-query)
-  (vulpea-db-query nil))
-
-(defvar custom/vulpea-memo-timer (timer-create))
-(defun custom/vulpea-memo-schedule-refresh (&rest _)
-  "Schedule a re-caching when the user is idle."
-  (cancel-timer custom/vulpea-memo-timer)
-  (setq custom/vulpea-memo-timer
-        (run-with-idle-timer 10 nil #'custom/vulpea-memo-refresh)))
-
-(use-package vulpea
-  :hook ((org-roam-db-autosync-mode . vulpea-db-autosync-enable))
-  :bind (([remap org-roam-node-find] . vulpea-find)
-         ([remap org-roam-node-insert] . vulpea-insert))
-  :config
-  (use-package memoize :demand)
-  (memoize #'vulpea-db-query)
-  (advice-add 'org-roam-db-update-file :after 'custom/vulpea-memo-schedule-refresh))
 #+end_src
 *** Org yt :ARCHIVE:
 It creates and displays YouTube links but with some tinkering it can display web images.
@@ -1650,35 +1650,35 @@ This variable desribes the way chosen buffers are displaying and behaving.
 
 (setq display-buffer-alist
       '(
-        ("^\\*helpful"
-         (display-buffer-at-bottom)
-         (window-height . 12)
-         (dedicated . t))
-        ("\\*Help\\*"
-         (display-buffer-at-bottom)
-         (window-height . 12)
-         (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
+        ;; ("^\\*helpful"
+        ;;  (display-buffer--maybe-at-bottom)
+        ;;  (window-height . 12)
+        ;;  (dedicated . t))
+        ;; ("\\*Help\\*"
+        ;;  (display-buffer--maybe-at-bottom)
+        ;;  (window-height . 12)
+        ;;  ;; (dedicated . t)
+        ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
 
         ("^CAPTURE"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12))
         (" \\*Agenda Commands\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Select\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12))
         ("\\*Org Links\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 1)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org todo\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Babel Results\\*"
-         (display-buffer-at-bottom))
+         (display-buffer--maybe-at-bottom))
         ("\\*org-roam\\*"
          (display-buffer-in-direction)
          (direction . right)
@@ -1686,12 +1686,13 @@ This variable desribes the way chosen buffers are displaying and behaving.
          (window-height . fit-window-to-buffer))
 
         ("\\*compilation\\*"
-         (display-buffer-at-bottom)
+         ;; (display-buffer--maybe-at-bottom)
+         (display-buffer-below-selected)
          (window-height . 12)
-         (dedicated . t)
+         ;; (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Compile-log\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
 
@@ -1699,22 +1700,22 @@ This variable desribes the way chosen buffers are displaying and behaving.
          (window-parameters . ((mode-line-format . none))))
 
         ("\\*Messages\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Backtrace\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Warnings\\*"
-         (display-buffer-at-bottom)
+         (display-buffer--maybe-at-bottom)
          (window-height . 12)
          (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ;; ("\\*Async Shell Command\\*"
-        ;;  (display-buffer-at-bottom)
+        ;;  (display-buffer--maybe-at-bottom)
         ;;  (window-height . 12)
         ;;  (dedicated . t)
         ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))

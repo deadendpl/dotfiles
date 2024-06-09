@@ -18,7 +18,7 @@ The script assumes that you:
 * Services
 ** Bluetooth
 #+begin_src sh :shebang "#!/usr/bin/env bash"
-if $(pacman -Q bluez >> /dev/null); then
+if pacman -Q bluez >> /dev/null; then
   echo "Bluetooth is set up."
 else
   sudo pacman -S --noconfirm bluez
@@ -29,14 +29,14 @@ fi
 By default pulseadio is installed so I remove that.
 I think pipewire sets up its' service automatically with reboot.
 #+begin_src sh
-if $(pacman -Q pulseaudio >> /dev/null); then
+if pacman -Q pulseaudio >> /dev/null; then
   sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
   sudo pacman -S --noconfirm pipewire pipewire-pulse pipewire-audio
 fi
 #+end_src
 ** Display manager (SDDM)
 #+begin_src sh
-if $(pacman -Q sddm >> /dev/null); then
+if pacman -Q sddm >> /dev/null; then
   echo "It seems SDDM is installed."
 else
   echo "Installing SDDM"
@@ -95,7 +95,7 @@ sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/p
 ** Dependencies
 *** Normal dependencies
 #+BEGIN_SRC sh
-if $(pacman -Q hyprland >> /dev/null); then
+if pacman -Q hyprland >> /dev/null; then
   echo "Normal packages are installed."
 else
   sudo pacman -Syyu --noconfirm hyprland \
@@ -160,7 +160,7 @@ fi
 *** Yay dependencies
 yay is AUR wrapper which can also be used as frontend to pacman.
 #+begin_src sh
-if $(pacman -Q yay >> /dev/null); then
+if pacman -Q yay >> /dev/null; then
   echo "It seems yay is installed."
 else
   git clone https://aur.archlinux.org/yay-bin
@@ -173,14 +173,14 @@ fi
 
 Now we install some packages with yay
 #+begin_src sh
-if $(pacman -Q rofi-lbonn-wayland-git >> /dev/null); then
+if pacman -Q rofi-lbonn-wayland-git >> /dev/null; then
   echo "AUR essential packages are installed."
 else
   yay -S --noconfirm networkmanager-dmenu-git \
                      rofi-bluetooth-git \
                      ctpv-git \
                      cp-p-git \
-                     rofi-lbonn-wayland-git \
+                     rofi-lbonn-wayland-git
                      # clipboard \
                      # pokemonsay-newgenerations-git \
                      # fortune-mod-vimtips \
@@ -196,7 +196,7 @@ fi
 *** Pywal dependencies
 Pywal is like Material You from Android but on Linux
 #+begin_src sh
-if $(pacman -Q wpgtk >> /dev/null); then
+if pacman -Q wpgtk >> /dev/null; then
   echo "It seems pywal packages are installed."
 else
   echo "Installing pywal packages."
@@ -214,13 +214,13 @@ else
                      # chaotic-aur/adw-gtk3
 
   wpg-install.sh -g
-  mkdir -p $HOME/.config/presets/users
+  # mkdir -p "${HOME}/.config/presets/users"
 fi
 #+end_src
 *** Optional software
 You don't need to do this part.
 #+begin_src sh
-if $(pacman -Q picard >> /dev/null); then
+if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
   yay -S --noconfirm appimagelauncher-bin \
@@ -260,7 +260,7 @@ fi
 * Latex working in Emacs
 Org mode supports latex displaying but that requires some setup.
 #+begin_src sh
-if $(pacman -Q texlive-bin >> /dev/null); then
+if pacman -Q texlive-bin >> /dev/null; then
   echo "Latex is setup."
 else
   sudo pacman -S --noconfirm texlive-bin texlive-binextra texlive-latexrecommended texlive-latexextra texlive-plaingeneric
@@ -287,7 +287,7 @@ sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" 
 #+end_src
 * Fish setup
 #+begin_src sh
-chsh -s $(which fish)
+chsh -s "$(command -v fish)"
 curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o "omf"
 fish omf --noninteractive
 fish -c "omf install foreign-env"

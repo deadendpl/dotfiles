@@ -54,11 +54,11 @@ gradience-wrap () {
 # }
 
 # waybar
-# file-line-change "$HOME/.config/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
+# file-line-change "${XDG_CONFIG_HOME}/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
 # qutebrowser
-# file-line-change "$HOME/.config/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
+# file-line-change "${XDG_CONFIG_HOME}/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
 # zathura
-# file-line-change "$HOME/.config/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
+# file-line-change "${XDG_CONFIG_HOME}/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
 
 # Use the wpg-tile function with the provided or default wallpaper file path
 wpg-tile "$1"

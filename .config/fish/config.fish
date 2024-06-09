@@ -8,7 +8,7 @@ set SHELLS_CONFIG_DIR "$XDG_CONFIG_HOME/shells"
 source "$SHELLS_CONFIG_DIR/default.sh"
 
 # nix
-if which nixos-rebuild > /dev/null 2>&1
+if command -q -v nixos-rebuild
   source "$SHELLS_CONFIG_DIR/nix.sh"
 end
 
@@ -20,18 +20,18 @@ set EDITOR emacsclient -t -a ""
 set VISUAL emacsclient -c -a ""
 
 # apt
-if which apt > /dev/null 2>&1
+if command -q -v apt
   source "$SHELLS_CONFIG_DIR/apt.sh"
 end
 
 # pacman and yay on Arch
-if which pacman > /dev/null 2>&1
+if command -q -v pacman
   source "$SHELLS_CONFIG_DIR/pacman.sh"
 end
 
 if test -n "$TERMUX_VERSION"
   # termux config
-  source "$SHELLS_CONFIG_DIR/termux"
+  source "$SHELLS_CONFIG_DIR/termux.sh"
 else
   starship init fish | source
   source "$SHELLS_CONFIG_DIR/desktop.sh"

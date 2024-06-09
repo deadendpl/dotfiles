@@ -11,7 +11,7 @@ declare -a options=(
   "Release Group"
 )
 
-option=$(printf '%s\n' "${options[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#options[@]} -i -p "Option:")
+option=$(printf '%s\n' "${options[@]}" | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#options[@]} -i -p "Option:")
 
 case $option in
   "Artist")
@@ -31,7 +31,7 @@ case $option in
     ;;
 esac
 
-query=$(echo '' | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l 0 -p "Query:")
+query=$(echo '' | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l 0 -p "Query:")
 
 declare -a options=(
   "Indexed"
@@ -39,7 +39,7 @@ declare -a options=(
   "Direct Database Search"
 )
 
-option=$(printf '%s\n' "${options[@]}" | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#options[@]} -i -p "Search method:")
+option=$(printf '%s\n' "${options[@]}" | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#options[@]} -i -p "Search method:")
 
 case $option in
   "Indexed")

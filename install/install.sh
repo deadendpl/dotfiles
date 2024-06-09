@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-if $(pacman -Q bluez >> /dev/null); then
+if pacman -Q bluez >> /dev/null; then
   echo "Bluetooth is set up."
 else
   sudo pacman -S --noconfirm bluez
   sudo systemctl enable bluetooth
 fi
 
-if $(pacman -Q pulseaudio >> /dev/null); then
+if pacman -Q pulseaudio >> /dev/null; then
   sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
   sudo pacman -S --noconfirm pipewire pipewire-pulse pipewire-audio
 fi
 
-if $(pacman -Q sddm >> /dev/null); then
+if pacman -Q sddm >> /dev/null; then
   echo "It seems SDDM is installed."
 else
   echo "Installing SDDM"
@@ -61,7 +61,7 @@ sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mi
 sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
 sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
 
-if $(pacman -Q hyprland >> /dev/null); then
+if pacman -Q hyprland >> /dev/null; then
   echo "Normal packages are installed."
 else
   sudo pacman -Syyu --noconfirm hyprland \
@@ -123,7 +123,7 @@ else
                                # otf-codenewroman-nerd \
 fi
 
-if $(pacman -Q yay >> /dev/null); then
+if pacman -Q yay >> /dev/null; then
   echo "It seems yay is installed."
 else
   git clone https://aur.archlinux.org/yay-bin
@@ -133,14 +133,14 @@ else
   rm -rf yay-bin/
 fi
 
-if $(pacman -Q rofi-lbonn-wayland-git >> /dev/null); then
+if pacman -Q rofi-lbonn-wayland-git >> /dev/null; then
   echo "AUR essential packages are installed."
 else
   yay -S --noconfirm networkmanager-dmenu-git \
                      rofi-bluetooth-git \
                      ctpv-git \
                      cp-p-git \
-                     rofi-lbonn-wayland-git \
+                     rofi-lbonn-wayland-git
                      # clipboard \
                      # pokemonsay-newgenerations-git \
                      # fortune-mod-vimtips \
@@ -153,7 +153,7 @@ else
                      # bitwarden-rofi-git \
 fi
 
-if $(pacman -Q wpgtk >> /dev/null); then
+if pacman -Q wpgtk >> /dev/null; then
   echo "It seems pywal packages are installed."
 else
   echo "Installing pywal packages."
@@ -171,10 +171,10 @@ else
                      # chaotic-aur/adw-gtk3
 
   wpg-install.sh -g
-  mkdir -p $HOME/.config/presets/users
+  # mkdir -p "${HOME}/.config/presets/users"
 fi
 
-if $(pacman -Q picard >> /dev/null); then
+if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
   yay -S --noconfirm appimagelauncher-bin \
@@ -208,7 +208,7 @@ EndSection'
   echo "The changes have been applied. After reboot touchpad should work."
 fi
 
-if $(pacman -Q texlive-bin >> /dev/null); then
+if pacman -Q texlive-bin >> /dev/null; then
   echo "Latex is setup."
 else
   sudo pacman -S --noconfirm texlive-bin texlive-binextra texlive-latexrecommended texlive-latexextra texlive-plaingeneric
@@ -229,7 +229,7 @@ rm -rf grub_gtg
 sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
 sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 
-chsh -s $(which fish)
+chsh -s "$(command -v fish)"
 curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o "omf"
 fish omf --noninteractive
 fish -c "omf install foreign-env"

@@ -4,13 +4,28 @@ if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
   terminal=foot
 fi
 
-dir="$HOME/.config/scripts"
+dir="${XDG_CONFIG_HOME}/scripts"
 
 cd "$dir"
 
-declare -a scripts=( "Changing root shell" "NVIM config as root" "(hypr) Toggle warm colors" "(hypr) Screen orientation" "(hypr) New wallpaper" "(hypr) Notification center" "(hypr) Waybar re/start" "Bookmarks" "Books" "Power menu" "Sxhkd help" "Touchpad on Xorg" "Web search" "Emacs server re/start" )
+declare -a scripts=(
+  "Changing root shell"
+  "NVIM config as root"
+  "(hypr) Toggle warm colors"
+  "(hypr) Screen orientation"
+  "(hypr) New wallpaper"
+  "(hypr) Notification center"
+  "(hypr) Waybar re/start"
+  "Bookmarks"
+  "Books"
+  "Power menu"
+  "Sxhkd help"
+  "Touchpad on Xorg"
+  "Web search"
+  "Emacs server re/start"
+)
 
-choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ~/.config/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
+choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
 case $choice in
   "(hypr) Screen orientation")
