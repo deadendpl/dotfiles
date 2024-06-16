@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+if systemctl status cups >> /dev/null; then
+  sudo systemctl stop cups
+  # killing left out hp processes
+  ps -Af | grep "hp-" | grep -v "grep" | awk '{print $2}' | xargs kill
+else
+  sudo systemctl start cups
+  hp-toolbox &
+fi

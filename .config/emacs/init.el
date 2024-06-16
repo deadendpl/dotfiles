@@ -106,6 +106,9 @@ Most of the stuff will get redirected here.")
 
 ;; (add-hook 'after-init-hook 'global-hl-line-mode)
 
+;; removing warning when using `upcase-region'
+(put 'upcase-region 'disabled nil)
+
 (use-package use-package
   :custom
   (use-package-verbose t)
@@ -665,8 +668,7 @@ Most of the stuff will get redirected here.")
   :hook
   (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
   (org-mode . electric-pair-local-mode)
-  ;; after refiling and archiving tasks agenda files aren't saved, I fix that
-  (org-after-refile-insert . (lambda () (save-some-buffers '('org-agenda-files))))
+  ;; after archiving tasks, agenda files aren't saved, I fix that
   (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
   ;; (org-capture-after-finalize . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
@@ -858,7 +860,10 @@ Most of the stuff will get redirected here.")
               (lambda (&rest _)
                 (when (called-interactively-p 'any)
                   (save-some-buffers (list org-agenda-files)))))
-
+  ;; saving agenda files after refiling
+  (advice-add #'org-refile
+              :after
+              (lambda (&rest _) (save-some-buffers 'org-agenda-files)))
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
               (lambda (&rest _)

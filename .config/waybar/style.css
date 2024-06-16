@@ -29,6 +29,11 @@ window#waybar {
   color: @background;
 }
 
+#workspaces button.focused {
+  background-color: @foreground;
+  color: @background;
+}
+
 #workspaces button.urgent {
   background-color: @color0;
   color: @foreground;

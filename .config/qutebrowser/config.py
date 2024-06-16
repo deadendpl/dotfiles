@@ -17,7 +17,7 @@ c.content.javascript.clipboard = "access-paste"
 
 # search
 c.url.searchengines = {
-  'DEFAULT': 'https://farside.link/searxng/search?q={}',
+  'DEFAULT': 'https://search.brave.com/search?q={}',
   'eco': 'https://www.ecosia.org/search?method=index&q={}',
   'whoo': 'https://farside.link/whoogle/search?q={}&lang_interface=en',
   'ph': 'https://www.phind.com/search?q={}',

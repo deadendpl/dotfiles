@@ -64,14 +64,14 @@ sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/p
 if pacman -Q hyprland >> /dev/null; then
   echo "Normal packages are installed."
 else
-  sudo pacman -Syyu --noconfirm hyprland \
+  sudo pacman -Syyu --noconfirm sway \
                                 htop \
                                 papirus-icon-theme \
                                 waybar \
                                 eza \
                                 qt5-wayland \
                                 swaybg \
-                                blueberry \
+                                blueman \
                                 swaync \
                                 wdisplays \
                                 wl-clipboard \
@@ -119,8 +119,9 @@ else
                                 tree-sitter \
                                 udiskie \
                                 swaylock
-                               # neovim \
-                               # otf-codenewroman-nerd \
+                                # hyprland \
+                                # neovim \
+                                # otf-codenewroman-nerd \
 fi
 
 if pacman -Q yay >> /dev/null; then
