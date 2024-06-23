@@ -14,10 +14,10 @@ in
     };
   };
 
-imports =
-  [ # Include the results of the hardware scan.
-    ./hardware-configuration.nix
-  ];
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+    ];
 
 boot = {
   tmp.cleanOnBoot = true;
@@ -41,9 +41,9 @@ boot = {
       # };
   };
 
-supportedFilesystems = [ "ntfs" ];
+  supportedFilesystems = [ "ntfs" ];
 
-kernelPackages = pkgs.unstable.linuxKernel.packages.linux_zen;
+  kernelPackages = pkgs.unstable.linuxKernel.packages.linux_zen;
 };
 
 nix = {
@@ -113,15 +113,15 @@ programs = {
   hyprland.enable = true;
   light.enable = true;
 
-# Some programs need SUID wrappers, can be configured further or are
-# started in user sessions.
-mtr.enable = true;
-gnupg.agent = {
-  enable = true;
-  enableSSHSupport = true;
-};
+  # Some programs need SUID wrappers, can be configured further or are
+  # started in user sessions.
+  mtr.enable = true;
+  gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
-fish.enable = true;
+  fish.enable = true;
 };
 
 users.defaultUserShell = pkgs.fish;

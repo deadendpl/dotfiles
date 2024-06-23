@@ -2,7 +2,10 @@
 #+auto_tangle: t
 #+startup: fold
 
+* WARNING
+It's outdated, so you will have to fix it along with my config files in order to get it working with Hyrpland.
 * Table of Contents :toc:
+- [[#warning][WARNING]]
 - [[#main-configuration][Main configuration]]
   - [[#importing-unstable-channel][Importing unstable channel]]
   - [[#boot][Boot]]

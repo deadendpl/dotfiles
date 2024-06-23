@@ -21,7 +21,7 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
 After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
-Software riced with pywal [10/11]:
+Software riced with pywal [11/11]:
 - [X] foot
 - [X] rofi
 - [X] gtk3
@@ -32,7 +32,7 @@ Software riced with pywal [10/11]:
 - [X] waybar
 - [X] hyprland
 - [X] zathura
-- [ ] sway
+- [X] sway
 * INSTALLING
 ** DEPENDENCIES
 Go to [[file:install/README.org][install/README.org]] to look at the dependencies and other tweaks.
