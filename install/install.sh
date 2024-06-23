@@ -71,7 +71,7 @@ else
                                 eza \
                                 qt5-wayland \
                                 swaybg \
-                                blueman \
+                                blueberry \
                                 swaync \
                                 wdisplays \
                                 wl-clipboard \

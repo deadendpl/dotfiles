@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# this is for a specific use case when editing MuscicBrainz entries
+# Requirements:
+# - yodotoold running, you can change the socket's location
+# - it's used for editing one entry in tracklist editor, thus it requires that each time you can move with 10 tabs
+# - Emacs with a buffer formatted like this:
+# onevalue
+# twovalue
+# - only Emacs and web browser windows on one workspace
+
+export YDOTOOL_SOCKET="${HOME}/.ydotool_socket"
+
+number=$(echo '' | rofi -config "${XDG_CONFIG_HOME}/rofi/config.rasi" -dmenu -l 0 -p "How many lines?") || exit
+
+for i in $(seq 1 $number)
+do
+  # pressing x and s
+  ydotool key 45:1 45:0 31:1 31:0
+  sleep 0.05
+
+  # pressing super+h
+  ydotool key 125:1 35:1 35:0 125:0
+  sleep 0.05
+
+  # pressing ctrl+a
+  ydotool key 29:1 30:1 30:0 29:0
+  sleep 0.05
+
+  # pressing ctrl+v
+  ydotool key 29:1 47:1 47:0 29:0
+  sleep 0.05
+
+  # pressing tab 10 times
+  for j in $(seq 1 10)
+  do
+    ydotool key 15:1 15:0
+    # sleep 0.05
+  done
+  sleep 0.05
+
+  # pressing super+h
+  ydotool key 125:1 35:1 35:0 125:0
+
+  sleep 0.05
+done

@@ -1,26 +1,6 @@
-alias ainst sudo apt install $*
-alias apu sudo apt purge $*
-alias aautopu sudo apt autopurge $*
-alias aup sudo apt update && sudo apt upgrade $*
-alias aupd sudo apt update $*
-alias aupg sudo apt upgrade $*
-alias ainstalled apt list --installed $*
-alias asearch apt search $*
-alias pinst yay -S $*
-alias ppu yay -Rs $*
-alias pup yay -Syu $*
-alias pinstalled yay -Q $*
-alias psearch yay -Ss $*
-alias porphan yay -Qtdq $*
-alias pclean yay -Sc && porphan $*
-alias listaur yay -Qqem $*
-alias yinst yay -S $*
-alias nup sudo nixos-rebuild switch $*
-alias nclean sudo nix-collect-garbage -d $*
-alias l eza --all --long --header --icons --git --group-directories-first --color-scale $*
-alias clr clear
-alias cllr clear && l $*
-alias clear clear t
-alias ip ip -color=auto $*
-alias vim find-file $1
 alias v find-file $1
+alias ip ip -color=auto $*
+alias clear clear t
+alias cllr clear && l $*
+alias clr clear
+alias l eza --all --long --header --icons --git --group-directories-first --color-scale $*

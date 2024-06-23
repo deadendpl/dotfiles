@@ -60,7 +60,7 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline t)
+              require-final-newline 'require-final-newline)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -575,16 +575,17 @@ Most of the stuff will get redirected here.")
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
+  (defalias 'project-find-file 'consult-project-buffer)
   :bind
-  ;; ([remap project-find-file] . consult-project-buffer)
-  ([remap meow-goto-line] . consult-line)
+  ([remap project-find-file] . consult-project-buffer)
+  ([remap goto-line] . consult-goto-line)
+  ([remap imenu] . consult-imenu)
   :config
-  ;; disabling `display-buffer-alist' for a command
+  ;; disabling `display-buffer-alist' for `consult-project-buffer'
   (advice-add 'consult-project-buffer :around
               (lambda (orig-fun &rest args)
                 (let ((display-buffer-alist nil))
                   (apply orig-fun args))))
-  (defalias 'project-find-file 'consult-project-buffer)
   )
 
 (use-package marginalia
@@ -596,7 +597,6 @@ Most of the stuff will get redirected here.")
 
 (use-package dired
   :ensure nil
-  ;; :init (evil-collection-dired-setup)
   :hook (dired-mode . dired-hide-details-mode)
   :bind (:map dired-mode-map
               ("b" . dired-up-directory))
@@ -610,6 +610,8 @@ Most of the stuff will get redirected here.")
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
+  (dired-guess-shell-alist-user
+    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
   )
 
 (use-package diredfl

@@ -1,7 +1,7 @@
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
-set                     {
+set {
     $mod                Mod4
 # Home row direction keys, like vim
     $left               h
@@ -19,21 +19,24 @@ set                     {
 }
 
 # startup stuff
-exec                    swaync
-exec                    ~/.local/bin/pyrice
-exec                    $scripts/emacs.sh
-exec                    /usr/libexec/polkit-gnome-authentication-agent-1
+exec {
+    swaync
+    ~/.local/bin/pyrice
+    $scripts/emacs.sh
+    /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+}
 
 # disabling window name in the window's border
 default_border          pixel
 
 ### Input configuration
-input                   * {
+input * {
     dwt                 disabled
     tap                 enabled
     # middle_emulation enabled
 }
-input                   type:keyboard {
+input type:keyboard {
+    xkb_layout          pl
     xkb_options         ctrl:nocaps
     repeat_delay        200
 }
@@ -42,12 +45,13 @@ input                   type:keyboard {
 #
 # Basics:
 #
-bindsym                 {
+bindsym {
     $mod+t              exec $term
     $mod+w              exec $browser
     $mod+e              exec $editor
     $mod+Alt+e          exec $editor -e "(scratch-buffer)"
     $mod+f              exec pcmanfm
+    $mod+Shift+f        exec $term -e fish -c lf
     $mod+Return         exec $menu
     $mod+Shift+Return   exec $scripts/hub.sh
     $mod+n              exec swaync-client -t
@@ -70,7 +74,8 @@ bindsym                 {
     $mod+Shift+F7       exec rofi-bluetooth
     $mod+F10            exec wdisplays
     $mod+F9             exec $script/udiskie-unmount.sh
-    $mod+Delete         exec hyprctl kill
+    # I need to find an alternative
+    # $mod+Delete         exec hyprctl kill
 
     # Reload the configuration file
     $mod+Shift+c        reload
@@ -168,11 +173,13 @@ bindsym                 {
     # Move the currently focused window to the scratchpad
     $mod+Shift+minus    move scratchpad
 
+    # resizing/resetting mode
+    $mod+r mode "resize"
+
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
     $mod+minus          scratchpad show
-
-    }
+}
 
 
     # Drag floating windows by holding down $mod and left mouse button.
@@ -189,30 +196,51 @@ bindsym                 {
 # Resizing containers:
 #
 mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
-    bindsym             $left resize shrink width 10px
-    bindsym             $down resize grow height 10px
-    bindsym             $up resize shrink height 10px
-    bindsym             $right resize grow width 10px
+    bindsym {
+        # left will shrink the containers width
+        # right will grow the containers width
+        # up will shrink the containers height
+        # down will grow the containers height
+        $left resize shrink width 10px
+        $down resize grow height 10px
+        $up resize shrink height 10px
+        $right resize grow width 10px
 
-    # Ditto, with arrow keys
-    # bindsym             Left resize shrink width 10px
-    # bindsym             Down resize grow height 10px
-    # bindsym             Up resize shrink height 10px
-    # bindsym             Right resize grow width 10px
+        # Ditto, with arrow keys
+        # bindsym             Left resize shrink width 10px
+        # bindsym             Down resize grow height 10px
+        # bindsym             Up resize shrink height 10px
+        # bindsym             Right resize grow width 10px
 
-    # Return to default mode
-    bindsym             Return mode "default"
-    bindsym             Escape mode "default"
-    bindsym             w exec $scripts/hypr/waybar-start.sh;mode "default"
-    bindsym             e exec $scripts/emacs.sh;mode "default"
+        # Return to default mode
+        Return mode "default"
+        Escape mode "default"
+        w exec $scripts/hypr/waybar-start.sh;mode "default"
+        e exec $scripts/emacs.sh;mode "default"
+    }
 }
-bindsym                 $mod+r mode "resize"
 
 # windows rules
-# for_window              [app_id="nautilus"] border none
+for_window {
+    # [app_id="^swayimg"] fullscreen
+    [app_id="org.pulseaudio.pavucontrol"] floating enable
+    [app_id="blueman-manager"] floating enable
+    [app_id="blueman-services"] floating enable
+    [app_id="blueberry.py"] floating enable
+    [title="Unlock Database - KeePassXC"] floating enable
+    [title="KeePassXC - Browser Access Request"] floating enable
+    [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
+}
 
-include                 /etc/sway/config.d/*
+include {
+    /etc/sway/config.d/*
+    # including pywal colors
+    ~/.cache/wal/colors-sway
+}
+
+# colors of borders
+client.focused          $background $color11 $foreground
+client.focused_inactive $background $background $foreground
+client.unfocused        $background $background $foreground
+client.urgent           $background $background $foreground
+client.placeholder      $background $background $foreground

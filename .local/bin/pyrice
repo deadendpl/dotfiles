@@ -63,6 +63,11 @@ gradience-wrap () {
 # Use the wpg-tile function with the provided or default wallpaper file path
 wpg-tile "$1"
 
+# It's not the best way, as it will still reload sway when sway starts up
+if ps -Af | grep "sway$" > /dev/null; then
+  swaymsg reload
+fi
+
 gradience-wrap &
 
 # reloading bunch of stuff

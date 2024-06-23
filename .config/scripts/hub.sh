@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; then
-  terminal=foot
-fi
+terminal=foot
 
 dir="${XDG_CONFIG_HOME}/scripts"
 
@@ -23,6 +21,7 @@ declare -a scripts=(
   "Touchpad on Xorg"
   "Web search"
   "Emacs server re/start"
+  "HP printer toggle"
 )
 
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
@@ -69,6 +68,9 @@ case $choice in
     ;;
   "Emacs server re/start")
     ./emacs.sh
+    ;;
+  "HP printer toggle")
+    $terminal -e hp-printer-toggle
     ;;
   *)
     exit 0

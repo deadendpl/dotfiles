@@ -17,6 +17,7 @@ declare -a search_engines=(
   "YouTube (Piped)"
   "Phind"
   "SearXNG"
+  "VGMdb"
   "Whoogle"
 ) # add or remove search engines here
 
@@ -73,6 +74,12 @@ case $selected_engine in
     ;;
   "MusicBrainz")
     ${XDG_CONFIG_HOME}/scripts/mb-search.sh
+    exit 0
+    ;;
+  "VGMdb")
+    URL="https://vgmdb.net/search?q="
+    QUERY=$(echo '' | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l 0 -p "Search $selected_engine:") || exit
+    xdg-open "${URL}${QUERY}&type=" 2> /dev/null
     exit 0
     ;;
   *)

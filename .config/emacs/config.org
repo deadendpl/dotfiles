@@ -30,7 +30,7 @@ Credits to:
 - System Crafters with his Emacs from Scratch [[https://youtube.com/playlist?list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ][videos]] and [[https://systemcrafters.net/emacs-from-scratch/][web articles]]
 - [[https://sachachua.com/blog/][Sacha Chua]] for giving sum of Emacs news and content per week
 
-This config is used on Emacs _29.3_ and is intended for use with that version.
+This config is used on Emacs _29.4_ and is intended for use with that version.
 * Early Init
 #+begin_src emacs-lisp :tangle ./early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
@@ -117,7 +117,7 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline t)
+              require-final-newline 'require-final-newline)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -781,16 +781,17 @@ Built-in =savehist-mode= saves minibuffer history
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
+  (defalias 'project-find-file 'consult-project-buffer)
   :bind
-  ;; ([remap project-find-file] . consult-project-buffer)
-  ([remap meow-goto-line] . consult-line)
+  ([remap project-find-file] . consult-project-buffer)
+  ([remap goto-line] . consult-goto-line)
+  ([remap imenu] . consult-imenu)
   :config
-  ;; disabling `display-buffer-alist' for a command
+  ;; disabling `display-buffer-alist' for `consult-project-buffer'
   (advice-add 'consult-project-buffer :around
               (lambda (orig-fun &rest args)
                 (let ((display-buffer-alist nil))
                   (apply orig-fun args))))
-  (defalias 'project-find-file 'consult-project-buffer)
   )
 #+end_src
 **** Annotations (marginalia)
@@ -812,7 +813,6 @@ I still do some configurations because dirvish at its core uses dired and its ke
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
-  ;; :init (evil-collection-dired-setup)
   :hook (dired-mode . dired-hide-details-mode)
   :bind (:map dired-mode-map
               ("b" . dired-up-directory))
@@ -826,6 +826,8 @@ I still do some configurations because dirvish at its core uses dired and its ke
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
+  (dired-guess-shell-alist-user
+    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
   )
 
 (use-package diredfl

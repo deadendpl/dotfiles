@@ -1,6 +1,6 @@
 configuration {
-  modi: "drun,run,";
-  icon-theme: "Papirus-Dark";
+  modi: "drun,run";
+  // icon-theme: "Papirus-Dark";
   show-icons: true;
   terminal: "foot";
   drun-display-format: "{icon} {name}";
