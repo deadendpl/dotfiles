@@ -13,7 +13,7 @@
   - [[#dired][Dired]]
   - [[#docs][Docs]]
   - [[#elfeed][Elfeed]]
-  - [[#git-stuff][Git stuff]]
+  - [[#magit][Magit]]
   - [[#org-mode][Org Mode]]
   - [[#parenthesis][Parenthesis]]
   - [[#programming][Programming]]
@@ -474,6 +474,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
    (concat
     (propertize "Welcome to the Church of Emacs" 'face 'success)
     "\n"
+    (concat "Startup time: " (emacs-init-time))
+    "\n"
     (enlight-menu
      '(("Org Mode"
         ("Org-Agenda (current day)" (org-agenda nil "a") "a")
@@ -827,7 +829,22 @@ I still do some configurations because dirvish at its core uses dired and its ke
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+  :config
+  (defun dired-do-flush-lines (regexp)
+    "Do `flush-lines' on all marked files.
+REGEXP is the argument used for `flush-lines'."
+    (interactive "s")
+    (dired-map-over-marks-check
+     (lambda ()
+       (let ((file (dired-get-filename)))
+         (with-temp-buffer
+           (insert-file-contents file)
+           (flush-lines regexp)
+           (write-region (point-min) (point-max) file)))
+       nil)
+     nil
+     'flush-score-blocks-in-dired-files))
   )
 
 (use-package diredfl
@@ -917,8 +934,8 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
   :bind (:map elfeed-search-mode-map)
   ("f" . elfeed-search-show-entry))
 #+end_src
-** Git stuff
-[[https://magit.vc/][Magit]] is the best git client in Emacs.
+** Magit
+[[https://magit.vc/][Magit]] is a git client.
 #+begin_src emacs-lisp
 (use-package magit
   :custom
@@ -1634,6 +1651,7 @@ The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x
 I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using [[https://github.com/magit/transient][transient]] to make interactive commands.
 #+begin_src emacs-lisp
 (use-package reverso
+  :bind (("C-c r" . reverso))
   :config (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 #+end_src
 ** Window/buffer management :ARCHIVE:

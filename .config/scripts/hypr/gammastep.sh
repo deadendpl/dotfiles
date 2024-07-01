@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 if pgrep "gammastep" > /dev/null; then
-  pgrep "gammastep" | xargs kill
+  pkill gammastep
 else
   gammastep -O 2200 2 &
 fi

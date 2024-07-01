@@ -7,4 +7,5 @@ if pgrep "emacs" > /dev/null; then
 fi
 
 emacs --daemon
-notify-send -i emacs "Emacs has started."
+notify-send -i emacs "Emacs has re/started."
+# emacsclient --eval '(shell-command (concat "notify-send -i emacs \"Emacs init time\" \"" (emacs-init-time) "\""))'

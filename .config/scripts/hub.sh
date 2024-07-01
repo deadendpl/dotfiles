@@ -9,11 +9,11 @@ cd "$dir"
 declare -a scripts=(
   "Changing root shell"
   "NVIM config as root"
-  "(hypr) Toggle warm colors"
-  "(hypr) Screen orientation"
-  "(hypr) New wallpaper"
-  "(hypr) Notification center"
-  "(hypr) Waybar re/start"
+  "(sway) Toggle warm colors"
+  "(sway) Screen orientation"
+  "(sway) New wallpaper"
+  "(sway) Notification center"
+  "(sway) Waybar re/start"
   "Bookmarks"
   "Books"
   "Power menu"
@@ -27,19 +27,19 @@ declare -a scripts=(
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
 case $choice in
-  "(hypr) Screen orientation")
+  "(sway) Screen orientation")
     hypr/screen-orientation.sh
     ;;
-  "(hypr) Notification center")
+  "(sway) Notification center")
     swaync-client -t
     ;;
-  "(hypr) New wallpaper")
+  "(sway) New wallpaper")
     ~/.local/bin/pyrice
     ;;
-  "(hypr) Toggle warm colors")
+  "(sway) Toggle warm colors")
     hypr/gammastep.sh
     ;;
-  "(hypr) Waybar re/start")
+  "(sway) Waybar re/start")
     hypr/waybar-start.sh
     ;;
   "NVIM config as root")

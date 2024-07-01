@@ -61,12 +61,13 @@ c.auto_save.session = True
 c.content.default_encoding = "utf-8"
 c.content.blocking.method = "both"
 
-c.editor.command = ["emacsclient", "-c", "-a", "'nvim'", "{}"]
+c.editor.command = ["emacsclient", "-c", "-a", "''", "{}"]
 
 c.content.user_stylesheets = "~/.config/qutebrowser/pog.css"
 
 config.bind('<ctrl+j>', 'completion-item-focus next', 'command')
 config.bind('<ctrl+k>', 'completion-item-focus prev', 'command')
+config.bind('<ctrl+l>', 'command-accept', 'command')
 config.bind('<ctrl+shift+l>', 'spawn --userscript qute-keepassxc --key 22B505BC', mode='insert')
 config.bind('cn', 'clear-messages', mode='normal')
 config.bind('gr', 'config-source', mode='normal')

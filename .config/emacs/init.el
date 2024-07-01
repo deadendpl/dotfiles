@@ -361,6 +361,8 @@ Most of the stuff will get redirected here.")
    (concat
     (propertize "Welcome to the Church of Emacs" 'face 'success)
     "\n"
+    (concat "Startup time: " (emacs-init-time))
+    "\n"
     (enlight-menu
      '(("Org Mode"
         ("Org-Agenda (current day)" (org-agenda nil "a") "a")
@@ -611,7 +613,22 @@ Most of the stuff will get redirected here.")
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+  :config
+  (defun dired-do-flush-lines (regexp)
+    "Do `flush-lines' on all marked files.
+REGEXP is the argument used for `flush-lines'."
+    (interactive "s")
+    (dired-map-over-marks-check
+     (lambda ()
+       (let ((file (dired-get-filename)))
+         (with-temp-buffer
+           (insert-file-contents file)
+           (flush-lines regexp)
+           (write-region (point-min) (point-max) file)))
+       nil)
+     nil
+     'flush-score-blocks-in-dired-files))
   )
 
 (use-package diredfl
@@ -1192,6 +1209,7 @@ I need to fix it."
   :bind ("C-x C-S-f" . sudo-edit-find-file))
 
 (use-package reverso
+  :bind (("C-c r" . reverso))
   :config (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 
 (use-package writeroom-mode

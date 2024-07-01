@@ -1,5 +1,5 @@
 alias fetch='fastfetch'
-alias lf='lfcd;pgrep "lf" | xargs kill'
+alias lf='lfcd;pkill lf'
 alias cp='cp-p'
 alias man='batman'
 alias mv='mv-p'
