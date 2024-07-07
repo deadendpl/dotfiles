@@ -60,7 +60,7 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline 'require-final-newline)
+              require-final-newline 'visit-save)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -354,6 +354,8 @@ Most of the stuff will get redirected here.")
   :custom (ibuffer-default-sorting-mode 'filename/process))
 
 (use-package enlight
+  :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
+                                    (emacs-lock-mode 'kill))))
   :custom
   (initial-buffer-choice #'enlight)
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
@@ -372,7 +374,8 @@ Most of the stuff will get redirected here.")
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Notes to self"
-        ("Press q instead of killing buffers")))))))
+        ("Press q instead of killing buffers"))))))
+)
 
 (set-face-attribute 'default nil
                     :font "JetBrainsMono NFM"
@@ -647,6 +650,7 @@ REGEXP is the argument used for `flush-lines'."
   ([remap describe-symbol] . helpful-symbol)
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key)
+  ("C-h C-." . helpful-at-point)
   :custom (helpful-max-buffers nil)
   )
 
@@ -807,7 +811,9 @@ REGEXP is the argument used for `flush-lines'."
   :config
   ;; live latex preview
   (defun custom/org-resize-latex-overlays ()
-    "It rescales all latex preview fragments correctly with the text size as you zoom text. It's fast, since no image regeneration is required."
+    "Rescales all latex preview fragments correctly with the text size
+as you zoom text. It's fast, since no image regeneration is
+required."
     (cl-loop for o in (car (overlay-lists))
              if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
              do (plist-put (cdr (overlay-get o 'display))
@@ -880,8 +886,7 @@ REGEXP is the argument used for `flush-lines'."
                 (when (called-interactively-p 'any)
                   (save-some-buffers (list org-agenda-files)))))
   ;; saving agenda files after refiling
-  (advice-add #'org-refile
-              :after
+  (advice-add #'org-refile :after
               (lambda (&rest _) (save-some-buffers 'org-agenda-files)))
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
@@ -889,7 +894,12 @@ REGEXP is the argument used for `flush-lines'."
                 (if (eq major-mode 'org-mode)
                     (unless (eq org-cycle-global-status 'all)
                       (org-fold-show-all)))))
+  ;; basically every heading will be shown in imenu
+  (with-eval-after-load 'org-indent
+    (setq org-imenu-depth org-indent--deepest-level))
   )
+
+
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1089,12 +1099,29 @@ using `browse-url'."
   :hook (html-mode . (lambda () (smartparens-mode 0)))
   :preface
   (defun html-close-tag ()
-    "Inserts > and closes tag.
-NOTE that it will each time close a tag.
-I need to fix it."
+    "Inserts >, closes tag, and moves to the >.
+After inserting >, it temporarily diables indenting functions, as
+they mess the point stored.
+NOTE that it will each time close a tag."
     (interactive)
     (insert ">")
-    (sgml-close-tag))
+    (let ((current-point (point))
+          (indent-func indent-line-function)
+          (indent-region-func indent-region-function))
+      ;; Temporarily disable indentation
+      (setq-local indent-line-function 'ignore)
+      (setq-local indent-region-function 'ignore)
+
+      (sgml-close-tag)
+      (goto-char current-point)
+
+      ;; Restore the original indentation functions
+      (setq-local indent-line-function indent-func)
+      (setq-local indent-region-function indent-region-func)
+
+      ;; Call the indentation function if it is not nil
+      (when indent-func
+        (funcall indent-func))))
   :bind (:map html-mode-map
               (">" . html-close-tag)))
 
