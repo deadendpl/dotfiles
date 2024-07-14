@@ -1,3 +1,4 @@
+# -*- mode: conf -*-
 # Command line completion entries
 set completion-fg {color7}
 set completion-bg {color0}

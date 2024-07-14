@@ -6,23 +6,93 @@
 - [[#early-init][Early Init]]
 - [[#the-rest][The rest]]
   - [[#sane-defaults-and-other][Sane defaults (and other)]]
+    - [[#termux-check][Termux check]]
+    - [[#some-modes-turned-on-and-off][Some modes turned on and off]]
+    - [[#uncluttering-user-emacs-directory][Uncluttering user-emacs-directory]]
+    - [[#other-variables][Other variables]]
+    - [[#other][Other]]
+    - [[#package-management-setup][Package management setup]]
+      - [[#normal-packages][Normal packages]]
+      - [[#not-normal-packages-vc][Not normal packages (vc)]]
   - [[#keybindings][Keybindings]]
+    - [[#modal-editing-meow][Modal editing (Meow)]]
+    - [[#flashing][Flashing]]
+    - [[#setting-keybindings][Setting keybindings]]
   - [[#built-in-packages][Built-in packages]]
+    - [[#abbreviations][Abbreviations]]
+    - [[#file-history][File history]]
+    - [[#remembering-file-place][Remembering file place]]
+    - [[#eww][EWW]]
+    - [[#line-numbers][Line numbers]]
+    - [[#project-management][Project management]]
+    - [[#tabs][Tabs]]
+    - [[#ibuffer][Ibuffer]]
   - [[#appearance][Appearance]]
+    - [[#dashboard][Dashboard]]
+    - [[#fonts][Fonts]]
+      - [[#setting-fonts][Setting fonts]]
+      - [[#enabling-programming-ligatures][Enabling programming ligatures]]
+      - [[#mixed-pitch][Mixed Pitch]]
+    - [[#highlight-todo][Highlight TODO]]
+    - [[#icons][Icons]]
+      - [[#all-the-icons][ALL THE ICONS]]
+      - [[#nerd-icons][NERD ICONS]]
+    - [[#modeline][Modeline]]
+    - [[#rainbow-delimiters][Rainbow delimiters]]
+    - [[#dispaly-color-codes][Dispaly color codes]]
+    - [[#theme][Theme]]
   - [[#completion][Completion]]
+    - [[#in-buffer-completion-corfu][In-buffer completion (corfu)]]
+    - [[#minibuffer-completion-vertico-with-consult][Minibuffer completion (vertico with consult)]]
+      - [[#vertico][Vertico]]
+      - [[#consult][Consult]]
+      - [[#annotations-marginalia][Annotations (marginalia)]]
   - [[#dired][Dired]]
+    - [[#dired-1][Dired]]
+    - [[#dirvish][Dirvish]]
   - [[#docs][Docs]]
+    - [[#helpful][Helpful]]
+    - [[#which-key][Which-key]]
   - [[#elfeed][Elfeed]]
   - [[#magit][Magit]]
   - [[#org-mode][Org Mode]]
+    - [[#initial-tweaks][Initial tweaks]]
+    - [[#org-tempo][Org Tempo]]
+    - [[#org-appear][Org appear]]
+    - [[#org-auto-tangle][Org auto tangle]]
+    - [[#org-roam][Org Roam]]
+    - [[#org-yt][Org yt]]
+    - [[#sliced-images][Sliced images]]
+    - [[#toc][TOC]]
   - [[#parenthesis][Parenthesis]]
   - [[#programming][Programming]]
+    - [[#compiling][Compiling]]
+    - [[#flycheck][Flycheck]]
+    - [[#lsp][LSP]]
+    - [[#language-support][Language support]]
+    - [[#languages][Languages]]
+      - [[#shells][Shells]]
+      - [[#c][C++]]
+      - [[#elisp][Elisp]]
+      - [[#python][Python]]
+      - [[#web][Web]]
+    - [[#lorem-ipsum-generator][Lorem ipsum generator]]
+    - [[#tree-sitter][Tree-sitter]]
+    - [[#templates][Templates]]
+      - [[#startup-templates][Startup templates]]
+      - [[#command-templates][Command templates]]
   - [[#shells-and-terminals][Shells and terminals]]
+    - [[#shell][Shell]]
+    - [[#eshell][Eshell]]
+      - [[#eat][EAT]]
+    - [[#vterm][Vterm]]
   - [[#sudo-edit][Sudo edit]]
   - [[#translation][Translation]]
   - [[#windowbuffer-management][Window/buffer management]]
+    - [[#buffer-move][Buffer-move]]
   - [[#writeroom][Writeroom]]
   - [[#display-buffer-alist][display-buffer-alist]]
+  - [[#m3u-mode][M3U mode]]
 
 * INFO and CREDITS
 Credits to:
@@ -690,7 +760,7 @@ With Emacs 29, true transparency has been added.
 [[https://github.com/minad/corfu][corfu]] is minimal completion provider aligning with Emacs built-in tools.
 #+begin_src emacs-lisp
 (use-package corfu
-  :hook ((meow-insert-exit . custom/corfu-cleanup)
+  :hook (;; (meow-insert-exit . custom/corfu-cleanup)
          (prog-mode . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom
@@ -698,16 +768,18 @@ With Emacs 29, true transparency has been added.
   (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (tab-always-indent 'complete)
-  :preface
-  ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
-  (defun custom/corfu-cleanup ()
-    "Close corfu popup if it is active."
-    (if (boundp 'corfu-mode)
-        (if corfu-mode (corfu-quit))))
+  :custom-face
+  (corfu-current ((nil (:inherit vertico-current))))
+  ;; :preface
+  ;; ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
+  ;; (defun custom/corfu-cleanup ()
+  ;;   "Close corfu popup if it is active."
+  ;;   (if (boundp 'corfu-mode)
+  ;;       (if corfu-mode (corfu-quit))))
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
-              ("ESC" . corfu-quit)))
+              ("<escape>" . corfu-quit)))
 
 (use-package nerd-icons-corfu
   :after corfu
@@ -823,7 +895,7 @@ I still do some configurations because dirvish at its core uses dired and its ke
               ("b" . dired-up-directory))
   :custom
   (insert-directory-program "ls")
-  (dired-listing-switches "-lv --almost-all --group-directories-first --human-readable")
+  (dired-listing-switches "-lvX --almost-all --group-directories-first --human-readable")
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
@@ -832,7 +904,9 @@ I still do some configurations because dirvish at its core uses dired and its ke
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")
+         '("\\.\\(pdf\\|epub\\)$" "zathura")))
+  (dired-dwim-target t)
   :config
   (defun dired-do-flush-lines (regexp)
     "Do `flush-lines' on all marked files.
@@ -966,7 +1040,9 @@ A whole lot of stuff.
   ("C-c n a" . org-agenda)
   ("C-c n c" . org-capture)
   (:map org-mode-map
-        ("C-x n t" . org-toggle-narrow-to-subtree))
+        ("C-x n t" . org-toggle-narrow-to-subtree)
+        ("C-x n r" . custom/org-reverso-grammar-subtree)
+        )
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -1028,7 +1104,11 @@ A whole lot of stuff.
   (org-agenda-skip-deadline-if-done t)
   (org-agenda-skip-timestamp-if-done t)
   (org-agenda-columns-add-appointments-to-effort-sum t)
-  ;; (org-agenda-custom-commands nil)
+  (org-agenda-custom-commands
+   '(("i" "Ideas" todo "IDEA")
+     ("n" "Agenda and all TODOs"
+      ((agenda "")
+       (alltodo "")))))
   (org-agenda-default-appointment-duration 60)
   (org-agenda-mouse-1-follows-link t)
   (org-agenda-skip-unavailable-files t)
@@ -1251,11 +1331,11 @@ It's set up so it will display markers when entering insert mode.
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :target (file+head "${slug}.org"
-                         "#+title: ${title}\n#+date: %U\n")
+                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n")
       :unnarrowed t)
      ("g" "video game" plain "%?"
       :target (file+head "games/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
+                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
       :unnarrowed t)
      ("b" "book" plain "%?"
@@ -1304,6 +1384,12 @@ It's set up so it will display markers when entering insert mode.
     (interactive)
     (org-map-entries 'org-id-get-create))
   )
+#+end_src
+
+I like sometimes to use =consult-org-roam-search= to use grep on my notes, and that is in [[https://github.com/jgru/consult-org-roam][consult-org-roam]].
+#+begin_src emacs-lisp
+(use-package consult-org-roam
+  :bind ("C-c n g" . consult-org-roam-search))
 #+end_src
 
 [[https://github.com/org-roam/org-roam-ui][org-roam-ui]] gives you nice webpage with obsidian looking graph of notes
@@ -1357,7 +1443,10 @@ Table of contents after after typing =:toc:= in header
 #+begin_src emacs-lisp
 (use-package toc-org
   :after org
-  :hook (org-mode . #'toc-org-enable))
+  :hook (org-mode . #'toc-org-enable)
+  :custom
+  (toc-org-max-depth org-indent--deepest-level)
+  (toc-org-enable-links-opening t))
 #+end_src
 ** Parenthesis
 #+begin_src emacs-lisp
@@ -1629,6 +1718,7 @@ Eshell is an Emacs /shell/ that is written in Elisp.
   (eshell-hist-ignoredups t)
   (eshell-scroll-to-bottom-on-input nil)
   (eshell-destroy-buffer-when-process-dies t)
+  (eshell-banner-message "")
   :config
   ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
   (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
@@ -1679,6 +1769,14 @@ I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using 
 #+begin_src emacs-lisp
 (use-package reverso
   :bind (("C-c r" . reverso))
+  :preface
+  (defun custom/org-reverso-grammar-subtree ()
+    "Narrows to the current subtree and uses `reverso-grammar-buffer'."
+    (interactive)
+    (org-narrow-to-subtree)
+    (org-fold-show-all)
+    (reverso-grammar-buffer)
+    )
   :config (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 #+end_src
 ** Window/buffer management :ARCHIVE:
@@ -1775,4 +1873,17 @@ This variable desribes the way chosen buffers are displaying and behaving.
 
       switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
       switch-to-buffer-in-dedicated-window t) ; `switch-to-buffer' will work on dedicated window
+#+end_src
+** M3U mode
+A mode for m3u files
+#+begin_src emacs-lisp
+(define-generic-mode
+    'm3u-mode                      ;; name of the mode to create
+  '("#")                         ;; comments start with '#'
+  nil                            ;; keywords (none in this case)
+  '(("^#EXTINF" . 'font-lock-keyword-face) ;; highlight #EXTINF as keyword
+    ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face)) ;; highlight file extensions as strings
+  '("\\.m3u\\'")                 ;; files for which to activate this mode
+  nil                            ;; other functions to call
+  "A mode for M3U playlist files") ;; doc string for this mode
 #+end_src

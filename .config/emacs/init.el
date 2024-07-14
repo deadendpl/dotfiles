@@ -502,7 +502,7 @@ Most of the stuff will get redirected here.")
 (add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
 
 (use-package corfu
-  :hook ((meow-insert-exit . custom/corfu-cleanup)
+  :hook (;; (meow-insert-exit . custom/corfu-cleanup)
          (prog-mode . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom
@@ -510,16 +510,18 @@ Most of the stuff will get redirected here.")
   (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (tab-always-indent 'complete)
-  :preface
-  ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
-  (defun custom/corfu-cleanup ()
-    "Close corfu popup if it is active."
-    (if (boundp 'corfu-mode)
-        (if corfu-mode (corfu-quit))))
+  :custom-face
+  (corfu-current ((nil (:inherit vertico-current))))
+  ;; :preface
+  ;; ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
+  ;; (defun custom/corfu-cleanup ()
+  ;;   "Close corfu popup if it is active."
+  ;;   (if (boundp 'corfu-mode)
+  ;;       (if corfu-mode (corfu-quit))))
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
-              ("ESC" . corfu-quit)))
+              ("<escape>" . corfu-quit)))
 
 (use-package nerd-icons-corfu
   :after corfu
@@ -607,7 +609,7 @@ Most of the stuff will get redirected here.")
               ("b" . dired-up-directory))
   :custom
   (insert-directory-program "ls")
-  (dired-listing-switches "-lv --almost-all --group-directories-first --human-readable")
+  (dired-listing-switches "-lvX --almost-all --group-directories-first --human-readable")
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
@@ -616,7 +618,9 @@ Most of the stuff will get redirected here.")
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")))
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")
+         '("\\.\\(pdf\\|epub\\)$" "zathura")))
+  (dired-dwim-target t)
   :config
   (defun dired-do-flush-lines (regexp)
     "Do `flush-lines' on all marked files.
@@ -699,7 +703,9 @@ REGEXP is the argument used for `flush-lines'."
   ("C-c n a" . org-agenda)
   ("C-c n c" . org-capture)
   (:map org-mode-map
-        ("C-x n t" . org-toggle-narrow-to-subtree))
+        ("C-x n t" . org-toggle-narrow-to-subtree)
+        ("C-x n r" . custom/org-reverso-grammar-subtree)
+        )
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -761,7 +767,11 @@ REGEXP is the argument used for `flush-lines'."
   (org-agenda-skip-deadline-if-done t)
   (org-agenda-skip-timestamp-if-done t)
   (org-agenda-columns-add-appointments-to-effort-sum t)
-  ;; (org-agenda-custom-commands nil)
+  (org-agenda-custom-commands
+   '(("i" "Ideas" todo "IDEA")
+     ("n" "Agenda and all TODOs"
+      ((agenda "")
+       (alltodo "")))))
   (org-agenda-default-appointment-duration 60)
   (org-agenda-mouse-1-follows-link t)
   (org-agenda-skip-unavailable-files t)
@@ -956,11 +966,11 @@ required."
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :target (file+head "${slug}.org"
-                         "#+title: ${title}\n#+date: %U\n")
+                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n")
       :unnarrowed t)
      ("g" "video game" plain "%?"
       :target (file+head "games/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :games:\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
+                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
       :unnarrowed t)
      ("b" "book" plain "%?"
@@ -1010,12 +1020,18 @@ required."
     (org-map-entries 'org-id-get-create))
   )
 
+(use-package consult-org-roam
+  :bind ("C-c n g" . consult-org-roam-search))
+
 (use-package org-roam-ui
   :custom (org-roam-ui-sync-theme t))
 
 (use-package toc-org
   :after org
-  :hook (org-mode . #'toc-org-enable))
+  :hook (org-mode . #'toc-org-enable)
+  :custom
+  (toc-org-max-depth org-indent--deepest-level)
+  (toc-org-enable-links-opening t))
 
 (use-package smartparens
   :hook (prog-mode) ;; add `smartparens-mode' to these hooks
@@ -1200,6 +1216,7 @@ NOTE that it will each time close a tag."
   (eshell-hist-ignoredups t)
   (eshell-scroll-to-bottom-on-input nil)
   (eshell-destroy-buffer-when-process-dies t)
+  (eshell-banner-message "")
   :config
   ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
   (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
@@ -1237,6 +1254,14 @@ NOTE that it will each time close a tag."
 
 (use-package reverso
   :bind (("C-c r" . reverso))
+  :preface
+  (defun custom/org-reverso-grammar-subtree ()
+    "Narrows to the current subtree and uses `reverso-grammar-buffer'."
+    (interactive)
+    (org-narrow-to-subtree)
+    (org-fold-show-all)
+    (reverso-grammar-buffer)
+    )
   :config (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 
 (use-package writeroom-mode
@@ -1321,3 +1346,13 @@ NOTE that it will each time close a tag."
 
       switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
       switch-to-buffer-in-dedicated-window t) ; `switch-to-buffer' will work on dedicated window
+
+(define-generic-mode
+    'm3u-mode                      ;; name of the mode to create
+  '("#")                         ;; comments start with '#'
+  nil                            ;; keywords (none in this case)
+  '(("^#EXTINF" . 'font-lock-keyword-face) ;; highlight #EXTINF as keyword
+    ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face)) ;; highlight file extensions as strings
+  '("\\.m3u\\'")                 ;; files for which to activate this mode
+  nil                            ;; other functions to call
+  "A mode for M3U playlist files") ;; doc string for this mode
