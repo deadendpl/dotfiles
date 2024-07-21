@@ -1,6 +1,5 @@
 # -*- mode: conf -*-
 [Default Applications]
-image/jpeg=swayimg.desktop
 image/avif=swayimg.desktop
 image/bmp=swayimg.desktop
 image/gif=swayimg.desktop
@@ -43,9 +42,6 @@ application/xml=org.qutebrowser.qutebrowser.desktop
 text/plain=emacsclient.desktop
 inode/directory=pcmanfm.desktop
 application/json=emacsclient.desktop
-application/pdf=org.pwmt.zathura.desktop
-application/epub+zip=org.pwmt.zathura.desktop
-inode/directory=pcmanfm.desktop
 text/html=org.qutebrowser.qutebrowser.desktop
 x-scheme-handler/http=org.qutebrowser.qutebrowser.desktop
 x-scheme-handler/https=org.qutebrowser.qutebrowser.desktop

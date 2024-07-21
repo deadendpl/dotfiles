@@ -60,7 +60,7 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline 'visit-save)
+              require-final-newline t)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -696,7 +696,7 @@ REGEXP is the argument used for `flush-lines'."
   (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
   (org-mode . electric-pair-local-mode)
   ;; after archiving tasks, agenda files aren't saved, I fix that
-  (org-archive . (lambda () (save-some-buffers '('org-agenda-files))))
+  (org-archive . (lambda () (save-some-buffers t #'org-agenda-file-p)))
   ;; (org-capture-after-finalize . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
   ([remap org-return] . custom/org-good-return)
@@ -704,8 +704,7 @@ REGEXP is the argument used for `flush-lines'."
   ("C-c n c" . org-capture)
   (:map org-mode-map
         ("C-x n t" . org-toggle-narrow-to-subtree)
-        ("C-x n r" . custom/org-reverso-grammar-subtree)
-        )
+        ([remap imenu] . consult-org-heading))
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -745,7 +744,7 @@ REGEXP is the argument used for `flush-lines'."
       "NO(n)")))
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
-      "* TODO %?\n %a")))
+      "* TODO %?")))
   ;; ============ org agenda ============
   (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
   (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
@@ -894,10 +893,10 @@ required."
   (advice-add 'org-agenda-todo :after
               (lambda (&rest _)
                 (when (called-interactively-p 'any)
-                  (save-some-buffers (list org-agenda-files)))))
+                  (save-some-buffers t #'org-agenda-file-p))))
   ;; saving agenda files after refiling
   (advice-add #'org-refile :after
-              (lambda (&rest _) (save-some-buffers 'org-agenda-files)))
+              (lambda (&rest _) (save-some-buffers t #'org-agenda-file-p)))
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
               (lambda (&rest _)
@@ -1021,7 +1020,8 @@ required."
   )
 
 (use-package consult-org-roam
-  :bind ("C-c n g" . consult-org-roam-search))
+  :bind ("C-c n g" . consult-org-roam-search)
+  :custom (consult-org-roam-grep-func 'consult-ripgrep))
 
 (use-package org-roam-ui
   :custom (org-roam-ui-sync-theme t))
@@ -1253,7 +1253,10 @@ NOTE that it will each time close a tag."
   :bind ("C-x C-S-f" . sudo-edit-find-file))
 
 (use-package reverso
-  :bind (("C-c r" . reverso))
+  :bind
+  ("C-c r" . reverso)
+  (:map org-mode-map
+        ("C-x n r" . custom/org-reverso-grammar-subtree))
   :preface
   (defun custom/org-reverso-grammar-subtree ()
     "Narrows to the current subtree and uses `reverso-grammar-buffer'."

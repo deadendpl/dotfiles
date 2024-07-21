@@ -7,9 +7,9 @@ scale = optimal
 # Start in full screen mode (yes/no)
 fullscreen = no
 # Background for transparent images (none, grid, or RGB, e.g. #112233)
-background = none
+# background = none
 # Window background mode/color (none or RGB, e.g. #112233)
-background = none
+# background = none
 # Anti-aliasing
 antialiasing = no
 # Slideshow image duration in seconds

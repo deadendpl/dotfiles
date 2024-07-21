@@ -6,6 +6,7 @@ declare -a search_engines=(
   "Arch Wiki"
   "Arch Packages"
   "Brave Search"
+  "Discogs"
   "Ecosia"
   "GameFAQs"
   "Github"
@@ -71,6 +72,9 @@ case $selected_engine in
     ;;
   "Ecosia")
     URL="https://www.ecosia.org/search?method=index&q="
+    ;;
+  "Discogs")
+    URL="https://www.discogs.com/search?q="
     ;;
   "MusicBrainz")
     ${XDG_CONFIG_HOME}/scripts/mb-search.sh
