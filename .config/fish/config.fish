@@ -3,7 +3,7 @@ fish_default_key_bindings
 
 fenv source "$HOME"/.profile
 
-set SHELLS_CONFIG_DIR "$XDG_CONFIG_HOME/shells"
+# set SHELLS_CONFIG_DIR "$XDG_CONFIG_HOME/shells"
 
 source "$SHELLS_CONFIG_DIR/default.sh"
 
@@ -19,10 +19,6 @@ end
 set EDITOR emacsclient -t -a ""
 set VISUAL emacsclient -c -a ""
 
-# apt
-if command -q -v apt
-  source "$SHELLS_CONFIG_DIR/apt.sh"
-end
 
 # pacman and yay on Arch
 if command -q -v pacman
@@ -49,5 +45,9 @@ else
         end
       end
     end
+  end
+  # apt
+  if command -q -v apt
+    source "$SHELLS_CONFIG_DIR/apt.sh"
   end
 end

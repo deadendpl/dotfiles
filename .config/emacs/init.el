@@ -418,8 +418,7 @@ Most of the stuff will get redirected here.")
   (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
 
 (use-package hl-todo
-  :hook ((org-mode . hl-todo-mode)
-         (prog-mode . hl-todo-mode))
+  :hook ((org-mode prog-mode) . hl-todo-mode)
   :custom
   (hl-todo-highlight-punctuation ":")
   (hl-todo-keyword-faces
@@ -460,7 +459,8 @@ Most of the stuff will get redirected here.")
 (use-package nerd-icons-completion
   :after marginalia
   :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup)
-  :config (nerd-icons-completion-mode))
+  ;; :config (nerd-icons-completion-mode)
+)
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
@@ -470,7 +470,8 @@ Most of the stuff will get redirected here.")
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package colorful-mode
-  :hook (prog-mode text-mode))
+  :hook (after-init . global-colorful-mode)
+  :custom (global-colorful-modes t))
 
 (use-package doom-themes
   ;; :demand
@@ -485,7 +486,6 @@ Most of the stuff will get redirected here.")
 
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
-  ;; (progn
   (use-package ewal-doom-themes
     :demand
     :config
@@ -496,7 +496,6 @@ Most of the stuff will get redirected here.")
                         :foreground (ewal--get-base-color 'green)
                         :inherit 'default)
     (load-theme 'ewal-doom-one t))
-  ;; )
   )
 
 (add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
@@ -704,6 +703,7 @@ REGEXP is the argument used for `flush-lines'."
   ("C-c n c" . org-capture)
   (:map org-mode-map
         ("C-x n t" . org-toggle-narrow-to-subtree)
+        ("C-x n r" . custom/org-reverso-grammar-subtree)
         ([remap imenu] . consult-org-heading))
   :custom-face
   ;; setting size of headers
@@ -1188,13 +1188,6 @@ NOTE that it will each time close a tag."
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
 
-(use-package yasnippet
-  :after eglot
-  :config (yas-global-mode))
-
-(use-package yasnippet-snippets
-  :after yasnippet)
-
 )
 
 (use-package fish-mode
@@ -1255,8 +1248,6 @@ NOTE that it will each time close a tag."
 (use-package reverso
   :bind
   ("C-c r" . reverso)
-  (:map org-mode-map
-        ("C-x n r" . custom/org-reverso-grammar-subtree))
   :preface
   (defun custom/org-reverso-grammar-subtree ()
     "Narrows to the current subtree and uses `reverso-grammar-buffer'."
@@ -1359,3 +1350,9 @@ NOTE that it will each time close a tag."
   '("\\.m3u\\'")                 ;; files for which to activate this mode
   nil                            ;; other functions to call
   "A mode for M3U playlist files") ;; doc string for this mode
+
+(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
+
+;; (cl-loop for file in (directory-files "~/.config/emacs/site-lisp/" nil "\.el$")
+;;          do (load-library file))
+(require 'mb-transient)

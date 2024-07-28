@@ -77,7 +77,8 @@ case $selected_engine in
     URL="https://www.discogs.com/search?q="
     ;;
   "MusicBrainz")
-    ${XDG_CONFIG_HOME}/scripts/mb-search.sh
+    # ${XDG_CONFIG_HOME}/scripts/mb-search.sh
+    emacsclient --eval "(mb-transient-frame)"
     exit 0
     ;;
   "VGMdb")

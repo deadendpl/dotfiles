@@ -1,6 +1,0 @@
-alias v find-file $1
-alias ip ip -color=auto $*
-alias clear clear t
-alias cllr clear && l $*
-alias clr clear
-alias l eza --all --long --header --icons --git --group-directories-first --color-scale $*

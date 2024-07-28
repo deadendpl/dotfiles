@@ -14,3 +14,4 @@ export CARGO_HOME="${XDG_DATA_HOME}"/cargo
 # export XCURSOR_PATH=/usr/share/icons:${XDG_DATA_HOME}/icons
 # export XCURSOR_PATH="${XDG_DATA_HOME}/icons:${XCURSOR_PATH}"
 PATH="${HOME}/.local/bin:${PATH}"
+export SHELLS_CONFIG_DIR="$XDG_CONFIG_HOME/shells"

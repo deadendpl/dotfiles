@@ -3,13 +3,20 @@
 
 source "${HOME}"/.profile
 
-SHELLS_CONFIG_DIR="${XDG_CONFIG_HOME}/shells"
+# SHELLS_CONFIG_DIR="${XDG_CONFIG_HOME}/shells"
 
 source "${SHELLS_CONFIG_DIR}/default.sh"
 
-# apt
-if command -v apt > /dev/null; then
-  source "${SHELLS_CONFIG_DIR}/apt.sh"
+# other
+if test -n "$TERMUX_VERSION"; then
+  # termux config
+  source "${XDG_CONFIG_HOME}/shells/termux"
+else
+  source "${SHELLS_CONFIG_DIR}/desktop.sh"
+  # apt
+  if command -v apt > /dev/null; then
+    source "${SHELLS_CONFIG_DIR}/apt.sh"
+  fi
 fi
 
 # pacman
@@ -22,13 +29,6 @@ if command -v nixos-rebuild > /dev/null; then
   source "${SHELLS_CONFIG_DIR}/nix.sh"
 fi
 
-# other
-if test -n "$TERMUX_VERSION"; then
-  # termux config
-  source "${XDG_CONFIG_HOME}/shells/termux"
-else
-  source "${SHELLS_CONFIG_DIR}/desktop.sh"
-fi
 
 if [ -n "$PS1" ]; then
   eval "$(starship init bash)"

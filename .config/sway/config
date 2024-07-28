@@ -1,4 +1,4 @@
-### Variables
+### Variables  -*- compile-command: sway -C; -*-
 #
 # Logo key. Use Mod1 for Alt.
 set {
@@ -10,7 +10,7 @@ set {
     $right              l
 
     $term               foot
-    $browser            qutebrowser
+    $browser            firefox
     $editor             emacsclient -c -a ''
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -222,13 +222,16 @@ mode "resize" {
 
 # windows rules
 for_window {
+    # the command for checking: swaymsg -t "get_tree"
     # [app_id="^swayimg"] fullscreen
     [app_id="org.pulseaudio.pavucontrol"] floating enable
+    [app_id="pavucontrol"] floating enable
     [app_id="blueman-manager"] floating enable
     [app_id="blueman-services"] floating enable
     [app_id="blueberry.py"] floating enable
     [title="Unlock Database - KeePassXC"] floating enable
     [title="KeePassXC - Browser Access Request"] floating enable
+    [title="MusicBrainz Emacs Search"] floating enable
     [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
 }
 
