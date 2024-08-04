@@ -10,7 +10,7 @@ set {
     $right              l
 
     $term               foot
-    $browser            firefox
+    # $browser            brave
     $editor             emacsclient -c -a ''
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -47,7 +47,8 @@ input type:keyboard {
 #
 bindsym {
     $mod+t              exec $term
-    $mod+w              exec $browser
+    # I'm constantly changing web browser, so I made this little solution for launching default web browser
+    $mod+w              exec xdg-settings get default-web-browser | xargs gtk-launch
     $mod+e              exec $editor
     $mod+Alt+e          exec $editor -e "(scratch-buffer)"
     $mod+f              exec pcmanfm
@@ -232,6 +233,7 @@ for_window {
     [title="Unlock Database - KeePassXC"] floating enable
     [title="KeePassXC - Browser Access Request"] floating enable
     [title="MusicBrainz Emacs Search"] floating enable
+    [title="^Compress$" app_id="file-roller"] floating enable
     [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
 }
 

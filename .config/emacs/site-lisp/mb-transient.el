@@ -21,8 +21,6 @@
 ;;; Commentary:
 
 ;; A Transient menu for invoking MusicBrainz web searches.
-;; FIXME `mb-make-frame' doesn't work if there is no Emacs frame running
-
 
 ;;; Code:
 
@@ -168,7 +166,7 @@
   "Buffer name used in `mb-make-buffer'.")
 
 (defvar mb-frame-name "MusicBrainz Emacs Search"
-  "Frame name used in `mb-make-frame'.")
+  "Name of a frame used for displaying `mb-transient'.")
 
 (defun mb-set-search-method (val)
   "Sets search method to VAL."
@@ -223,26 +221,22 @@
   "Sets search query to what user writes."
   (interactive)
   (let ((query (read-string (format-prompt "Query" nil))))
-  (setq mb-query query)))
+    (setq mb-query query)))
 
 (defun mb-open ()
   "Combines `mb-query', `mb-type', and `mb-search-method' into a
 search URL that gets opened with `browse-url'.
 
-If it's run in a frame whose name matches `mb-frame-name', the
-frame will be deleted. That way, when used in `mb-transient', the
-frame will automatically close."
+It also runs `mb-delete-frame'."
   (interactive)
   (browse-url (concat "https://musicbrainz.org" "/search?query=" mb-query "&type=" mb-type "&method=" mb-search-method))
-  ;; frame deletion if it's in frame made by `mb-make-frame'
-  (if (string-equal (cdr (assoc 'name (frame-parameters))) mb-frame-name)
-      (delete-frame)))
+  (mb-delete-frame))
 
 (defun mb-advanced-query-set ()
   "Returns a string valid for doing advanced searches for a search URL."
   (interactive)
   (let ((syntax (completing-read (format-prompt "Advanced syntax" nil)
-                                 mb-advanced-syntaxes-list nil nil)))
+                                 mb-advanced-syntaxes-list nil t)))
     (when syntax
       (concat syntax ":"
               (read-string (format-prompt syntax nil)))
@@ -258,7 +252,7 @@ frame will automatically close."
   "Search in MusicBrainz"
   ["Search method"
    ("si" "Indexed" mb-set-search-method-indexed :transient t)
-   ("sa" "Indexed with Advanced Query Syntax (Fills Query)" mb-advanced-method-setup :transient t)
+   ("sa" (lambda () (format (concat "Indexed with Advanced Query Syntax (fills " (propertize "Query" 'face 'transient-heading) ")"))) mb-advanced-method-setup :transient t)
    ("sd" "Direct Database Search" mb-set-search-method-direct :transient t)]
   ["Type"
    ("ta" "Artist" mb-set-type-artist :transient t)
@@ -269,8 +263,9 @@ frame will automatically close."
    ("tt" "All types" mb-set-type-full :transient t)]
   ["Query"
    ("<SPC>" "Enter query" mb-set-query :transient t)]
-  ["Open"
-   ("e" "Open" mb-open)])
+  ["The rest"
+   ("e" "Open" mb-open)
+   ("q" "Quit" mb-transient-quit)])
 
 ;;; Making it as an external frame that will make it easy to invoke out of Emacs
 
@@ -293,14 +288,40 @@ frame will automatically close."
     (with-selected-frame mb-frame (switch-to-buffer mb-buffer-name)))
   )
 
+(defun mb-current-frame ()
+  "Edits current frame to use name in `mb-frame-name' and display only buffer `mb-buffer-name'."
+  (modify-frame-parameters nil `((name . ,mb-frame-name)
+                                 ;; (width . ,mb-optimal-width)
+                                 ))
+  (unless (get-buffer mb-buffer-name)
+    (mb-make-buffer))
+  ;; (delete-other-windows)
+  (switch-to-buffer mb-buffer-name)
+  )
+
+
 (defun mb-transient-frame ()
   "Wrapper for creating a frame with selected placeholder buffer,
 and displaying `mb-transient'."
   (interactive)
   (mb-make-frame)
+  ;; (mb-current-frame)
   (select-frame-by-name mb-frame-name)
   (mb-transient)
   )
+
+(defun mb-delete-frame ()
+  "If it's run in a frame whose name matches `mb-frame-name', that
+frame gets deleted."
+  (interactive)
+  (if (string-equal (cdr (assoc 'name (frame-parameters))) mb-frame-name)
+      (delete-frame)))
+
+(defun mb-transient-quit ()
+  "Quits transient menu, and invokes `mb-delete-frame'."
+  (interactive)
+  (transient-quit-one)
+  (mb-delete-frame))
 
 (provide 'mb-transient)
 

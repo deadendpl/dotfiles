@@ -5,3 +5,6 @@ home/.config/qutebrowser/dracula/__pycache__/__init__.cpython-311.pyc
 home/.config/qutebrowser/dracula/__pycache__/draw.cpython-311.pyc
 *.pyc
 home/.config/nvim/plugin/packer_compiled.lua
+/.config/emacs/test/
+/.config/fish/conf.d/
+/.config/emacs/tree-sitter/

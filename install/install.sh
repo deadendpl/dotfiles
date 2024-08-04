@@ -108,7 +108,7 @@ else
                                 fzf \
                                 hyprpicker-git \
                                 swayimg \
-                                emacs \
+                                emacs-wayland \
                                 lf \
                                 stow \
                                 expac \
@@ -186,7 +186,8 @@ else
                      picard \
                      rsgain \
                      nicotine+ \
-                     xdg-ninja
+                     xdg-ninja \
+                     otf-ipaexfont
                      # syncthing-gtk
 fi
 

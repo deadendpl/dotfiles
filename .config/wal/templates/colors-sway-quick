@@ -1,0 +1,5 @@
+swaymsg "client.focused {background} {color11} {foreground}"
+swaymsg "client.focused_inactive {background} {background} {foreground}"
+swaymsg "client.unfocused {background} {background} {foreground}"
+swaymsg "client.urgent {background} {background} {foreground}"
+swaymsg "client.placeholder {background} {background} {foreground}"

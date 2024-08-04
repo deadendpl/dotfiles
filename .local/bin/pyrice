@@ -34,38 +34,12 @@ gradience-wrap () {
   gradience-cli apply -n pywal --gtk gtk4
 }
 
-# file-line-change() {
-#   arg1=$(realpath "$1")  # file name
-#   arg2=$2                # string in a line that will be replaced
-#   arg3=$3                # string that will replace the line
-
-    # Get the line containing "@import"
-#   old_line=$(grep "$arg2" "$arg1")
-
-    # Check if the old line exists in the file
-#   if [ -n "$old_line" ]; then
-#     # Replace the line using sed
-#     new_line="$arg3"
-#     sed -i "s|$old_line|$new_line|" "$arg1"
-#     echo "Line replaced successfully in $arg1"
-#   else
-#     echo "Old line not found in the file."
-#   fi
-# }
-
-# waybar
-# file-line-change "${XDG_CONFIG_HOME}/waybar/style.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors-waybar.css)');"
-# qutebrowser
-# file-line-change "${XDG_CONFIG_HOME}/qutebrowser/start/styles.css" "@import" "@import url('$(realpath $HOME/.cache/wal/colors.css)');"
-# zathura
-# file-line-change "${XDG_CONFIG_HOME}/zathura/zathurarc" "include" "include $(realpath $HOME/.cache/wal/colors-zathurarc)"
-
 # Use the wpg-tile function with the provided or default wallpaper file path
 wpg-tile "$1"
 
-# It's not the best way, as it will still reload sway when sway starts up
-if ps -Af | grep "sway$" > /dev/null; then
-  swaymsg reload
+# if sway is running for more than a minute, reload colors
+if [ $(pgrep "sway$" | xargs ps -o etimes=) -gt 60 ]; then
+  source ~/.cache/wal/colors-sway-quick
 fi
 
 gradience-wrap &

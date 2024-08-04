@@ -78,7 +78,7 @@ case $selected_engine in
     ;;
   "MusicBrainz")
     # ${XDG_CONFIG_HOME}/scripts/mb-search.sh
-    emacsclient --eval "(mb-transient-frame)"
+    emacsclient -e '(mb-transient-frame)'
     exit 0
     ;;
   "VGMdb")

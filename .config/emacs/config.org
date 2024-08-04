@@ -141,8 +141,8 @@ Those =fbound= are because Termux Emacs doesn't have some functions at all and t
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
-(electric-pair-mode 0)               ; Turns off automatic parens pairing
-(electric-indent-mode -1)            ; Turn off the weird default indenting.
+(electric-pair-mode 1)               ; Turns on automatic parens pairing
+(electric-indent-mode -1)            ; Turns off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 #+end_src
@@ -189,7 +189,9 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline t)
+              require-final-newline t
+              native-compile-target-directory (expand-file-name "eln-cache" custom/user-share-emacs-directory)
+              native-comp-async-report-warnings-errors 'silent)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -239,6 +241,14 @@ Most of the stuff will get redirected here.")
 
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
+
+;; launching test emacs with package management setup
+(defun launch-test-emacs ()
+  "Launches emacs that only loads test init file."
+  (interactive)
+  ;; (async-shell-command "emacs -Q -l ~/.config/emacs/test-init.el")
+  (async-start-process "emacs-test" "emacs" nil "-Q" "-l" "~/.config/emacs/test-init.el")
+  )
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -269,10 +279,6 @@ Default package management using =package.el=
   (unless package-archive-contents
     (package-refresh-contents))
   )
-
-;; Initialize use-package on non-Linux platforms
-;; (unless (package-installed-p 'use-package)
-;;   (package-install 'use-package))
 #+end_src
 
 The [[https://gitlab.com/koral/gcmh][garbage collector magic hack]] is installed here as the first not built-in package because that speeds up startup.
@@ -559,7 +565,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Notes to self"
-        ("Press q instead of killing buffers"))))))
+        ("Press q instead of killing buffers")
+        ("Press C-S-Backspace to kill whole line"))))))
 )
 #+end_src
 *** Fonts
@@ -732,7 +739,7 @@ I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so
   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
   :config
-  ;; Enable flashing mode-line on errors
+  ;; Enable flashing modeline on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
@@ -932,7 +939,8 @@ REGEXP is the argument used for `flush-lines'."
    ;; highlight parent and directory preview as well
    (dirvish-directory-view-mode . diredfl-mode))
   :config
-  (set-face-attribute 'diredfl-dir-name nil :bold t))
+  (set-face-attribute 'diredfl-dir-name nil :bold t)
+)
 #+end_src
 *** Dirvish :ARCHIVE:
 [[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
@@ -1032,10 +1040,8 @@ A whole lot of stuff.
   :ensure nil
   :hook
   (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-  (org-mode . electric-pair-local-mode)
   ;; after archiving tasks, agenda files aren't saved, I fix that
   (org-archive . (lambda () (save-some-buffers t #'org-agenda-file-p)))
-  ;; (org-capture-after-finalize . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
   ([remap org-return] . custom/org-good-return)
   ("C-c n a" . org-agenda)
@@ -1839,10 +1845,10 @@ This variable desribes the way chosen buffers are displaying and behaving.
          (window-height . fit-window-to-buffer))
 
         ("\\*compilation\\*"
-         ;; (display-buffer--maybe-at-bottom)
-         (display-buffer-below-selected)
+         (display-buffer--maybe-at-bottom)
+         ;; (display-buffer-below-selected)
          (window-height . 12)
-         ;; (dedicated . t)
+         (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Compile-log\\*"
          (display-buffer--maybe-at-bottom)

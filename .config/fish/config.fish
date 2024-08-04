@@ -8,7 +8,7 @@ fenv source "$HOME"/.profile
 source "$SHELLS_CONFIG_DIR/default.sh"
 
 # nix
-if command -q -v nixos-rebuild
+if command -q nixos-rebuild
   source "$SHELLS_CONFIG_DIR/nix.sh"
 end
 
@@ -21,7 +21,7 @@ set VISUAL emacsclient -c -a ""
 
 
 # pacman and yay on Arch
-if command -q -v pacman
+if command -q pacman
   source "$SHELLS_CONFIG_DIR/pacman.sh"
 end
 
@@ -47,7 +47,7 @@ else
     end
   end
   # apt
-  if command -q -v apt
+  if command -q apt
     source "$SHELLS_CONFIG_DIR/apt.sh"
   end
 end

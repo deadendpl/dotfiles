@@ -16,8 +16,8 @@
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
-(electric-pair-mode 0)               ; Turns off automatic parens pairing
-(electric-indent-mode -1)            ; Turn off the weird default indenting.
+(electric-pair-mode 1)               ; Turns on automatic parens pairing
+(electric-indent-mode -1)            ; Turns off the weird default indenting.
 (column-number-mode 1)               ; Column number in modeline
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 
@@ -60,7 +60,9 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files wiht ".#"
-              require-final-newline t)
+              require-final-newline t
+              native-compile-target-directory (expand-file-name "eln-cache" custom/user-share-emacs-directory)
+              native-comp-async-report-warnings-errors 'silent)
 
 ;; showing init time in scratch buffer
 (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
@@ -109,6 +111,14 @@ Most of the stuff will get redirected here.")
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
 
+;; launching test emacs with package management setup
+(defun launch-test-emacs ()
+  "Launches emacs that only loads test init file."
+  (interactive)
+  ;; (async-shell-command "emacs -Q -l ~/.config/emacs/test-init.el")
+  (async-start-process "emacs-test" "emacs" nil "-Q" "-l" "~/.config/emacs/test-init.el")
+  )
+
 (use-package use-package
   :custom
   (use-package-verbose t)
@@ -129,10 +139,6 @@ Most of the stuff will get redirected here.")
   (unless package-archive-contents
     (package-refresh-contents))
   )
-
-;; Initialize use-package on non-Linux platforms
-;; (unless (package-installed-p 'use-package)
-;;   (package-install 'use-package))
 
 ;; (use-package gcmh
 ;;   :demand
@@ -374,7 +380,8 @@ Most of the stuff will get redirected here.")
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Notes to self"
-        ("Press q instead of killing buffers"))))))
+        ("Press q instead of killing buffers")
+        ("Press C-S-Backspace to kill whole line"))))))
 )
 
 (set-face-attribute 'default nil
@@ -479,7 +486,7 @@ Most of the stuff will get redirected here.")
   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
   :config
-  ;; Enable flashing mode-line on errors
+  ;; Enable flashing modeline on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
@@ -644,7 +651,8 @@ REGEXP is the argument used for `flush-lines'."
    ;; highlight parent and directory preview as well
    (dirvish-directory-view-mode . diredfl-mode))
   :config
-  (set-face-attribute 'diredfl-dir-name nil :bold t))
+  (set-face-attribute 'diredfl-dir-name nil :bold t)
+)
 
 (use-package helpful
   :bind
@@ -693,10 +701,8 @@ REGEXP is the argument used for `flush-lines'."
   :ensure nil
   :hook
   (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-  (org-mode . electric-pair-local-mode)
   ;; after archiving tasks, agenda files aren't saved, I fix that
   (org-archive . (lambda () (save-some-buffers t #'org-agenda-file-p)))
-  ;; (org-capture-after-finalize . (lambda () (save-some-buffers '('org-agenda-files))))
   :bind
   ([remap org-return] . custom/org-good-return)
   ("C-c n a" . org-agenda)
@@ -1303,10 +1309,10 @@ NOTE that it will each time close a tag."
          (window-height . fit-window-to-buffer))
 
         ("\\*compilation\\*"
-         ;; (display-buffer--maybe-at-bottom)
-         (display-buffer-below-selected)
+         (display-buffer--maybe-at-bottom)
+         ;; (display-buffer-below-selected)
          (window-height . 12)
-         ;; (dedicated . t)
+         (dedicated . t)
          (body-function . custom/switch-to-buffer-other-window-for-alist))
         ("\\*Compile-log\\*"
          (display-buffer--maybe-at-bottom)
