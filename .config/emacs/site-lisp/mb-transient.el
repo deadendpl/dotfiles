@@ -54,7 +54,7 @@
 (defvar mb-query nil
   "A search query.")
 
-(defconst mb-advanced-syntaxes-list
+(defconst mb-advanced-syntax-list
   '(added
     address
     aid
@@ -191,26 +191,6 @@
   (interactive "s")
   (setq mb-type val))
 
-(defun mb-set-type-artist ()
-  "Sets search type to artist."
-  (interactive)
-  (mb-set-type "artist"))
-(defun mb-set-type-doc ()
-  "Sets search type to documentation."
-  (interactive)
-  (mb-set-type "doc"))
-(defun mb-set-type-recording ()
-  "Sets search type to recording."
-  (interactive)
-  (mb-set-type "recording"))
-(defun mb-set-type-release ()
-  "Sets search type to release."
-  (interactive)
-  (mb-set-type "release"))
-(defun mb-set-type-release-group ()
-  "Sets search type to release-group."
-  (interactive)
-  (mb-set-type "release_group"))
 (defun mb-set-type-full ()
   "Chooses one of entries in `mb-type-list'."
   (interactive)
@@ -229,14 +209,15 @@ search URL that gets opened with `browse-url'.
 
 It also runs `mb-delete-frame'."
   (interactive)
-  (browse-url (concat "https://musicbrainz.org" "/search?query=" mb-query "&type=" mb-type "&method=" mb-search-method))
+  (browse-url
+   (concat "https://musicbrainz.org/search?query=" mb-query "&type=" mb-type "&method=" mb-search-method))
   (mb-delete-frame))
 
 (defun mb-advanced-query-set ()
   "Returns a string valid for doing advanced searches for a search URL."
   (interactive)
   (let ((syntax (completing-read (format-prompt "Advanced syntax" nil)
-                                 mb-advanced-syntaxes-list nil t)))
+                                 mb-advanced-syntax-list nil t)))
     (when syntax
       (concat syntax ":"
               (read-string (format-prompt syntax nil)))
@@ -250,18 +231,34 @@ It also runs `mb-delete-frame'."
 
 (transient-define-prefix mb-transient ()
   "Search in MusicBrainz"
-  ["Search method"
+  ["Search method" :description (lambda () (concat (propertize "Search method" 'face 'transient-heading) " ("
+                                                   (propertize mb-search-method 'face 'font-lock-variable-name-face) ")"))
    ("si" "Indexed" mb-set-search-method-indexed :transient t)
-   ("sa" (lambda () (format (concat "Indexed with Advanced Query Syntax (fills " (propertize "Query" 'face 'transient-heading) ")"))) mb-advanced-method-setup :transient t)
+   ("sa" (lambda () (concat "Advanced Query Syntax (fills " (propertize "Query" 'face 'transient-heading) ")")) mb-advanced-method-setup :transient t)
    ("sd" "Direct Database Search" mb-set-search-method-direct :transient t)]
-  ["Type"
-   ("ta" "Artist" mb-set-type-artist :transient t)
-   ("td" "Documentation" mb-set-type-doc :transient t)
-   ("tr" "Recording" mb-set-type-recording :transient t)
-   ("tR" "Release" mb-set-type-release :transient t)
-   ("tg" "Release Group" mb-set-type-release-group :transient t)
-   ("tt" "All types" mb-set-type-full :transient t)]
-  ["Query"
+  ["Type" :description (lambda () (concat (propertize "Type" 'face 'transient-heading) " ("
+                                          (propertize mb-type 'face 'font-lock-variable-name-face) ")"))
+   :pad-keys t
+   [("t C-a" "annotation" (lambda () (interactive) (mb-set-type "annotation")) :transient t)
+    ("tA" "area" (lambda () (interactive) (mb-set-type "area")) :transient t)
+    ("ta" "artist" (lambda () (interactive) (mb-set-type "artist")) :transient t)
+    ("tc" "cdstub" (lambda () (interactive) (mb-set-type "cdstub")) :transient t)
+    ("td" "doc" (lambda () (interactive) (mb-set-type "doc")) :transient t)
+    ("tE" "editor" (lambda () (interactive) (mb-set-type "editor")) :transient t)
+    ("te" "event" (lambda () (interactive) (mb-set-type "event")) :transient t)
+    ("ti" "instrument" (lambda () (interactive) (mb-set-type "instrument")) :transient t)]
+   [("tl" "label" (lambda () (interactive) (mb-set-type "label")) :transient t)
+    ("tp" "place" (lambda () (interactive) (mb-set-type "place")) :transient t)
+    ("tR" "recording" (lambda () (interactive) (mb-set-type "recording")) :transient t)
+    ("tr" "release" (lambda () (interactive) (mb-set-type "release")) :transient t)
+    ("tg" "release_group" (lambda () (interactive) (mb-set-type "release_group")) :transient t)
+    ("ts" "series" (lambda () (interactive) (mb-set-type "series")) :transient t)
+    ("tt" "tag" (lambda () (interactive) (mb-set-type "tag")) :transient t)
+    ("tw" "work" (lambda () (interactive) (mb-set-type "work")) :transient t)]
+   ]
+  ["Query" :description (lambda () (concat (propertize "Query" 'face 'transient-heading)
+                                           (if mb-query
+                                               (concat " (" (propertize mb-query 'face 'font-lock-variable-name-face) ")"))))
    ("<SPC>" "Enter query" mb-set-query :transient t)]
   ["The rest"
    ("e" "Open" mb-open)

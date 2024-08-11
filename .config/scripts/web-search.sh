@@ -6,11 +6,12 @@ declare -a search_engines=(
   "Arch Wiki"
   "Arch Packages"
   "Brave Search"
+  "Cover Music Hoarders"
   "Discogs"
   "Ecosia"
   "GameFAQs"
   "Github"
-  "MusicBrainz"
+  "MusicBrainz (MB)"
   "Nitter (Twitter/X)"
   "Nix Packages"
   "NixOS Wiki"
@@ -28,11 +29,17 @@ case $selected_engine in
   "Phind")
     URL="https://www.phind.com/search?q="
     ;;
+  "Cover Music Hoarders")
+    URL="https://covers.musichoarders.xyz/?album="
+    ;;
   "SearXNG")
     URL="https://farside.link/searxng/search?q="
     ;;
   "Brave Search")
     URL="https://search.brave.com/search?q="
+    QUERY=$(echo '' | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l 0 -p "Search $selected_engine:") || exit
+    xdg-open "${URL}${QUERY}&source=desktop" 2> /dev/null
+    exit 0
     ;;
   "AUR (Arch User Repository)")
     URL="https://aur.archlinux.org/packages?O=0&K="
@@ -76,7 +83,7 @@ case $selected_engine in
   "Discogs")
     URL="https://www.discogs.com/search?q="
     ;;
-  "MusicBrainz")
+  "MusicBrainz (MB)")
     # ${XDG_CONFIG_HOME}/scripts/mb-search.sh
     emacsclient -e '(mb-transient-frame)'
     exit 0

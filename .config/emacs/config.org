@@ -43,13 +43,11 @@
     - [[#theme][Theme]]
   - [[#completion][Completion]]
     - [[#in-buffer-completion-corfu][In-buffer completion (corfu)]]
-    - [[#minibuffer-completion-vertico-with-consult][Minibuffer completion (vertico with consult)]]
+    - [[#minibuffer-completion][Minibuffer completion]]
       - [[#vertico][Vertico]]
       - [[#consult][Consult]]
       - [[#annotations-marginalia][Annotations (marginalia)]]
   - [[#dired][Dired]]
-    - [[#dired-1][Dired]]
-    - [[#dirvish][Dirvish]]
   - [[#docs][Docs]]
     - [[#helpful][Helpful]]
     - [[#which-key][Which-key]]
@@ -155,12 +153,11 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory) ; bookmarks file put somewhere else
+(setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory)
               auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
-              ;; prescient-save-file (expand-file-name "var/prescient-save.el" custom/user-share-emacs-directory)
-              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets put into it's own file
+              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets
               backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory) ; tramp file put somewhere else
+              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory)
               save-place-file (expand-file-name "places" custom/user-share-emacs-directory)
               url-configuration-directory (expand-file-name "url" custom/user-share-emacs-directory) ; cache from urls (eww)
               multisession-directory (expand-file-name "multisession" custom/user-share-emacs-directory)
@@ -170,16 +167,16 @@ Most of the stuff will get redirected here.")
 *** Other variables
 #+begin_src emacs-lisp
 (setq-default visible-bell nil ;; Set up the visible bell
-              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+              global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
-              initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
-              initial-scratch-message nil ; scratch buffer message
+              initial-buffer-choice t ; scratch buffer as a startup buffer
+              initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
+              ;; initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               scroll-conservatively 1000 ; Scroll one line at a time
               scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-              vc-follow-symlinks t ; Enable follow symlinks
+              vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
               ;; standard-indent 2 ; indenting set to 2
@@ -188,13 +185,14 @@ Most of the stuff will get redirected here.")
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil ; no files wiht ".#"
+              create-lockfiles nil ; no files with ".#"
               require-final-newline t
-              native-compile-target-directory (expand-file-name "eln-cache" custom/user-share-emacs-directory)
               native-comp-async-report-warnings-errors 'silent)
 
 ;; showing init time in scratch buffer
-(add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+(if (custom/termux-p)
+    (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+  (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
 (if (custom/termux-p)
@@ -242,12 +240,10 @@ Most of the stuff will get redirected here.")
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
 
-;; launching test emacs with package management setup
 (defun launch-test-emacs ()
   "Launches emacs that only loads test init file."
   (interactive)
-  ;; (async-shell-command "emacs -Q -l ~/.config/emacs/test-init.el")
-  (async-start-process "emacs-test" "emacs" nil "-Q" "-l" "~/.config/emacs/test-init.el")
+  (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
 #+end_src
 *** Package management setup
@@ -409,7 +405,7 @@ That is great for packages not available in elpas.
   )
 #+end_src
 *** Flashing
-When I do =C-u= or =C-d= I will get a flash at the current line.
+When doing big movements, I will get a flash at the current line.
 #+begin_src emacs-lisp
 (use-package pulse
   :config
@@ -468,6 +464,7 @@ Built-in =abbrev-mode= allows for abbreviations.
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
+  :bind ("C-x \"" . unexpand-abbrev)
   :config
   (if (custom/termux-p)
       (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
@@ -515,21 +512,21 @@ I'm using built-in =project= package.
 #+end_src
 *** Tabs
 =tab-bar= is built-in package that emulates web browser tab behaviour.
-At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]] to have workspaces but it didn't work so I opted for this.
+At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]] to have workspaces, but it didn't work so I opted for this.
 #+begin_src emacs-lisp
 (use-package tab-bar
   :init
   (tab-bar-mode 1)
   ;; (advice-add #'tab-new
   ;;             :after
-  ;;             (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
+  ;;             (lambda (&rest _) (when (yes-or-no-p "Rename tab? ")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
   (tab-bar-tab ((nil (:foreground "#151515" :background "#c8c5c7"))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
-  (tab-bar-new-button-show nil)      ;; hide tab close / X button
+  (tab-bar-new-button-show nil)        ;; hide tab new / + button
   (tab-bar-tab-hints t)                ;; show tab numbers
   (tab-bar-auto-width-max nil)
   )
@@ -560,8 +557,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
      '(("Org Mode"
         ("Org-Agenda (current day)" (org-agenda nil "a") "a")
         ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
-        ("Org-Roam notes" (org-roam-node-find) "n")
-        ("Org-Roam today daily" (org-roam-dailies-goto-today) "d"))
+        ("Org-Roam notes" org-roam-node-find "n")
+        ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Notes to self"
@@ -769,7 +766,7 @@ With Emacs 29, true transparency has been added.
 #+begin_src emacs-lisp
 (use-package corfu
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-         (prog-mode . corfu-mode)
+         ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom
   (corfu-auto t)
@@ -794,7 +791,7 @@ With Emacs 29, true transparency has been added.
   :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
   )
 #+end_src
-*** Minibuffer completion (vertico with consult)
+*** Minibuffer completion
 The completion that you get when doing =M-x= for example that lists candidates to choose from.
 **** Vertico
 I switched from [[https://github.com/abo-abo/swiper#ivy][Ivy]] to [[https://github.com/minad/vertico][Vertico]] because it's simpler.
@@ -866,17 +863,17 @@ Built-in =savehist-mode= saves minibuffer history
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
-  (defalias 'project-find-file 'consult-project-buffer)
+  ;; (defalias 'project-find-file 'consult-project-buffer)
   :bind
-  ([remap project-find-file] . consult-project-buffer)
+  ;; ([remap project-find-file] . consult-project-buffer)
   ([remap goto-line] . consult-goto-line)
   ([remap imenu] . consult-imenu)
-  :config
+  ;; :config
   ;; disabling `display-buffer-alist' for `consult-project-buffer'
-  (advice-add 'consult-project-buffer :around
-              (lambda (orig-fun &rest args)
-                (let ((display-buffer-alist nil))
-                  (apply orig-fun args))))
+  ;; (advice-add 'consult-project-buffer :around
+  ;;             (lambda (orig-fun &rest args)
+  ;;               (let ((display-buffer-alist nil))
+  ;;                 (apply orig-fun args))))
   )
 #+end_src
 **** Annotations (marginalia)
@@ -893,8 +890,7 @@ Built-in =savehist-mode= saves minibuffer history
 Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories.
 I don't know why, but I always think that dired doesn't have moving file functionality.
 It has with renaming function by pressing =R=. You can rename the file and/or move it to some other directory just like =mv= shell command.
-*** Dired
-I still do some configurations because dirvish at its core uses dired and its keybindings.
+
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil
@@ -913,7 +909,8 @@ I still do some configurations because dirvish at its core uses dired and its ke
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")
-         '("\\.\\(pdf\\|epub\\)$" "zathura")))
+         '("\\.\\(pdf\\|epub\\)$" "zathura")
+         '("\\.\\(mkv\\|mp4\\)$" "mpv")))
   (dired-dwim-target t)
   :config
   (defun dired-do-flush-lines (regexp)
@@ -941,36 +938,6 @@ REGEXP is the argument used for `flush-lines'."
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
 )
-#+end_src
-*** Dirvish :ARCHIVE:
-[[https://github.com/alexluigit/dirvish][Dirvish]] is well made ranger/lf like dired extension.
-+I don't currently use that since it displays all files as buffers and doesn't kill them.+
-It kills the buffers when =dirvish-quit= is called or when you enter the file.
-#+begin_src emacs-lisp
-(use-package dirvish
-  :unless (custom/termux-p)
-  :init (dirvish-override-dired-mode t) ; dirvish takes over dired
-  :custom
-  (dirvish-cache-dir (expand-file-name "dirvish" custom/user-share-emacs-directory))
-  (dirvish-attributes '(collapse git-msg file-time file-size))
-  (dirvish-default-layout '(1 0.15 0.5))
-  :config
-  ;; (evil-collection-define-key 'normal 'dirvish-mode-map
-  ;;   "p" 'dirvish-yank-menu
-  ;;   "q" 'dirvish-quit)
-  ;; (dirvish-define-preview eza (file)
-  ;;   "Use `eza' to generate directory preview."
-  ;;   :require ("eza") ; tell Dirvish to check if we have the executable
-  ;;   (when (file-directory-p file) ; we only interest in directories here
-  ;;     `(shell . ("eza" "-al" "--color=always" "--icons"
-  ;;                "--group-directories-first" ,file))))
-  ;; (add-to-list 'dirvish-preview-dispatchers 'eza)
-  ;; lines not wrapping
-  (add-hook 'dirvish-find-entry-hook
-            (lambda (&rest _) (setq-local truncate-lines t)))
-  ;; rebinds all dired commands to `dirvish-dwim' so when I only have 1 window dirvish will have 3 pane view
-  ;; (defalias 'dired 'dirvish-dwim)
-  )
 #+end_src
 ** Docs
 *** Helpful
@@ -1592,7 +1559,8 @@ using `browse-url'."
 Here I add autocompletion when typing =>= in html modes.
 #+begin_src emacs-lisp
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
-  :hook (html-mode . (lambda () (smartparens-mode 0)))
+  :hook (html-mode . (lambda () (smartparens-mode 0)
+                       (electric-pair-local-mode 0)))
   :preface
   (defun html-close-tag ()
     "Inserts >, closes tag, and moves to the >.
@@ -1903,4 +1871,5 @@ A mode for m3u files
 ;; (cl-loop for file in (directory-files "~/.config/emacs/site-lisp/" nil "\.el$")
 ;;          do (load-library file))
 (require 'mb-transient)
+(require 'mb-api)
 #+end_src

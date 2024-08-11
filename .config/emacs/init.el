@@ -28,12 +28,11 @@ The same goes for some default files like bookmarks file.
 In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory) ; bookmarks file put somewhere else
+(setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory)
               auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
-              ;; prescient-save-file (expand-file-name "var/prescient-save.el" custom/user-share-emacs-directory)
-              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets put into it's own file
+              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets
               backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory) ; tramp file put somewhere else
+              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory)
               save-place-file (expand-file-name "places" custom/user-share-emacs-directory)
               url-configuration-directory (expand-file-name "url" custom/user-share-emacs-directory) ; cache from urls (eww)
               multisession-directory (expand-file-name "multisession" custom/user-share-emacs-directory)
@@ -41,16 +40,16 @@ Most of the stuff will get redirected here.")
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
 (setq-default visible-bell nil ;; Set up the visible bell
-              global-auto-revert-non-file-buffers t ; refreshing buffers when files have changed
+              global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
-              initial-buffer-choice t ; scratch buffer is the buffer to show at the startup
-              initial-major-mode 'fundamental-mode ; setting scratch buffer in `fundamental-mode'
-              initial-scratch-message nil ; scratch buffer message
+              initial-buffer-choice t ; scratch buffer as a startup buffer
+              initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
+              ;; initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               scroll-conservatively 1000 ; Scroll one line at a time
               scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
-              vc-follow-symlinks t ; Enable follow symlinks
+              vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
               ;; standard-indent 2 ; indenting set to 2
@@ -59,13 +58,14 @@ Most of the stuff will get redirected here.")
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
-              create-lockfiles nil ; no files wiht ".#"
+              create-lockfiles nil ; no files with ".#"
               require-final-newline t
-              native-compile-target-directory (expand-file-name "eln-cache" custom/user-share-emacs-directory)
               native-comp-async-report-warnings-errors 'silent)
 
 ;; showing init time in scratch buffer
-(add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+(if (custom/termux-p)
+    (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+  (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
 (if (custom/termux-p)
@@ -111,12 +111,10 @@ Most of the stuff will get redirected here.")
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
 
-;; launching test emacs with package management setup
 (defun launch-test-emacs ()
   "Launches emacs that only loads test init file."
   (interactive)
-  ;; (async-shell-command "emacs -Q -l ~/.config/emacs/test-init.el")
-  (async-start-process "emacs-test" "emacs" nil "-Q" "-l" "~/.config/emacs/test-init.el")
+  (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
 
 (use-package use-package
@@ -308,6 +306,7 @@ Most of the stuff will get redirected here.")
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
+  :bind ("C-x \"" . unexpand-abbrev)
   :config
   (if (custom/termux-p)
       (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
@@ -343,14 +342,14 @@ Most of the stuff will get redirected here.")
   (tab-bar-mode 1)
   ;; (advice-add #'tab-new
   ;;             :after
-  ;;             (lambda (&rest _) (when (y-or-n-p "Rename tab? ")
+  ;;             (lambda (&rest _) (when (yes-or-no-p "Rename tab? ")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
   (tab-bar-tab ((nil (:foreground "#151515" :background "#c8c5c7"))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
-  (tab-bar-new-button-show nil)      ;; hide tab close / X button
+  (tab-bar-new-button-show nil)        ;; hide tab new / + button
   (tab-bar-tab-hints t)                ;; show tab numbers
   (tab-bar-auto-width-max nil)
   )
@@ -375,8 +374,8 @@ Most of the stuff will get redirected here.")
      '(("Org Mode"
         ("Org-Agenda (current day)" (org-agenda nil "a") "a")
         ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
-        ("Org-Roam notes" (org-roam-node-find) "n")
-        ("Org-Roam today daily" (org-roam-dailies-goto-today) "d"))
+        ("Org-Roam notes" org-roam-node-find "n")
+        ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Notes to self"
@@ -509,7 +508,7 @@ Most of the stuff will get redirected here.")
 
 (use-package corfu
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-         (prog-mode . corfu-mode)
+         ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom
   (corfu-auto t)
@@ -588,17 +587,17 @@ Most of the stuff will get redirected here.")
                      #'consult-completion-in-region
                    #'completion--in-region)
                  args)))
-  (defalias 'project-find-file 'consult-project-buffer)
+  ;; (defalias 'project-find-file 'consult-project-buffer)
   :bind
-  ([remap project-find-file] . consult-project-buffer)
+  ;; ([remap project-find-file] . consult-project-buffer)
   ([remap goto-line] . consult-goto-line)
   ([remap imenu] . consult-imenu)
-  :config
+  ;; :config
   ;; disabling `display-buffer-alist' for `consult-project-buffer'
-  (advice-add 'consult-project-buffer :around
-              (lambda (orig-fun &rest args)
-                (let ((display-buffer-alist nil))
-                  (apply orig-fun args))))
+  ;; (advice-add 'consult-project-buffer :around
+  ;;             (lambda (orig-fun &rest args)
+  ;;               (let ((display-buffer-alist nil))
+  ;;                 (apply orig-fun args))))
   )
 
 (use-package marginalia
@@ -625,7 +624,8 @@ Most of the stuff will get redirected here.")
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
    (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")
-         '("\\.\\(pdf\\|epub\\)$" "zathura")))
+         '("\\.\\(pdf\\|epub\\)$" "zathura")
+         '("\\.\\(mkv\\|mp4\\)$" "mpv")))
   (dired-dwim-target t)
   :config
   (defun dired-do-flush-lines (regexp)
@@ -1118,7 +1118,8 @@ using `browse-url'."
       (httpd-stop))))
 
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
-  :hook (html-mode . (lambda () (smartparens-mode 0)))
+  :hook (html-mode . (lambda () (smartparens-mode 0)
+                       (electric-pair-local-mode 0)))
   :preface
   (defun html-close-tag ()
     "Inserts >, closes tag, and moves to the >.
@@ -1362,3 +1363,4 @@ NOTE that it will each time close a tag."
 ;; (cl-loop for file in (directory-files "~/.config/emacs/site-lisp/" nil "\.el$")
 ;;          do (load-library file))
 (require 'mb-transient)
+(require 'mb-api)

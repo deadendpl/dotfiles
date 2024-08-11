@@ -18,7 +18,7 @@ wpg-tile() {
     -s "$wallpaper_path"
   # wal \
   #   --cols16 \
-  #   --backend modern_colorthief \
+  #   --backend haishoku \
   #   -ne \
   #   -i "$wallpaper_path" \
   #   -b "#151515" \
@@ -37,10 +37,6 @@ gradience-wrap () {
 # Use the wpg-tile function with the provided or default wallpaper file path
 wpg-tile "$1"
 
-# if sway is running for more than a minute, reload colors
-if [ $(pgrep "sway$" | xargs ps -o etimes=) -gt 60 ]; then
-  source ~/.cache/wal/colors-sway-quick
-fi
 
 gradience-wrap &
 
@@ -49,6 +45,20 @@ if pgrep "swaybg" > /dev/null; then
   killall swaybg
 fi
 swaybg -m fit -i "$(< "${XDG_CACHE_HOME}/wal/wal")" &
+
+# reloading sway colors
+# if [ $(pgrep "sway$" | xargs ps -o etimes=) -gt 60 ]; then
+  # source ~/.cache/wal/colors-sway-quick
+  . ~/.cache/wal/colors.sh
+
+  swaymsg "client.focused $background $color11 $foreground"
+  swaymsg "client.focused_inactive $background $background $foreground"
+  swaymsg "client.unfocused $background $background $foreground"
+  swaymsg "client.urgent $background $background $foreground"
+  swaymsg "client.placeholder $background $background $foreground"
+  swaymsg "output * bg $background solid_color"
+# fi
+
 if ! pgrep "waybar" > /dev/null; then
   waybar &
 fi
