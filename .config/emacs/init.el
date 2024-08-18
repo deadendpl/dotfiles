@@ -47,8 +47,6 @@ Most of the stuff will get redirected here.")
               initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
               ;; initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
-              scroll-conservatively 1000 ; Scroll one line at a time
-              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
               vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
@@ -59,8 +57,25 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files with ".#"
+              make-backup-files nil
               require-final-newline t
-              native-comp-async-report-warnings-errors 'silent)
+              native-comp-async-report-warnings-errors 'silent
+              show-paren-when-point-inside-paren t
+              show-paren-when-point-in-periphery t
+              truncate-string-ellipsis "…"
+              uniquify-buffer-name-style 'forward
+              kill-buffer-delete-auto-save-files t
+              frame-resize-pixelwise t
+              hscroll-margin 2
+              hscroll-step 1
+              scroll-conservatively 10
+              scroll-margin 0
+              scroll-preserve-screen-position t
+              auto-window-vscroll nil
+              mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
+              mouse-wheel-scroll-amount-horizontal 1
+              kill-do-not-save-duplicates nil
+              comment-empty-lines t)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -101,12 +116,10 @@ Most of the stuff will get redirected here.")
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
 ;; returning to normal garbage collection
-(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
+(add-hook 'emacs-startup-hook (lambda () (setq gc-cons-threshold 800000)))
 
-;; line numbers in conf files
+;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
 (add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
-
-;; (add-hook 'after-init-hook 'global-hl-line-mode)
 
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
@@ -116,6 +129,8 @@ Most of the stuff will get redirected here.")
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
+
+(blink-cursor-mode -1)
 
 (use-package use-package
   :custom
@@ -473,7 +488,8 @@ Most of the stuff will get redirected here.")
   :custom (doom-modeline-battery t))
 
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook (prog-mode . rainbow-delimiters-mode)
+  :custom (rainbow-delimiters-max-face-count 5))
 
 (use-package colorful-mode
   :hook (after-init . global-colorful-mode)
@@ -646,10 +662,7 @@ REGEXP is the argument used for `flush-lines'."
 
 (use-package diredfl
   :after dired
-  :hook
-  ((dired-mode . diredfl-mode)
-   ;; highlight parent and directory preview as well
-   (dirvish-directory-view-mode . diredfl-mode))
+  :hook (dired-mode . diredfl-mode)
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
 )
@@ -912,9 +925,10 @@ required."
   ;; basically every heading will be shown in imenu
   (with-eval-after-load 'org-indent
     (setq org-imenu-depth org-indent--deepest-level))
+
+  ;; opening video files from links in mpv
+  (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   )
-
-
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1046,6 +1060,7 @@ required."
 (unless (custom/termux-p)
 
 (use-package compile
+  :init (setq-default compile-command nil)
   :bind (("C-c c c" . compile)
          ("C-c c r" . recompile))
   :custom
@@ -1072,7 +1087,6 @@ required."
 - Current file gets an executable permission by using shell chmod, not Emacs `chmod'
 - The current file gets executed"
     (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name)))))
-
   :custom (sh-basic-offset 2)
   )
 
@@ -1196,6 +1210,9 @@ NOTE that it will each time close a tag."
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
 
 )
+
+(keymap-global-set "C-c s t" 'term)
+(keymap-global-set "C-c s s" 'shell)
 
 (use-package fish-mode
   :mode ("\\.fish\\'")
@@ -1358,9 +1375,12 @@ NOTE that it will each time close a tag."
   nil                            ;; other functions to call
   "A mode for M3U playlist files") ;; doc string for this mode
 
-(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
+(use-package emacs-mb-transient
+  :ensure nil
+  :load-path "~/dev/emacs-mb-transient/"
+  :commands (mb-transient mb-transient-frame))
 
-;; (cl-loop for file in (directory-files "~/.config/emacs/site-lisp/" nil "\.el$")
-;;          do (load-library file))
-(require 'mb-transient)
-(require 'mb-api)
+(use-package emacs-mb-search
+  :ensure nil
+  :load-path "~/dev/emacs-mb-search/"
+  :commands (mb-search-release-group mb-search-work mb-search-artist))

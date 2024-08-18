@@ -5,7 +5,7 @@ declare -a search_engines=(
   "AUR (Arch User Repository)"
   "Arch Wiki"
   "Arch Packages"
-  "Brave Search"
+  "Brave"
   "Cover Music Hoarders"
   "Discogs"
   "Ecosia"
@@ -35,7 +35,7 @@ case $selected_engine in
   "SearXNG")
     URL="https://farside.link/searxng/search?q="
     ;;
-  "Brave Search")
+  "Brave")
     URL="https://search.brave.com/search?q="
     QUERY=$(echo '' | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l 0 -p "Search $selected_engine:") || exit
     xdg-open "${URL}${QUERY}&source=desktop" 2> /dev/null

@@ -249,3 +249,6 @@ gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 
 yay -S --noconfirm xdg-user-dirs
 xdg-user-dirs-update
+
+# enabling syncthing service
+systemctl --user enable syncthing

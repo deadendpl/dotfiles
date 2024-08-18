@@ -32,11 +32,8 @@
     - [[#fonts][Fonts]]
       - [[#setting-fonts][Setting fonts]]
       - [[#enabling-programming-ligatures][Enabling programming ligatures]]
-      - [[#mixed-pitch][Mixed Pitch]]
     - [[#highlight-todo][Highlight TODO]]
-    - [[#icons][Icons]]
-      - [[#all-the-icons][ALL THE ICONS]]
-      - [[#nerd-icons][NERD ICONS]]
+    - [[#icons-nerd-fonts][Icons (Nerd Fonts)]]
     - [[#modeline][Modeline]]
     - [[#rainbow-delimiters][Rainbow delimiters]]
     - [[#dispaly-color-codes][Dispaly color codes]]
@@ -92,7 +89,7 @@
   - [[#writeroom][Writeroom]]
   - [[#display-buffer-alist][display-buffer-alist]]
   - [[#m3u-mode][M3U mode]]
-  - [[#adding-additional-files][Adding additional files]]
+  - [[#local-packages][Local packages]]
 
 * INFO and CREDITS
 Credits to:
@@ -104,12 +101,16 @@ This config is used on Emacs _29.4_ and is intended for use with that version.
 * Early Init
 #+begin_src emacs-lisp :tangle ./early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
-      gc-cons-threshold most-positive-fixnum)
+      gc-cons-threshold most-positive-fixnum
+      auto-mode-case-fold nil
+      package-native-compile t
+)
 
 ;; Faster to disable these here (before they've been initialized)
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
+(push '(horizontal-scroll-bars) default-frame-alist)
 #+end_src
 * The rest
 #+PROPERTY: header-args :tangle init.el
@@ -174,8 +175,6 @@ Most of the stuff will get redirected here.")
               initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
               ;; initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
-              scroll-conservatively 1000 ; Scroll one line at a time
-              scroll-margin 1 ; Keep a margin of 1 line when scrolling at the window's edge
               vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
@@ -186,8 +185,25 @@ Most of the stuff will get redirected here.")
               inhibit-compacting-font-caches t
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files with ".#"
+              make-backup-files nil
               require-final-newline t
-              native-comp-async-report-warnings-errors 'silent)
+              native-comp-async-report-warnings-errors 'silent
+              show-paren-when-point-inside-paren t
+              show-paren-when-point-in-periphery t
+              truncate-string-ellipsis "…"
+              uniquify-buffer-name-style 'forward
+              kill-buffer-delete-auto-save-files t
+              frame-resize-pixelwise t
+              hscroll-margin 2
+              hscroll-step 1
+              scroll-conservatively 10
+              scroll-margin 0
+              scroll-preserve-screen-position t
+              auto-window-vscroll nil
+              mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
+              mouse-wheel-scroll-amount-horizontal 1
+              kill-do-not-save-duplicates nil
+              comment-empty-lines t)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -230,12 +246,10 @@ Most of the stuff will get redirected here.")
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
 ;; returning to normal garbage collection
-(add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
+(add-hook 'emacs-startup-hook (lambda () (setq gc-cons-threshold 800000)))
 
-;; line numbers in conf files
+;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
 (add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
-
-;; (add-hook 'after-init-hook 'global-hl-line-mode)
 
 ;; removing warning when using `upcase-region'
 (put 'upcase-region 'disabled nil)
@@ -245,6 +259,8 @@ Most of the stuff will get redirected here.")
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
+
+(blink-cursor-mode -1)
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -613,30 +629,6 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
   ;; Enable ligatures in programming modes
   (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
 #+end_src
-**** Mixed Pitch :ARCHIVE:
-[[https://gitlab.com/jabranham/mixed-pitch][This]] incorprates variable pitch font into modes. In cases where you would want to keep fixed width font then it will probably keep that font.
-I turn that mode in Org Mode.
-#+begin_src emacs-lisp
-(use-package mixed-pitch
-  :unless (custom/termux-p)
-  :hook (org-mode . mixed-pitch-mode)
-  :diminish
-  :config
-  (dolist (faces '(;; org-level-1
-                   ;; org-level-2
-                   ;; org-level-3
-                   ;; org-level-4
-                   ;; org-level-5
-                   ;; org-level-6
-                   ;; org-level-7
-                   ;; org-level-8
-                   org-modern-label
-                   org-property-value
-                   org-special-keyword
-                   org-drawer
-                   org-document-face))
-    (add-to-list 'mixed-pitch-fixed-pitch-faces faces)))
-#+end_src
 *** Highlight TODO
 Adding highlights to TODO and related words.
 #+begin_src emacs-lisp
@@ -652,27 +644,7 @@ Adding highlights to TODO and related words.
      ("NOTE"       success bold)
      ("DEPRECATED" font-lock-doc-face bold))))
 #+end_src
-*** Icons
-**** [[https://github.com/domtronn/all-the-icons.el][ALL THE ICONS]] :ARCHIVE:
-#+begin_src emacs-lisp
-(use-package all-the-icons
-  :if (display-graphic-p))
-
-(use-package all-the-icons-dired
-  :after dired
-  :hook (dired-mode . all-the-icons-dired-mode))
-
-(use-package all-the-icons-ibuffer
-  :after ibuffer
-  :hook (ibuffer-mode . all-the-icons-ibuffer-mode))
-
-(use-package all-the-icons-completion
-  :after marginalia
-  :hook (marginalia-mode . #'all-the-icons-completion-marginalia-setup)
-  :config
-  (all-the-icons-completion-mode))
-#+end_src
-**** [[https://github.com/rainstormstudio/nerd-icons.el][NERD ICONS]]
+*** Icons ([[https://www.nerdfonts.com/][Nerd Fonts]])
 #+begin_src emacs-lisp
 (use-package nerd-icons)
 
@@ -718,7 +690,8 @@ Adding highlights to TODO and related words.
 Adding coloring to parentheses.
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook (prog-mode . rainbow-delimiters-mode)
+  :custom (rainbow-delimiters-max-face-count 5))
 #+end_src
 *** Dispaly color codes
 [[https://github.com/DevelopmentCool2449/colorful-mode][colorful-mode]] displays the actual color as a background for any hex color value (ex. #ffffff).
@@ -728,7 +701,7 @@ Adding coloring to parentheses.
   :custom (global-colorful-modes t))
 #+end_src
 *** Theme
-I started to use [[https://github.com/dylanaraps/pywal][pywal]] for my ricing so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
+I [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
 #+begin_src emacs-lisp
 (use-package doom-themes
   ;; :demand
@@ -931,10 +904,7 @@ REGEXP is the argument used for `flush-lines'."
 
 (use-package diredfl
   :after dired
-  :hook
-  ((dired-mode . diredfl-mode)
-   ;; highlight parent and directory preview as well
-   (dirvish-directory-view-mode . diredfl-mode))
+  :hook (dired-mode . diredfl-mode)
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
 )
@@ -1218,9 +1188,10 @@ required."
   ;; basically every heading will be shown in imenu
   (with-eval-after-load 'org-indent
     (setq org-imenu-depth org-indent--deepest-level))
+
+  ;; opening video files from links in mpv
+  (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   )
-
-
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1438,6 +1409,7 @@ This bit is not intended for Termux usage. That's why I include =unless= stateme
 The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gavin Freeborn's video]] and [[https://www.masteringemacs.org/article/compiling-running-scripts-emacs][Mastering Emacs article]].
 #+begin_src emacs-lisp
 (use-package compile
+  :init (setq-default compile-command nil)
   :bind (("C-c c c" . compile)
          ("C-c c r" . recompile))
   :custom
@@ -1498,7 +1470,6 @@ Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM,
 - Current file gets an executable permission by using shell chmod, not Emacs `chmod'
 - The current file gets executed"
     (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name)))))
-
   :custom (sh-basic-offset 2)
   )
 #+end_src
@@ -1672,6 +1643,9 @@ This is the end of =unless= statement.
 ** Shells and terminals
 *** Shell
 #+begin_src emacs-lisp
+(keymap-global-set "C-c s t" 'term)
+(keymap-global-set "C-c s s" 'shell)
+
 (use-package fish-mode
   :mode ("\\.fish\\'")
   :custom (fish-indent-offset 2))
@@ -1864,12 +1838,15 @@ A mode for m3u files
   nil                            ;; other functions to call
   "A mode for M3U playlist files") ;; doc string for this mode
 #+end_src
-** Adding additional files
+** Local packages
 #+begin_src emacs-lisp
-(add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
+(use-package emacs-mb-transient
+  :ensure nil
+  :load-path "~/dev/emacs-mb-transient/"
+  :commands (mb-transient mb-transient-frame))
 
-;; (cl-loop for file in (directory-files "~/.config/emacs/site-lisp/" nil "\.el$")
-;;          do (load-library file))
-(require 'mb-transient)
-(require 'mb-api)
+(use-package emacs-mb-search
+  :ensure nil
+  :load-path "~/dev/emacs-mb-search/"
+  :commands (mb-search-release-group mb-search-work mb-search-artist))
 #+end_src

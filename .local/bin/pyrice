@@ -13,16 +13,16 @@ wpg-tile() {
 
   wpg \
     --noreload \
-    --backend modern_colorthief \
+    --backend haishoku \
     -n \
     -s "$wallpaper_path"
-  # wal \
-  #   --cols16 \
-  #   --backend haishoku \
-  #   -ne \
-  #   -i "$wallpaper_path" \
-  #   -b "#151515" \
-  #   -p pywal16
+  wal \
+    --cols16 \
+    --backend haishoku \
+    -ne \
+    -i "$wallpaper_path" \
+    -b "#000000" \
+    # -p pywal16
 }
 
 gradience-wrap () {
