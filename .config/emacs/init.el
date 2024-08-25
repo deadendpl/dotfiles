@@ -117,6 +117,7 @@ Most of the stuff will get redirected here.")
 
 ;; returning to normal garbage collection
 (add-hook 'emacs-startup-hook (lambda () (setq gc-cons-threshold 800000)))
+;; (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
 
 ;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
 (add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
@@ -430,14 +431,6 @@ Most of the stuff will get redirected here.")
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
 
-(use-package ligature
-  :after prog-mode
-  :hook (prog-mode . ligature-mode)
-  :config
-  (ligature-set-ligatures 't '("www"))
-  ;; Enable ligatures in programming modes
-  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
-
 (use-package hl-todo
   :hook ((org-mode prog-mode) . hl-todo-mode)
   :custom
@@ -528,11 +521,9 @@ Most of the stuff will get redirected here.")
          (corfu-mode . corfu-popupinfo-mode))
   :custom
   (corfu-auto t)
-  (corfu-auto-prefix 1)
+  ;; (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (tab-always-indent 'complete)
-  :custom-face
-  (corfu-current ((nil (:inherit vertico-current))))
   ;; :preface
   ;; ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
   ;; (defun custom/corfu-cleanup ()
@@ -542,7 +533,9 @@ Most of the stuff will get redirected here.")
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
-              ("<escape>" . corfu-quit)))
+              ("<escape>" . corfu-quit))
+  :config
+  (set-face-attribute 'corfu-current nil :background (face-attribute 'vertico-current :background)))
 
 (use-package nerd-icons-corfu
   :after corfu
@@ -550,7 +543,8 @@ Most of the stuff will get redirected here.")
   )
 
 (use-package vertico
-  :defer 1
+  :hook (after-init . vertico-mode)
+  ;; :defer 1
   :bind (:map vertico-map
               ("C-j" . vertico-next)
               ("C-k" . vertico-previous)
@@ -608,12 +602,15 @@ Most of the stuff will get redirected here.")
   ;; ([remap project-find-file] . consult-project-buffer)
   ([remap goto-line] . consult-goto-line)
   ([remap imenu] . consult-imenu)
-  ;; :config
-  ;; disabling `display-buffer-alist' for `consult-project-buffer'
-  ;; (advice-add 'consult-project-buffer :around
-  ;;             (lambda (orig-fun &rest args)
-  ;;               (let ((display-buffer-alist nil))
-  ;;                 (apply orig-fun args))))
+  ([remap switch-to-buffer] . consult-buffer)
+  :config
+  ;; disabling `display-buffer-alist' for `consult-buffer'
+  (advice-add 'consult-buffer :around
+              (lambda (orig-fun &rest args)
+                (let ((display-buffer-alist nil))
+                  (apply orig-fun args))))
+  ;; removing recentf from `consult-buffer'
+  (setq consult-buffer-sources (remove 'consult--source-recent-file consult-buffer-sources))
   )
 
 (use-package marginalia
@@ -630,7 +627,7 @@ Most of the stuff will get redirected here.")
               ("b" . dired-up-directory))
   :custom
   (insert-directory-program "ls")
-  (dired-listing-switches "-lvX --almost-all --group-directories-first --human-readable")
+  (dired-listing-switches "-lvXAh --group-directories-first")
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
@@ -673,7 +670,7 @@ REGEXP is the argument used for `flush-lines'."
   ([remap describe-command] . helpful-command)
   ([remap describe-symbol] . helpful-symbol)
   ([remap describe-variable] . helpful-variable)
-  ([remap describe-key] . helpful-key)
+  ([remap describe-key] . helpful-key) ; it doesn't work with meow
   ("C-h C-." . helpful-at-point)
   :custom (helpful-max-buffers nil)
   )
@@ -708,14 +705,21 @@ REGEXP is the argument used for `flush-lines'."
 (use-package magit
   :custom
   (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
-  (magit-bury-buffer-function 'magit-restore-window-configuration))
+  (magit-bury-buffer-function 'magit-restore-window-configuration)
+  (magit-repository-directories '(("~/.dotfiles" . 0)
+                                  ("~/dev" . 1))))
 
 (use-package org
   :ensure nil
   :hook
   (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
   ;; after archiving tasks, agenda files aren't saved, I fix that
-  (org-archive . (lambda () (save-some-buffers t #'org-agenda-file-p)))
+  (org-archive . #'org-agenda-save-buffers)
+  :preface
+  (defun org-agenda-save-buffers ()
+    "Saves opened agenda files"
+    (interactive)
+    (save-some-buffers t #'org-agenda-file-p))
   :bind
   ([remap org-return] . custom/org-good-return)
   ("C-c n a" . org-agenda)
@@ -738,6 +742,75 @@ REGEXP is the argument used for `flush-lines'."
   (org-agenda-date-today ((nil (:height 1.3))))
   ;; (org-ellipsis ((nil (:underline t))))
   :custom
+  (org-M-RET-may-split-line nil)
+  (org-agenda-block-separator 8411)
+  (org-agenda-category-icon-alist
+   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
+     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
+     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
+     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
+  (org-agenda-columns-add-appointments-to-effort-sum t)
+  (org-agenda-custom-commands
+   '(("i" "Ideas" todo "IDEA")
+     ("n" "Agenda and all TODOs"
+      ((agenda "")
+       (alltodo "")))))
+  (org-agenda-default-appointment-duration 60)
+  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
+  (org-agenda-hide-tags-regexp ".*")
+  (org-agenda-include-all-todo nil)
+  (org-agenda-mouse-1-follows-link t)
+  (org-agenda-prefix-format
+   '((agenda . " %i ")
+     (todo . " %i ")
+     (tags . "%c %-12:c")
+     (search . "%c %-12:c")))
+  (org-agenda-skip-deadline-if-done t)
+  (org-agenda-skip-scheduled-if-done t)
+  (org-agenda-skip-timestamp-if-done t)
+  (org-agenda-skip-unavailable-files t)
+  (org-agenda-start-day "+0d")
+  (org-agenda-use-time-grid nil)
+  (org-agenda-window-setup 'current-window)
+  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
+  (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
+  (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
+  (org-capture-templates
+   '(("t" "Todo" entry (file "agenda/inbox.org")
+      "* TODO %?")))
+  (org-confirm-babel-evaluate nil)
+  (org-cycle-separator-lines 0)
+  (org-display-remote-inline-images 'download)
+  (org-edit-src-content-indentation 0)
+  (org-export-allow-bind-keywords t)
+  (org-export-backends '(ascii html icalendar latex odt md))
+  (org-export-preserve-breaks t)
+  (org-export-with-smart-quotes t)
+  (org-export-with-toc nil)
+  (org-fontify-quote-and-verse-blocks t)
+  (org-hide-emphasis-markers t)
+  (org-html-validation-link nil)
+  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+  (org-id-locations-file (expand-file-name "org/.org-id-locations" custom/user-share-emacs-directory))
+  (org-image-actual-width '(300 600))
+  (org-indent-mode-turns-on-hiding-stars nil)
+  (org-insert-heading-respect-content t)
+  (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
+  (org-link-file-path-type 'relative)
+  (org-list-allow-alphabetical t)
+  (org-log-done t)
+  (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
+  (org-pretty-entities t)
+  (org-preview-latex-default-process 'dvisvgm)
+  (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
+  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
+  (org-refile-use-outline-path nil)
+  (org-return-follows-link t)
+  (org-src-preserve-indentation t)
+  (org-startup-folded t)
+  (org-startup-indented t) ;; use `org-indent-mode' at startup
+  (org-startup-with-inline-images t)
+  (org-tags-column 0)
   (org-todo-keywords
    '((sequence
       "TODO(t)"  ; A task that needs doing & is ready to do
@@ -761,81 +834,6 @@ REGEXP is the argument used for `flush-lines'."
       "OKAY(o)"
       "YES(y)"
       "NO(n)")))
-  (org-capture-templates
-   '(("t" "Todo" entry (file "agenda/inbox.org")
-      "* TODO %?")))
-  ;; ============ org agenda ============
-  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
-  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
-  (org-agenda-prefix-format ;; format at which tasks are displayed
-   '((agenda . " %i ")
-     (todo . " %i ")
-     (tags . "%c %-12:c")
-     (search . "%c %-12:c")))
-  (org-agenda-category-icon-alist ;; icons for categories
-   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
-     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
-     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
-     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
-  (org-agenda-include-all-todo nil)
-  (org-agenda-start-day "+0d")
-  ;; (org-agenda-span 3)
-  (org-agenda-hide-tags-regexp ".*")
-  (org-agenda-skip-scheduled-if-done t)
-  (org-agenda-skip-deadline-if-done t)
-  (org-agenda-skip-timestamp-if-done t)
-  (org-agenda-columns-add-appointments-to-effort-sum t)
-  (org-agenda-custom-commands
-   '(("i" "Ideas" todo "IDEA")
-     ("n" "Agenda and all TODOs"
-      ((agenda "")
-       (alltodo "")))))
-  (org-agenda-default-appointment-duration 60)
-  (org-agenda-mouse-1-follows-link t)
-  (org-agenda-skip-unavailable-files t)
-  (org-agenda-use-time-grid nil)
-  (org-agenda-block-separator 8411)
-  (org-agenda-window-setup 'current-window)
-  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
-  (org-refile-use-outline-path nil)
-  (org-hide-emphasis-markers t)
-  ;; (org-hide-leading-stars t)
-  (org-html-validation-link nil)
-  (org-pretty-entities t)
-  (org-image-actual-width '(300 600))
-  (org-startup-with-inline-images t)
-  (org-startup-indented t) ;; use `org-indent-mode' at startup
-  (org-indent-mode-turns-on-hiding-stars nil)
-  ;; (org-cycle-inline-images-display t)
-  (org-cycle-separator-lines 0)
-  (org-display-remote-inline-images 'download)
-  (org-list-allow-alphabetical t)
-  (org-log-done t)
-  (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
-  (org-fontify-quote-and-verse-blocks t)
-  (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
-  (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (org-id-locations-file (expand-file-name "org/.org-id-locations" custom/user-share-emacs-directory))
-  (org-return-follows-link t)
-  (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
-  (org-M-RET-may-split-line nil)
-  (org-insert-heading-respect-content t)
-  (org-tags-column 0)
-  (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
-  (org-confirm-babel-evaluate nil)
-  (org-edit-src-content-indentation 0)
-  (org-src-preserve-indentation t)
-  (org-export-preserve-breaks t)
-  (org-export-allow-bind-keywords t)
-  (org-export-with-toc nil)
-  (org-export-with-smart-quotes t)
-  (org-export-backends '(ascii html icalendar latex odt md))
-  ;; (org-export-with-properties t)
-  (org-startup-folded t)
-  ;; (org-ellipsis "󱞣")
-  (org-link-file-path-type 'relative)
   :config
   ;; live latex preview
   (defun custom/org-resize-latex-overlays ()
@@ -912,20 +910,16 @@ required."
   (advice-add 'org-agenda-todo :after
               (lambda (&rest _)
                 (when (called-interactively-p 'any)
-                  (save-some-buffers t #'org-agenda-file-p))))
+                  (org-agenda-save-buffers))))
   ;; saving agenda files after refiling
   (advice-add #'org-refile :after
-              (lambda (&rest _) (save-some-buffers t #'org-agenda-file-p)))
+              (lambda (&rest _) (org-agenda-save-buffers)))
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
               (lambda (&rest _)
                 (if (eq major-mode 'org-mode)
                     (unless (eq org-cycle-global-status 'all)
                       (org-fold-show-all)))))
-  ;; basically every heading will be shown in imenu
-  (with-eval-after-load 'org-indent
-    (setq org-imenu-depth org-indent--deepest-level))
-
   ;; opening video files from links in mpv
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   )
@@ -1331,7 +1325,8 @@ NOTE that it will each time close a tag."
          ;; (display-buffer-below-selected)
          (window-height . 12)
          (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
+         ;; (body-function . custom/switch-to-buffer-other-window-for-alist)
+         )
         ("\\*Compile-log\\*"
          (display-buffer--maybe-at-bottom)
          (window-height . 12)
@@ -1375,12 +1370,12 @@ NOTE that it will each time close a tag."
   nil                            ;; other functions to call
   "A mode for M3U playlist files") ;; doc string for this mode
 
-(use-package emacs-mb-transient
-  :ensure nil
+(use-package mb-transient
+  :init (require 'mb-transient)
   :load-path "~/dev/emacs-mb-transient/"
-  :commands (mb-transient mb-transient-frame))
+  )
 
-(use-package emacs-mb-search
-  :ensure nil
+(use-package mb-search
+  :init (require 'mb-search)
   :load-path "~/dev/emacs-mb-search/"
-  :commands (mb-search-release-group mb-search-work mb-search-artist))
+  )

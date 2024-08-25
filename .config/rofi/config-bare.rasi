@@ -1,5 +1,4 @@
 configuration {
-  drun-display-format: "{name}";
   location: 6;
   // font: "JetBrainsMono NF Font Regular 12";
 }
