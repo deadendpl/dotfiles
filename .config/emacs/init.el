@@ -39,7 +39,7 @@ Most of the stuff will get redirected here.")
               transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory)
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
-(setq-default visible-bell nil ;; Set up the visible bell
+(setq-default ; visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
@@ -132,6 +132,9 @@ Most of the stuff will get redirected here.")
   )
 
 (blink-cursor-mode -1)
+
+(with-eval-after-load 'prog-mode
+  (keymap-set prog-mode-map "RET" #'newline-and-indent))
 
 (use-package use-package
   :custom
@@ -640,21 +643,6 @@ Most of the stuff will get redirected here.")
          '("\\.\\(pdf\\|epub\\)$" "zathura")
          '("\\.\\(mkv\\|mp4\\)$" "mpv")))
   (dired-dwim-target t)
-  :config
-  (defun dired-do-flush-lines (regexp)
-    "Do `flush-lines' on all marked files.
-REGEXP is the argument used for `flush-lines'."
-    (interactive "s")
-    (dired-map-over-marks-check
-     (lambda ()
-       (let ((file (dired-get-filename)))
-         (with-temp-buffer
-           (insert-file-contents file)
-           (flush-lines regexp)
-           (write-region (point-min) (point-max) file)))
-       nil)
-     nil
-     'flush-score-blocks-in-dired-files))
   )
 
 (use-package diredfl
@@ -1156,9 +1144,6 @@ NOTE that it will each time close a tag."
   :bind (:map html-mode-map
               (">" . html-close-tag)))
 
-(use-package lorem-ipsum
-  :custom (lorem-ipsum-sentence-separator " "))
-
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
         ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
@@ -1370,12 +1355,14 @@ NOTE that it will each time close a tag."
   nil                            ;; other functions to call
   "A mode for M3U playlist files") ;; doc string for this mode
 
-(use-package mb-transient
-  :init (require 'mb-transient)
-  :load-path "~/dev/emacs-mb-transient/"
-  )
+(unless (custom/termux-p)
+  (use-package mb-transient
+    :init (require 'mb-transient)
+    :load-path "~/dev/emacs-mb-transient/"
+    )
 
-(use-package mb-search
-  :init (require 'mb-search)
-  :load-path "~/dev/emacs-mb-search/"
+  (use-package mb-search
+    :init (require 'mb-search)
+    :load-path "~/dev/emacs-mb-search/"
+    )
   )

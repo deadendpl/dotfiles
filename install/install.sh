@@ -187,7 +187,8 @@ else
                      rsgain \
                      nicotine+ \
                      xdg-ninja \
-                     otf-ipaexfont
+                     otf-ipaexfont \
+                     playerctl
                      # syncthing-gtk
 fi
 

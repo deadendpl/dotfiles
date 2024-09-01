@@ -69,7 +69,6 @@
       - [[#elisp][Elisp]]
       - [[#python][Python]]
       - [[#web][Web]]
-    - [[#lorem-ipsum-generator][Lorem ipsum generator]]
     - [[#tree-sitter][Tree-sitter]]
     - [[#templates][Templates]]
       - [[#startup-templates][Startup templates]]
@@ -163,7 +162,7 @@ Most of the stuff will get redirected here.")
 #+end_src
 *** Other variables
 #+begin_src emacs-lisp
-(setq-default visible-bell nil ;; Set up the visible bell
+(setq-default ; visible-bell nil ;; Set up the visible bell
               global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
@@ -258,6 +257,9 @@ Most of the stuff will get redirected here.")
   )
 
 (blink-cursor-mode -1)
+
+(with-eval-after-load 'prog-mode
+  (keymap-set prog-mode-map "RET" #'newline-and-indent))
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -886,21 +888,6 @@ It has with renaming function by pressing =R=. You can rename the file and/or mo
          '("\\.\\(pdf\\|epub\\)$" "zathura")
          '("\\.\\(mkv\\|mp4\\)$" "mpv")))
   (dired-dwim-target t)
-  :config
-  (defun dired-do-flush-lines (regexp)
-    "Do `flush-lines' on all marked files.
-REGEXP is the argument used for `flush-lines'."
-    (interactive "s")
-    (dired-map-over-marks-check
-     (lambda ()
-       (let ((file (dired-get-filename)))
-         (with-temp-buffer
-           (insert-file-contents file)
-           (flush-lines regexp)
-           (write-region (point-min) (point-max) file)))
-       nil)
-     nil
-     'flush-score-blocks-in-dired-files))
   )
 
 (use-package diredfl
@@ -1517,11 +1504,6 @@ NOTE that it will each time close a tag."
   :bind (:map html-mode-map
               (">" . html-close-tag)))
 #+end_src
-*** Lorem ipsum generator
-#+begin_src emacs-lisp
-(use-package lorem-ipsum
-  :custom (lorem-ipsum-sentence-separator " "))
-#+end_src
 *** Tree-sitter
 Emacs from version 29 supports tree-sitter.
 Tree-sitter is fast parser and smart syntax highlighter for languages.
@@ -1793,13 +1775,15 @@ A mode for m3u files
 ** Local packages
 I don't know how to set those up, so I use =require= in =:init=.
 #+begin_src emacs-lisp
-(use-package mb-transient
-  :init (require 'mb-transient)
-  :load-path "~/dev/emacs-mb-transient/"
-  )
+(unless (custom/termux-p)
+  (use-package mb-transient
+    :init (require 'mb-transient)
+    :load-path "~/dev/emacs-mb-transient/"
+    )
 
-(use-package mb-search
-  :init (require 'mb-search)
-  :load-path "~/dev/emacs-mb-search/"
+  (use-package mb-search
+    :init (require 'mb-search)
+    :load-path "~/dev/emacs-mb-search/"
+    )
   )
 #+end_src

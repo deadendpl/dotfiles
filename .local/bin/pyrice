@@ -21,8 +21,7 @@ wpg-tile() {
     --backend haishoku \
     -ne \
     -i "$wallpaper_path" \
-    -b "#000000" \
-    # -p pywal16
+    -b "#000000"
 }
 
 gradience-wrap () {
@@ -49,14 +48,14 @@ swaybg -m fit -i "$(< "${XDG_CACHE_HOME}/wal/wal")" &
 # reloading sway colors
 # if [ $(pgrep "sway$" | xargs ps -o etimes=) -gt 60 ]; then
   # source ~/.cache/wal/colors-sway-quick
-  . ~/.cache/wal/colors.sh
+. ~/.cache/wal/colors.sh
 
-  swaymsg "client.focused $background $color11 $foreground"
-  swaymsg "client.focused_inactive $background $background $foreground"
-  swaymsg "client.unfocused $background $background $foreground"
-  swaymsg "client.urgent $background $background $foreground"
-  swaymsg "client.placeholder $background $background $foreground"
-  swaymsg "output * bg $background solid_color"
+swaymsg "client.focused $background $color11 $foreground"
+swaymsg "client.focused_inactive $background $background $foreground"
+swaymsg "client.unfocused $background $background $foreground"
+swaymsg "client.urgent $background $background $foreground"
+swaymsg "client.placeholder $background $background $foreground"
+swaymsg "output * bg $background solid_color"
 # fi
 
 if ! pgrep "waybar" > /dev/null; then
