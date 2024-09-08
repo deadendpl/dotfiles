@@ -50,7 +50,7 @@ Most of the stuff will get redirected here.")
               vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
-              ;; standard-indent 2 ; indenting set to 2
+              standard-indent 2 ; indenting set to 2
               auto-revert-interval 1
               use-short-answers t ; replace yes-no prompts with y-n
               fast-but-imprecise-scrolling t ; fast scrolling
@@ -75,7 +75,8 @@ Most of the stuff will get redirected here.")
               mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
               mouse-wheel-scroll-amount-horizontal 1
               kill-do-not-save-duplicates nil
-              comment-empty-lines t)
+              comment-empty-lines t
+              url-privacy-level 'paranoid)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -115,15 +116,11 @@ Most of the stuff will get redirected here.")
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'whitespace-cleanup)
 
-;; returning to normal garbage collection
-(add-hook 'emacs-startup-hook (lambda () (setq gc-cons-threshold 800000)))
-;; (add-hook 'after-init-hook (lambda () (setq gc-cons-threshold 800000)))
-
 ;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
 (add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
 
-;; removing warning when using `upcase-region'
-(put 'upcase-region 'disabled nil)
+;; removing warning when using some commands
+(setq disabled-command-function nil)
 
 (defun launch-test-emacs ()
   "Launches emacs that only loads test init file."
@@ -133,8 +130,8 @@ Most of the stuff will get redirected here.")
 
 (blink-cursor-mode -1)
 
-(with-eval-after-load 'prog-mode
-  (keymap-set prog-mode-map "RET" #'newline-and-indent))
+(add-hook 'prog-mode-hook
+          (lambda () (keymap-local-set "RET" #'newline-and-indent)))
 
 (use-package use-package
   :custom
@@ -156,15 +153,6 @@ Most of the stuff will get redirected here.")
   (unless package-archive-contents
     (package-refresh-contents))
   )
-
-;; (use-package gcmh
-;;   :demand
-;;   :diminish
-;;   :custom
-;;     (gcmh-mode 1)
-;;     (gcmh-idle-delay 10)
-;;     (gcmh-high-cons-threshold (* 32 1024 1024))
-;;     (gc-cons-percentage 0.8))
 
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
@@ -364,7 +352,7 @@ Most of the stuff will get redirected here.")
   ;;             (lambda (&rest _) (when (yes-or-no-p "Rename tab? ")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
-  (tab-bar-tab ((nil (:foreground "#151515" :background "#c8c5c7"))))
+  (tab-bar-tab ((nil (:inherit 'highlight :background nil :foreground nil))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
@@ -519,9 +507,12 @@ Most of the stuff will get redirected here.")
 (add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
 
 (use-package corfu
+  :init (global-corfu-mode t)
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-         ((prog-mode ielm-mode) . corfu-mode)
+         ;; ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
+  :custom-face
+  (corfu-current ((nil (:inherit 'highlight :background nil :foreground nil))))
   :custom
   (corfu-auto t)
   ;; (corfu-auto-prefix 1)
@@ -536,14 +527,25 @@ Most of the stuff will get redirected here.")
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
+              ("C-l" . corfu-insert)
               ("<escape>" . corfu-quit))
-  :config
-  (set-face-attribute 'corfu-current nil :background (face-attribute 'vertico-current :background)))
+  )
 
 (use-package nerd-icons-corfu
   :after corfu
   :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
   )
+
+(use-package cape
+  :init
+  ;; The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-history)
+)
 
 (use-package vertico
   :hook (after-init . vertico-mode)
@@ -591,29 +593,35 @@ Most of the stuff will get redirected here.")
 
 (use-package consult
   ;; :after vertico
-  :init
+  ;; :init
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
-  (setq completion-in-region-function
-        (lambda (&rest args)
-          (apply (if vertico-mode
-                     #'consult-completion-in-region
-                   #'completion--in-region)
-                 args)))
-  ;; (defalias 'project-find-file 'consult-project-buffer)
+  ;; (setq completion-in-region-function
+  ;;       (lambda (&rest args)
+  ;;         (apply (if vertico-mode
+  ;;                    #'consult-completion-in-region
+  ;;                  #'completion--in-region)
+  ;;                args)))
   :bind
   ;; ([remap project-find-file] . consult-project-buffer)
   ([remap goto-line] . consult-goto-line)
   ([remap imenu] . consult-imenu)
   ([remap switch-to-buffer] . consult-buffer)
+  ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+  ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+  ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
+  :custom
+  (consult-async-min-input 0)
   :config
-  ;; disabling `display-buffer-alist' for `consult-buffer'
   (advice-add 'consult-buffer :around
               (lambda (orig-fun &rest args)
-                (let ((display-buffer-alist nil))
+                (let (;; disabling `display-buffer-alist'
+                      (display-buffer-alist nil)
+                      ;; no live preview as loading org mode takes few seconds
+                      (consult-preview-key nil))
                   (apply orig-fun args))))
-  ;; removing recentf from `consult-buffer'
-  (setq consult-buffer-sources (remove 'consult--source-recent-file consult-buffer-sources))
+  ;; adding project source
+  (push 'consult--source-project-recent-file consult-buffer-sources)
   )
 
 (use-package marginalia
@@ -660,12 +668,12 @@ Most of the stuff will get redirected here.")
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key) ; it doesn't work with meow
   ("C-h C-." . helpful-at-point)
+  ("C-h '" . describe-face)
   :custom (helpful-max-buffers nil)
   )
 
 (use-package which-key
   :unless (custom/termux-p)
-  :diminish
   :defer 5
   :custom
   (which-key-side-window-location 'bottom)
@@ -687,8 +695,8 @@ Most of the stuff will get redirected here.")
   (elfeed-db-directory (expand-file-name "elfeed" custom/user-share-emacs-directory)) ; cache? directory
   (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
-  :bind (:map elfeed-search-mode-map)
-  ("f" . elfeed-search-show-entry))
+  :bind (:map elfeed-search-mode-map
+              ("f" . elfeed-search-show-entry)))
 
 (use-package magit
   :custom
@@ -699,18 +707,7 @@ Most of the stuff will get redirected here.")
 
 (use-package org
   :ensure nil
-  :hook
-  (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
-  ;; after archiving tasks, agenda files aren't saved, I fix that
-  (org-archive . #'org-agenda-save-buffers)
-  :preface
-  (defun org-agenda-save-buffers ()
-    "Saves opened agenda files"
-    (interactive)
-    (save-some-buffers t #'org-agenda-file-p))
   :bind
-  ([remap org-return] . custom/org-good-return)
-  ("C-c n a" . org-agenda)
   ("C-c n c" . org-capture)
   (:map org-mode-map
         ("C-x n t" . org-toggle-narrow-to-subtree)
@@ -727,40 +724,8 @@ Most of the stuff will get redirected here.")
   (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
   (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
   (org-list-dt ((nil (:weight bold))))
-  (org-agenda-date-today ((nil (:height 1.3))))
-  ;; (org-ellipsis ((nil (:underline t))))
   :custom
   (org-M-RET-may-split-line nil)
-  (org-agenda-block-separator 8411)
-  (org-agenda-category-icon-alist
-   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
-     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
-     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
-     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
-  (org-agenda-columns-add-appointments-to-effort-sum t)
-  (org-agenda-custom-commands
-   '(("i" "Ideas" todo "IDEA")
-     ("n" "Agenda and all TODOs"
-      ((agenda "")
-       (alltodo "")))))
-  (org-agenda-default-appointment-duration 60)
-  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)(expand-file-name "agenda/inbox.org" org-roam-directory)))
-  (org-agenda-hide-tags-regexp ".*")
-  (org-agenda-include-all-todo nil)
-  (org-agenda-mouse-1-follows-link t)
-  (org-agenda-prefix-format
-   '((agenda . " %i ")
-     (todo . " %i ")
-     (tags . "%c %-12:c")
-     (search . "%c %-12:c")))
-  (org-agenda-skip-deadline-if-done t)
-  (org-agenda-skip-scheduled-if-done t)
-  (org-agenda-skip-timestamp-if-done t)
-  (org-agenda-skip-unavailable-files t)
-  (org-agenda-start-day "+0d")
-  (org-agenda-use-time-grid nil)
-  (org-agenda-window-setup 'current-window)
-  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
@@ -783,16 +748,11 @@ Most of the stuff will get redirected here.")
   (org-image-actual-width '(300 600))
   (org-indent-mode-turns-on-hiding-stars nil)
   (org-insert-heading-respect-content t)
-  (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
   (org-link-file-path-type 'relative)
   (org-list-allow-alphabetical t)
   (org-log-done t)
   (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
   (org-pretty-entities t)
-  (org-preview-latex-default-process 'dvisvgm)
-  (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
-  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
-  (org-refile-use-outline-path nil)
   (org-return-follows-link t)
   (org-src-preserve-indentation t)
   (org-startup-folded t)
@@ -823,7 +783,96 @@ Most of the stuff will get redirected here.")
       "YES(y)"
       "NO(n)")))
   :config
-  ;; live latex preview
+  ;; opening video files from links in mpv
+  (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
+  )
+
+;; it's for html source block syntax highlighting
+(use-package htmlize)
+
+(use-package org
+  :ensure nil
+  :bind ([remap org-return] . custom/org-good-return)
+  :config
+  (defun custom/org-good-return ()
+    "`org-return' that allows for following links in table."
+    (interactive)
+    (if (and (org-at-table-p) (org-in-regexp org-link-any-re 1))
+        (org-open-at-point)
+      (org-return))
+    ))
+
+(use-package org
+  :bind ("C-c n a" . org-agenda)
+  :custom-face (org-agenda-date-today ((nil (:height 1.3))))
+  :custom
+  (org-agenda-block-separator 8411)
+  (org-agenda-category-icon-alist
+   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
+     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
+     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
+     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
+  (org-agenda-columns-add-appointments-to-effort-sum t)
+  (org-agenda-custom-commands
+   '(("i" "Ideas" todo "IDEA")
+     ("n" "Agenda and all TODOs"
+      ((agenda "")
+       (alltodo "")))))
+  (org-agenda-default-appointment-duration 60)
+  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)
+                          (expand-file-name "agenda/inbox.org" org-roam-directory)))
+  (org-agenda-hide-tags-regexp ".*")
+  (org-agenda-include-all-todo nil)
+  (org-agenda-mouse-1-follows-link t)
+  (org-agenda-prefix-format
+   '((agenda . " %i ")
+     (todo . " %i ")
+     (tags . "%c %-12:c")
+     (search . "%c %-12:c")))
+  (org-agenda-skip-deadline-if-done t)
+  (org-agenda-skip-scheduled-if-done t)
+  (org-agenda-skip-timestamp-if-done t)
+  (org-agenda-skip-unavailable-files t)
+  (org-agenda-start-day "+0d")
+  (org-agenda-use-time-grid nil)
+  (org-agenda-window-setup 'current-window)
+  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
+  (org-refile-use-outline-path nil)
+  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
+  )
+
+(use-package org
+  :ensure nil
+  :hook (org-archive . #'org-agenda-save-buffers) ; archiving
+  :config
+  (defun org-agenda-save-buffers ()
+    "Saves opened agenda files"
+    (interactive)
+    (save-some-buffers t #'org-agenda-file-p))
+  ;; changing TODO state in `org-agenda'
+  (advice-add 'org-agenda-todo :after
+              (lambda (&rest _)
+                (when (called-interactively-p 'any)
+                  (org-agenda-save-buffers))))
+  ;; scheduling in `org-agenda'
+  (advice-add 'org-agenda-schedule :after
+              (lambda (&rest _)
+                (when (called-interactively-p 'any)
+                  (org-agenda-save-buffers))))
+  ;; refiling
+  (advice-add #'org-refile :after
+              (lambda (&rest _)
+                (when (called-interactively-p 'any)
+                  (org-agenda-save-buffers))))
+  )
+
+(use-package org
+  :hook (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+  :custom
+  (org-preview-latex-default-process 'dvisvgm)
+  (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
+  (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
+  :config
   (defun custom/org-resize-latex-overlays ()
     "Rescales all latex preview fragments correctly with the text size
 as you zoom text. It's fast, since no image regeneration is
@@ -835,7 +884,11 @@ required."
                                         text-scale-mode-amount))))
   (plist-put org-format-latex-options :foreground nil)
   (plist-put org-format-latex-options :background nil)
+  )
 
+(use-package org
+  :ensure nil
+  :config
   ;; meow custom state (inspired by https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
   (setq meow-org-motion-keymap (make-keymap))
   (meow-define-state org-motion
@@ -883,37 +936,13 @@ required."
   (meow-define-keys 'normal
     '("O" . meow-org-motion-mode))
 
-  ;; In tables pressing RET doesn't follow links.
-  ;; I fix that
-  (defun custom/org-good-return ()
-    "`org-return' that allows for following links in table."
-    (interactive)
-    (if (org-at-table-p)
-        (if (org-in-regexp org-link-any-re 1)
-            (org-open-at-point)
-          (org-return))
-      (org-return)))
-
-  ;; saving agenda files after changing TODO state in `org-agenda'
-  (advice-add 'org-agenda-todo :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
-  ;; saving agenda files after refiling
-  (advice-add #'org-refile :after
-              (lambda (&rest _) (org-agenda-save-buffers)))
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
               (lambda (&rest _)
                 (if (eq major-mode 'org-mode)
                     (unless (eq org-cycle-global-status 'all)
                       (org-fold-show-all)))))
-  ;; opening video files from links in mpv
-  (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   )
-
-;; it's for html source block syntax highlighting
-(use-package htmlize)
 
 (with-eval-after-load 'org
   (require 'org-tempo)
@@ -949,7 +978,6 @@ required."
 
 (use-package org-auto-tangle
   :after org
-  :diminish
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package org-roam
@@ -986,7 +1014,6 @@ required."
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
-
   :bind (
          ("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
@@ -1008,11 +1035,11 @@ required."
   (org-roam-setup)
   (require 'org-roam-export)
   ;; if the file is dailie then increase buffer's size automatically
-  (require 'org-roam-dailies)
+  ;; (require 'org-roam-dailies)
   ;; (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
   ;; (add-hook 'find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3))))
   (defun custom/org-roam-notes-dired ()
-    "Opens org-roam-directory in Dired."
+    "Opens org-roam-directory in `dired'."
     (interactive)
     (dired org-roam-directory))
   (defun custom/org-add-ids-to-headlines-in-file ()
@@ -1023,10 +1050,11 @@ required."
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
-  :custom (consult-org-roam-grep-func 'consult-ripgrep))
+  :custom (consult-org-roam-grep-func #'consult-ripgrep))
 
 (use-package org-roam-ui
-  :custom (org-roam-ui-sync-theme t))
+  :custom
+  (org-roam-ui-sync-theme t))
 
 (use-package toc-org
   :after org
@@ -1114,35 +1142,28 @@ using `browse-url'."
       (httpd-stop))))
 
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
-  :hook (html-mode . (lambda () (smartparens-mode 0)
-                       (electric-pair-local-mode 0)))
-  :preface
+  :hook ((html-mode . (lambda () (smartparens-mode 0)
+                        (electric-pair-local-mode 0)))
+         ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
+         (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
+  ;; :custom (css-indent-offset 2)
+  :bind (:map html-mode-map
+              (">" . html-close-tag))
+  :config
   (defun html-close-tag ()
-    "Inserts >, closes tag, and moves to the >.
-After inserting >, it temporarily diables indenting functions, as
-they mess the point stored.
+    "Inserts >, closes tag, and moves to the inserted >.
+Indenting functions are temporarily disabled, as they mess the
+point stored.
 NOTE that it will each time close a tag."
     (interactive)
     (insert ">")
     (let ((current-point (point))
-          (indent-func indent-line-function)
-          (indent-region-func indent-region-function))
-      ;; Temporarily disable indentation
-      (setq-local indent-line-function 'ignore)
-      (setq-local indent-region-function 'ignore)
-
+          (indent-line-function 'ignore)
+          (indent-region-function 'ignore))
       (sgml-close-tag)
       (goto-char current-point)
-
-      ;; Restore the original indentation functions
-      (setq-local indent-line-function indent-func)
-      (setq-local indent-region-function indent-region-func)
-
-      ;; Call the indentation function if it is not nil
-      (when indent-func
-        (funcall indent-func))))
-  :bind (:map html-mode-map
-              (">" . html-close-tag)))
+      ))
+  )
 
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -1192,6 +1213,8 @@ NOTE that it will each time close a tag."
 
 (keymap-global-set "C-c s t" 'term)
 (keymap-global-set "C-c s s" 'shell)
+(setq explicit-shell-file-name "/bin/bash")
+;; (setq shell-file-name "/bin/bash")
 
 (use-package fish-mode
   :mode ("\\.fish\\'")

@@ -1,6 +1,9 @@
 configuration {
   location: 6;
   // font: "JetBrainsMono NF Font Regular 12";
+  sorting-method: "fzf";
+  matching: "fuzzy";
+  sort: true;
 }
 
 /* Keybindings */
@@ -8,7 +11,3 @@ configuration {
 
 /* Pywal theme. */
 @theme "~/.cache/wal/colors-rofi-custom.rasi"
-
-/* If you want to import default pywal theme then
-@import "~/.cache/wal/colors-rofi-dark.rasi"
-*/

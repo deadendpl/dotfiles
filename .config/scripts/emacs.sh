@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 
-cd "$HOME"
-
 if pgrep "emacs" > /dev/null; then
   pkill emacs
   emacs_killed=1
