@@ -96,7 +96,6 @@ Most of the stuff will get redirected here.")
 (with-current-buffer "*Messages*"
   (emacs-lock-mode 'kill))
 
-
 (defun custom/find-config-file ()
   "Opens config.org file in `user-emacs-directory'."
   (interactive)
@@ -106,12 +105,13 @@ Most of the stuff will get redirected here.")
 ;; make utf-8 the coding system
 (set-language-environment "UTF-8")
 
-(defadvice find-file (before make-directory-maybe (filename &optional wildcards) activate)
+(defun make-directory-maybe (filename &optional wildcards)
   "Create parent directory if not exists while visiting file."
   (unless (file-exists-p filename)
     (let ((dir (file-name-directory filename)))
       (unless (file-exists-p dir)
         (make-directory dir t)))))
+(advice-add 'find-file :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'whitespace-cleanup)
@@ -352,7 +352,7 @@ Most of the stuff will get redirected here.")
   ;;             (lambda (&rest _) (when (yes-or-no-p "Rename tab? ")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
-  (tab-bar-tab ((nil (:inherit 'highlight :background nil :foreground nil))))
+  (tab-bar-tab ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
@@ -384,10 +384,7 @@ Most of the stuff will get redirected here.")
         ("Org-Roam notes" org-roam-node-find "n")
         ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
        ("Other"
-        ("Projects" project-switch-project "p"))
-       ("Notes to self"
-        ("Press q instead of killing buffers")
-        ("Press C-S-Backspace to kill whole line"))))))
+        ("Projects" project-switch-project "p"))))))
 )
 
 (set-face-attribute 'default nil
@@ -422,6 +419,14 @@ Most of the stuff will get redirected here.")
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
 
+(use-package ligature
+  :unless (custom/termux-p)
+  :hook (prog-mode . ligature-mode)
+  :config
+  (ligature-set-ligatures 't '("www"))
+  ;; Enable ligatures in programming modes
+  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
+
 (use-package hl-todo
   :hook ((org-mode prog-mode) . hl-todo-mode)
   :custom
@@ -437,7 +442,6 @@ Most of the stuff will get redirected here.")
 (use-package nerd-icons)
 
 (use-package nerd-icons-dired
-  :after dired
   :hook (dired-mode . nerd-icons-dired-mode)
   :config
   (advice-add #'wdired-change-to-wdired-mode :before
@@ -462,7 +466,6 @@ Most of the stuff will get redirected here.")
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 (use-package nerd-icons-completion
-  :after marginalia
   :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup)
   ;; :config (nerd-icons-completion-mode)
 )
@@ -512,11 +515,12 @@ Most of the stuff will get redirected here.")
          ;; ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom-face
-  (corfu-current ((nil (:inherit 'highlight :background nil :foreground nil))))
+  (corfu-current ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
   :custom
   (corfu-auto t)
   ;; (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
+  (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
   ;; :preface
   ;; ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
@@ -529,10 +533,10 @@ Most of the stuff will get redirected here.")
               ("C-k" . corfu-previous)
               ("C-l" . corfu-insert)
               ("<escape>" . corfu-quit))
-  )
+  :config
+  (add-to-list 'meow-mode-state-list '(corfu-mode . insert)))
 
 (use-package nerd-icons-corfu
-  :after corfu
   :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
   )
 
@@ -592,16 +596,15 @@ Most of the stuff will get redirected here.")
   :custom (savehist-file (expand-file-name "history" custom/user-share-emacs-directory)))
 
 (use-package consult
-  ;; :after vertico
-  ;; :init
+  :init
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
-  ;; (setq completion-in-region-function
-  ;;       (lambda (&rest args)
-  ;;         (apply (if vertico-mode
-  ;;                    #'consult-completion-in-region
-  ;;                  #'completion--in-region)
-  ;;                args)))
+  (setq-default completion-in-region-function
+                (lambda (&rest args)
+                  (apply (if vertico-mode
+                             #'consult-completion-in-region
+                           #'completion--in-region)
+                         args)))
   :bind
   ;; ([remap project-find-file] . consult-project-buffer)
   ([remap goto-line] . consult-goto-line)
@@ -735,14 +738,8 @@ Most of the stuff will get redirected here.")
   (org-cycle-separator-lines 0)
   (org-display-remote-inline-images 'download)
   (org-edit-src-content-indentation 0)
-  (org-export-allow-bind-keywords t)
-  (org-export-backends '(ascii html icalendar latex odt md))
-  (org-export-preserve-breaks t)
-  (org-export-with-smart-quotes t)
-  (org-export-with-toc nil)
   (org-fontify-quote-and-verse-blocks t)
   (org-hide-emphasis-markers t)
-  (org-html-validation-link nil)
   (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
   (org-id-locations-file (expand-file-name "org/.org-id-locations" custom/user-share-emacs-directory))
   (org-image-actual-width '(300 600))
@@ -864,6 +861,16 @@ Most of the stuff will get redirected here.")
               (lambda (&rest _)
                 (when (called-interactively-p 'any)
                   (org-agenda-save-buffers))))
+  )
+
+(use-package org
+  :custom
+  (org-export-allow-bind-keywords t)
+  (org-export-backends '(ascii html icalendar latex odt md))
+  (org-export-preserve-breaks t)
+  (org-export-with-smart-quotes t)
+  (org-export-with-toc nil)
+  (org-html-validation-link nil)
   )
 
 (use-package org
@@ -1057,7 +1064,6 @@ required."
   (org-roam-ui-sync-theme t))
 
 (use-package toc-org
-  :after org
   :hook (org-mode . #'toc-org-enable)
   :custom
   (toc-org-max-depth org-indent--deepest-level)
@@ -1078,12 +1084,12 @@ required."
   (compilation-ask-about-save nil)
   (compilation-always-kill t)
   :config
-  (defadvice compile (before ad-compile-smart activate)
-    "Advises `compile' so it sets the argument COMINT to t."
-    (ad-set-arg 1 t))
-  (defadvice recompile (before ad-recompile-smart activate)
-    "Advises `recompile' so it sets the argument COMINT to t."
-    (setq compilation-arguments (list compile-command t)))
+  (defun ad-compile-comint (orig-fun &rest args)
+    (unless (nth 1 args)
+      ;; If the COMINT argument (second argument) is nil, set it to t.
+      (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
+    (apply orig-fun args))
+  (advice-add 'compilation-start :around #'ad-compile-comint)
   )
 
 (use-package lua-mode)
@@ -1096,18 +1102,21 @@ required."
     "The curent buffer gets `compile-command' changed to the following:
 - Current file gets an executable permission by using shell chmod, not Emacs `chmod'
 - The current file gets executed"
-    (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name)))))
+    (if buffer-file-name
+        (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name))))))
   :custom (sh-basic-offset 2)
   )
 
 (use-package cc-mode
-  :hook ((c++-mode c++-ts-mode) .  custom/c++-set-compile-command)
+  :hook ((c++-mode .  custom/c++-set-compile-command)
+         (c++-ts-mode . (lambda () (run-hooks 'c++-mode-hook))))
   :preface
   (defun custom/c++-set-compile-command ()
     "The curent buffer gets `compile-command' changed to the following:
 - The current file gets compiled using g++
 - The compiled file gets executed"
-    (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out")))
+    (if buffer-file-name
+        (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
   :config
   ;; this is for indenting
   (c-set-offset 'comment-intro 0)
@@ -1122,7 +1131,7 @@ required."
 (use-package bug-hunter)
 
 (use-package python
-  :hook (python-base-mode . (lambda () (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name))))))
+  :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
   )
 
 (use-package impatient-mode
@@ -1241,11 +1250,9 @@ NOTE that it will each time close a tag."
   (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
 
 (use-package eshell-syntax-highlighting
-  :after eshell
   :hook (eshell-mode . eshell-syntax-highlighting-mode))
 
 (use-package eat
-  :after eshell
   :hook (eshell-load . eat-eshell-mode))
 
 (use-package vterm
