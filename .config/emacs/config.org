@@ -20,7 +20,7 @@
     - [[#setting-keybindings][Setting keybindings]]
   - [[#built-in-packages][Built-in packages]]
     - [[#abbreviations][Abbreviations]]
-    - [[#file-history][File history]]
+    - [[#recentf---file-history][recentf - file history]]
     - [[#remembering-file-place][Remembering file place]]
     - [[#eww][EWW]]
     - [[#line-numbers][Line numbers]]
@@ -81,7 +81,7 @@
     - [[#templates][Templates]]
       - [[#startup-templates][Startup templates]]
       - [[#command-templates][Command templates]]
-      - [[#the-end][The end]]
+    - [[#the-end][The end]]
   - [[#shells-and-terminals][Shells and terminals]]
     - [[#shell][Shell]]
     - [[#eshell][Eshell]]
@@ -148,7 +148,7 @@ Those =fbound= are because Termux Emacs doesn't have some functions at all and t
       (tool-bar-mode -1)))           ; Disable the toolbar
 (unless (custom/termux-p)
   (if (fboundp 'set-fringe-mode)
-      (set-fringe-mode 10)))       ; Give some breathing room
+      (set-fringe-mode 10)))         ; Give some breathing room
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
@@ -181,8 +181,7 @@ Most of the stuff will get redirected here.")
 #+end_src
 *** Other variables
 #+begin_src emacs-lisp
-(setq-default ; visible-bell nil ;; Set up the visible bell
-              global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
+(setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
               initial-buffer-choice t ; scratch buffer as a startup buffer
@@ -267,7 +266,7 @@ Most of the stuff will get redirected here.")
 (setq disabled-command-function nil)
 
 (defun launch-test-emacs ()
-  "Launches emacs that only loads test init file."
+  "Launches Emacs that only loads test init file."
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
@@ -284,6 +283,7 @@ It will lazy-load packages by default.
 I have =use-package-always-ensure= because otherwise packages didn't want to download with =use-package-always-defer=.
 #+begin_src emacs-lisp
 (use-package use-package
+  :init (setq use-package-enable-imenu-support t)
   :custom
   (use-package-verbose t)
   (use-package-always-ensure t)
@@ -493,7 +493,7 @@ Built-in =abbrev-mode= allows for abbreviations.
 
 I have /btw/ set for /by the way/.
 The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at the beginning.
-*** File history
+*** recentf - file history
 =recentf= is built-in package for remembering file visit history.
 #+begin_src emacs-lisp
 (use-package recentf
@@ -503,7 +503,6 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
   :custom
   (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
   (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
-  (recentf-auto-cleanup 'never) ; not cleaning recentf file
   )
 #+end_src
 *** Remembering file place
@@ -673,9 +672,7 @@ Adding highlights to TODO and related words.
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 (use-package nerd-icons-completion
-  :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup)
-  ;; :config (nerd-icons-completion-mode)
-)
+  :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup))
 #+end_src
 *** Modeline
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a bar at the bottom of the screen
@@ -685,7 +682,7 @@ Adding highlights to TODO and related words.
   :custom (doom-modeline-battery t))
 #+end_src
 *** Rainbow delimiters
-Adding coloring to parentheses.
+Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]].
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
@@ -699,7 +696,7 @@ Adding coloring to parentheses.
   :custom (global-colorful-modes t))
 #+end_src
 *** Theme
-I [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
+I use [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[https://github.com/cyruseuros/ewal][this]] as my theme.
 #+begin_src emacs-lisp
 (use-package doom-themes
   ;; :demand
@@ -729,7 +726,7 @@ I [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[https
 
 With Emacs 29, true transparency has been added.
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 95))
 #+end_src
 ** Completion
 *** In-buffer completion
@@ -745,8 +742,9 @@ With Emacs 29, true transparency has been added.
   (corfu-current ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
   :custom
   (corfu-auto t)
-  ;; (corfu-auto-prefix 1)
+  (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
+  (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
   ;; :preface
@@ -777,7 +775,7 @@ With Emacs 29, true transparency has been added.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  (add-hook 'completion-at-point-functions #'cape-history)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
 )
 #+end_src
 *** Minibuffer completion
@@ -837,7 +835,10 @@ Built-in =savehist-mode= saves minibuffer history
 #+begin_src emacs-lisp
 (use-package savehist
   :init (savehist-mode t)
-  :custom (savehist-file (expand-file-name "history" custom/user-share-emacs-directory)))
+  :custom
+  (savehist-file (expand-file-name "history" custom/user-share-emacs-directory))
+  (savehist-additional-variables '(comint-input-ring))
+  )
 #+end_src
 **** Consult
 [[https://github.com/minad/consult][Consult]] has lots of useful commands with minibuffer completion.
@@ -865,13 +866,12 @@ Built-in =savehist-mode= saves minibuffer history
   :config
   (advice-add 'consult-buffer :around
               (lambda (orig-fun &rest args)
-                (let (;; disabling `display-buffer-alist'
-                      (display-buffer-alist nil)
-                      ;; no live preview as loading org mode takes few seconds
-                      (consult-preview-key nil))
+                ;; no live preview as loading org mode takes few seconds
+                (let ((consult-preview-key nil))
                   (apply orig-fun args))))
   ;; adding project source
-  (push 'consult--source-project-recent-file consult-buffer-sources)
+  ;; (push 'consult--source-project-recent-file consult-buffer-sources)
+  (push 'consult--source-project-buffer consult-buffer-sources)
   )
 #+end_src
 **** Annotations (marginalia)
@@ -881,7 +881,6 @@ Built-in =savehist-mode= saves minibuffer history
   :after vertico
   :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle))
-  :custom (marginalia--pangram "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
   :init (marginalia-mode))
 #+end_src
 ** Dired
@@ -895,6 +894,7 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   :custom
   (insert-directory-program "ls")
   (dired-listing-switches "-lvXAh --group-directories-first")
+  (dired-switches-in-mode-line 0)
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
@@ -1055,6 +1055,8 @@ Here I'm improving it as much as I can.
   :config
   ;; opening video files from links in mpv
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
+  ;; unfolding header after `consult-org-heading'
+  (advice-add 'consult-org-heading :after #'org-fold-show-entry)
   )
 
 ;; it's for html source block syntax highlighting
@@ -1064,7 +1066,6 @@ Here I'm improving it as much as I can.
 In tables pressing RET doesn't follow links. I fix that.
 #+begin_src emacs-lisp
 (use-package org
-  :ensure nil
   :bind ([remap org-return] . custom/org-good-return)
   :config
   (defun custom/org-good-return ()
@@ -1119,28 +1120,19 @@ In tables pressing RET doesn't follow links. I fix that.
 *** Saving agenda files
 #+begin_src emacs-lisp
 (use-package org
-  :ensure nil
   :hook (org-archive . #'org-agenda-save-buffers) ; archiving
   :config
   (defun org-agenda-save-buffers ()
     "Saves opened agenda files"
     (interactive)
     (save-some-buffers t #'org-agenda-file-p))
-  ;; changing TODO state in `org-agenda'
-  (advice-add 'org-agenda-todo :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
-  ;; scheduling in `org-agenda'
-  (advice-add 'org-agenda-schedule :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
-  ;; refiling
-  (advice-add #'org-refile :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
+
+  ;; automatically save agenda files after some commands
+  (dolist (func '(org-agenda-todo org-agenda-schedule org-refile))
+    (advice-add func :after
+                (lambda (&rest _)
+                  (when (called-interactively-p 'any)
+                    (org-agenda-save-buffers)))))
   )
 #+end_src
 *** Export settings
@@ -1150,9 +1142,13 @@ In tables pressing RET doesn't follow links. I fix that.
   (org-export-allow-bind-keywords t)
   (org-export-backends '(ascii html icalendar latex odt md))
   (org-export-preserve-breaks t)
+  (org-export-with-date nil)
   (org-export-with-smart-quotes t)
   (org-export-with-toc nil)
   (org-html-validation-link nil)
+  ;; html5
+  (org-html-doctype "html5")
+  (org-html-html5-fancy t)
   )
 #+end_src
 *** LaTeX settings
@@ -1180,7 +1176,6 @@ required."
 *** Meow settings
 #+begin_src emacs-lisp
 (use-package org
-  :ensure nil
   :config
   ;; meow custom state (inspired by https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
   (setq meow-org-motion-keymap (make-keymap))
@@ -1295,7 +1290,6 @@ It's set up so it will display markers when entering insert mode.
 [[https://github.com/yilkalargaw/org-auto-tangle][org-auto-tangle]] automatically tangles files that have =#+auto_tangle: t= in them.
 #+begin_src emacs-lisp
 (use-package org-auto-tangle
-  :after org
   :hook (org-mode . org-auto-tangle-mode))
 #+end_src
 *** Org Roam
@@ -1335,8 +1329,7 @@ It's set up so it will display markers when entering insert mode.
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
-  :bind (
-         ("C-c n A a" . org-roam-alias-add)
+  :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
          ("C-c n d f" . org-roam-dailies-find-date)
@@ -1350,8 +1343,7 @@ It's set up so it will display markers when entering insert mode.
          ("C-c n r"   . org-roam-ref-add)
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
-         ("C-c n T"   . org-roam-tag-remove)
-         )
+         ("C-c n T"   . org-roam-tag-remove))
   :config
   (org-roam-setup)
   (require 'org-roam-export)
@@ -1452,7 +1444,7 @@ With this major modes automatically turn on eglot.
   (add-hook mode 'eglot-ensure))
 #+end_src
 *** Language support
-Emacs has built-in programming language modes for Lisp, Scheme, DSSSL, Ada, ASM, AWK, C, C++, Fortran, Icon, IDL (CORBA), IDLWAVE, Java, Javascript, M4, Makefiles, Metafont, Modula2, Object Pascal, Objective-C, Octave, Pascal, Perl, Pike, PostScript, Prolog, Python, Ruby, Simula, SQL, Tcl, Verilog, and VHDL. Other languages will require additional modes.
+I don't use those much. I just have some files in my dotfiles in those languages.
 #+begin_src emacs-lisp
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1612,7 +1604,9 @@ This remaps specified major modes to its tree-sitter counterparts.
   (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
   (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
+  (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
+  (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
+)
 #+end_src
 **** Command templates :ARCHIVE:
 [[https://github.com/joaotavora/yasnippet][yasnippet]] implements snippets for commands etc.
@@ -1624,7 +1618,7 @@ This remaps specified major modes to its tree-sitter counterparts.
 (use-package yasnippet-snippets
   :after yasnippet)
 #+end_src
-**** The end
+*** The end
 This is the end of =unless= statement.
 #+begin_src emacs-lisp
 )
@@ -1634,8 +1628,8 @@ This is the end of =unless= statement.
 #+begin_src emacs-lisp
 (keymap-global-set "C-c s t" 'term)
 (keymap-global-set "C-c s s" 'shell)
-(setq explicit-shell-file-name "/bin/bash")
-;; (setq shell-file-name "/bin/bash")
+(setq explicit-shell-file-name "/bin/bash"
+      async-shell-command-buffer 'new-buffer)
 
 (use-package fish-mode
   :mode ("\\.fish\\'")
@@ -1645,8 +1639,8 @@ This is the end of =unless= statement.
 Eshell is an Emacs /shell/ that is written in Elisp.
 #+begin_src emacs-lisp
 (use-package eshell
-  :hook
-  (eshell-mode . (lambda () (setq mode-line-format nil)))
+  ;; :hook
+  ;; (eshell-mode . (lambda () (setq mode-line-format nil)))
   :bind (("C-c s e" . eshell))
   :custom
   (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
@@ -1674,8 +1668,7 @@ Eshell is an Emacs /shell/ that is written in Elisp.
   :hook (eshell-load . eat-eshell-mode))
 #+end_src
 *** Vterm
-Vterm is a terminal emulator within Emacs.
-The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x ansi-term= and =M-x vterm=.
+[[https://github.com/akermu/emacs-libvterm][Vterm]] is a terminal emulator within Emacs.
 #+begin_src emacs-lisp
 (use-package vterm
   :unless (custom/termux-p)
@@ -1690,7 +1683,6 @@ The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x
                                        (vterm-copy-mode 0))))))
   :bind (("C-c s v" . vterm))
   :custom
-  ;; (shell-file-name "/bin/fish")
   (vterm-max-scrollback 5000)
   (vterm-always-compile-module t)
   :config
@@ -1704,7 +1696,7 @@ The =shell-file-name= sets the shell to be used in =M-x shell=, =M-x term=, =M-x
   :bind ("C-x C-S-f" . sudo-edit-find-file))
 #+end_src
 ** Translation (reverso)
-I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using [[https://github.com/magit/transient][transient]] to make interactive commands.
+I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using [[https://github.com/magit/transient][transient]].
 #+begin_src emacs-lisp
 (use-package reverso
   :bind

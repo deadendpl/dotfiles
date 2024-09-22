@@ -14,14 +14,12 @@ wpg-tile() {
   wpg \
     --noreload \
     --backend haishoku \
-    -n \
-    -s "$wallpaper_path"
+    -ns "$wallpaper_path"
   wal \
     --cols16 \
     --backend haishoku \
-    -ne \
-    -i "$wallpaper_path" \
-    -b "#000000"
+    -b "#000000" \
+    -nei "$wallpaper_path"
 }
 
 gradience-wrap () {
@@ -63,7 +61,7 @@ if ! pgrep "waybar" > /dev/null; then
 fi
 swaync-client -rs &
 swaync-client -R &
-emacsclient --eval "(load-theme 'ewal-doom-one t)" &
+emacsclient -e "(load-theme 'ewal-doom-one t)" &
 
 if pgrep "qutebrowser" > /dev/null; then
   qutebrowser :config-source &

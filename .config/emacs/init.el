@@ -10,7 +10,7 @@
       (tool-bar-mode -1)))           ; Disable the toolbar
 (unless (custom/termux-p)
   (if (fboundp 'set-fringe-mode)
-      (set-fringe-mode 10)))       ; Give some breathing room
+      (set-fringe-mode 10)))         ; Give some breathing room
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
@@ -39,8 +39,7 @@ Most of the stuff will get redirected here.")
               transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory)
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
-(setq-default ; visible-bell nil ;; Set up the visible bell
-              global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
+(setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
               initial-buffer-choice t ; scratch buffer as a startup buffer
@@ -123,7 +122,7 @@ Most of the stuff will get redirected here.")
 (setq disabled-command-function nil)
 
 (defun launch-test-emacs ()
-  "Launches emacs that only loads test init file."
+  "Launches Emacs that only loads test init file."
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
   )
@@ -134,6 +133,7 @@ Most of the stuff will get redirected here.")
           (lambda () (keymap-local-set "RET" #'newline-and-indent)))
 
 (use-package use-package
+  :init (setq use-package-enable-imenu-support t)
   :custom
   (use-package-verbose t)
   (use-package-always-ensure t)
@@ -327,7 +327,6 @@ Most of the stuff will get redirected here.")
   :custom
   (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
   (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
-  (recentf-auto-cleanup 'never) ; not cleaning recentf file
   )
 
 (use-package saveplace
@@ -466,9 +465,7 @@ Most of the stuff will get redirected here.")
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 (use-package nerd-icons-completion
-  :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup)
-  ;; :config (nerd-icons-completion-mode)
-)
+  :hook (marginalia-mode . #'nerd-icons-completion-marginalia-setup))
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
@@ -507,7 +504,7 @@ Most of the stuff will get redirected here.")
     (load-theme 'ewal-doom-one t))
   )
 
-(add-to-list 'default-frame-alist '(alpha-background . 95)) ; For all new frames henceforth
+(add-to-list 'default-frame-alist '(alpha-background . 95))
 
 (use-package corfu
   :init (global-corfu-mode t)
@@ -518,8 +515,9 @@ Most of the stuff will get redirected here.")
   (corfu-current ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
   :custom
   (corfu-auto t)
-  ;; (corfu-auto-prefix 1)
+  (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
+  (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
   ;; :preface
@@ -548,7 +546,7 @@ Most of the stuff will get redirected here.")
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  (add-hook 'completion-at-point-functions #'cape-history)
+  ;; (add-hook 'completion-at-point-functions #'cape-history)
 )
 
 (use-package vertico
@@ -593,7 +591,10 @@ Most of the stuff will get redirected here.")
 
 (use-package savehist
   :init (savehist-mode t)
-  :custom (savehist-file (expand-file-name "history" custom/user-share-emacs-directory)))
+  :custom
+  (savehist-file (expand-file-name "history" custom/user-share-emacs-directory))
+  (savehist-additional-variables '(comint-input-ring))
+  )
 
 (use-package consult
   :init
@@ -618,20 +619,18 @@ Most of the stuff will get redirected here.")
   :config
   (advice-add 'consult-buffer :around
               (lambda (orig-fun &rest args)
-                (let (;; disabling `display-buffer-alist'
-                      (display-buffer-alist nil)
-                      ;; no live preview as loading org mode takes few seconds
-                      (consult-preview-key nil))
+                ;; no live preview as loading org mode takes few seconds
+                (let ((consult-preview-key nil))
                   (apply orig-fun args))))
   ;; adding project source
-  (push 'consult--source-project-recent-file consult-buffer-sources)
+  ;; (push 'consult--source-project-recent-file consult-buffer-sources)
+  (push 'consult--source-project-buffer consult-buffer-sources)
   )
 
 (use-package marginalia
   :after vertico
   :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle))
-  :custom (marginalia--pangram "Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
   :init (marginalia-mode))
 
 (use-package dired
@@ -642,6 +641,7 @@ Most of the stuff will get redirected here.")
   :custom
   (insert-directory-program "ls")
   (dired-listing-switches "-lvXAh --group-directories-first")
+  (dired-switches-in-mode-line 0)
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
@@ -782,13 +782,14 @@ Most of the stuff will get redirected here.")
   :config
   ;; opening video files from links in mpv
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
+  ;; unfolding header after `consult-org-heading'
+  (advice-add 'consult-org-heading :after #'org-fold-show-entry)
   )
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
 
 (use-package org
-  :ensure nil
   :bind ([remap org-return] . custom/org-good-return)
   :config
   (defun custom/org-good-return ()
@@ -839,28 +840,19 @@ Most of the stuff will get redirected here.")
   )
 
 (use-package org
-  :ensure nil
   :hook (org-archive . #'org-agenda-save-buffers) ; archiving
   :config
   (defun org-agenda-save-buffers ()
     "Saves opened agenda files"
     (interactive)
     (save-some-buffers t #'org-agenda-file-p))
-  ;; changing TODO state in `org-agenda'
-  (advice-add 'org-agenda-todo :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
-  ;; scheduling in `org-agenda'
-  (advice-add 'org-agenda-schedule :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
-  ;; refiling
-  (advice-add #'org-refile :after
-              (lambda (&rest _)
-                (when (called-interactively-p 'any)
-                  (org-agenda-save-buffers))))
+
+  ;; automatically save agenda files after some commands
+  (dolist (func '(org-agenda-todo org-agenda-schedule org-refile))
+    (advice-add func :after
+                (lambda (&rest _)
+                  (when (called-interactively-p 'any)
+                    (org-agenda-save-buffers)))))
   )
 
 (use-package org
@@ -868,9 +860,13 @@ Most of the stuff will get redirected here.")
   (org-export-allow-bind-keywords t)
   (org-export-backends '(ascii html icalendar latex odt md))
   (org-export-preserve-breaks t)
+  (org-export-with-date nil)
   (org-export-with-smart-quotes t)
   (org-export-with-toc nil)
   (org-html-validation-link nil)
+  ;; html5
+  (org-html-doctype "html5")
+  (org-html-html5-fancy t)
   )
 
 (use-package org
@@ -894,7 +890,6 @@ required."
   )
 
 (use-package org
-  :ensure nil
   :config
   ;; meow custom state (inspired by https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
   (setq meow-org-motion-keymap (make-keymap))
@@ -984,7 +979,6 @@ required."
   )
 
 (use-package org-auto-tangle
-  :after org
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package org-roam
@@ -1021,8 +1015,7 @@ required."
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
-  :bind (
-         ("C-c n A a" . org-roam-alias-add)
+  :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
          ("C-c n d f" . org-roam-dailies-find-date)
@@ -1036,8 +1029,7 @@ required."
          ("C-c n r"   . org-roam-ref-add)
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
-         ("C-c n T"   . org-roam-tag-remove)
-         )
+         ("C-c n T"   . org-roam-tag-remove))
   :config
   (org-roam-setup)
   (require 'org-roam-export)
@@ -1216,22 +1208,24 @@ NOTE that it will each time close a tag."
   (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
   (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp")))
+  (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
+  (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
+)
 
 )
 
 (keymap-global-set "C-c s t" 'term)
 (keymap-global-set "C-c s s" 'shell)
-(setq explicit-shell-file-name "/bin/bash")
-;; (setq shell-file-name "/bin/bash")
+(setq explicit-shell-file-name "/bin/bash"
+      async-shell-command-buffer 'new-buffer)
 
 (use-package fish-mode
   :mode ("\\.fish\\'")
   :custom (fish-indent-offset 2))
 
 (use-package eshell
-  :hook
-  (eshell-mode . (lambda () (setq mode-line-format nil)))
+  ;; :hook
+  ;; (eshell-mode . (lambda () (setq mode-line-format nil)))
   :bind (("C-c s e" . eshell))
   :custom
   (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
@@ -1268,7 +1262,6 @@ NOTE that it will each time close a tag."
                                        (vterm-copy-mode 0))))))
   :bind (("C-c s v" . vterm))
   :custom
-  ;; (shell-file-name "/bin/fish")
   (vterm-max-scrollback 5000)
   (vterm-always-compile-module t)
   :config
