@@ -73,7 +73,7 @@ case $selected_engine in
     ;;
   "MusicBrainz (MB)")
     # ${XDG_CONFIG_HOME}/scripts/mb-search.sh
-    emacsclient -e '(mb-transient-frame)'
+    emacsclient -e '(window-popup-mb-transient)'
     exit 0
     ;;
   "VGMdb")

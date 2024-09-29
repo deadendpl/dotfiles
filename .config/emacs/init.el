@@ -132,6 +132,14 @@ Most of the stuff will get redirected here.")
 (add-hook 'prog-mode-hook
           (lambda () (keymap-local-set "RET" #'newline-and-indent)))
 
+(defun execute-extended-command-other-window ()
+  "Open a new window, and execute `execute-extended-command'."
+  (interactive)
+  (switch-to-buffer-other-window (current-buffer))
+  (call-interactively #'execute-extended-command))
+
+(keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
+
 (use-package use-package
   :init (setq use-package-enable-imenu-support t)
   :custom
@@ -256,7 +264,11 @@ Most of the stuff will get redirected here.")
      '("Y" . meow-sync-grab)
      '("z" . meow-pop-selection)
      '("'" . repeat)
-     '("<escape>" . ignore)))
+     '("<escape>" . ignore))
+
+    (meow-define-keys 'insert
+      '("C-." . meow-keypad))
+    )
 
   (meow-setup)
   (meow-global-mode 1)
@@ -383,7 +395,9 @@ Most of the stuff will get redirected here.")
         ("Org-Roam notes" org-roam-node-find "n")
         ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
        ("Other"
-        ("Projects" project-switch-project "p"))))))
+        ("Projects" project-switch-project "p"))
+       ("Things to remember"
+        ("Instead of holding h/l, use letter finding keybindings"))))))
 )
 
 (set-face-attribute 'default nil
@@ -532,7 +546,8 @@ Most of the stuff will get redirected here.")
               ("C-l" . corfu-insert)
               ("<escape>" . corfu-quit))
   :config
-  (add-to-list 'meow-mode-state-list '(corfu-mode . insert)))
+  ;; (add-to-list 'meow-mode-state-list '(corfu-mode . insert))
+  )
 
 (use-package nerd-icons-corfu
   :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
@@ -665,7 +680,7 @@ Most of the stuff will get redirected here.")
 
 (use-package helpful
   :bind
-  ([remap describe-function] . helpful-function)
+  ([remap describe-function] . helpful-callable)
   ([remap describe-command] . helpful-command)
   ([remap describe-symbol] . helpful-symbol)
   ([remap describe-variable] . helpful-variable)
@@ -962,20 +977,15 @@ required."
 
 (use-package org-appear
   :after org
-  :hook (org-mode . org-appear-mode)
+  :hook ((org-mode . org-appear-mode)
+         (org-appear-mode . org-appear-meow-setup))
   :custom
   (org-appear-trigger 'manual)
   (org-appear-autolinks t)
   :config
-  (add-hook 'org-appear-mode-hook (lambda ()
-                                    (add-hook 'meow-insert-enter-hook
-                                              #'org-appear-manual-start
-                                              nil
-                                              t)
-                                    (add-hook 'meow-insert-exit-hook
-                                              #'org-appear-manual-stop
-                                              nil
-                                              t)))
+  (defun org-appear-meow-setup ()
+    (add-hook 'meow-insert-enter-hook #'org-appear-manual-start nil t)
+    (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t))
   )
 
 (use-package org-auto-tangle
@@ -1088,7 +1098,7 @@ required."
 (use-package nix-mode)
 
 (use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
-  :hook ((bash-ts-mode fish-mode sh-mode)  . custom/sh-set-compile-command)
+  :hook ((bash-ts-mode fish-mode sh-mode) . custom/sh-set-compile-command)
   :preface
   (defun custom/sh-set-compile-command ()
     "The curent buffer gets `compile-command' changed to the following:
@@ -1144,7 +1154,9 @@ using `browse-url'."
 
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda () (smartparens-mode 0)
-                        (electric-pair-local-mode 0)))
+                        (setq-local electric-pair-inhibit-predicate
+                                    `(lambda (c)
+                                       (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
   ;; :custom (css-indent-offset 2)
@@ -1153,17 +1165,27 @@ using `browse-url'."
   :config
   (defun html-close-tag ()
     "Inserts >, closes tag, and moves to the inserted >.
+If called after character >, it just inserts another >.
+It doesn't close empty tags.
 Indenting functions are temporarily disabled, as they mess the
-point stored.
-NOTE that it will each time close a tag."
+point stored."
     (interactive)
-    (insert ">")
-    (let ((current-point (point))
-          (indent-line-function 'ignore)
-          (indent-region-function 'ignore))
-      (sgml-close-tag)
-      (goto-char current-point)
+    (if (= (char-before (point)) ?>)
+        (insert ?>)
+      (progn
+        (insert ">")
+        (let ((current-point (point))
+              (indent-line-function 'ignore)
+              (indent-region-function 'ignore)
+              (tag (save-excursion (backward-char)
+                                   (current-word))))
+          (unless (member tag html-empty-tag-list)
+            (sgml-close-tag))
+          (goto-char current-point)))
       ))
+  (defvar html-empty-tag-list
+    '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr")
+    "List of empty HTML tags.")
   )
 
 (setq treesit-language-source-alist
@@ -1368,6 +1390,28 @@ NOTE that it will each time close a tag."
       switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
       switch-to-buffer-in-dedicated-window t) ; `switch-to-buffer' will work on dedicated window
 
+(defun window-delete-popup-frame (&rest _)
+  "Kill selected selected frame if it has parameter `window-popup-frame'.
+Use this function via a hook."
+  (when (frame-parameter nil 'window-popup-frame)
+    (delete-frame)))
+
+(defmacro window-define-with-popup-frame (command)
+  "Define interactive function which calls COMMAND in a new frame.
+Make the new frame have the `window-popup-frame' parameter."
+  `(defun ,(intern (format "window-popup-%s" command)) ()
+     ,(format "Run `%s' in a popup frame with `window-popup-frame' parameter.
+Also see `window-delete-popup-frame'." command)
+     (interactive)
+     (let ((frame (make-frame '((window-popup-frame . t)
+                                (name . "window-popup-frame")))))
+       (select-frame frame)
+       (switch-to-buffer " window-hidden-buffer-for-popup-frame")
+       (condition-case nil
+           (call-interactively ',command)
+         ((quit error user-error)
+          (delete-frame frame))))))
+
 (define-generic-mode
     'm3u-mode                      ;; name of the mode to create
   '("#")                         ;; comments start with '#'
@@ -1382,6 +1426,11 @@ NOTE that it will each time close a tag."
   (use-package mb-transient
     :init (require 'mb-transient)
     :load-path "~/dev/emacs-mb-transient/"
+    :hook (mb-transient-exit . window-delete-popup-frame)
+    :config
+    (window-define-with-popup-frame mb-transient)
+    (advice-add 'window-popup-mb-transient :after
+                (lambda () (modify-frame-parameters nil '((width . 54) (height . 27)))))
     )
 
   (use-package mb-search

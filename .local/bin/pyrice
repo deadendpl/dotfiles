@@ -60,7 +60,7 @@ if ! pgrep "waybar" > /dev/null; then
   waybar &
 fi
 swaync-client -rs &
-swaync-client -R &
+# swaync-client -R &
 emacsclient -e "(load-theme 'ewal-doom-one t)" &
 
 if pgrep "qutebrowser" > /dev/null; then

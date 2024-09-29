@@ -236,7 +236,7 @@ for_window {
   [app_id="blueberry.py"] floating enable
   [title="Unlock Database - KeePassXC"] floating enable
   [title="KeePassXC - Browser Access Request"] floating enable
-  [title="MusicBrainz Emacs Search"] floating enable
+  [title="window-popup-frame"] floating enable
   [title="^Compress$|^Extract$" app_id="file-roller"] floating enable
   [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
 }

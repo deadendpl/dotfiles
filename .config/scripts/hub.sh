@@ -10,9 +10,9 @@ declare -a scripts=(
   "Changing root shell"
   "NVIM config as root"
   "(sway) Toggle warm colors"
-  "(sway) Screen orientation"
+  # "(sway) Screen orientation"
   "(sway) New wallpaper"
-  "(sway) Notification center"
+  # "(sway) Notification center"
   "(sway) Waybar re/start"
   "Bookmarks"
   "Books"
@@ -27,12 +27,12 @@ declare -a scripts=(
 choice=$(printf '%s\n' "${scripts[@]}" | sort | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#scripts[@]} -i -b -p "Scripts" )
 
 case $choice in
-  "(sway) Screen orientation")
-    hypr/screen-orientation.sh
-    ;;
-  "(sway) Notification center")
-    swaync-client -t
-    ;;
+  # "(sway) Screen orientation")
+  #   hypr/screen-orientation.sh
+  #   ;;
+  # "(sway) Notification center")
+  #   swaync-client -t
+  #   ;;
   "(sway) New wallpaper")
     ~/.local/bin/pyrice
     ;;
