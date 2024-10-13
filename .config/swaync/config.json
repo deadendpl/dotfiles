@@ -44,16 +44,16 @@
   //   }
   // },
   "widgets": [
-    "inhibitors",
+    // "inhibitors",
     "notifications",
     "mpris"
   ],
   "widget-config": {
-    "inhibitors": {
-      "text": "Inhibitors",
-      "button-text": "Clear All",
-      "clear-all-button": true
-    },
+    // "inhibitors": {
+    //   "text": "Inhibitors",
+    //   "button-text": "Clear All",
+    //   "clear-all-button": true
+    // },
     "mpris": {
       "image-size": 96,
       "image-radius": 13

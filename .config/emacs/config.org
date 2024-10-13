@@ -51,10 +51,12 @@
     - [[#helpful][Helpful]]
     - [[#which-key][Which-key]]
   - [[#elfeed][Elfeed]]
+  - [[#embark][Embark]]
   - [[#magit][Magit]]
   - [[#org-mode][Org Mode]]
     - [[#initial-tweaks][Initial tweaks]]
     - [[#following-links-in-a-table][Following links in a table]]
+    - [[#automatic-todo-inserting][Automatic TODO inserting]]
     - [[#agenda-settings][Agenda settings]]
     - [[#saving-agenda-files][Saving agenda files]]
     - [[#export-settings][Export settings]]
@@ -77,6 +79,9 @@
       - [[#elisp][Elisp]]
       - [[#python][Python]]
       - [[#web][Web]]
+        - [[#impatient-mode][Impatient mode]]
+        - [[#html][HTML]]
+        - [[#css][CSS]]
     - [[#tree-sitter][Tree-sitter]]
     - [[#templates][Templates]]
       - [[#startup-templates][Startup templates]]
@@ -218,7 +223,8 @@ Most of the stuff will get redirected here.")
               mouse-wheel-scroll-amount-horizontal 1
               kill-do-not-save-duplicates nil
               comment-empty-lines t
-              url-privacy-level 'paranoid)
+              url-privacy-level 'paranoid
+              electric-pair-skip-self nil)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -981,6 +987,17 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
   :bind (:map elfeed-search-mode-map
               ("f" . elfeed-search-show-entry)))
 #+end_src
+** Embark
+#+begin_src emacs-lisp
+(use-package embark
+  :bind (("C-." . embark-act)
+         ("C-;" . embark-dwim))
+  :config
+  ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
+  )
+
+(use-package embark-consult)
+#+end_src
 ** Magit
 [[https://magit.vc/][Magit]] is a git client.
 #+begin_src emacs-lisp
@@ -1092,6 +1109,16 @@ In tables pressing RET doesn't follow links. I fix that.
       (org-return))
     ))
 #+end_src
+*** Automatic TODO inserting
+#+begin_src emacs-lisp
+(use-package org
+  :config
+  (advice-add 'org-meta-return :around (lambda (orig-fun &rest args)
+                                         (if (or (org-at-item-checkbox-p) (org-entry-is-todo-p))
+                                             (org-insert-todo-heading t)
+                                           (apply orig-fun args))))
+  )
+#+end_src
 *** Agenda settings
 #+begin_src emacs-lisp
 (use-package org
@@ -1136,10 +1163,10 @@ In tables pressing RET doesn't follow links. I fix that.
 *** Saving agenda files
 #+begin_src emacs-lisp
 (use-package org
-  :hook (org-archive . #'org-agenda-save-buffers) ; archiving
+  :hook (org-archive . org-agenda-save-buffers) ; archiving
   :config
   (defun org-agenda-save-buffers ()
-    "Saves opened agenda files"
+    "Saves opened agenda files."
     (interactive)
     (save-some-buffers t #'org-agenda-file-p))
 
@@ -1419,6 +1446,7 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
   (compilation-always-kill t)
   :config
   (defun ad-compile-comint (orig-fun &rest args)
+    "Sets compilation arguments to run in `comint-mode'."
     (unless (nth 1 args)
       ;; If the COMINT argument (second argument) is nil, set it to t.
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
@@ -1511,6 +1539,7 @@ If I'll not forget about it then probably I will get the most use out of [[https
   )
 #+end_src
 **** Web
+***** Impatient mode
 [[https://github.com/netguy204/imp.el][impatient-mode]] allows for nice website development where the website reacts immediately to any edits.
 Since it requires manual http startup and website opening, I automated this in one function.
 #+begin_src emacs-lisp
@@ -1530,7 +1559,7 @@ using `browse-url'."
             (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
       (httpd-stop))))
 #+end_src
-
+***** HTML
 Here I add autocompletion when typing =>= in html modes.
 #+begin_src emacs-lisp
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
@@ -1568,6 +1597,11 @@ point stored."
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr")
     "List of empty HTML tags.")
   )
+#+end_src
+***** CSS
+#+begin_src emacs-lisp
+(use-package css-mode
+  :custom (css-indent-offset 2))
 #+end_src
 *** Tree-sitter
 Emacs from version 29 supports tree-sitter.

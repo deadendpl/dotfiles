@@ -3,6 +3,8 @@
 
 .control-center {
   background: alpha(@background, 0.9);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .control-center-list {

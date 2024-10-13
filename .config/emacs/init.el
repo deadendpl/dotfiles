@@ -75,7 +75,8 @@ Most of the stuff will get redirected here.")
               mouse-wheel-scroll-amount-horizontal 1
               kill-do-not-save-duplicates nil
               comment-empty-lines t
-              url-privacy-level 'paranoid)
+              url-privacy-level 'paranoid
+              electric-pair-skip-self nil)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -716,6 +717,15 @@ Most of the stuff will get redirected here.")
   :bind (:map elfeed-search-mode-map
               ("f" . elfeed-search-show-entry)))
 
+(use-package embark
+  :bind (("C-." . embark-act)
+         ("C-;" . embark-dwim))
+  :config
+  ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
+  )
+
+(use-package embark-consult)
+
 (use-package magit
   :custom
   (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
@@ -816,6 +826,14 @@ Most of the stuff will get redirected here.")
     ))
 
 (use-package org
+  :config
+  (advice-add 'org-meta-return :around (lambda (orig-fun &rest args)
+                                         (if (or (org-at-item-checkbox-p) (org-entry-is-todo-p))
+                                             (org-insert-todo-heading t)
+                                           (apply orig-fun args))))
+  )
+
+(use-package org
   :bind ("C-c n a" . org-agenda)
   :custom-face (org-agenda-date-today ((nil (:height 1.3))))
   :custom
@@ -855,10 +873,10 @@ Most of the stuff will get redirected here.")
   )
 
 (use-package org
-  :hook (org-archive . #'org-agenda-save-buffers) ; archiving
+  :hook (org-archive . org-agenda-save-buffers) ; archiving
   :config
   (defun org-agenda-save-buffers ()
-    "Saves opened agenda files"
+    "Saves opened agenda files."
     (interactive)
     (save-some-buffers t #'org-agenda-file-p))
 
@@ -1087,6 +1105,7 @@ required."
   (compilation-always-kill t)
   :config
   (defun ad-compile-comint (orig-fun &rest args)
+    "Sets compilation arguments to run in `comint-mode'."
     (unless (nth 1 args)
       ;; If the COMINT argument (second argument) is nil, set it to t.
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
@@ -1187,6 +1206,9 @@ point stored."
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr")
     "List of empty HTML tags.")
   )
+
+(use-package css-mode
+  :custom (css-indent-offset 2))
 
 (setq treesit-language-source-alist
       '((bash "https://github.com/tree-sitter/tree-sitter-bash")

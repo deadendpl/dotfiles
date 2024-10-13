@@ -7,8 +7,8 @@
   padding: 8px;
   margin: 8px;
   color: @foreground;
-  padding-bottom: 0;
-  margin-bottom: 0;
+  /* padding-bottom: 0; */
+  /* margin-bottom: 0; */
 }
 .widget-mpris-title {
   font-weight: bold;
@@ -20,6 +20,10 @@
   color: @foreground;
 }
 
+.widget-mpris .widget-mpris-player > box > button {
+  /* Change player control buttons */
+  border-radius: 5px;
+}
 
 /* Inhibitors widget */
 .widget-inhibitors {
