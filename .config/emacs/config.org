@@ -82,6 +82,7 @@
         - [[#impatient-mode][Impatient mode]]
         - [[#html][HTML]]
         - [[#css][CSS]]
+        - [[#js][JS]]
     - [[#tree-sitter][Tree-sitter]]
     - [[#templates][Templates]]
       - [[#startup-templates][Startup templates]]
@@ -264,7 +265,7 @@ Most of the stuff will get redirected here.")
 (advice-add 'find-file :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
-(add-hook 'before-save-hook #'whitespace-cleanup)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 ;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
 (add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
@@ -1573,26 +1574,24 @@ Here I add autocompletion when typing =>= in html modes.
   :bind (:map html-mode-map
               (">" . html-close-tag))
   :config
-  (defun html-close-tag ()
+  (defun html-close-tag (point)
     "Inserts >, closes tag, and moves to the inserted >.
-If called after character >, it just inserts another >.
-It doesn't close empty tags.
-Indenting functions are temporarily disabled, as they mess the
-point stored."
-    (interactive)
-    (if (= (char-before (point)) ?>)
-        (insert ?>)
-      (progn
-        (insert ">")
-        (let ((current-point (point))
-              (indent-line-function 'ignore)
-              (indent-region-function 'ignore)
-              (tag (save-excursion (backward-char)
-                                   (current-word))))
-          (unless (member tag html-empty-tag-list)
-            (sgml-close-tag))
-          (goto-char current-point)))
-      ))
+It doesn't close empty tags."
+    (interactive "d")
+    (insert ?>)
+    (let ((current-point (point))
+          ;; `sgml-close-tag' does some indenting
+          ;; so I disable indenting
+          (indent-line-function 'ignore)
+          (indent-region-function 'ignore)
+          (tag (save-excursion
+                 (search-backward "<")
+                 (forward-char)
+                 (current-word))))
+      (unless (member tag html-empty-tag-list)
+        (sgml-close-tag))
+      (goto-char current-point)))
+
   (defvar html-empty-tag-list
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr")
     "List of empty HTML tags.")
@@ -1602,6 +1601,11 @@ point stored."
 #+begin_src emacs-lisp
 (use-package css-mode
   :custom (css-indent-offset 2))
+#+end_src
+***** JS
+#+begin_src emacs-lisp
+(use-package js
+  :custom (js-indent-level 2))
 #+end_src
 *** Tree-sitter
 Emacs from version 29 supports tree-sitter.
