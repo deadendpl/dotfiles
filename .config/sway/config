@@ -222,6 +222,7 @@ mode "playerctl" {
     n exec playerctl next;mode "default"
     p exec playerctl previous;mode "default"
     t exec $scripts/playerctl-meta.sh;mode "default"
+    s exec $scripts/valent-share-url.sh;mode "default"
     Escape mode "default"
   }
 }
@@ -239,6 +240,7 @@ for_window {
   [title="KeePassXC - Browser Access Request"] floating enable
   [title="window-popup-frame"] floating enable
   [title="^Compress$|^Extract$" app_id="file-roller"] floating enable
+  [title="Share" app_id="valent"] floating enable
   [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
 }
 

@@ -666,9 +666,11 @@ Most of the stuff will get redirected here.")
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "swayimg")
-         '("\\.\\(pdf\\|epub\\)$" "zathura")
-         '("\\.\\(mkv\\|mp4\\)$" "mpv")))
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "xdg-open")
+         '("\\.\\(pdf\\|epub\\)$" "xdg-open")
+         '("\\.\\(mkv\\|mp4\\)$" "xdg-open")
+         ;; everything else
+         '("\\..*$" "xdg-open")))
   (dired-dwim-target t)
   )
 
@@ -828,7 +830,8 @@ Most of the stuff will get redirected here.")
 (use-package org
   :config
   (advice-add 'org-meta-return :around (lambda (orig-fun &rest args)
-                                         (if (or (org-at-item-checkbox-p) (org-entry-is-todo-p))
+                                         (if (or (org-at-item-checkbox-p)
+                                                 (ignore-errors (org-entry-is-todo-p)))
                                              (org-insert-todo-heading t)
                                            (apply orig-fun args))))
   )
@@ -881,7 +884,11 @@ Most of the stuff will get redirected here.")
     (save-some-buffers t #'org-agenda-file-p))
 
   ;; automatically save agenda files after some commands
-  (dolist (func '(org-agenda-todo org-agenda-schedule org-refile))
+  (dolist (func '(org-agenda-todo
+                  org-agenda-schedule
+                  org-refile
+                  org-agenda-do-date-later
+                  org-agenda-do-date-earlier))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
@@ -1459,5 +1466,23 @@ Also see `window-delete-popup-frame'." command)
   (use-package mb-search
     :init (require 'mb-search)
     :load-path "~/dev/emacs-mb-search/"
+    :config
+    (dolist (func '(mb-search-annotation
+                    mb-search-area
+                    mb-search-artist
+                    mb-search-cdstub
+                    mb-search-event
+                    mb-search-instrument
+                    mb-search-label
+                    mb-search-place
+                    mb-search-recording
+                    mb-search-release
+                    mb-search-release-group
+                    mb-search-series
+                    mb-search-tag
+                    mb-search-url
+                    mb-search-work))
+      (add-to-list 'vertico-multiform-commands
+       `(,func (vertico-sort-function . nil))))
     )
   )
