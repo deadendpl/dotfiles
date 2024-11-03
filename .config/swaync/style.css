@@ -42,7 +42,7 @@
   outline: none;
   margin: 0;
   padding: 10px;
-  font-family: "Ubuntu Nerd Font";
+  /* font-family: "Ubuntu Nerd Font"; */
 }
 
 .notification-row:focus,
@@ -55,14 +55,16 @@
   box-shadow: 3px 3px 0 0 @color6;
   border-radius: 8px 15px 15px 8px;
   background: alpha(@background, .8);
+  border: 1px solid @foreground;
 }
 
-.low {border: 1px solid @color3;}
-.normal {border: 1px solid @color13;} /* or color5 */
+/* .low {border: 1px solid @color3;} */
+/* .normal {border: 1px solid @color13;} /\* or color5 *\/ */
 .critical {
-  background: alpha(black, .89);
-  border: 1px solid white;
-  color: #eeeeee;
+  /* box-shadow: 3px 3px 0 0 red; */
+  /* background: alpha(black, .89); */
+  /* border: 1px solid white; */
+  /* color: #eeeeee; */
 }
 
 .notification-content {

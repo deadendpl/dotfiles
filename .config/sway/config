@@ -35,6 +35,7 @@ input * {
   tap                 enabled
   # middle_emulation enabled
 }
+
 input type:keyboard {
   xkb_layout          pl
   xkb_options         ctrl:nocaps

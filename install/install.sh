@@ -158,7 +158,7 @@ if pacman -Q wpgtk >> /dev/null; then
   echo "It seems pywal packages are installed."
 else
   echo "Installing pywal packages."
-  yay -S --noconfirm pywal-16-colors \
+  yay -S --noconfirm python-pywal16 \
                      python-inotify-simple \
                      python-psutil \
                      python-prctl \

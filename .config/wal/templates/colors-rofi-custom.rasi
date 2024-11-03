@@ -8,7 +8,6 @@
     prompt-font:                 "Ubuntu Nerd Font Bold 9";
     prompt-background:           {color1};
     prompt-foreground:           {background};
-    prompt-padding:              4px;
     alternate-normal-background: {color0};
     alternate-normal-foreground: {foreground};
     selected-normal-background:  {color3};
@@ -81,8 +80,8 @@
 
 #entry {{
     padding: 4px 4px;
-    expand: false;
-    width: 10em;
+    expand: true;
+    width: 100%;
 }}
 
 #prompt {{

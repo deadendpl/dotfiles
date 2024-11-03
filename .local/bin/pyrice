@@ -53,7 +53,7 @@ swaymsg "client.focused_inactive $background $background $foreground"
 swaymsg "client.unfocused $background $background $foreground"
 swaymsg "client.urgent $background $background $foreground"
 swaymsg "client.placeholder $background $background $foreground"
-swaymsg "output * bg $background solid_color"
+# swaymsg "output * bg $background solid_color"
 # fi
 
 if ! pgrep "waybar" > /dev/null; then

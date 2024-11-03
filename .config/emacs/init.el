@@ -399,7 +399,7 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings"))))))
-)
+  )
 
 (set-face-attribute 'default nil
                     :font "JetBrainsMono NFM"
@@ -1158,6 +1158,17 @@ required."
 
 (use-package bug-hunter)
 
+(with-eval-after-load 'elisp-mode
+  (defun elisp-version-update ()
+    "Update version line to today date."
+    (interactive)
+    (save-excursion
+      (goto-char (point-min))
+      (re-search-forward ";; Version: ")
+      (delete-region (point) (line-end-position))
+      (insert (format-time-string "%Y%m%d"))))
+  (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
+
 (use-package python
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
   )
@@ -1460,29 +1471,31 @@ Also see `window-delete-popup-frame'." command)
     :config
     (window-define-with-popup-frame mb-transient)
     (advice-add 'window-popup-mb-transient :after
-                (lambda () (modify-frame-parameters nil '((width . 54) (height . 27)))))
+                (lambda () (modify-frame-parameters nil `((width . 54) (height . ,(+ 27 vertico-count))))))
     )
 
   (use-package mb-search
     :init (require 'mb-search)
     :load-path "~/dev/emacs-mb-search/"
     :config
-    (dolist (func '(mb-search-annotation
-                    mb-search-area
-                    mb-search-artist
-                    mb-search-cdstub
-                    mb-search-event
-                    mb-search-instrument
-                    mb-search-label
-                    mb-search-place
-                    mb-search-recording
-                    mb-search-release
-                    mb-search-release-group
-                    mb-search-series
-                    mb-search-tag
-                    mb-search-url
-                    mb-search-work))
-      (add-to-list 'vertico-multiform-commands
-       `(,func (vertico-sort-function . nil))))
+    (with-eval-after-load 'vertico
+      (dolist (func '(mb-search-annotation
+                      mb-search-area
+                      mb-search-artist
+                      mb-search-cdstub
+                      mb-search-event
+                      mb-search-instrument
+                      mb-search-label
+                      mb-search-place
+                      mb-search-recording
+                      mb-search-release
+                      mb-search-release-group
+                      mb-search-series
+                      mb-search-tag
+                      mb-search-url
+                      mb-search-work))
+        (add-to-list 'vertico-multiform-commands
+                     `(,func (vertico-sort-function . nil))))
+      )
     )
   )
