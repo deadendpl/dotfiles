@@ -72,7 +72,7 @@
     "format": "{}",
     "rewrite": {
       "(.*) GNU Emacs (.*)": "$1 ",
-      "(.*) qutebrowser": "$1 ",
+      "(.*) (Brave|qutebrowser)": "$1 󰖟",
     },
   },
 

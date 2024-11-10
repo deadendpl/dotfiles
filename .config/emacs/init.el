@@ -130,14 +130,17 @@ Most of the stuff will get redirected here.")
 
 (blink-cursor-mode -1)
 
-(add-hook 'prog-mode-hook
-          (lambda () (keymap-local-set "RET" #'newline-and-indent)))
+(keymap-set prog-mode-map "RET" #'newline-and-indent)
 
-(defun execute-extended-command-other-window ()
-  "Open a new window, and execute `execute-extended-command'."
-  (interactive)
+(defun execute-extended-command-other-window (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new window."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
   (switch-to-buffer-other-window (current-buffer))
-  (call-interactively #'execute-extended-command))
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
 
 (keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
 

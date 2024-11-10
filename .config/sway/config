@@ -214,6 +214,7 @@ mode "resize" {
     Escape mode "default"
     w exec $scripts/hypr/waybar-start.sh;mode "default"
     e exec $scripts/emacs.sh;mode "default"
+    r floating toggle;floating toggle
   }
 }
 
@@ -259,4 +260,4 @@ client.urgent           $background $background $foreground
 client.placeholder      $background $background $foreground
 
 # setting background color in case wallpaper wouldn't cover whole screen
-output * bg $background solid_color
+# output * bg $background solid_color
