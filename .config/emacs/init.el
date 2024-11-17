@@ -1167,7 +1167,7 @@ required."
     (interactive)
     (save-excursion
       (goto-char (point-min))
-      (re-search-forward ";; Version: ")
+      (search-forward ";; Version: ")
       (delete-region (point) (line-end-position))
       (insert (format-time-string "%Y%m%d"))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
