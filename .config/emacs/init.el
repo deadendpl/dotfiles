@@ -142,7 +142,18 @@ Most of the stuff will get redirected here.")
   (with-suppressed-warnings ((interactive-only execute-extended-command))
     (execute-extended-command prefixarg command-name typed)))
 
+(defun execute-extended-command-other-tab (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new window."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
+  (display-buffer-in-new-tab (current-buffer) nil)
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
+
 (keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
+(keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
 (use-package use-package
   :init (setq use-package-enable-imenu-support t)
