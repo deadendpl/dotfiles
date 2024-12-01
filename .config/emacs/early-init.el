@@ -2,6 +2,7 @@
       auto-mode-case-fold nil
       package-native-compile t
       default-directory "~/"
+      use-package-enable-imenu-support t
       )
 
 ;; improving startup with setting garbage collection

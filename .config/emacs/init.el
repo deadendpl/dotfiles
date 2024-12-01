@@ -156,7 +156,7 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
 (use-package use-package
-  :init (setq use-package-enable-imenu-support t)
+  ;; :init (setq use-package-enable-imenu-support t)
   :custom
   (use-package-verbose t)
   (use-package-always-ensure t)
@@ -703,9 +703,21 @@ Most of the stuff will get redirected here.")
   ([remap describe-symbol] . helpful-symbol)
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key) ; it doesn't work with meow
-  ("C-h C-." . helpful-at-point)
+  ("C-h C-." . helpful-at-point-better)
   ("C-h '" . describe-face)
   :custom (helpful-max-buffers nil)
+  :config
+  (defun helpful-at-point-better ()
+    "Fixed version of `helpful-symnol'.
+When using `helpful-symbol' on string like \"'foo\", it gives
+documentation of symbol before it.
+The issue is with ' character.
+This function handles symbols that start with '."
+    (interactive)
+    (let ((sym (thing-at-point 'symbol t)))
+      (if (char-equal ?' (aref sym 0))
+          (helpful-symbol (intern (substring sym 1 nil)))
+        (helpful-symbol (intern sym)))))
   )
 
 (use-package which-key
@@ -1469,11 +1481,10 @@ Also see `window-delete-popup-frame'." command)
          ((quit error user-error)
           (delete-frame frame))))))
 
-(define-generic-mode
-    'm3u-mode                      ;; name of the mode to create
+(define-generic-mode m3u-mode    ;; name of the mode to create
   '("#")                         ;; comments start with '#'
   nil                            ;; keywords (none in this case)
-  '(("^#EXTINF" . 'font-lock-keyword-face) ;; highlight #EXTINF as keyword
+  '(("^#EXTINF" . 'font-lock-keyword-face) ;; highlight #EXTINF as keyword, it doesn't work
     ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face)) ;; highlight file extensions as strings
   '("\\.m3u\\'")                 ;; files for which to activate this mode
   nil                            ;; other functions to call
@@ -1481,18 +1492,32 @@ Also see `window-delete-popup-frame'." command)
 
 (unless (custom/termux-p)
   (use-package mb-transient
-    :init (require 'mb-transient)
-    :load-path "~/dev/emacs-mb-transient/"
-    :hook (mb-transient-exit . window-delete-popup-frame)
-    :config
+    :init
     (window-define-with-popup-frame mb-transient)
     (advice-add 'window-popup-mb-transient :after
                 (lambda () (modify-frame-parameters nil `((width . 54) (height . ,(+ 27 vertico-count))))))
+    :load-path "~/dev/emacs-mb-transient/"
+    :hook (mb-transient-exit . window-delete-popup-frame)
+    :commands (mb-transient)
     )
 
   (use-package mb-search
-    :init (require 'mb-search)
     :load-path "~/dev/emacs-mb-search/"
+    :commands (mb-search-annotation
+               mb-search-area
+               mb-search-artist
+               mb-search-cdstub
+               mb-search-event
+               mb-search-instrument
+               mb-search-label
+               mb-search-place
+               mb-search-recording
+               mb-search-release
+               mb-search-release-group
+               mb-search-series
+               mb-search-tag
+               mb-search-url
+               mb-search-work)
     :config
     (with-eval-after-load 'vertico
       (dolist (func '(mb-search-annotation
