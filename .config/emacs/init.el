@@ -644,6 +644,7 @@ Most of the stuff will get redirected here.")
   ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
   ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
   ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
+  ("M-P" . consult-history)
   :custom
   (consult-async-min-input 0)
   :config
@@ -1079,6 +1080,11 @@ required."
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
          ("C-c n T"   . org-roam-tag-remove))
+  :preface
+  (defun custom/org-roam-notes-dired ()
+    "Opens org-roam-directory in `dired'."
+    (interactive)
+    (dired org-roam-directory))
   :config
   (org-roam-setup)
   (require 'org-roam-export)
@@ -1086,10 +1092,6 @@ required."
   ;; (require 'org-roam-dailies)
   ;; (add-hook 'org-roam-dailies-find-file-hook (lambda () (text-scale-set 3)))
   ;; (add-hook 'find-file-hook (lambda () (if (org-roam-dailies--daily-note-p) (text-scale-set 3))))
-  (defun custom/org-roam-notes-dired ()
-    "Opens org-roam-directory in `dired'."
-    (interactive)
-    (dired org-roam-directory))
   (defun custom/org-add-ids-to-headlines-in-file ()
     "Add ID properties to all headlines in the current file."
     (interactive)

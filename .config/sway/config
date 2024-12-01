@@ -1,4 +1,4 @@
-### Variables  -*- compile-command: "sway -C"; -*-
+### Variables  -*- compile-command: "swaymsg reload"; -*-
 #
 # Logo key. Use Mod1 for Alt.
 set {
@@ -92,6 +92,7 @@ bindsym {
   --locked            XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
   --locked            XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
   --locked            XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+  --locked            XF86AudioPlay exec playerctl play-pause
 
   $mod+XF86MonBrightnessUp   exec $scripts/hypr/gammastep.sh
   $mod+XF86MonBrightnessDown exec $scripts/hypr/gammastep.sh
@@ -225,6 +226,9 @@ mode "playerctl" {
     p exec playerctl previous;mode "default"
     t exec $scripts/playerctl-meta.sh;mode "default"
     s exec $scripts/valent-share-url.sh;mode "default"
+    plus exec playerctl volume 0.1+
+    equal exec playerctl volume 0.1+
+    minus exec playerctl volume 0.1-
     Escape mode "default"
   }
 }
