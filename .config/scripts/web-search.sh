@@ -10,7 +10,7 @@ declare -a search_engines=(
   "Discogs"
   "Ecosia"
   "GameFAQs"
-  "Github"
+  "GitHub"
   "MusicBrainz (MB)"
   "Nix Packages"
   "NixOS Wiki"
@@ -44,7 +44,7 @@ case $selected_engine in
   "Arch Packages")
     URL="https://archlinux.org/packages/?q="
     ;;
-  "Github")
+  "GitHub")
     URL="https://github.com/search?q="
     ;;
   "YouTube (Invidious)")

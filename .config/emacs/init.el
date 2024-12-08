@@ -143,7 +143,7 @@ Most of the stuff will get redirected here.")
     (execute-extended-command prefixarg command-name typed)))
 
 (defun execute-extended-command-other-tab (prefixarg &optional command-name typed)
-  "Execute `execute-extended-command' in a new window."
+  "Execute `execute-extended-command' in a new tab."
   (interactive
    (let ((execute-extended-command--last-typed nil))
      (list current-prefix-arg
@@ -289,6 +289,19 @@ Most of the stuff will get redirected here.")
   (meow-global-mode 1)
   )
 
+(use-package meow
+  :bind (("C-x 4 k" . meow-keypad-other-window)
+         ("C-x t k" . meow-keypad-other-tab))
+  :config
+  (defun meow-keypad-other-window ()
+    (interactive)
+    (switch-to-buffer-other-window (current-buffer))
+    (meow-keypad))
+  (defun meow-keypad-other-tab ()
+    (interactive)
+    (tab-new)
+    (meow-keypad)))
+
 (use-package pulse
   :config
   (defun custom/pulse-line (&rest _)
@@ -424,9 +437,7 @@ Most of the stuff will get redirected here.")
                     :height 100
                     :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-                    :family "JetBrainsMono NFM Mono"
-                    :height 80
-                    :weight 'medium)
+                    :family "JetBrainsMono NFM Mono")
 (set-face-attribute 'fixed-pitch-serif nil
                     :inherit 'fixed-pitch
                     :slant 'italic)
@@ -476,18 +487,13 @@ Most of the stuff will get redirected here.")
               (lambda ()
                 (if nerd-icons-dired-mode
                     (nerd-icons-dired-mode -1))))
-  (advice-add #'wdired-finish-edit :after
-              (lambda ()
-                (unless nerd-icons-dired-mode
-                  (nerd-icons-dired-mode 1))))
-  (advice-add #'wdired-exit :after
-              (lambda ()
-                (unless nerd-icons-dired-mode
-                  (nerd-icons-dired-mode 1))))
-  (advice-add #'wdired-abort-changes :after
-              (lambda ()
-                (unless nerd-icons-dired-mode
-                  (nerd-icons-dired-mode 1))))
+  (dolist (func '(wdired-finish-edit
+                  wdired-exit
+                  wdired-abort-changes))
+    (advice-add func :after
+                (lambda ()
+                  (unless nerd-icons-dired-mode
+                    (nerd-icons-dired-mode 1)))))
   )
 
 (use-package nerd-icons-ibuffer
@@ -498,7 +504,10 @@ Most of the stuff will get redirected here.")
 
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
-  :custom (doom-modeline-battery t))
+  :custom
+  (doom-modeline-battery t)
+  (doom-modeline-buffer-encoding 'nondefault)
+  )
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
@@ -638,13 +647,16 @@ Most of the stuff will get redirected here.")
                          args)))
   :bind
   ;; ([remap project-find-file] . consult-project-buffer)
-  ([remap goto-line] . consult-goto-line)
-  ([remap imenu] . consult-imenu)
-  ([remap switch-to-buffer] . consult-buffer)
-  ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-  ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
-  ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
-  ("M-P" . consult-history)
+  (([remap goto-line] . consult-goto-line)
+   ([remap imenu] . consult-imenu)
+   ([remap switch-to-buffer] . consult-buffer)
+   ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+   ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+   ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
+   ("M-P" . consult-history)
+   ([remap comint-history-isearch-backward-regexp] . consult-history)
+   ([remap previous-matching-history-element] . consult-history)
+   )
   :custom
   (consult-async-min-input 0)
   :config
@@ -656,6 +668,7 @@ Most of the stuff will get redirected here.")
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
+  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
   )
 
 (use-package marginalia

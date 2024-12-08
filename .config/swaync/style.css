@@ -1,4 +1,4 @@
-@import url("/home/oliwier/.cache/wal/gtk-colors.css");
+@import url("../../.cache/wal/gtk-colors.css");
 @import url("./styles/widgets.css");
 
 .control-center {
@@ -60,12 +60,12 @@
 
 /* .low {border: 1px solid @color3;} */
 /* .normal {border: 1px solid @color13;} /\* or color5 *\/ */
-.critical {
-  /* box-shadow: 3px 3px 0 0 red; */
-  /* background: alpha(black, .89); */
-  /* border: 1px solid white; */
-  /* color: #eeeeee; */
-}
+/* .critical { */
+/*   box-shadow: 3px 3px 0 0 red; */
+/*   background: alpha(black, .89); */
+/*   border: 1px solid white; */
+/*   color: #eeeeee; */
+/* } */
 
 .notification-content {
   padding: 5px 0;

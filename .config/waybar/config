@@ -3,7 +3,7 @@
   "layer": "top",
   "position": "top",
   "height": 24,
-  "spacing": 7,
+  "spacing": 5,
   "reload_style_on_change": true,
 
   "modules-left": [
@@ -105,7 +105,9 @@
 
   "backlight": {
     // "device": "acpi_video1",
-    "format": " {percent}% {icon} ",
+    "tooltip-format": "Turn on/off eye protection on click!",
+    "on-click": "~/.config/scripts/hypr/gammastep.sh",
+    "format": "{percent}% {icon}",
     "format-icons": ["", "", "", "", "", "", "", "", ""]
   },
 
@@ -123,50 +125,50 @@
       "warning": 30,
       "critical": 15
     },
-    "format": " {capacity}% {icon} ",
-    "format-charging": " {capacity}% 󰂄 ",
-    "format-plugged": " {capacity}%  ",
-    "format-alt": " {time} {icon} ",
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% 󰂄",
+    "format-plugged": "{capacity}% ",
+    "format-alt": "{time} {icon}",
     // "format-good": "", // An empty format will hide the module
-    "format-full": " {capacity}% 󱈑 ",
-    // "format-icons": [" ", " ", " ", " ", " "]
+    "format-full": "{capacity}% 󱈑",
     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂"]
   },
 
   "network": {
     // "interface": "wlp2*", // (Optional) To force the use of this interface
-    "format-wifi": " {essid} ({signalStrength}%) 󰖩 ",
-    "format-ethernet": " {ipaddr}/{cidr} 󰈀 ",
+    "format-wifi": "{essid} ({signalStrength}%) 󰖩",
+    "format-ethernet": "{ipaddr}/{cidr} 󰈀",
     "tooltip-format": "{ifname} via {gwaddr} 󰛳",
-    "format-linked": " {ifname} (No IP) 󱚵 ",
-    "format-disconnected": " Disconnected  ",
-    "format-disabled": " 󰖪 ",
-    "format-alt": " {ifname}: {ipaddr}/{cidr} ",
+    "format-linked": "{ifname} (No IP) 󱚵",
+    "format-disconnected": "Disconnected ",
+    "format-disabled": "󰖪",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
     "on-click-right": "networkmanager_dmenu"
   },
 
   "bluetooth": {
-    "format-on": "  ",
-    "format-disabled": " 󰂲 ",
-    "format-off": " 󰂲 ",
-    "format-connected": "  {num_connections} ",
-    // "format-connected-battery": "  {device_alias} 󰥉{device_battery_percentage}%",
+    "format-on": "",
+    "format-disabled": "󰂲",
+    "format-off": "󰂲",
+    "format-connected": " {num_connections}",
+    // "format-connected-battery": " {device_alias} 󰥉{device_battery_percentage}%",
     // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
     "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
-    "on-click": "blueberry"
+    "on-click": "blueberry",
+    "on-click-right": "rofi-bluetooth"
   },
 
   "pulseaudio": {
     // "scroll-step": 1, // %, can be a float
-    "format": " {volume}% {icon} {format_source} ",
-    "format-bluetooth": " {volume}% {icon} {format_source} ",
-    "format-bluetooth-muted": " 󰝟 {icon} {format_source} ",
-    "format-muted": " 󰝟 {format_source} ",
-    "format-source": " {volume}%  ",
-    "format-source-muted": "  ",
+    "format": "{volume}% {icon} {format_source}",
+    "format-bluetooth": "{volume}% {icon} {format_source}",
+    "format-bluetooth-muted": "󰝟 {icon} {format_source}",
+    "format-muted": "󰝟 {format_source}",
+    "format-source": "{volume}% ",
+    "format-source-muted": "",
     "format-icons": {
       "headphone": "",
       "hands-free": "󰋋",
@@ -180,10 +182,10 @@
     "on-click-right": "pavucontrol"
   },
 
-  "custom/gammastep": {
-    "format": " 󰛐 ",
-    "tooltip": true,
-    "tooltip-format": "Turn on/off eye protection!",
-    "on-click": "~/.config/scripts/hypr/gammastep.sh",
-  },
+  // "custom/gammastep": {
+  //   "format": "󰛐",
+  //   "tooltip": true,
+  //   "tooltip-format": "Turn on/off eye protection!",
+  //   "on-click": "~/.config/scripts/hypr/gammastep.sh",
+  // },
 }

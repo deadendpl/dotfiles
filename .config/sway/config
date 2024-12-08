@@ -78,8 +78,7 @@ bindsym {
   $mod+Shift+F7       exec rofi-bluetooth
   $mod+F10            exec wdisplays
   $mod+F9             exec $script/udiskie-unmount.sh
-  # I need to find an alternative
-  # $mod+Delete         exec hyprctl kill
+  $mod+Delete         exec $scripts/rofi-kill.sh
 
   # Reload the configuration file
   $mod+Shift+c        reload
@@ -245,7 +244,7 @@ for_window {
   [title="Unlock Database - KeePassXC"] floating enable
   [title="KeePassXC - Browser Access Request"] floating enable
   [title="window-popup-frame"] floating enable
-  [title="^Compress$|^Extract$" app_id="file-roller"] floating enable
+  [title="^Compress$|^Extract$" app_id="org.gnome.FileRoller"] floating enable
   [title="Share" app_id="valent"] floating enable
   [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
 }

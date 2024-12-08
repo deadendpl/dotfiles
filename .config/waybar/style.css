@@ -1,36 +1,32 @@
-@import url('/home/oliwier/.cache/wal/colors-waybar.css');
+@import url("../../.cache/wal/colors-waybar.css");
 * {
-  border: none;
-  /* border-radius: 8px; */
   /* with font-family set, japanese characters don't display */
   /* font-family: Ubuntu Nerd Font; */
   font-size: 11pt;
-  min-height: 0;
+}
+
+label.module {
+  padding: 0 3px;
+  border-radius: 8px;
+  color: @background;
 }
 
 window#waybar {
   background: @background;
   opacity: 0.8;
-/*  background: transparent; */
   color: @foreground;
   border-bottom: 2px solid @background;
 }
 
 #workspaces button {
   border-radius: 8px;
-  padding: 0 3px;
   background-color: @background;
   color: @foreground;
-  /* border: 2px solid #3a3b3c; */
-  margin-right: 2px;
+  /* margin-right: 2px; */
+  padding: 0 3px;
 }
 
-#workspaces button.active {
-  background-color: @foreground;
-  color: @background;
-}
-
-#workspaces button.focused {
+#workspaces button.active, #workspaces button.focused {
   background-color: @foreground;
   color: @background;
 }
@@ -41,69 +37,50 @@ window#waybar {
 }
 
 #taskbar button {
-  background-image: linear-gradient(0deg, @background, @background);
+  border-radius: 100px;
+  background-color: @background;
+  padding: 0 5px;
 }
 
 #taskbar button.active {
-  border-radius: 15px;
-  background-image: linear-gradient(0deg, @selection, @background-darker);
+  background-color: @color1;
 }
 
 #clock {
-  padding: 0 4px;
   background: @background;
+  color: @foreground;
 }
 
 #battery {
   background-color: @color1;
-  color: @background;
-  border-radius: 8px;
 }
 
 #pulseaudio {
   background-color: @color2;
-  color: @background;
-  border-radius: 8px;
 }
 
 #pulseaudio.muted {
   background-color: @background;
   color: @color2;
-  border-radius: 8px;
 }
 
 #backlight {
   background-color: @color3;
-  color: @background;
-  border-radius: 8px;
 }
 
 #bluetooth {
   background-color: @color4;
-  color: @background;
-  border-radius: 8px;
 }
 
-#bluetooth.disabled {
+#bluetooth.disabled, #bluetooth.off {
   background-color: @background;
   color: @color4;
-  border-radius: 8px;
-}
-
-#bluetooth.off {
-  background-color: @background;
-  color: @color4;
-  border-radius: 8px;
 }
 
 #network {
   background-color: @color5;
-  color: @background;
-  border-radius: 8px;
 }
 
 #custom-gammastep {
   background-color: @color6;
-  color: @background;
-  border-radius: 8px;
 }
