@@ -2,4 +2,5 @@
 ;;; For more information see (info "(emacs) Directory Variables")
 
 ((css-mode . ((compile-command . "swaync-client -R -rs")))
- (css-ts-mode . ((compile-command . "swaync-client -R -rs"))))
+ (css-ts-mode . ((compile-command . "swaync-client -R -rs")))
+ (json-ts-mode . ((compile-command . "swaync-client -R -rs"))))

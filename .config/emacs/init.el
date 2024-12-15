@@ -76,7 +76,8 @@ Most of the stuff will get redirected here.")
               kill-do-not-save-duplicates nil
               comment-empty-lines t
               url-privacy-level 'paranoid
-              electric-pair-skip-self nil)
+              electric-pair-skip-self nil
+              history-length t)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -112,6 +113,7 @@ Most of the stuff will get redirected here.")
       (unless (file-exists-p dir)
         (make-directory dir t)))))
 (advice-add 'find-file :before #'make-directory-maybe)
+(advice-add 'find-file-other-window :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -289,19 +291,6 @@ Most of the stuff will get redirected here.")
   (meow-global-mode 1)
   )
 
-(use-package meow
-  :bind (("C-x 4 k" . meow-keypad-other-window)
-         ("C-x t k" . meow-keypad-other-tab))
-  :config
-  (defun meow-keypad-other-window ()
-    (interactive)
-    (switch-to-buffer-other-window (current-buffer))
-    (meow-keypad))
-  (defun meow-keypad-other-tab ()
-    (interactive)
-    (tab-new)
-    (meow-keypad)))
-
 (use-package pulse
   :config
   (defun custom/pulse-line (&rest _)
@@ -347,6 +336,7 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-=" 'text-scale-increase)
 (keymap-global-set "C-+" 'text-scale-increase)
 (keymap-global-set "C--" 'text-scale-decrease)
+(keymap-global-set "C-x 4 k" 'other-window-prefix)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
@@ -392,6 +382,7 @@ Most of the stuff will get redirected here.")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
   (tab-bar-tab ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
+  :bind ("C-x t k" . other-tab-prefix)
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
@@ -590,7 +581,6 @@ Most of the stuff will get redirected here.")
 
 (use-package vertico
   :hook (after-init . vertico-mode)
-  ;; :defer 1
   :bind (:map vertico-map
               ("C-j" . vertico-next)
               ("C-k" . vertico-previous)
@@ -656,6 +646,7 @@ Most of the stuff will get redirected here.")
    ("M-P" . consult-history)
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
+   ([remap eshell-previous-matching-input] . consult-history)
    )
   :custom
   (consult-async-min-input 0)
@@ -721,16 +712,19 @@ Most of the stuff will get redirected here.")
   :custom (helpful-max-buffers nil)
   :config
   (defun helpful-at-point-better ()
-    "Fixed version of `helpful-symnol'.
-When using `helpful-symbol' on string like \"'foo\", it gives
-documentation of symbol before it.
-The issue is with ' character.
-This function handles symbols that start with '."
+    "Improved version of `helpful-at-point'.
+Handles symbols that start or end with a single quote (') correctly."
     (interactive)
     (let ((sym (thing-at-point 'symbol t)))
-      (if (char-equal ?' (aref sym 0))
-          (helpful-symbol (intern (substring sym 1 nil)))
-        (helpful-symbol (intern sym)))))
+      (if sym
+          (let ((sym (cond
+                      ((char-equal ?' (aref sym 0)) ; Starts with '
+                       (substring sym 1)) ; Remove leading '
+                      ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
+                       (substring sym 0 -1)) ; Remove trailing '
+                      (t sym)))) ; No changes needed
+            (helpful-symbol (intern sym)))
+        (message "No symbol found at point!"))))
   )
 
 (use-package which-key
@@ -864,16 +858,16 @@ This function handles symbols that start with '."
     (interactive)
     (if (and (org-at-table-p) (org-in-regexp org-link-any-re 1))
         (org-open-at-point)
-      (org-return))
-    ))
+      (org-return))))
 
 (use-package org
   :config
-  (advice-add 'org-meta-return :around (lambda (orig-fun &rest args)
-                                         (if (or (org-at-item-checkbox-p)
-                                                 (ignore-errors (org-entry-is-todo-p)))
-                                             (org-insert-todo-heading t)
-                                           (apply orig-fun args))))
+  (advice-add 'org-meta-return
+              :around (lambda (orig-fun &rest args)
+                        (if (or (org-at-item-checkbox-p)
+                                (ignore-errors (org-entry-is-todo-p)))
+                            (org-insert-todo-heading t)
+                          (apply orig-fun args))))
   )
 
 (use-package org
@@ -916,7 +910,6 @@ This function handles symbols that start with '."
   )
 
 (use-package org
-  :hook (org-archive . org-agenda-save-buffers) ; archiving
   :config
   (defun org-agenda-save-buffers ()
     "Saves opened agenda files."
@@ -928,7 +921,8 @@ This function handles symbols that start with '."
                   org-agenda-schedule
                   org-refile
                   org-agenda-do-date-later
-                  org-agenda-do-date-earlier))
+                  org-agenda-do-date-earlier
+                  org-archive-subtree))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
@@ -1203,11 +1197,15 @@ required."
   (defun elisp-version-update ()
     "Update version line to today date."
     (interactive)
-    (save-excursion
-      (goto-char (point-min))
-      (search-forward ";; Version: ")
-      (delete-region (point) (line-end-position))
-      (insert (format-time-string "%Y%m%d"))))
+    (let ((date (format-time-string "%Y%m%d")))
+      (save-excursion
+        (goto-char (point-min))
+        (search-forward ";; Version: ")
+        (delete-region (point) (line-end-position))
+        (insert date)
+        (re-search-forward "^(def\\(var\\|const\\).*[0-9]")
+        (delete-backward-char (length (thing-at-point 'symbol t)))
+        (insert date))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 
 (use-package python
