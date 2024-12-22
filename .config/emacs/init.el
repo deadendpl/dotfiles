@@ -715,16 +715,15 @@ Most of the stuff will get redirected here.")
     "Improved version of `helpful-at-point'.
 Handles symbols that start or end with a single quote (') correctly."
     (interactive)
-    (let ((sym (thing-at-point 'symbol t)))
-      (if sym
-          (let ((sym (cond
-                      ((char-equal ?' (aref sym 0)) ; Starts with '
-                       (substring sym 1)) ; Remove leading '
-                      ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
-                       (substring sym 0 -1)) ; Remove trailing '
-                      (t sym)))) ; No changes needed
-            (helpful-symbol (intern sym)))
-        (message "No symbol found at point!"))))
+    (if-let ((sym (thing-at-point 'symbol t)))
+        (let ((sym (cond
+                    ((char-equal ?' (aref sym 0)) ; Starts with '
+                     (substring sym 1)) ; Remove leading '
+                    ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
+                     (substring sym 0 -1)) ; Remove trailing '
+                    (t sym)))) ; No changes needed
+          (helpful-symbol (intern sym)))
+      (message "No symbol found at point!")))
   )
 
 (use-package which-key
@@ -1210,6 +1209,7 @@ required."
 
 (use-package python
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
+  :custom (python-indent-offset 2)
   )
 
 (use-package impatient-mode
