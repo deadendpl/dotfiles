@@ -1,7 +1,7 @@
 # emacs keybindings
 fish_default_key_bindings
 
-fenv source "$HOME"/.profile
+fenv source "$HOME/.profile"
 
 # set SHELLS_CONFIG_DIR "$XDG_CONFIG_HOME/shells"
 

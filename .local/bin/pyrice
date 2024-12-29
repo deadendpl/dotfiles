@@ -1,81 +1,148 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
 
-wpg-tile() {
-  local wallpaper_path="$1"
+import subprocess
+import argparse
+import random
+import os
+from pathlib import Path
+import psutil
+import shutil
+import time
 
-  # If no wallpaper path is provided, choose a random one
-  if [ -z "$wallpaper_path" ]; then
-    local walls_dir="${HOME}/Pictures/bg"
-    wallpaper_path="$(find "$walls_dir" -type f | shuf -n 1)"
-  fi
+# Set up the argument parser
+parser = argparse.ArgumentParser(
+  prog = "pyrice",
+  description = "Wrapper of pywal and wpgtk"
+)
 
-  wallpaper_path=$(realpath "$wallpaper_path")
+parser.add_argument(
+  "--backend",
+  nargs = "?",
+  default = "haishoku",
+  help = "Backend to use (default: haishoku)"
+)
 
-  wpg \
-    --noreload \
-    --backend haishoku \
-    -ns "$wallpaper_path"
-  wal \
-    --cols16 \
-    --backend haishoku \
-    -b "#000000" \
-    -nei "$wallpaper_path"
-}
+parser.add_argument(
+  "-t",
+  "--time",
+  action = "store_false",
+  help = "Disable time based theme checking"
+)
 
-gradience-wrap () {
-  if [ ! -d "${XDG_CONFIG_HOME}/presets/user" ]; then
-    mkdir -p "${XDG_CONFIG_HOME}/presets/user"
-  fi
-  cp -f "${XDG_CACHE_HOME}/wal/pywal.json" "${XDG_CONFIG_HOME}/presets/user/pywal.json"
-  # gradience-cli monet -n pywal -p "$wallpaper_path" --theme dark
-  gradience-cli apply -n pywal --gtk gtk4
-}
+parser.add_argument(
+  "-l",
+  "--light",
+  action = "store_true",
+  help = "Use light theme"
+)
 
-# Use the wpg-tile function with the provided or default wallpaper file path
-wpg-tile "$1"
+parser.add_argument(
+  "wallpaper_path",
+  nargs = "?",
+  help = "Path to the wallpaper image"
+)
 
+parser.add_argument(
+  "--old",
+  action = "store_true",
+  help = "Use the current/old wallpaper"
+)
 
-gradience-wrap &
+args = parser.parse_args()
 
-# reloading bunch of stuff
-if pgrep "swaybg" > /dev/null; then
-  killall swaybg
-fi
-swaybg -m fit -i "$(< "${XDG_CACHE_HOME}/wal/wal")" &
+if args.time:
+  current_hour = time.localtime()[3]
 
-# reloading sway colors
-# if [ $(pgrep "sway$" | xargs ps -o etimes=) -gt 60 ]; then
-  # source ~/.cache/wal/colors-sway-quick
-. ~/.cache/wal/colors.sh
+  if current_hour >= 8 and current_hour < 16:
+    args.light = True
 
-swaymsg "client.focused $background $color11 $foreground"
-swaymsg "client.focused_inactive $background $background $foreground"
-swaymsg "client.unfocused $background $background $foreground"
-swaymsg "client.urgent $background $background $foreground"
-swaymsg "client.placeholder $background $background $foreground"
-# swaymsg "output * bg $background solid_color"
-# fi
+def get_recursive_files(directory):
+  "Returns a list of all files names from a directory recursively."
+  files = []
+  for root, dirs, filenames in os.walk(directory):
+    for filename in filenames:
+      files.append(os.path.join(root, filename))
+  return files
 
-if ! pgrep "waybar" > /dev/null; then
-  waybar &
-fi
+def wallpaper_path_get(path = args.wallpaper_path):
+  if Path(str(path)).is_dir() is True:
+    return random.choice(get_recursive_files(path))
+  elif path is not None:
+    return os.path.realpath(path)
+  else:
+    return random.choice(get_recursive_files(os.environ["HOME"] + "/Pictures/bg"))
 
-# reloading waybar css
-# touch isn't enough for waybar to reload css, so
-# I add new line to the css file and delete it
-sed -i "1i\\\\" "${XDG_CONFIG_HOME}/waybar/style.css"
-sed -i 1d "${XDG_CONFIG_HOME}/waybar/style.css"
+if args.old:
+  path = open(os.environ["HOME"] + "/.cache/wal/wal").read()
+else:
+  path = wallpaper_path_get()
 
-swaync-client -rs &
-# swaync-client -R &
-emacsclient -e "(load-theme 'ewal-doom-one t)" &
+def pywal_run():
+  wpg_args = ["wpg", "--noreload", "--backend", args.backend, "-ns", path]
+  wal_args = ["wal", "--cols16", "--backend", args.backend, "-nei", path]
+  if args.light:
+    wpg_args += ["-L"]
+    wal_args += ["-l"]
+    subprocess.Popen(["gsettings", "set", "org.gnome.desktop.interface", "icon-theme",
+                      "Papirus-Light"])
+    subprocess.Popen(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
+                      "prefer-light"])
+  else:
+    wal_args += ["-b", "#000000"]
+    subprocess.Popen(["gsettings", "set", "org.gnome.desktop.interface", "icon-theme",
+                      "Papirus-Dark"])
+    subprocess.Popen(["gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
+                      "prefer-dark"])
+  subprocess.run(wpg_args)
+  subprocess.run(wal_args)
 
-if pgrep "qutebrowser" > /dev/null; then
-  qutebrowser :config-source &
-fi
+def gradience_wrap():
+  path_exists = os.path.exists(os.environ["XDG_CONFIG_HOME"] + "/presets/user")
+  if path_exists == False:
+    os.mkdir(os.environ["XDG_CONFIG_HOME"] + "/presets/user")
+  shutil.copyfile(os.environ["XDG_CACHE_HOME"] + "/wal/pywal.json",
+                  os.environ["XDG_CONFIG_HOME"] + "/presets/user/pywal.json")
+  subprocess.Popen(["gradience-cli", "apply", "-n", "pywal", "--gtk", "gtk4"])
 
-if pgrep "firefox" > /dev/null; then
-  pywalfox update &
-fi
+def afterwards():
+  # swaybg setup and waybar
+  waybarp = False
+  emacsp = False
+  for proc in psutil.process_iter(attrs=["pid", "name"]):
+    if proc.info["name"] == "swaybg":
+      pid = proc.info["pid"]
+      psutil.Process(pid).terminate()  # Terminate the process
+    elif proc.info["name"] == "waybar":
+      waybarp = True
+    elif proc.info["name"] == "emacs":
+      emacsp = True
+  subprocess.Popen(["swaybg", "-m", "fit", "-i", path]) # Popen is async
 
-notify-send "New rice applied"
+  if waybarp == False:
+    subprocess.Popen(["waybar"])
+
+  # reloading waybar css
+  # touch isn't enough for waybar to reload css, so
+  # I add new line to the css file and delete it
+  waybar_file = os.environ["XDG_CONFIG_HOME"] + "/waybar/style.css"
+  subprocess.run(["sed", "-i", "1i\\\\", waybar_file])
+  subprocess.run(["sed", "-i", "1d", waybar_file])
+
+  # swaync
+  subprocess.Popen(["swaync-client", "-rs"])
+
+  # emacs
+  if emacsp == True:
+    if args.light == True:
+      subprocess.Popen(["emacsclient", "-e",
+                        "(setq ewal-doom-one-brighter-comments t)"])
+    else:
+      subprocess.Popen(["emacsclient", "-e",
+                        "(setq ewal-doom-one-brighter-comments nil)"])
+    subprocess.Popen(["emacsclient", "-e", "(load-theme 'ewal-doom-one t)"])
+
+  subprocess.Popen(["notify-send", "New rice applied"])
+  gradience_wrap()
+
+pywal_run()
+afterwards()

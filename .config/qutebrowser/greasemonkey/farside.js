@@ -189,7 +189,8 @@ switch (true) {
     // invidious
     'inv,https://farside.link/invidious',
     // piped
-    'pip,https://farside.link/piped'];
+    // 'pip,https://farside.link/piped'
+  ];
   break;
 };
 

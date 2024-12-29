@@ -18,8 +18,8 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
 | Window Manager            | [[https://github.com/swaywm/sway/][sway]]              |
 
-At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. Go there and edit =walls_dir= variable to your own wallpapers directory.
-After that you can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
+At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. It will use a image file as a argument, or a directory and choose random file from there.
+You can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
 
 Software riced with pywal [11/11]:
 - [X] foot

@@ -10,14 +10,10 @@ declare -a scripts=(
   "Changing root shell"
   "NVIM config as root"
   "(sway) Toggle warm colors"
-  # "(sway) Screen orientation"
   "(sway) New wallpaper"
-  # "(sway) Notification center"
-  "(sway) Waybar re/start"
   "Bookmarks"
   "Books"
   "Power menu"
-  "Sxhkd help"
   "Touchpad on Xorg"
   "Web search"
   "Emacs server re/start"
@@ -39,9 +35,6 @@ case $choice in
   "(sway) Toggle warm colors")
     hypr/gammastep.sh
     ;;
-  "(sway) Waybar re/start")
-    hypr/waybar-start.sh
-    ;;
   "NVIM config as root")
     cd tweaks && $terminal -e ./nvim-as-root.sh
     ;;
@@ -53,9 +46,6 @@ case $choice in
     ;;
   "Power menu")
     ./power.sh
-    ;;
-  "Sxhkd help" )
-    bspwm/sxhkd-help.sh
     ;;
   "Web search")
     ./web-search.sh

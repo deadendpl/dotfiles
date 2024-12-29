@@ -81,6 +81,11 @@ window#waybar {
   background-color: @color5;
 }
 
+#network.disabled, #network.disconnected {
+  background-color: @background;
+  color: @color5;
+}
+
 #custom-gammastep {
   background-color: @color6;
 }

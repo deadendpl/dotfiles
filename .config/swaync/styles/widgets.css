@@ -3,6 +3,7 @@
   /* The parent to all players */
   color: @foreground;
 }
+
 .widget-mpris-player {
   padding: 8px;
   margin: 8px;
@@ -10,11 +11,13 @@
   /* padding-bottom: 0; */
   /* margin-bottom: 0; */
 }
+
 .widget-mpris-title {
   font-weight: bold;
   font-size: 1.25rem;
   color: @foreground;
 }
+
 .widget-mpris-subtitle {
   font-size: 1em;
   color: @foreground;
@@ -30,6 +33,7 @@
   margin: 8px;
   font-size: 1.5rem;
 }
+
 .widget-inhibitors > button {
   font-size: initial;
   color: @foreground;
@@ -39,6 +43,7 @@
   box-shadow: none;
   border-radius: 12px;
 }
-.widget-inhibitors > button:hover {
-  /* background: @noti-bg-hover; */
-}
+
+/* .widget-inhibitors > button:hover { */
+/*   background: @noti-bg-hover; */
+/* } */

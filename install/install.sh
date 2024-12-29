@@ -166,10 +166,16 @@ else
                      python-haishoku \
                      chaotic-aur/qt5-styleplugins \
                      chaotic-aur/qt6gtk2 \
-                     chaotic-aur/gradience \
+                     python-zombie-imp \
+                     gradience \
                      wpgtk \
                      gtk-theme-flat-color-git
                      # chaotic-aur/adw-gtk3
+
+  # using pip like this can break stuff, be careful
+  sudo pip install yapsy --break-system-packages
+  sudo pip install anyascii --break-system-packages
+  sudo pip install modern_colorthief --break-system-packages
 
   wpg-install.sh -g
   # mkdir -p "${HOME}/.config/presets/users"
@@ -228,9 +234,6 @@ sudo bash ./install.sh
 
 cd ../
 rm -rf grub_gtg
-
-sudo bash -c "echo -e \"\nQT_QPA_PLATFORMTHEME=gtk2\" >> \"/etc/environment\""
-sudo bash -c "echo -e \"\nCALIBRE_USE_SYSTEM_THEME=1\" >> \"/etc/environment\"" # this is not necessary if you don't use calibre
 
 chsh -s "$(command -v fish)"
 curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o "omf"

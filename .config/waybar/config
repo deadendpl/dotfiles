@@ -21,7 +21,7 @@
     "tray",
     "pulseaudio",
     "backlight",
-    "custom/gammastep",
+    // "custom/gammastep",
     "network",
     "bluetooth",
     "battery",
@@ -104,7 +104,6 @@
   },
 
   "backlight": {
-    // "device": "acpi_video1",
     "tooltip-format": "Turn on/off eye protection on click!",
     "on-click": "~/.config/scripts/hypr/gammastep.sh",
     "format": "{percent}% {icon}",
@@ -112,7 +111,6 @@
   },
 
   "clock": {
-    // "timezone": "America/New_York",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "format": "{:%H:%M}",
     "format-alt": "{:%a %d %b}"
@@ -150,7 +148,7 @@
     "format-on": "",
     "format-disabled": "󰂲",
     "format-off": "󰂲",
-    "format-connected": " {num_connections}",
+    "format-connected": "{num_connections} ",
     // "format-connected-battery": " {device_alias} 󰥉{device_battery_percentage}%",
     // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",

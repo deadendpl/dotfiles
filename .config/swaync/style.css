@@ -21,20 +21,26 @@
 }
 
 /* ============NOTIFICATIONS============ */
-.notification-action {
-  border-radius: 0px 0px 13px 5px;
-  /* background: @background; */
+.notification {
+  /* box-shadow: 3px 3px 0 0 @color6; */
+  background: alpha(@background, .8);
+  border: 3px solid @color6;
 }
+
+/* .notification-action { */
+/*   border-radius: 0px 0px 13px 5px; */
+/*   background: @background; */
+/* } */
 
 .notification-action:hover {
   /* -gtk-icon-effect: none; */
-  border-radius: 0px 0px 13px 5px;
+  /* border-radius: 0px 0px 13px 5px; */
   background: @foreground;
   color: @background;
 }
 
 /* applies only to floating block, not the notifications in control center */
-.floating-notifications .notification-row {
+.floating-notifications {
   padding: 0;
 }
 
@@ -50,14 +56,6 @@
   background: alpha(@color6, .2);
 }
 
-.notification {
-  margin: 6px;
-  box-shadow: 3px 3px 0 0 @color6;
-  border-radius: 8px 15px 15px 8px;
-  background: alpha(@background, .8);
-  border: 1px solid @foreground;
-}
-
 /* .low {border: 1px solid @color3;} */
 /* .normal {border: 1px solid @color13;} /\* or color5 *\/ */
 /* .critical { */
@@ -68,7 +66,7 @@
 /* } */
 
 .notification-content {
-  padding: 5px 0;
+  padding: 5px;
   color: @foreground;
   background: transparent;
 }
@@ -83,16 +81,15 @@
 /* yet another useless wrapper */
 .notification-default-action,
 .notification-action {
-  padding: 0;
+  /* padding: 0; */
   margin: 0;
-  border-radius: 0;
   background: transparent;
   border: none;
 }
 
-.image {
-  /* margin-right: -15px; */
-}
+/* .image { */
+/*   margin-right: -15px; */
+/* } */
 
 .body-image {
   margin-top: 6px;

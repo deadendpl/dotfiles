@@ -39,6 +39,15 @@ Most of the stuff will get redirected here.")
               transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory)
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
+(when (featurep 'native-compile)
+  ;; Set the right directory to store the native compilation cache
+  (let ((path (expand-file-name "eln-cache/" custom/user-share-emacs-directory)))
+    (setq-default native-comp-eln-load-path (list path (cadr native-comp-eln-load-path))
+                  native-compile-target-directory path))
+  ;; Silence compiler warnings as they can be disruptive
+  (setq-default native-comp-async-report-warnings-errors nil
+                package-native-compile t))
+
 (setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
@@ -58,7 +67,6 @@ Most of the stuff will get redirected here.")
               create-lockfiles nil ; no files with ".#"
               make-backup-files nil
               require-final-newline t
-              native-comp-async-report-warnings-errors 'silent
               show-paren-when-point-inside-paren t
               show-paren-when-point-in-periphery t
               truncate-string-ellipsis "…"
@@ -285,11 +293,24 @@ Most of the stuff will get redirected here.")
 
     (meow-define-keys 'insert
       '("C-." . meow-keypad))
+    (add-to-list 'meow-mode-state-list '(helpful-mode . normal))
     )
 
   (meow-setup)
   (meow-global-mode 1)
   )
+
+(use-package meow
+  :config
+  (defun kill-ring-save-visual-line ()
+    "Save the region from point to the end of visual line."
+    (interactive)
+    (let ((end-point (save-excursion
+                       (end-of-visual-line)
+                       (point))))
+      (save-excursion
+        (kill-ring-save (point) end-point))))
+  (add-to-list 'meow-selection-command-fallback '(meow-save . kill-ring-save-visual-line)))
 
 (use-package pulse
   :config
@@ -397,7 +418,7 @@ Most of the stuff will get redirected here.")
 
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
-                                    (emacs-lock-mode 'kill))))
+                                     (emacs-lock-mode 'kill))))
   :custom
   (initial-buffer-choice #'enlight)
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
@@ -416,7 +437,8 @@ Most of the stuff will get redirected here.")
        ("Other"
         ("Projects" project-switch-project "p"))
        ("Things to remember"
-        ("Instead of holding h/l, use letter finding keybindings"))))))
+        ("Instead of holding h/l, use letter finding keybindings")
+        ("Use C-. in insert mode to access meow-keypad"))))))
   )
 
 (set-face-attribute 'default nil
@@ -530,7 +552,21 @@ Most of the stuff will get redirected here.")
     (set-face-attribute 'line-number nil
                         :foreground (ewal--get-base-color 'green)
                         :inherit 'default)
-    (load-theme 'ewal-doom-one t))
+    (defun color-hex-to-rgb (hex)
+      "Return list of red, green and blue colors for the hex color
+string specified by HEX."
+      (list (string-to-number (substring hex 1 3) 16)
+            (string-to-number (substring hex 3 5) 16)
+            (string-to-number (substring hex 5 7) 16)))
+
+    (unless (color-dark-p (mapcar (lambda (x)
+                            (/ x 255.0))
+                          (color-hex-to-rgb (ewal-get-color 'background))))
+        (setq ewal-doom-one-brighter-comments t
+              ewal-doom-one-comment-bg nil))
+
+    (load-theme 'ewal-doom-one t)
+    )
   )
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
@@ -640,6 +676,7 @@ Most of the stuff will get redirected here.")
   (([remap goto-line] . consult-goto-line)
    ([remap imenu] . consult-imenu)
    ([remap switch-to-buffer] . consult-buffer)
+   ([remap project-find-file] . consult-project-buffer)
    ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
    ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
    ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
@@ -767,6 +804,23 @@ Handles symbols that start or end with a single quote (') correctly."
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
                                   ("~/dev" . 1))))
+
+(use-package transient
+  :custom (transient-show-during-minibuffer-read t)
+  :bind ("C-c w r" . window-resize-transient)
+  :config
+  (transient-define-prefix window-resize-transient ()
+    "Transient for resizing windows."
+    [["Change window"
+      ("o" "Change window" other-window :transient t)]
+     ["Expand"
+      ("v" "Vertically" enlarge-window :transient t)
+      ("h" "Horizontally" enlarge-window-horizontally :transient t)]
+     ["Shrink"
+      ("C-v" "Vertically" shrink-window :transient t)
+      ("C-h" "Horizontally" shrink-window-horizontally :transient t)]
+     ["Quit"
+      ("q" "Quit" transient-quit-one)]]))
 
 (use-package org
   :ensure nil
@@ -1201,10 +1255,16 @@ required."
         (goto-char (point-min))
         (search-forward ";; Version: ")
         (delete-region (point) (line-end-position))
-        (insert date)
-        (re-search-forward "^(def\\(var\\|const\\).*[0-9]")
-        (delete-backward-char (length (thing-at-point 'symbol t)))
-        (insert date))))
+        (insert date))
+      (save-excursion
+        (goto-char (point-min))
+        (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
+          (delete-backward-char (length (thing-at-point 'symbol t)))
+          (insert date))
+    (when (buffer-modified-p)
+        (let ((inhibit-message t))
+          (save-buffer))
+        (message (concat "Version updated to " date)))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 
 (use-package python
@@ -1510,6 +1570,9 @@ Also see `window-delete-popup-frame'." command)
     :load-path "~/dev/emacs-mb-transient/"
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)
+    :config
+    (add-to-list 'vertico-multiform-commands
+                 '(mb-transient--search (vertico-sort-function . nil)))
     )
 
   (use-package mb-search

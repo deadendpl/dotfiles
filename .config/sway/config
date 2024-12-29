@@ -226,6 +226,8 @@ mode "playerctl" {
     p exec playerctl previous;mode "default"
     t exec $scripts/playerctl-meta.sh;mode "default"
     s exec $scripts/valent-share-url.sh;mode "default"
+    f exec playerctl position 5+;mode "default"
+    b exec playerctl position 5-;mode "default"
     plus exec $scripts/playerctl-volume.py 1
     equal exec $scripts/playerctl-volume.py 1
     minus exec $scripts/playerctl-volume.py 0
