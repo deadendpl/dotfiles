@@ -29,6 +29,9 @@ exec {
 # disabling window name in the window's border
 default_border          pixel
 
+# font
+font JetBrains Mono Nerd Font 10
+
 ### Input configuration
 input * {
   dwt                 disabled
@@ -259,11 +262,11 @@ include {
 }
 
 # colors of borders
-client.focused          $background $color11 $foreground
-client.focused_inactive $background $background $foreground
-client.unfocused        $background $background $foreground
-client.urgent           $background $background $foreground
-client.placeholder      $background $background $foreground
+# client.focused          $background $color11 $foreground
+# client.focused_inactive $background $background $foreground
+# client.unfocused        $background $background $foreground
+# client.urgent           $background $background $foreground
+# client.placeholder      $background $background $foreground
 
 # setting background color in case wallpaper wouldn't cover whole screen
 # output * bg $background solid_color

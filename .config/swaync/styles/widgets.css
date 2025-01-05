@@ -1,13 +1,14 @@
 /* Mpris widget */
-.widget-mpris {
-  /* The parent to all players */
-  color: @foreground;
-}
+/* .widget-mpris { */
+/*   The parent to all players */
+/*   color: @foreground; */
+/* } */
 
 .widget-mpris-player {
   padding: 8px;
   margin: 8px;
-  color: @foreground;
+  /* color: @foreground; */
+  box-shadow: none;
   /* padding-bottom: 0; */
   /* margin-bottom: 0; */
 }
@@ -15,13 +16,17 @@
 .widget-mpris-title {
   font-weight: bold;
   font-size: 1.25rem;
-  color: @foreground;
+  /* color: @foreground; */
 }
 
 .widget-mpris-subtitle {
   font-size: 1em;
-  color: @foreground;
+  /* color: @foreground; */
 }
+
+/* .widget-mpris-album-art { */
+/*   background-blend-mode: saturation; */
+/* } */
 
 .widget-mpris .widget-mpris-player > box > button {
   /* Change player control buttons */

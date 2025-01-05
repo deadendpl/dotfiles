@@ -36,7 +36,6 @@ Most of the stuff will get redirected here.")
               save-place-file (expand-file-name "places" custom/user-share-emacs-directory)
               url-configuration-directory (expand-file-name "url" custom/user-share-emacs-directory) ; cache from urls (eww)
               multisession-directory (expand-file-name "multisession" custom/user-share-emacs-directory)
-              transient-history-file (expand-file-name "transient/history.el" custom/user-share-emacs-directory)
               request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
 
 (when (featurep 'native-compile)
@@ -438,7 +437,8 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad"))))))
+        ("Use C-. in insert mode to access meow-keypad")
+        ("Use C-M-\\ to indent whole buffer"))))))
   )
 
 (set-face-attribute 'default nil
@@ -466,7 +466,7 @@ Most of the stuff will get redirected here.")
 ;; This sets the default font on all graphical frames created after restarting Emacs.
 ;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
 ;; are not right, idk why
-(add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
+;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
 
 ;; Uncomment the following line if line spacing needs adjusting.
 ;; (setq-default line-spacing 0.12)
@@ -477,7 +477,19 @@ Most of the stuff will get redirected here.")
   :config
   (ligature-set-ligatures 't '("www"))
   ;; Enable ligatures in programming modes
-  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???" "<:<" ";;;")))
+  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!="
+  "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***"
+  ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>"
+  "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##"
+  "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^="
+  "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>"
+  "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<=="
+  "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<"
+  ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~"
+  "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>"
+  "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::"
+  ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/=="
+  "@_" "__" "???" "<:<" ";;;")))
 
 (use-package hl-todo
   :hook ((org-mode prog-mode) . hl-todo-mode)
@@ -561,7 +573,8 @@ string specified by HEX."
 
     (unless (color-dark-p (mapcar (lambda (x)
                             (/ x 255.0))
-                          (color-hex-to-rgb (ewal-get-color 'background))))
+                          (color-hex-to-rgb
+                           (ewal-get-color 'background))))
         (setq ewal-doom-one-brighter-comments t
               ewal-doom-one-comment-bg nil))
 
@@ -577,7 +590,9 @@ string specified by HEX."
          ;; ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode))
   :custom-face
-  (corfu-current ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
+  (corfu-current ((nil (:inherit 'highlight
+                                 :background unspecified
+                                 :foreground unspecified))))
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 1)
@@ -586,7 +601,8 @@ string specified by HEX."
   (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
   ;; :preface
-  ;; ;; it doesn't exit when using meow, the fix was inspired by https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
+  ;; it doesn't exit when using meow, the fix was inspired by
+  ;; https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
   ;; (defun custom/corfu-cleanup ()
   ;;   "Close corfu popup if it is active."
   ;;   (if (boundp 'corfu-mode)
@@ -601,7 +617,10 @@ string specified by HEX."
   )
 
 (use-package nerd-icons-corfu
-  :hook (corfu-mode . (lambda () (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+  :hook (corfu-mode . nerd-icons-corfu-setup)
+  :preface
+  (defun nerd-icons-corfu-setup ()
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
   )
 
 (use-package cape
@@ -624,8 +643,9 @@ string specified by HEX."
               )
   :custom
   (enable-recursive-minibuffers t)
+  ;; `recentf-open' will not have sorted entries
   (vertico-multiform-commands
-   '((recentf-open (vertico-sort-function . nil)))) ;; `recentf-open' will not have sorted entries
+   '((recentf-open (vertico-sort-function . nil))))
   :config
   (vertico-mode)
   (vertico-mouse-mode t)
@@ -657,7 +677,8 @@ string specified by HEX."
 (use-package savehist
   :init (savehist-mode t)
   :custom
-  (savehist-file (expand-file-name "history" custom/user-share-emacs-directory))
+  (savehist-file (expand-file-name "history"
+                                   custom/user-share-emacs-directory))
   (savehist-additional-variables '(comint-input-ring))
   )
 
@@ -715,14 +736,16 @@ string specified by HEX."
   (dired-listing-switches "-lvXAh --group-directories-first")
   (dired-switches-in-mode-line 0)
   (dired-kill-when-opening-new-dired-buffer t)
-  (image-dired-dir (expand-file-name "image-dired" custom/user-share-emacs-directory))
+  (image-dired-dir (expand-file-name "image-dired"
+                                     custom/user-share-emacs-directory))
   (dired-auto-revert-buffer t)
   (dired-hide-details-hide-symlink-targets nil)
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$" "xdg-open")
+   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$"
+           "xdg-open")
          '("\\.\\(pdf\\|epub\\)$" "xdg-open")
          '("\\.\\(mkv\\|mp4\\)$" "xdg-open")
          ;; everything else
@@ -735,6 +758,7 @@ string specified by HEX."
   :hook (dired-mode . diredfl-mode)
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
+  (add-to-list 'diredfl-compressed-extensions ".chd")
 )
 
 (use-package helpful
@@ -763,6 +787,13 @@ Handles symbols that start or end with a single quote (') correctly."
       (message "No symbol found at point!")))
   )
 
+(use-package helpful
+  :config
+  (advice-add #'describe-key :override #'meow-helpful-key)
+  (defun meow-helpful-key (&rest args)
+    (funcall #'helpful-key (cdaar args)))
+  )
+
 (use-package which-key
   :unless (custom/termux-p)
   :defer 5
@@ -783,8 +814,11 @@ Handles symbols that start or end with a single quote (') correctly."
 (use-package elfeed
   :unless (custom/termux-p)
   :custom
-  (elfeed-db-directory (expand-file-name "elfeed" custom/user-share-emacs-directory)) ; cache? directory
-  (elfeed-feeds  '("https://sachachua.com/blog/feed/" "https://planet.emacslife.com/atom.xml"))
+  ;; cache? directory
+  (elfeed-db-directory
+   (expand-file-name "elfeed" custom/user-share-emacs-directory))
+  (elfeed-feeds  '("https://sachachua.com/blog/feed/"
+                   "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
   :bind (:map elfeed-search-mode-map
               ("f" . elfeed-search-show-entry)))
@@ -800,13 +834,25 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package magit
   :custom
-  (magit-display-buffer-function 'magit-display-buffer-fullframe-status-topleft-v1)
+  (magit-display-buffer-function
+   'magit-display-buffer-fullframe-status-topleft-v1)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
                                   ("~/dev" . 1))))
 
 (use-package transient
-  :custom (transient-show-during-minibuffer-read t)
+  :custom
+  (transient-show-during-minibuffer-read t)
+  (transient-history-file
+   (expand-file-name "transient/history.el"
+                     custom/user-share-emacs-directory))
+  (transient-levels-file
+   (expand-file-name "transient/levels.el"
+                     custom/user-share-emacs-directory))
+  (transient-values-file
+   (expand-file-name "transient/values.el"
+                     custom/user-share-emacs-directory))
+
   :bind ("C-c w r" . window-resize-transient)
   :config
   (transient-define-prefix window-resize-transient ()
@@ -844,6 +890,13 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom
   (org-M-RET-may-split-line nil)
   (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
+  (org-babel-default-header-args '((:session . "none")
+                                   (:results . "replace")
+                                   (:exports . "both")
+                                   (:cache . "no")
+                                   (:noweb . "no")
+                                   (:hlines . "no")
+                                   (:tangle . "no")))
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
@@ -855,19 +908,22 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-fontify-quote-and-verse-blocks t)
   (org-hide-emphasis-markers t)
   (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-  (org-id-locations-file (expand-file-name "org/.org-id-locations" custom/user-share-emacs-directory))
+  (org-id-locations-file
+   (expand-file-name "org/.org-id-locations"
+                     custom/user-share-emacs-directory))
   (org-image-actual-width '(300 600))
   (org-indent-mode-turns-on-hiding-stars nil)
   (org-insert-heading-respect-content t)
   (org-link-file-path-type 'relative)
   (org-list-allow-alphabetical t)
   (org-log-done t)
-  (org-log-into-drawer t) ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
+  ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
+  (org-log-into-drawer t)
   (org-pretty-entities t)
   (org-return-follows-link t)
   (org-src-preserve-indentation t)
   (org-startup-folded t)
-  (org-startup-indented t) ;; use `org-indent-mode' at startup
+  (org-startup-indented t) ; use `org-indent-mode' at startup
   (org-startup-with-inline-images t)
   (org-tags-column 0)
   (org-todo-keywords
@@ -929,10 +985,14 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom
   (org-agenda-block-separator 8411)
   (org-agenda-category-icon-alist
-   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5)) nil nil :ascent center)
-     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5)) nil nil :ascent center)
-     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5)) nil nil :ascent center)
-     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5)) nil nil :ascent center)))
+   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5))
+      nil nil :ascent center)
+     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5))
+      nil nil :ascent center)
+     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5))
+      nil nil :ascent center)
+     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5))
+      nil nil :ascent center)))
   (org-agenda-columns-add-appointments-to-effort-sum t)
   (org-agenda-custom-commands
    '(("i" "Ideas" todo "IDEA")
@@ -940,8 +1000,10 @@ Handles symbols that start or end with a single quote (') correctly."
       ((agenda "")
        (alltodo "")))))
   (org-agenda-default-appointment-duration 60)
-  (org-agenda-files (list (expand-file-name "agenda/agenda.org" org-roam-directory)
-                          (expand-file-name "agenda/inbox.org" org-roam-directory)))
+  (org-agenda-files (list (expand-file-name "agenda/agenda.org"
+                                            org-roam-directory)
+                          (expand-file-name "agenda/inbox.org"
+                                            org-roam-directory)))
   (org-agenda-hide-tags-regexp ".*")
   (org-agenda-include-all-todo nil)
   (org-agenda-mouse-1-follows-link t)
@@ -957,7 +1019,8 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-agenda-start-day "+0d")
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
-  (org-archive-location (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
+  (org-archive-location (expand-file-name "agenda/agenda-archive.org::"
+                                          org-roam-directory))
   (org-refile-use-outline-path nil)
   (org-refile-targets '((org-agenda-files :maxlevel . 1)))
   )
@@ -990,6 +1053,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-export-with-date nil)
   (org-export-with-smart-quotes t)
   (org-export-with-toc nil)
+  (org-export-babel-evaluate nil)
   (org-html-validation-link nil)
   ;; html5
   (org-html-doctype "html5")
@@ -997,7 +1061,16 @@ Handles symbols that start or end with a single quote (') correctly."
   )
 
 (use-package org
-  :hook (org-mode . (lambda () (add-hook 'text-scale-mode-hook #'custom/org-resize-latex-overlays nil t)))
+  :init
+  (define-minor-mode org-latex-resize-mode
+    "Automatic latex resizing."
+    :global nil
+    (if org-latex-resize-mode
+        (add-hook 'text-scale-mode-hook
+                  #'custom/org-resize-latex-overlays nil t)
+      (remove-hook 'text-scale-mode-hook
+                   #'custom/org-resize-latex-overlays t)))
+  :hook (org-mode . org-latex-resize-mode)
   :custom
   (org-preview-latex-default-process 'dvisvgm)
   (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
@@ -1005,8 +1078,7 @@ Handles symbols that start or end with a single quote (') correctly."
   :config
   (defun custom/org-resize-latex-overlays ()
     "Rescales all latex preview fragments correctly with the text size
-as you zoom text. It's fast, since no image regeneration is
-required."
+as you zoom text. It's fast, since no image regeneration is required."
     (cl-loop for o in (car (overlay-lists))
              if (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
              do (plist-put (cdr (overlay-get o 'display))
@@ -1018,7 +1090,8 @@ required."
 
 (use-package org
   :config
-  ;; meow custom state (inspired by https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
+  ;; meow custom state (inspired by
+  ;; https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
   (setq meow-org-motion-keymap (make-keymap))
   (meow-define-state org-motion
     "Org-mode structural motion"
@@ -1081,10 +1154,12 @@ required."
   (add-to-list 'org-structure-template-alist '("html" . "src html"))
   ;; The following prevents <> from auto-pairing when electric-pair-mode is on.
   ;; Otherwise, org-tempo is broken when you try to <s TAB...
-  (add-hook 'org-mode-hook (lambda ()
-                             (setq-local electric-pair-inhibit-predicate
-                                         `(lambda (c)
-                                            (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
+  (add-hook 'org-mode-hook #'org-electric-pair-disable-arrow)
+  (defun org-electric-pair-disable-arrow ()
+    (setq-local electric-pair-inhibit-predicate
+                `(lambda (c)
+                   (if (char-equal c ?<) t
+                     (,electric-pair-inhibit-predicate c)))))
   )
 
 (use-package org-appear
@@ -1184,10 +1259,6 @@ required."
   (toc-org-max-depth org-indent--deepest-level)
   (toc-org-enable-links-opening t))
 
-(use-package smartparens
-  :hook (prog-mode) ;; add `smartparens-mode' to these hooks
-  :config (require 'smartparens-config)) ;; load default config
-
 (unless (custom/termux-p)
 
 (use-package compile
@@ -1219,7 +1290,11 @@ required."
 - Current file gets an executable permission by using shell chmod, not Emacs `chmod'
 - The current file gets executed"
     (if buffer-file-name
-        (setq-local compile-command (concat "chmod +x " (shell-quote-argument (buffer-file-name)) " && " (shell-quote-argument (buffer-file-name))))))
+        (setq-local compile-command
+                    (concat "chmod +x "
+                            (shell-quote-argument (buffer-file-name))
+                            " && "
+                            (shell-quote-argument (buffer-file-name))))))
   :custom (sh-basic-offset 2)
   )
 
@@ -1349,7 +1424,8 @@ It doesn't close empty tags."
 
 (unless (treesit-language-available-p 'bash)
   (message "Installing tree-sitter parsers")
-  (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist)))
+  (mapc #'treesit-install-language-grammar
+        (mapcar #'car treesit-language-source-alist)))
 
 (setq major-mode-remap-alist
  '((c-or-c++-mode . c-or-c++-ts-mode)
@@ -1390,11 +1466,18 @@ It doesn't close empty tags."
   ;; (eshell-mode . (lambda () (setq mode-line-format nil)))
   :bind (("C-c s e" . eshell))
   :custom
-  (eshell-directory-name (expand-file-name "eshell" user-emacs-directory))
-  (eshell-rc-script (expand-file-name "profile" eshell-directory-name))    ;; your profile for eshell; like a bashrc for eshell
-  (eshell-aliases-file (expand-file-name "aliases" eshell-directory-name)) ;; sets an aliases file for the eshell
-  (eshell-history-file-name (expand-file-name "eshell-history" custom/user-share-emacs-directory))
-  (eshell-last-dir-ring-file-name (expand-file-name "eshell-lastdir" custom/user-share-emacs-directory))
+  (eshell-directory-name
+   (expand-file-name "eshell" user-emacs-directory))
+  ;; your profile for eshell; like a bashrc for eshell
+  (eshell-rc-script
+   (expand-file-name "profile" eshell-directory-name))
+  ;; sets an aliases file for the eshell
+  (eshell-aliases-file
+   (expand-file-name "aliases" eshell-directory-name))
+  (eshell-history-file-name
+   (expand-file-name "eshell-history" custom/user-share-emacs-directory))
+  (eshell-last-dir-ring-file-name
+   (expand-file-name "eshell-lastdir" custom/user-share-emacs-directory))
   (eshell-history-size 5000)
   (eshell-buffer-maximum-lines 5000)
   (eshell-hist-ignoredups t)
@@ -1413,21 +1496,25 @@ It doesn't close empty tags."
 
 (use-package vterm
   :unless (custom/termux-p)
-  :hook ((vterm-mode . (lambda () (setq mode-line-format nil)))
-         (meow-normal-mode . (lambda ()
-                               (if (string-equal major-mode "vterm-mode")
-                                   (unless vterm-copy-mode
-                                     (vterm-copy-mode 1)))))
-         (meow-insert-mode . (lambda ()
-                               (if (string-equal major-mode "vterm-mode")
-                                   (if vterm-copy-mode
-                                       (vterm-copy-mode 0))))))
+  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
+  (vterm-mode . vterm-meow-setup)
   :bind (("C-c s v" . vterm))
   :custom
   (vterm-max-scrollback 5000)
   (vterm-always-compile-module t)
   :config
   (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
+  (defun vterm-meow-setup ()
+    (add-hook 'meow-normal-mode-hook (lambda ()
+                                       (if (string-equal major-mode "vterm-mode")
+                                           (unless vterm-copy-mode
+                                             (vterm-copy-mode 1))))
+              nil t)
+    (add-hook 'meow-insert-mode-hook (lambda ()
+                                       (if (string-equal major-mode "vterm-mode")
+                                           (if vterm-copy-mode
+                                               (vterm-copy-mode 0))))
+              nil t))
   )
 
 (use-package sudo-edit
@@ -1438,19 +1525,21 @@ It doesn't close empty tags."
   ("C-c r" . reverso)
   :preface
   (defun custom/org-reverso-grammar-subtree ()
-    "Narrows to the current subtree and uses `reverso-grammar-buffer'."
+    "Check grammar in a narrowed subtree."
     (interactive)
     (org-narrow-to-subtree)
     (org-fold-show-all)
     (reverso-grammar-buffer)
     )
-  :config (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
+  :config
+  (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 
 (use-package writeroom-mode
   :unless (custom/termux-p))
 
 (defun custom/switch-to-buffer-other-window-for-alist (window)
-  "Kind of `switch-to-buffer-other-window' but can be used in `display-buffer-alist' with body-function parameter."
+  "Kind of `switch-to-buffer-other-window' but can be used in
+`display-buffer-alist' with body-function parameter."
   (select-window window))
 
 (setq display-buffer-alist
@@ -1552,21 +1641,25 @@ Also see `window-delete-popup-frame'." command)
          ((quit error user-error)
           (delete-frame frame))))))
 
-(define-generic-mode m3u-mode    ;; name of the mode to create
-  '("#")                         ;; comments start with '#'
-  nil                            ;; keywords (none in this case)
-  '(("^#EXTINF" . 'font-lock-keyword-face) ;; highlight #EXTINF as keyword, it doesn't work
-    ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face)) ;; highlight file extensions as strings
-  '("\\.m3u\\'")                 ;; files for which to activate this mode
-  nil                            ;; other functions to call
-  "A mode for M3U playlist files") ;; doc string for this mode
+(define-generic-mode m3u-mode      ; name of the mode to create
+  '("#")                           ; comments start with '#'
+  nil                              ; keywords (none in this case)
+  ;; highlight #EXTINF as keyword, it doesn't work, because lines
+  ;; starting with '#' are treated as comments
+  '(("^#EXTINF" . 'font-lock-keyword-face)
+    ;; highlight file extensions as strings
+    ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face))
+  '("\\.m3u\\'")                   ; files for which to activate this mode
+  nil                              ; other functions to call
+  "A mode for M3U playlist files") ; doc string for this mode
 
 (unless (custom/termux-p)
   (use-package mb-transient
     :init
     (window-define-with-popup-frame mb-transient)
     (advice-add 'window-popup-mb-transient :after
-                (lambda () (modify-frame-parameters nil `((width . 54) (height . ,(+ 27 vertico-count))))))
+                (lambda () (modify-frame-parameters nil '((width . 54)))
+                  (set-window-parameter nil 'mode-line-format 'none)))
     :load-path "~/dev/emacs-mb-transient/"
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)

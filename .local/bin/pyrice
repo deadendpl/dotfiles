@@ -8,6 +8,7 @@ from pathlib import Path
 import psutil
 import shutil
 import time
+import json
 
 # Set up the argument parser
 parser = argparse.ArgumentParser(
@@ -73,7 +74,7 @@ def wallpaper_path_get(path = args.wallpaper_path):
     return random.choice(get_recursive_files(os.environ["HOME"] + "/Pictures/bg"))
 
 if args.old:
-  path = open(os.environ["HOME"] + "/.cache/wal/wal").read()
+  path = open(os.environ["XDG_CACHE_HOME"] + "/wal/wal").read()
 else:
   path = wallpaper_path_get()
 
@@ -116,6 +117,23 @@ def afterwards():
       waybarp = True
     elif proc.info["name"] == "emacs":
       emacsp = True
+    elif proc.info["name"] == "sway":
+      swayp = True
+
+  # sway
+  if swayp:
+    colors = json.loads(open(os.environ["XDG_CACHE_HOME"] + "/wal/colors.json").read())
+    background = colors["special"]["background"]
+    foreground = colors["special"]["foreground"]
+    subprocess.Popen(["swaymsg", "client.focused", background,
+                      colors["colors"]["color11"], foreground])
+    subprocess.Popen(["swaymsg", "client.focused_inactive",
+                      background, background, foreground])
+    subprocess.Popen(["swaymsg", "client.unfocused", background, background, foreground])
+    subprocess.Popen(["swaymsg", "client.urgent", background, background, foreground])
+    subprocess.Popen(["swaymsg", "client.placeholder", background, background, foreground])
+    # subprocess.run(["swaymsg", "output", "*", "bg", background, "solid_color"])
+
   subprocess.Popen(["swaybg", "-m", "fit", "-i", path]) # Popen is async
 
   if waybarp == False:
@@ -132,16 +150,17 @@ def afterwards():
   subprocess.Popen(["swaync-client", "-rs"])
 
   # emacs
-  if emacsp == True:
+  if emacsp:
     if args.light == True:
-      subprocess.Popen(["emacsclient", "-e",
+      subprocess.run(["emacsclient", "-e",
                         "(setq ewal-doom-one-brighter-comments t)"])
     else:
-      subprocess.Popen(["emacsclient", "-e",
+      subprocess.run(["emacsclient", "-e",
                         "(setq ewal-doom-one-brighter-comments nil)"])
     subprocess.Popen(["emacsclient", "-e", "(load-theme 'ewal-doom-one t)"])
 
   subprocess.Popen(["notify-send", "New rice applied"])
+
   gradience_wrap()
 
 pywal_run()
