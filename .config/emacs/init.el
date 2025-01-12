@@ -21,12 +21,14 @@
 (column-number-mode 1)               ; Column number in modeline
 (display-battery-mode 1)             ; Setting battery percentage in modeline
 
-(defvar custom/user-share-emacs-directory "~/.local/share/emacs/"
+(require 'xdg)
+
+(defvar custom/user-share-emacs-directory (expand-file-name "emacs" (xdg-data-home))
   "Directory to redirect cache/dump files.
-Elisp packages cache folders/files normally clutter `user-emacs-directory'.
-The same goes for some default files like bookmarks file.
-In order to prevent that this variable exists.
-Most of the stuff will get redirected here.")
+  Elisp packages cache folders/files normally clutter `user-emacs-directory'.
+  The same goes for some default files like bookmarks file.
+  In order to prevent that this variable exists.
+  Most of the stuff will get redirected here.")
 
 (setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory)
               auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
@@ -84,7 +86,10 @@ Most of the stuff will get redirected here.")
               comment-empty-lines t
               url-privacy-level 'paranoid
               electric-pair-skip-self nil
-              history-length t)
+              history-length t
+              kill-do-not-save-duplicates t
+              scroll-error-top-bottom t
+              enable-local-variables :all)
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
@@ -441,36 +446,6 @@ Most of the stuff will get redirected here.")
         ("Use C-M-\\ to indent whole buffer"))))))
   )
 
-(set-face-attribute 'default nil
-                    :font "JetBrainsMono NFM"
-                    :height 90
-                    :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-                    :family "Ubuntu Nerd Font"
-                    :height 100
-                    :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-                    :family "JetBrainsMono NFM Mono")
-(set-face-attribute 'fixed-pitch-serif nil
-                    :inherit 'fixed-pitch
-                    :slant 'italic)
-
-;; Makes commented text and keywords italics.
-;; This is working in emacsclient but not emacs.
-;; Your font must have an italic face available.
-(set-face-attribute 'font-lock-comment-face nil
-                    :slant 'italic)
-;; (set-face-attribute 'font-lock-keyword-face nil
-;;   :slant 'italic)
-
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right, idk why
-;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
-
-;; Uncomment the following line if line spacing needs adjusting.
-;; (setq-default line-spacing 0.12)
-
 (use-package ligature
   :unless (custom/termux-p)
   :hook (prog-mode . ligature-mode)
@@ -540,7 +515,10 @@ Most of the stuff will get redirected here.")
 
 (use-package colorful-mode
   :hook (after-init . global-colorful-mode)
-  :custom (global-colorful-modes t))
+  :custom (global-colorful-modes '(prog-mode conf-mode help-mode (not special-mode)))
+  ;; the default box around the colors causes line to be slightly
+  ;; misaligned
+  :custom-face (colorful-base ((nil (:box nil)))))
 
 (use-package doom-themes
   ;; :demand
@@ -555,30 +533,37 @@ Most of the stuff will get redirected here.")
 
 (if (custom/termux-p)
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
-  (use-package ewal-doom-themes
-    :demand
-    :config
-    (set-face-attribute 'line-number-current-line nil
-                        :foreground (ewal-load-color 'comment)
-                        :inherit 'default)
-    (set-face-attribute 'line-number nil
-                        :foreground (ewal--get-base-color 'green)
-                        :inherit 'default)
-    (defun color-hex-to-rgb (hex)
-      "Return list of red, green and blue colors for the hex color
+  (progn
+    (use-package ewal-doom-themes
+      :demand
+      :config
+      (set-face-attribute 'line-number-current-line nil
+                          :foreground (ewal-load-color 'comment)
+                          :inherit 'default)
+      (set-face-attribute 'line-number nil
+                          :foreground (ewal--get-base-color 'green)
+                          :inherit 'default)
+
+      (defun color-hex-to-rgb (hex)
+        "Return list of red, green and blue colors for the hex color
 string specified by HEX."
-      (list (string-to-number (substring hex 1 3) 16)
-            (string-to-number (substring hex 3 5) 16)
-            (string-to-number (substring hex 5 7) 16)))
+        (list (string-to-number (substring hex 1 3) 16)
+              (string-to-number (substring hex 3 5) 16)
+              (string-to-number (substring hex 5 7) 16)))
 
-    (unless (color-dark-p (mapcar (lambda (x)
-                            (/ x 255.0))
-                          (color-hex-to-rgb
-                           (ewal-get-color 'background))))
-        (setq ewal-doom-one-brighter-comments t
-              ewal-doom-one-comment-bg nil))
-
-    (load-theme 'ewal-doom-one t)
+      (if (color-dark-p (mapcar (lambda (x)
+                                  (/ x 255.0))
+                                (color-hex-to-rgb
+                                 (ewal-get-color 'background))))
+          (load-theme 'ewal-doom-one t)
+        (progn
+          (setq ewal-doom-one-brighter-comments t
+                ewal-doom-one-comment-bg nil)
+          (load-theme 'ewal-doom-one t)
+          (with-eval-after-load 'org
+            (set-face-attribute 'org-scheduled-today nil :foreground
+                                (ewal--get-base-color 'green)))))
+      )
     )
   )
 
@@ -788,7 +773,7 @@ Handles symbols that start or end with a single quote (') correctly."
   )
 
 (use-package helpful
-  :config
+  :init
   (advice-add #'describe-key :override #'meow-helpful-key)
   (defun meow-helpful-key (&rest args)
     (funcall #'helpful-key (cdaar args)))
@@ -1058,6 +1043,8 @@ Handles symbols that start or end with a single quote (') correctly."
   ;; html5
   (org-html-doctype "html5")
   (org-html-html5-fancy t)
+  (org-publish-timestamp-directory
+   (expand-file-name "org/timestamps" custom/user-share-emacs-directory))
   )
 
 (use-package org

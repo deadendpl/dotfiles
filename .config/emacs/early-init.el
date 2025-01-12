@@ -21,3 +21,33 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
 (push '(horizontal-scroll-bars) default-frame-alist)
+
+(set-face-attribute 'default nil
+                    :font "JetBrainsMono NFM"
+                    :height 90
+                    :weight 'medium)
+(set-face-attribute 'variable-pitch nil
+                    :family "Ubuntu Nerd Font"
+                    :height 100
+                    :weight 'medium)
+(set-face-attribute 'fixed-pitch nil
+                    :family "JetBrainsMono NFM Mono")
+(set-face-attribute 'fixed-pitch-serif nil
+                    :inherit 'fixed-pitch
+                    :slant 'italic)
+
+;; Makes commented text and keywords italics.
+;; This is working in emacsclient but not emacs.
+;; Your font must have an italic face available.
+(set-face-attribute 'font-lock-comment-face nil
+                    :slant 'italic)
+;; (set-face-attribute 'font-lock-keyword-face nil
+;;   :slant 'italic)
+
+;; This sets the default font on all graphical frames created after restarting Emacs.
+;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
+;; are not right, idk why
+;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
+
+;; Uncomment the following line if line spacing needs adjusting.
+;; (setq-default line-spacing 0.12)

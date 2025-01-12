@@ -24,8 +24,8 @@ parser.add_argument(
   "number",
   nargs = "?",
   type = float,
-  default = 0.1,
-  help = "Amount to change the volume (default: 0.1)"
+  default = 0.05,
+  help = "Amount to change the volume (default: 0.05)"
 )
 
 # Parse the arguments
