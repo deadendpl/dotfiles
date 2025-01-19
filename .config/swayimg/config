@@ -84,7 +84,7 @@ Ctrl+minus = zoom -1
 z = zoom optimal
 Shift+z = zoom fit
 0 = zoom real
-BackSpace = zoom reset
+BackSpace = zoom real
 
 F5 = rotate_left
 F6 = rotate_right

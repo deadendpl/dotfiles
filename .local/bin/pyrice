@@ -109,10 +109,14 @@ def afterwards():
   # swaybg setup and waybar
   waybarp = False
   emacsp = False
+  swaybgp = False
   for proc in psutil.process_iter(attrs=["pid", "name"]):
     if proc.info["name"] == "swaybg":
-      pid = proc.info["pid"]
-      psutil.Process(pid).terminate()  # Terminate the process
+      if args.old != True:
+        pid = proc.info["pid"]
+        psutil.Process(pid).terminate()  # Terminate the process
+      else:
+        swaybgp = True
     elif proc.info["name"] == "waybar":
       waybarp = True
     elif proc.info["name"] == "emacs":
@@ -129,12 +133,16 @@ def afterwards():
                       colors["colors"]["color11"], foreground])
     subprocess.Popen(["swaymsg", "client.focused_inactive",
                       background, background, foreground])
-    subprocess.Popen(["swaymsg", "client.unfocused", background, background, foreground])
-    subprocess.Popen(["swaymsg", "client.urgent", background, background, foreground])
-    subprocess.Popen(["swaymsg", "client.placeholder", background, background, foreground])
+    subprocess.Popen(["swaymsg", "client.unfocused", background,
+                      background, foreground])
+    subprocess.Popen(["swaymsg", "client.urgent", background,
+                      background, foreground])
+    subprocess.Popen(["swaymsg", "client.placeholder", background,
+                      background, foreground])
     # subprocess.run(["swaymsg", "output", "*", "bg", background, "solid_color"])
 
-  subprocess.Popen(["swaybg", "-m", "fit", "-i", path]) # Popen is async
+  if args.old == False or swaybgp == False:
+    subprocess.Popen(["swaybg", "-m", "fit", "-i", path]) # Popen is async
 
   if waybarp == False:
     subprocess.Popen(["waybar"])
@@ -153,7 +161,8 @@ def afterwards():
   if emacsp:
     if args.light == True:
       subprocess.run(["emacsclient", "-e",
-                        "(setq ewal-doom-one-brighter-comments t)"])
+                      "(setq ewal-doom-one-brighter-comments t " +
+                      "ewal-doom-one-comment-bg nil)"])
     else:
       subprocess.run(["emacsclient", "-e",
                         "(setq ewal-doom-one-brighter-comments nil)"])

@@ -342,6 +342,7 @@
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-c f ." 'find-file-at-point)
 (keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-x M-k" 'desktop-clear)
 ;; I don't like default window management keybindings so I set my own
 ;; They are inspired by Doom Emacs keybindings
 (keymap-global-set "C-c w j" 'windmove-down)
@@ -562,7 +563,11 @@ string specified by HEX."
           (load-theme 'ewal-doom-one t)
           (with-eval-after-load 'org
             (set-face-attribute 'org-scheduled-today nil :foreground
-                                (ewal--get-base-color 'green)))))
+                                (ewal--get-base-color 'green)))
+          (with-eval-after-load 'eww
+            (set-face-attribute
+             'eww-form-text nil :box
+             `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
       )
     )
   )
@@ -1304,6 +1309,9 @@ as you zoom text. It's fast, since no image regeneration is required."
   (c-set-offset 'substatement-open 0)
   )
 
+(use-package inf-lisp
+  :custom (inferior-lisp-program "sbcl"))
+
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
 (use-package bug-hunter)
@@ -1320,13 +1328,14 @@ as you zoom text. It's fast, since no image regeneration is required."
         (insert date))
       (save-excursion
         (goto-char (point-min))
-        (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
+        (when (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
           (delete-backward-char (length (thing-at-point 'symbol t)))
-          (insert date))
-    (when (buffer-modified-p)
+          (insert date)))
+      (when (buffer-modified-p)
         (let ((inhibit-message t))
-          (save-buffer))
-        (message (concat "Version updated to " date)))))
+          (if (yes-or-no-p "Save the file?")
+              (save-buffer))
+          (message (concat "Version updated to " date))))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 
 (use-package python
@@ -1639,6 +1648,12 @@ Also see `window-delete-popup-frame'." command)
   '("\\.m3u\\'")                   ; files for which to activate this mode
   nil                              ; other functions to call
   "A mode for M3U playlist files") ; doc string for this mode
+
+(with-eval-after-load 'nerd-icons
+  (add-to-list 'nerd-icons-mode-icon-alist
+               '(m3u-mode nerd-icons-faicon "nf-fa-play"))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("m3u" nerd-icons-faicon "nf-fa-play")))
 
 (unless (custom/termux-p)
   (use-package mb-transient

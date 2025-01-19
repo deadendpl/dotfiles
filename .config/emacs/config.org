@@ -79,6 +79,7 @@
     - [[#languages][Languages]]
       - [[#shells][Shells]]
       - [[#c][C++]]
+      - [[#lisp][Lisp]]
       - [[#elisp][Elisp]]
       - [[#python][Python]]
       - [[#web][Web]]
@@ -525,6 +526,7 @@ When doing big movements, I will get a flash at the current line.
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-c f ." 'find-file-at-point)
 (keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-x M-k" 'desktop-clear)
 ;; I don't like default window management keybindings so I set my own
 ;; They are inspired by Doom Emacs keybindings
 (keymap-global-set "C-c w j" 'windmove-down)
@@ -829,7 +831,11 @@ string specified by HEX."
           (load-theme 'ewal-doom-one t)
           (with-eval-after-load 'org
             (set-face-attribute 'org-scheduled-today nil :foreground
-                                (ewal--get-base-color 'green)))))
+                                (ewal--get-base-color 'green)))
+          (with-eval-after-load 'eww
+            (set-face-attribute
+             'eww-form-text nil :box
+             `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
       )
     )
   )
@@ -1734,6 +1740,11 @@ I don't use those much. I just have some files in my dotfiles in those languages
   (c-set-offset 'substatement-open 0)
   )
 #+end_src
+**** Lisp
+#+begin_src emacs-lisp
+(use-package inf-lisp
+  :custom (inferior-lisp-program "sbcl"))
+#+end_src
 **** Elisp
 #+begin_src emacs-lisp
 (defalias 'elisp-mode 'emacs-lisp-mode)
@@ -1757,13 +1768,14 @@ Quick version update.
         (insert date))
       (save-excursion
         (goto-char (point-min))
-        (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
+        (when (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
           (delete-backward-char (length (thing-at-point 'symbol t)))
-          (insert date))
-    (when (buffer-modified-p)
+          (insert date)))
+      (when (buffer-modified-p)
         (let ((inhibit-message t))
-          (save-buffer))
-        (message (concat "Version updated to " date)))))
+          (if (yes-or-no-p "Save the file?")
+              (save-buffer))
+          (message (concat "Version updated to " date))))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 #+end_src
 **** Python
@@ -2149,6 +2161,12 @@ A mode for m3u files
   '("\\.m3u\\'")                   ; files for which to activate this mode
   nil                              ; other functions to call
   "A mode for M3U playlist files") ; doc string for this mode
+
+(with-eval-after-load 'nerd-icons
+  (add-to-list 'nerd-icons-mode-icon-alist
+               '(m3u-mode nerd-icons-faicon "nf-fa-play"))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("m3u" nerd-icons-faicon "nf-fa-play")))
 #+end_src
 ** Local packages
 #+begin_src emacs-lisp

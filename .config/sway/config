@@ -202,10 +202,10 @@ mode "resize" {
     # right will grow the containers width
     # up will shrink the containers height
     # down will grow the containers height
-    $left resize shrink width 10px
-    $down resize grow height 10px
-    $up resize shrink height 10px
-    $right resize grow width 10px
+    Ctrl+h resize shrink width 10px
+    v resize grow height 10px
+    Ctrl+v resize shrink height 10px
+    h resize grow width 10px
 
     # Ditto, with arrow keys
     # bindsym             Left resize shrink width 10px
@@ -262,11 +262,11 @@ include {
 }
 
 # colors of borders
-# client.focused          $background $color11 $foreground
-# client.focused_inactive $background $background $foreground
-# client.unfocused        $background $background $foreground
-# client.urgent           $background $background $foreground
-# client.placeholder      $background $background $foreground
+client.focused          $background $color11 $foreground
+client.focused_inactive $background $background $foreground
+client.unfocused        $background $background $foreground
+client.urgent           $background $background $foreground
+client.placeholder      $background $background $foreground
 
 # setting background color in case wallpaper wouldn't cover whole screen
 # output * bg $background solid_color
