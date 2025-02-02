@@ -25,10 +25,10 @@
 
 (defvar custom/user-share-emacs-directory (expand-file-name "emacs" (xdg-data-home))
   "Directory to redirect cache/dump files.
-  Elisp packages cache folders/files normally clutter `user-emacs-directory'.
-  The same goes for some default files like bookmarks file.
-  In order to prevent that this variable exists.
-  Most of the stuff will get redirected here.")
+Elisp packages cache folders/files normally clutter `user-emacs-directory'.
+The same goes for some default files like bookmarks file.
+In order to prevent that this variable exists.
+Most of the stuff will get redirected here.")
 
 (setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory)
               auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
@@ -42,9 +42,9 @@
 
 (when (featurep 'native-compile)
   ;; Set the right directory to store the native compilation cache
-  (let ((path (expand-file-name "eln-cache/" custom/user-share-emacs-directory)))
-    (setq-default native-comp-eln-load-path (list path (cadr native-comp-eln-load-path))
-                  native-compile-target-directory path))
+  (let ((path (expand-file-name "eln-cache/"
+                                custom/user-share-emacs-directory)))
+    (startup-redirect-eln-cache path))
   ;; Silence compiler warnings as they can be disruptive
   (setq-default native-comp-async-report-warnings-errors nil
                 package-native-compile t))
@@ -538,12 +538,19 @@
     (use-package ewal-doom-themes
       :demand
       :config
-      (set-face-attribute 'line-number-current-line nil
-                          :foreground (ewal-load-color 'comment)
-                          :inherit 'default)
-      (set-face-attribute 'line-number nil
-                          :foreground (ewal--get-base-color 'green)
-                          :inherit 'default)
+      (defun ewal-line-number-setup (theme)
+        "Set line number face if THEME is ewal theme."
+        (if (eq theme 'ewal-doom-one)
+            (set-face-attribute 'line-number nil
+                                :foreground (ewal--get-base-color 'green)
+                                :inherit 'default)))
+
+      (defun set-comment-face-italic (&rest _)
+        (set-face-attribute 'font-lock-comment-face nil
+                            :slant 'italic))
+
+      (add-hook 'enable-theme-functions 'ewal-line-number-setup)
+      (add-hook 'enable-theme-functions 'set-comment-face-italic)
 
       (defun color-hex-to-rgb (hex)
         "Return list of red, green and blue colors for the hex color
@@ -555,7 +562,7 @@ string specified by HEX."
       (if (color-dark-p (mapcar (lambda (x)
                                   (/ x 255.0))
                                 (color-hex-to-rgb
-                                 (ewal-get-color 'background))))
+                                 (ewal-load-color 'background))))
           (load-theme 'ewal-doom-one t)
         (progn
           (setq ewal-doom-one-brighter-comments t
@@ -961,13 +968,18 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package org
   :config
-  (advice-add 'org-meta-return
-              :around (lambda (orig-fun &rest args)
-                        (if (or (org-at-item-checkbox-p)
-                                (ignore-errors (org-entry-is-todo-p)))
-                            (org-insert-todo-heading t)
-                          (apply orig-fun args))))
-  )
+  (defun org-insert-heading-dwim (orig-fun &rest args)
+    (cond
+     ((org-at-item-checkbox-p)
+      (org-insert-todo-heading t))
+     ((and (org-at-item-p)
+           (org-entry-is-todo-p))
+      (apply orig-fun args))
+     ((ignore-errors (org-entry-is-todo-p))
+      (org-insert-todo-heading t))
+     (t (apply orig-fun args))))
+
+  (advice-add 'org-meta-return :around 'org-insert-heading-dwim))
 
 (use-package org
   :bind ("C-c n a" . org-agenda)
@@ -1323,9 +1335,9 @@ as you zoom text. It's fast, since no image regeneration is required."
     (let ((date (format-time-string "%Y%m%d")))
       (save-excursion
         (goto-char (point-min))
-        (search-forward ";; Version: ")
-        (delete-region (point) (line-end-position))
-        (insert date))
+        (when (search-forward ";; Version: ")
+          (delete-region (point) (line-end-position))
+          (insert date)))
       (save-excursion
         (goto-char (point-min))
         (when (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
@@ -1334,8 +1346,8 @@ as you zoom text. It's fast, since no image regeneration is required."
       (when (buffer-modified-p)
         (let ((inhibit-message t))
           (if (yes-or-no-p "Save the file?")
-              (save-buffer))
-          (message (concat "Version updated to " date))))))
+              (save-buffer)))
+          (message (concat "Version updated to " date)))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 
 (use-package python

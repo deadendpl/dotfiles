@@ -74,7 +74,7 @@ bindsym {
   $mod+Slash          exec $scripts/web-search.sh
   $mod+Shift+Slash    exec $scripts/bookmarks.sh
   $mod+Alt+Slash      exec $scripts/bookmarking.sh
-  $mod+Alt+Shift+Slash exec $editor ~/Sync/foo/wazne/bookmarks
+  $mod+Alt+Shift+Slash exec $scripts/bookmarks-sort.sh
 
   $mod+F2             exec $scripts/volume.sh
   $mod+F7             exec networkmanager_dmenu
