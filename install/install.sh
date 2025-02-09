@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+sudo -v
+
 if pacman -Q bluez >> /dev/null; then
   echo "Bluetooth is set up."
 else
@@ -178,7 +180,6 @@ else
   sudo pip install modern_colorthief --break-system-packages
 
   wpg-install.sh -g
-  # mkdir -p "${HOME}/.config/presets/users"
 fi
 
 if pacman -Q picard >> /dev/null; then

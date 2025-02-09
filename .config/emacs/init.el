@@ -169,6 +169,25 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
 (keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
+(defun desktop-and-tabs-clear ()
+  "Clear desktop, close all tabs and open enlight."
+  (interactive)
+  (desktop-clear)
+  (let ((inhibit-message t))
+    (tab-close-other)
+    (enlight-open)))
+
+(keymap-global-set "C-x M-k" 'desktop-and-tabs-clear)
+
+(defun indent-dwim ()
+  "Indent whole buffer or region."
+  (interactive)
+  (if (use-region-p)
+      (call-interactively 'indent-region)
+    (indent-region (point-min) (point-max))))
+
+(keymap-global-set "<remap> <indent-region>" 'indent-dwim)
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -342,7 +361,6 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-c f ." 'find-file-at-point)
 (keymap-global-set "C-x K" 'kill-this-buffer)
-(keymap-global-set "C-x M-k" 'desktop-clear)
 ;; I don't like default window management keybindings so I set my own
 ;; They are inspired by Doom Emacs keybindings
 (keymap-global-set "C-c w j" 'windmove-down)
@@ -443,8 +461,7 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad")
-        ("Use C-M-\\ to indent whole buffer"))))))
+        ("Use C-. in insert mode to access meow-keypad"))))))
   )
 
 (use-package ligature
@@ -453,19 +470,21 @@ Most of the stuff will get redirected here.")
   :config
   (ligature-set-ligatures 't '("www"))
   ;; Enable ligatures in programming modes
-  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!="
-  "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***"
-  ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>"
-  "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##"
-  "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^="
-  "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>"
-  "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<=="
-  "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<"
-  ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~"
-  "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>"
-  "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::"
-  ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/=="
-  "@_" "__" "???" "<:<" ";;;")))
+  (ligature-set-ligatures
+   'prog-mode
+   '("--" "---" "==" "===" "!="
+     "!==" "=!=" "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***"
+     ";;" "!!" "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>"
+     "<<<" ">>>" "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##"
+     "###" "####" "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^="
+     "<$>" "<$" "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>"
+     "<!--" "<#--" "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<=="
+     "<=>" "<==>" "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<"
+     ">->" "<-<" "<-|" "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~"
+     "~~>" "~>" "~-" "-~" "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>"
+     "<|" "||>" "<||" "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::"
+     ":::" ":=" "::=" ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/=="
+     "@_" "__" "???" "<:<" ";;;")))
 
 (use-package hl-todo
   :hook ((org-mode prog-mode) . hl-todo-mode)
@@ -479,7 +498,12 @@ Most of the stuff will get redirected here.")
      ("NOTE"       success bold)
      ("DEPRECATED" font-lock-doc-face bold))))
 
-(use-package nerd-icons)
+(use-package nerd-icons
+  :config
+  (add-to-list 'nerd-icons-mode-icon-alist
+               '(lisp-data-mode nerd-icons-sucicon
+                                "nf-custom-scheme"
+                                :face nerd-icons-orange)))
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode)
@@ -1347,7 +1371,7 @@ as you zoom text. It's fast, since no image regeneration is required."
         (let ((inhibit-message t))
           (if (yes-or-no-p "Save the file?")
               (save-buffer)))
-          (message (concat "Version updated to " date)))))
+        (message (concat "Version updated to " date)))))
   (keymap-set emacs-lisp-mode-map "C-c C-u" #'elisp-version-update))
 
 (use-package python
@@ -1379,29 +1403,37 @@ using `browse-url'."
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
   ;; :custom (css-indent-offset 2)
-  :bind (:map html-mode-map
-              (">" . html-close-tag))
   :config
-  (defun html-close-tag (point)
-    "Inserts >, closes tag, and moves to the inserted >.
+  (defun html-close-tag ()
+    "Closes tag.
+The tag is closed if the last typed character was > and if there
+were no > before it.
 It doesn't close empty tags."
-    (interactive "d")
-    (insert ?>)
-    (let ((current-point (point))
-          ;; `sgml-close-tag' does some indenting
-          ;; so I disable indenting
-          (indent-line-function 'ignore)
-          (indent-region-function 'ignore)
-          (tag (save-excursion
-                 (search-backward "<")
-                 (forward-char)
-                 (current-word))))
-      (unless (member tag html-empty-tag-list)
-        (sgml-close-tag))
-      (goto-char current-point)))
+    (interactive)
+    (if (eql last-command-event ?>)
+        (unless (eql (save-excursion
+                       (backward-char)
+                       (char-before))
+                     ?>)
+          (let ((current-point (point))
+                ;; `sgml-close-tag' does some indenting
+                ;; so I disable indenting
+                (indent-line-function 'ignore)
+                (indent-region-function 'ignore)
+                (tag (save-excursion
+                       (search-backward "<")
+                       (forward-char)
+                       (current-word))))
+            (unless (member tag html-empty-tag-list)
+              (sgml-close-tag))
+            (goto-char current-point)))))
+  (add-hook 'html-mode-hook (lambda ()
+                              (add-hook 'post-self-insert-hook
+                                        'html-close-tag nil t)))
 
   (defvar html-empty-tag-list
-    '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen" "link" "meta" "param" "source" "track" "wbr")
+    '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen"
+      "link" "meta" "param" "source" "track" "wbr")
     "List of empty HTML tags.")
   )
 
@@ -1436,12 +1468,12 @@ It doesn't close empty tags."
         (mapcar #'car treesit-language-source-alist)))
 
 (setq major-mode-remap-alist
- '((c-or-c++-mode . c-or-c++-ts-mode)
-   (c++-mode . c++-ts-mode)
-   (css-mode . css-ts-mode)
-   (python-mode . python-ts-mode)
-   (sh-mode . bash-ts-mode)
-   (js-json-mode . json-ts-mode)))
+      '((c-or-c++-mode . c-or-c++-ts-mode)
+        (c++-mode . c++-ts-mode)
+        (css-mode . css-ts-mode)
+        (python-mode . python-ts-mode)
+        (sh-mode . bash-ts-mode)
+        (js-json-mode . json-ts-mode)))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -1456,7 +1488,7 @@ It doesn't close empty tags."
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
-)
+  )
 
 )
 
@@ -1663,9 +1695,9 @@ Also see `window-delete-popup-frame'." command)
 
 (with-eval-after-load 'nerd-icons
   (add-to-list 'nerd-icons-mode-icon-alist
-               '(m3u-mode nerd-icons-faicon "nf-fa-play"))
+               '(m3u-mode nerd-icons-faicon "nf-fa-play" :face nerd-icons-dred))
   (add-to-list 'nerd-icons-extension-icon-alist
-               '("m3u" nerd-icons-faicon "nf-fa-play")))
+               '("m3u" nerd-icons-faicon "nf-fa-play" :face nerd-icons-dred)))
 
 (unless (custom/termux-p)
   (use-package mb-transient
@@ -1721,3 +1753,28 @@ Also see `window-delete-popup-frame'." command)
       )
     )
   )
+
+(defun anilist-get-weekly-progress ()
+  "Create a buffer with last week activity on AniList."
+  (interactive)
+  (let ((query
+         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native userPreferred } } progress status type } } } }\", \"variables\": {}}"
+                 (let ((one-week-ago (time-subtract (current-time)
+                                                    (days-to-time 7))))
+                   (format-time-string "%s" one-week-ago)))))
+    (let ((buffer (generate-new-buffer "anilist-weekly-progress")))
+      (with-current-buffer buffer
+        (lisp-data-mode)
+        (call-process
+         "curl" nil t nil "-s"
+         "-X" "POST"
+         "--header" "Content-Type: application/json"
+         "--data" query
+         "--url" "https://graphql.anilist.co")
+        (goto-char (point-min))
+        (let ((out (json-read)))
+          (goto-char (point-max))
+          (delete-backward-char (buffer-size))
+          (save-excursion
+            (pp out buffer))))
+      (switch-to-buffer-other-window buffer))))

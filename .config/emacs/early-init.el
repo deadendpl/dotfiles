@@ -14,7 +14,8 @@
   (add-hook 'after-init-hook
             `(lambda ()
                (setq gc-cons-percentage ,default-gc-percentage
-                     gc-cons-threshold ,default-gc-threshold))))
+                     gc-cons-threshold ,default-gc-threshold))
+            100)) ; add to the end of the list
 
 ;; Faster to disable these here (before they've been initialized)
 (push '(menu-bar-lines . 0) default-frame-alist)

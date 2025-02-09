@@ -13,7 +13,7 @@ scale = optimal
 # Window background mode/color (none or RGB, e.g. #112233)
 # background = none
 # Anti-aliasing
-antialiasing = no
+antialiasing = none
 # Slideshow image duration in seconds
 slideshow = no
 slideshow_time = 3
