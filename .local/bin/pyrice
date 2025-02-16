@@ -146,13 +146,13 @@ def afterwards():
 
   if waybarp == False:
     subprocess.Popen(["waybar"])
-
-  # reloading waybar css
-  # touch isn't enough for waybar to reload css, so
-  # I add new line to the css file and delete it
-  waybar_file = os.environ["XDG_CONFIG_HOME"] + "/waybar/style.css"
-  subprocess.run(["sed", "-i", "1i\\\\", waybar_file])
-  subprocess.run(["sed", "-i", "1d", waybar_file])
+  else:
+    # reloading waybar css
+    # touch isn't enough for waybar to reload css, so
+    # I add new line to the css file and delete it
+    waybar_file = os.environ["XDG_CONFIG_HOME"] + "/waybar/style.css"
+    subprocess.run(["sed", "-i", "1i\\\\", waybar_file])
+    subprocess.run(["sed", "-i", "1d", waybar_file])
 
   # swaync
   subprocess.Popen(["swaync-client", "-rs"])

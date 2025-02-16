@@ -169,13 +169,17 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
 (keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
-(defun desktop-and-tabs-clear ()
-  "Clear desktop, close all tabs and open enlight."
-  (interactive)
+(defun desktop-and-tabs-clear (arg)
+  "Clear desktop, close all tabs."
+  (interactive "P")
+  (if arg
+      (emacs-lock-mode 'kill))
   (desktop-clear)
   (let ((inhibit-message t))
     (tab-close-other)
-    (enlight-open)))
+    (if arg
+        (setq emacs-lock-mode nil)
+      (enlight-open))))
 
 (keymap-global-set "C-x M-k" 'desktop-and-tabs-clear)
 
@@ -503,7 +507,11 @@ Most of the stuff will get redirected here.")
   (add-to-list 'nerd-icons-mode-icon-alist
                '(lisp-data-mode nerd-icons-sucicon
                                 "nf-custom-scheme"
-                                :face nerd-icons-orange)))
+                                :face nerd-icons-orange))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("desktop" nerd-icons-faicon
+                 "nf-fa-desktop"
+                 :face nerd-icons-dorange)))
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode)
@@ -562,18 +570,21 @@ Most of the stuff will get redirected here.")
     (use-package ewal-doom-themes
       :demand
       :config
-      (defun ewal-line-number-setup (theme)
-        "Set line number face if THEME is ewal theme."
-        (if (eq theme 'ewal-doom-one)
-            (set-face-attribute 'line-number nil
-                                :foreground (ewal--get-base-color 'green)
-                                :inherit 'default)))
+      (defun ewal-setup (theme)
+        "Set some faces if THEME is ewal theme."
+        (when (eq theme 'ewal-doom-one)
+          (set-face-attribute 'line-number nil
+                              :foreground (ewal--get-base-color 'green)
+                              :inherit 'default)
+          (with-eval-after-load 'org
+            (set-face-attribute 'org-scheduled-today nil :foreground
+                                (ewal--get-base-color 'green)))))
 
       (defun set-comment-face-italic (&rest _)
         (set-face-attribute 'font-lock-comment-face nil
                             :slant 'italic))
 
-      (add-hook 'enable-theme-functions 'ewal-line-number-setup)
+      (add-hook 'enable-theme-functions 'ewal-setup)
       (add-hook 'enable-theme-functions 'set-comment-face-italic)
 
       (defun color-hex-to-rgb (hex)
@@ -592,9 +603,7 @@ string specified by HEX."
           (setq ewal-doom-one-brighter-comments t
                 ewal-doom-one-comment-bg nil)
           (load-theme 'ewal-doom-one t)
-          (with-eval-after-load 'org
-            (set-face-attribute 'org-scheduled-today nil :foreground
-                                (ewal--get-base-color 'green)))
+
           (with-eval-after-load 'eww
             (set-face-attribute
              'eww-form-text nil :box
@@ -803,6 +812,11 @@ Handles symbols that start or end with a single quote (') correctly."
                      (substring sym 1)) ; Remove leading '
                     ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
                      (substring sym 0 -1)) ; Remove trailing '
+                    ;; is in org mode and is surrounded by =
+                    ((and (eq major-mode 'org-mode)
+                          (and (char-equal ?= (aref sym 0))
+                               (char-equal ?= (aref sym (1- (length sym))))))
+                     (substring sym 1 -1))
                     (t sym)))) ; No changes needed
           (helpful-symbol (intern sym)))
       (message "No symbol found at point!")))
@@ -1011,13 +1025,13 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom
   (org-agenda-block-separator 8411)
   (org-agenda-category-icon-alist
-   `(("tech" ,(list (nerd-icons-mdicon "nf-md-laptop" :height 1.5))
+   `(("tech" (,(nerd-icons-mdicon "nf-md-laptop" :height 1.5))
       nil nil :ascent center)
-     ("school" ,(list (nerd-icons-mdicon "nf-md-school" :height 1.5))
+     ("school" (,(nerd-icons-mdicon "nf-md-school" :height 1.5))
       nil nil :ascent center)
-     ("personal" ,(list (nerd-icons-mdicon "nf-md-drama_masks" :height 1.5))
+     ("personal" (,(nerd-icons-mdicon "nf-md-drama_masks" :height 1.5))
       nil nil :ascent center)
-     ("content" ,(list (nerd-icons-faicon "nf-fae-popcorn" :height 1.5))
+     ("content" (,(nerd-icons-faicon "nf-fae-popcorn" :height 1.5))
       nil nil :ascent center)))
   (org-agenda-columns-add-appointments-to-effort-sum t)
   (org-agenda-custom-commands
@@ -1254,7 +1268,8 @@ as you zoom text. It's fast, since no image regeneration is required."
          ("C-c n r"   . org-roam-ref-add)
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
-         ("C-c n T"   . org-roam-tag-remove))
+         ("C-c n T"   . org-roam-tag-remove)
+         :map org-mode-map ("C-c C-S-l" . org-move-file-and-insert-link))
   :preface
   (defun custom/org-roam-notes-dired ()
     "Opens org-roam-directory in `dired'."
@@ -1271,6 +1286,14 @@ as you zoom text. It's fast, since no image regeneration is required."
     "Add ID properties to all headlines in the current file."
     (interactive)
     (org-map-entries 'org-id-get-create))
+  (defun org-move-file-and-insert-link (file)
+    "Move FILE to attachment directory and link to it."
+    (interactive "fFile: ")
+    (let ((new-file (concat (expand-file-name "attachments/"
+                                              org-roam-directory)
+                            (file-name-nondirectory file))))
+      (rename-file file new-file 1)
+      (org-insert-link nil (format "file:%s" new-file))))
   )
 
 (use-package consult-org-roam
@@ -1319,10 +1342,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 - The current file gets executed"
     (if buffer-file-name
         (setq-local compile-command
-                    (concat "chmod +x "
-                            (shell-quote-argument (buffer-file-name))
-                            " && "
-                            (shell-quote-argument (buffer-file-name))))))
+                    (shell-quote-argument (buffer-file-name)))))
   :custom (sh-basic-offset 2)
   )
 
@@ -1335,7 +1355,9 @@ as you zoom text. It's fast, since no image regeneration is required."
 - The current file gets compiled using g++
 - The compiled file gets executed"
     (if buffer-file-name
-        (setq-local compile-command (concat "g++ " (shell-quote-argument (buffer-file-name)) " && ./a.out"))))
+        (setq-local compile-command
+                    (concat "g++ "(shell-quote-argument
+                                   (buffer-file-name)) " && ./a.out"))))
   :config
   ;; this is for indenting
   (c-set-offset 'comment-intro 0)
@@ -1346,7 +1368,7 @@ as you zoom text. It's fast, since no image regeneration is required."
   )
 
 (use-package inf-lisp
-  :custom (inferior-lisp-program "sbcl"))
+  :custom (inferior-lisp-program "sbcl --noinform"))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
@@ -1359,12 +1381,12 @@ as you zoom text. It's fast, since no image regeneration is required."
     (let ((date (format-time-string "%Y%m%d")))
       (save-excursion
         (goto-char (point-min))
-        (when (search-forward ";; Version: ")
+        (when (ignore-errors (search-forward ";; Version: "))
           (delete-region (point) (line-end-position))
-          (insert date)))
-      (save-excursion
+          (insert date))
         (goto-char (point-min))
-        (when (ignore-errors (re-search-forward "^(def\\(var\\|const\\).*[0-9]"))
+        (when (ignore-errors (re-search-forward
+                              "^(def\\(var\\|const\\).*[0-9]"))
           (delete-backward-char (length (thing-at-point 'symbol t)))
           (insert date)))
       (when (buffer-modified-p)
@@ -1488,7 +1510,14 @@ It doesn't close empty tags."
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
-  )
+  (add-to-list 'auto-insert-alist '("\\.user.js\\'" . "userscript.js")))
+
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (add-hook
+             'before-save-hook
+             'executable-make-buffer-file-executable-if-script-p
+             nil t)))
 
 )
 
@@ -1752,6 +1781,15 @@ Also see `window-delete-popup-frame'." command)
                      `(,func (vertico-sort-function . nil))))
       )
     )
+
+  (use-package web-bookmarks
+    :load-path "~/dev/emacs-web-bookmarks/"
+    :custom (web-bookmarks-file "~/Sync/foo/wazne/bookmarks-for-emacs.csv")
+    :commands (web-bookmarks-open)
+    :init
+    (window-define-with-popup-frame web-bookmarks-open)
+    (advice-add 'window-popup-web-bookmarks-open :after
+                'window-delete-popup-frame))
   )
 
 (defun anilist-get-weekly-progress ()

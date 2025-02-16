@@ -17,6 +17,14 @@
                      gc-cons-threshold ,default-gc-threshold))
             100)) ; add to the end of the list
 
+;; also improves startup time
+(let ((old-list file-name-handler-alist))
+  (setq file-name-handler-alist nil)
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (setq file-name-handler-alist ',old-list))
+            100))
+
 ;; Faster to disable these here (before they've been initialized)
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)

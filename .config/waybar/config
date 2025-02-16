@@ -12,10 +12,10 @@
     "wlr/taskbar",
   ],
 
-  "modules-center": [
+  // "modules-center": [
     // "hyprland/window",
-    "sway/window",
-  ],
+    // "sway/window",
+  // ],
 
   "modules-right": [
     "tray",
