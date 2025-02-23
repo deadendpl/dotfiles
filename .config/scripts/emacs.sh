@@ -5,13 +5,18 @@ if [ "$DESKTOP_SESSION" ]; then
 fi
 
 if pgrep "emacs" > /dev/null; then
-  emacsclient -e '(kill-emacs nil t)'
+  pkill emacs
   emacs_killed=1
-  sleep 1.7
 fi
 
-# emacs --daemon
-notify-send -i emacs "Emacs has re/started."
-if [ "$emacs_killed" = 1 ] && [ "$gui" = 1 ]; then
-  emacsclient -c
+if [ "$emacs_killed" = 1 ]; then
+  while pgrep "emacs" > /dev/null; do
+    sleep 0.05
+  done
 fi
+
+emacs --daemon
+if [ "$emacs_killed" = 1 ] && [ "$gui" = 1 ]; then
+  emacsclient -c &
+fi
+notify-send -i emacs "Emacs has re/started."

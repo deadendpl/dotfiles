@@ -23,31 +23,45 @@
 
 (require 'xdg)
 
-(defvar custom/user-share-emacs-directory (expand-file-name "emacs" (xdg-data-home))
+(defvar custom/user-share-emacs-directory
+  (expand-file-name"emacs" (xdg-data-home))
   "Directory to redirect cache/dump files.
-Elisp packages cache folders/files normally clutter `user-emacs-directory'.
-The same goes for some default files like bookmarks file.
-In order to prevent that this variable exists.
+Elisp packages cache folders/files normally clutter
+`user-emacs-directory'. The same goes for some default files like
+bookmarks file. In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
-(setq-default bookmark-default-file (expand-file-name "bookmarks" custom/user-share-emacs-directory)
-              auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" custom/user-share-emacs-directory)
-              custom-file (expand-file-name "custom.el" custom/user-share-emacs-directory) ; custom settings that emacs autosets
-              backup-directory-alist '((".*" . "~/.local/share/Trash/files")) ; moving backup files to trash directory
-              tramp-persistency-file-name (expand-file-name "tramp" custom/user-share-emacs-directory)
-              save-place-file (expand-file-name "places" custom/user-share-emacs-directory)
-              url-configuration-directory (expand-file-name "url" custom/user-share-emacs-directory) ; cache from urls (eww)
-              multisession-directory (expand-file-name "multisession" custom/user-share-emacs-directory)
-              request-storage-directory (expand-file-name "request" custom/user-share-emacs-directory))
+(setq-default
+ bookmark-default-file
+ (expand-file-name "bookmarks" custom/user-share-emacs-directory)
+ auto-save-list-file-prefix
+ (expand-file-name "auto-save-list/.saves-"
+                   custom/user-share-emacs-directory)
+ ;; custom settings that emacs autosets
+ custom-file
+ (expand-file-name "custom.el" custom/user-share-emacs-directory)
+ ;; moving backup files to trash directory
+ backup-directory-alist '((".*" . "~/.local/share/Trash/files"))
+ tramp-persistency-file-name
+ (expand-file-name "tramp" custom/user-share-emacs-directory)
+ save-place-file
+ (expand-file-name "places" custom/user-share-emacs-directory)
+ ;; cache from urls (eww)
+ url-configuration-directory
+ (expand-file-name "url" custom/user-share-emacs-directory)
+ multisession-directory
+ (expand-file-name "multisession" custom/user-share-emacs-directory)
+ request-storage-directory
+ (expand-file-name "request" custom/user-share-emacs-directory))
 
-(when (featurep 'native-compile)
+(when (and (featurep 'native-compile)
+           package-native-compile)
   ;; Set the right directory to store the native compilation cache
   (let ((path (expand-file-name "eln-cache/"
                                 custom/user-share-emacs-directory)))
     (startup-redirect-eln-cache path))
   ;; Silence compiler warnings as they can be disruptive
-  (setq-default native-comp-async-report-warnings-errors nil
-                package-native-compile t))
+  (setq-default native-comp-async-report-warnings-errors nil))
 
 (setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
@@ -93,7 +107,11 @@ Most of the stuff will get redirected here.")
 
 ;; showing init time in scratch buffer
 (if (custom/termux-p)
-    (add-hook 'after-init-hook (lambda () (setq initial-scratch-message (concat "Initialization time: " (emacs-init-time)))))
+    (add-hook
+     'after-init-hook
+     (lambda ()
+       (setq initial-scratch-message
+             (concat "Initialization time: " (emacs-init-time)))))
   (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
@@ -337,7 +355,8 @@ Most of the stuff will get redirected here.")
                        (point))))
       (save-excursion
         (kill-ring-save (point) end-point))))
-  (add-to-list 'meow-selection-command-fallback '(meow-save . kill-ring-save-visual-line)))
+  (add-to-list 'meow-selection-command-fallback
+               '(meow-save . kill-ring-save-visual-line)))
 
 (use-package pulse
   :config
@@ -364,7 +383,7 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 (keymap-global-set "C-c f c" 'custom/find-config-file)
 (keymap-global-set "C-c f ." 'find-file-at-point)
-(keymap-global-set "C-x K" 'kill-this-buffer)
+(keymap-global-set "C-x K" 'kill-current-buffer)
 ;; I don't like default window management keybindings so I set my own
 ;; They are inspired by Doom Emacs keybindings
 (keymap-global-set "C-c w j" 'windmove-down)
@@ -507,11 +526,7 @@ Most of the stuff will get redirected here.")
   (add-to-list 'nerd-icons-mode-icon-alist
                '(lisp-data-mode nerd-icons-sucicon
                                 "nf-custom-scheme"
-                                :face nerd-icons-orange))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("desktop" nerd-icons-faicon
-                 "nf-fa-desktop"
-                 :face nerd-icons-dorange)))
+                                :face nerd-icons-orange)))
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode)
@@ -526,8 +541,7 @@ Most of the stuff will get redirected here.")
     (advice-add func :after
                 (lambda ()
                   (unless nerd-icons-dired-mode
-                    (nerd-icons-dired-mode 1)))))
-  )
+                    (nerd-icons-dired-mode 1))))))
 
 (use-package nerd-icons-ibuffer
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
@@ -873,7 +887,8 @@ Handles symbols that start or end with a single quote (') correctly."
    'magit-display-buffer-fullframe-status-topleft-v1)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
-                                  ("~/dev" . 1))))
+                                  ("~/dev" . 1)))
+  (magit-format-file-function #'magit-format-file-nerd-icons))
 
 (use-package transient
   :custom
@@ -1011,7 +1026,7 @@ Handles symbols that start or end with a single quote (') correctly."
      ((org-at-item-checkbox-p)
       (org-insert-todo-heading t))
      ((and (org-at-item-p)
-           (org-entry-is-todo-p))
+           (ignore-errors (org-entry-is-todo-p)))
       (apply orig-fun args))
      ((ignore-errors (org-entry-is-todo-p))
       (org-insert-todo-heading t))
@@ -1078,12 +1093,12 @@ Handles symbols that start or end with a single quote (') correctly."
                   org-refile
                   org-agenda-do-date-later
                   org-agenda-do-date-earlier
-                  org-archive-subtree))
+                  org-archive-subtree
+                  org-agenda-refile))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
-                    (org-agenda-save-buffers)))))
-  )
+                    (org-agenda-save-buffers))))))
 
 (use-package org
   :custom
@@ -1221,7 +1236,6 @@ as you zoom text. It's fast, since no image regeneration is required."
   :hook (org-mode . org-auto-tangle-mode))
 
 (use-package org-roam
-  ;; :after org
   :init
   (setq org-roam-v2-ack t)
   (if (custom/termux-p)
@@ -1533,7 +1547,9 @@ It doesn't close empty tags."
 (use-package eshell
   ;; :hook
   ;; (eshell-mode . (lambda () (setq mode-line-format nil)))
-  :bind (("C-c s e" . eshell))
+  :bind (("C-c s e" . eshell)
+         :map eshell-mode-map
+         ("C-d" . eshell-quit-or-delete-char))
   :custom
   (eshell-directory-name
    (expand-file-name "eshell" user-emacs-directory))
@@ -1555,7 +1571,13 @@ It doesn't close empty tags."
   (eshell-banner-message "")
   :config
   ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
-  (add-to-list 'meow-mode-state-list '(eshell-mode . insert)))
+  (add-to-list 'meow-mode-state-list '(eshell-mode . insert))
+  (defun eshell-quit-or-delete-char (arg)
+    (interactive "p")
+    (if (and (eolp) (looking-back eshell-prompt-regexp))
+        (progn
+          (eshell-life-is-too-much))
+      (delete-forward-char arg))))
 
 (use-package eshell-syntax-highlighting
   :hook (eshell-mode . eshell-syntax-highlighting-mode))
@@ -1598,8 +1620,7 @@ It doesn't close empty tags."
     (interactive)
     (org-narrow-to-subtree)
     (org-fold-show-all)
-    (reverso-grammar-buffer)
-    )
+    (reverso-grammar-buffer))
   :config
   (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 
@@ -1718,15 +1739,14 @@ Also see `window-delete-popup-frame'." command)
   '(("^#EXTINF" . 'font-lock-keyword-face)
     ;; highlight file extensions as strings
     ("\\.[A-Za-z0-9_]*$" . 'font-lock-string-face))
-  '("\\.m3u\\'")                   ; files for which to activate this mode
-  nil                              ; other functions to call
+  '("\\.m3u\\'" "\\.m3u8\\'")      ; files for which to activate this mode
+  '((lambda () (setq mode-name "M3U"))) ; other functions to call
   "A mode for M3U playlist files") ; doc string for this mode
-
 (with-eval-after-load 'nerd-icons
   (add-to-list 'nerd-icons-mode-icon-alist
-               '(m3u-mode nerd-icons-faicon "nf-fa-play" :face nerd-icons-dred))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("m3u" nerd-icons-faicon "nf-fa-play" :face nerd-icons-dred)))
+               '(m3u-mode nerd-icons-mdicon
+                          "nf-md-playlist_music_outline"
+                          :face nerd-icons-dred)))
 
 (unless (custom/termux-p)
   (use-package mb-transient
@@ -1740,8 +1760,7 @@ Also see `window-delete-popup-frame'." command)
     :commands (mb-transient)
     :config
     (add-to-list 'vertico-multiform-commands
-                 '(mb-transient--search (vertico-sort-function . nil)))
-    )
+                 '(mb-transient--search (vertico-sort-function . nil))))
 
   (use-package mb-search
     :load-path "~/dev/emacs-mb-search/"
@@ -1778,19 +1797,7 @@ Also see `window-delete-popup-frame'." command)
                       mb-search-url
                       mb-search-work))
         (add-to-list 'vertico-multiform-commands
-                     `(,func (vertico-sort-function . nil))))
-      )
-    )
-
-  (use-package web-bookmarks
-    :load-path "~/dev/emacs-web-bookmarks/"
-    :custom (web-bookmarks-file "~/Sync/foo/wazne/bookmarks-for-emacs.csv")
-    :commands (web-bookmarks-open)
-    :init
-    (window-define-with-popup-frame web-bookmarks-open)
-    (advice-add 'window-popup-web-bookmarks-open :after
-                'window-delete-popup-frame))
-  )
+                     `(,func (vertico-sort-function . nil)))))))
 
 (defun anilist-get-weekly-progress ()
   "Create a buffer with last week activity on AniList."
@@ -1811,6 +1818,12 @@ Also see `window-delete-popup-frame'." command)
          "--url" "https://graphql.anilist.co")
         (goto-char (point-min))
         (let ((out (json-read)))
+          ;; converting unix timestamps to normal dates
+          (mapcar
+           (lambda (item)
+             (setcdr (car item)
+                     (format-time-string "%Y-%m-%d" (cdr (car item)))))
+           (append (cdar (cdadar out)) nil))
           (goto-char (point-max))
           (delete-backward-char (buffer-size))
           (save-excursion

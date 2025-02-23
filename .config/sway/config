@@ -72,7 +72,7 @@ bindsym {
   $mod+q              kill
 
   $mod+Slash          exec $scripts/web-search.sh
-  $mod+Shift+Slash    exec emacsclient -e '(window-popup-web-bookmarks-open)'
+  $mod+Shift+Slash    exec rofi-bookmarks ~/Sync/foo/wazne/bookmarks-for-emacs.tsv
   $mod+Alt+Slash      exec $scripts/bookmarking.sh
   $mod+Alt+Shift+Slash exec $scripts/bookmarks-sort.sh
 

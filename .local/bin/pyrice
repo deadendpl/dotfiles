@@ -105,6 +105,17 @@ def gradience_wrap():
                   os.environ["XDG_CONFIG_HOME"] + "/presets/user/pywal.json")
   subprocess.Popen(["gradience-cli", "apply", "-n", "pywal", "--gtk", "gtk4"])
 
+def gtk2_icon_setup():
+  if os.environ["GTK2_RC_FILES"]:
+    path = os.environ["GTK2_RC_FILES"]
+  else:
+    path = os.environ["XDG_CONFIG_HOME"] + "/gtk-2.0/gtkrc"
+  if os.path.exists(path):
+    if args.light:
+      subprocess.Popen(["sed", "-i", "s/Papirus-Dark/Papirus-Light/g", path])
+    else:
+      subprocess.Popen(["sed", "-i", "s/Papirus-Light/Papirus-Dark/g", path])
+
 def afterwards():
   # swaybg setup and waybar
   waybarp = False
@@ -171,6 +182,7 @@ def afterwards():
   subprocess.Popen(["notify-send", "New rice applied"])
 
   gradience_wrap()
+  gtk2_icon_setup()
 
 pywal_run()
 afterwards()

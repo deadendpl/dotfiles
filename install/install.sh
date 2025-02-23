@@ -195,7 +195,8 @@ else
                      nicotine+ \
                      xdg-ninja \
                      otf-ipaexfont \
-                     playerctl
+                     playerctl \
+                     ntfs-3g
                      # syncthing-gtk
 fi
 

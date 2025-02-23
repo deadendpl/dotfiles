@@ -2,8 +2,7 @@
       auto-mode-case-fold nil
       package-native-compile t
       default-directory "~/"
-      use-package-enable-imenu-support t
-      )
+      use-package-enable-imenu-support t)
 
 ;; improving startup with setting garbage collection
 ;; https://codeberg.org/zyd/dotfiles/src/commit/e2deef9551ec259e62e19abe3a9b86feb4a5c870/emacs.d/early-init.el
