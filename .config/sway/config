@@ -190,28 +190,15 @@ bindsym {
   # mouse button for dragging.
   floating_modifier   $mod normal
 
-
-  # Exit sway (logs you out of your Wayland session)
-  # bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 #
 # Resizing containers:
 #
 mode "resize" {
   bindsym {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
     Ctrl+h resize shrink width 10px
     v resize grow height 10px
     Ctrl+v resize shrink height 10px
     h resize grow width 10px
-
-    # Ditto, with arrow keys
-    # bindsym             Left resize shrink width 10px
-    # bindsym             Down resize grow height 10px
-    # bindsym             Up resize shrink height 10px
-    # bindsym             Right resize grow width 10px
 
     # Return to default mode
     Return mode "default"

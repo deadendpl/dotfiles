@@ -1,3 +1,5 @@
+import subprocess
+
 # Change the argument to True to still load settings configured via autoconfig.yml
 config.load_autoconfig(False)
 
@@ -29,8 +31,18 @@ c.url.start_pages = '~/.config/qutebrowser/start/start.html'
 c.url.default_page = '~/.config/qutebrowser/start/start.html'
 
 # dark mode
-# c.colors.webpage.darkmode.enabled = True
-c.colors.webpage.preferred_color_scheme = "dark"
+def set_dark_theme():
+  preffered_theme = subprocess.run(
+    ["gsettings", "get",
+     "org.gnome.desktop.interface", "color-scheme"],
+    capture_output = True, text = True).stdout
+  if preffered_theme == "'prefer-light'\n":
+    c.colors.webpage.darkmode.enabled = False
+  else:
+    c.colors.webpage.darkmode.enabled = True
+
+set_dark_theme()
+c.colors.webpage.preferred_color_scheme = "auto"
 c.colors.webpage.darkmode.policy.images = "smart"
 c.colors.webpage.darkmode.policy.page = "smart"
 

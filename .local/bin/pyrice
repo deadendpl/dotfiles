@@ -121,6 +121,7 @@ def afterwards():
   waybarp = False
   emacsp = False
   swaybgp = False
+  qutebrowserp = False
   for proc in psutil.process_iter(attrs=["pid", "name"]):
     if proc.info["name"] == "swaybg":
       if args.old != True:
@@ -134,6 +135,8 @@ def afterwards():
       emacsp = True
     elif proc.info["name"] == "sway":
       swayp = True
+    elif proc.info["name"] == "qutebrowser":
+      qutebrowserp = True
 
   # sway
   if swayp:
@@ -178,6 +181,9 @@ def afterwards():
       subprocess.run(["emacsclient", "-e",
                         "(setq ewal-doom-one-brighter-comments nil)"])
     subprocess.Popen(["emacsclient", "-e", "(load-theme 'ewal-doom-one t)"])
+
+  if qutebrowserp:
+    subprocess.Popen(["qutebrowser", ":config-source"])
 
   subprocess.Popen(["notify-send", "New rice applied"])
 

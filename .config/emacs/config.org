@@ -59,7 +59,7 @@
   - [[#org-mode][Org Mode]]
     - [[#initial-tweaks][Initial tweaks]]
     - [[#following-links-in-a-table][Following links in a table]]
-    - [[#automatic-todo-inserting][Automatic TODO inserting]]
+    - [[#dwim-inserting-behaviour][DWIM inserting behaviour]]
     - [[#agenda-settings][Agenda settings]]
     - [[#saving-agenda-files][Saving agenda files]]
     - [[#export-settings][Export settings]]
@@ -92,7 +92,6 @@
       - [[#startup-templates][Startup templates]]
       - [[#command-templates][Command templates]]
     - [[#making-file-executable-if-its-a-script][Making file executable if it's a script]]
-    - [[#the-end][The end]]
   - [[#shells-and-terminals][Shells and terminals]]
     - [[#shell][Shell]]
     - [[#eshell][Eshell]]
@@ -113,7 +112,7 @@ Credits to:
 - System Crafters with his Emacs from Scratch [[https://youtube.com/playlist?list=PLEoMzSkcN8oPH1au7H6B7bBJ4ZO7BXjSZ][videos]] and [[https://systemcrafters.net/emacs-from-scratch/][web articles]]
 - [[https://sachachua.com/blog/][Sacha Chua]] for giving sum of Emacs news and content per week
 
-This config is used on Emacs _29.4_ and is intended for use with that version.
+This config is used on Emacs _30.1_ and is intended for use with that version.
 * Early Init
 #+begin_src emacs-lisp :tangle early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
@@ -153,22 +152,21 @@ This config is used on Emacs _29.4_ and is intended for use with that version.
 ** Sane defaults (and other)
 Here are some tweaks that idk where to put.
 *** Termux check
-I'll disable some stuff for Termux specifically so I create a function that checks if I'm on Termux.
+I'll disable some stuff for Termux specifically so I create a variable that checks if I'm on Termux.
 #+begin_src emacs-lisp
-(defun custom/termux-p ()
-  "Checks if Emacs is running inside of Termux."
-  (and (getenv "TERMUX_VERSION")))
+(defvar on-termux-p (and (getenv "TERMUX_VERSION"))
+  "Checks if Emacs is running inside of Termux.")
 #+end_src
 *** Some modes turned on and off
 Those =fbound= are because Termux Emacs doesn't have some functions at all and that spitted out errors.
 #+begin_src emacs-lisp
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'scroll-bar-mode)
       (scroll-bar-mode -1)))         ; Disable visible scrollbar
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'tool-bar-mode)
       (tool-bar-mode -1)))           ; Disable the toolbar
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'set-fringe-mode)
       (set-fringe-mode 10)))         ; Give some breathing room
 (tooltip-mode -1)                    ; Disable tooltips
@@ -214,7 +212,9 @@ Most of the stuff will get redirected here.")
  multisession-directory
  (expand-file-name "multisession" custom/user-share-emacs-directory)
  request-storage-directory
- (expand-file-name "request" custom/user-share-emacs-directory))
+ (expand-file-name "request" custom/user-share-emacs-directory)
+ ielm-history-file-name
+ (expand-file-name "ielm-history.eld" custom/user-share-emacs-directory))
 #+end_src
 *** Native compilation
 From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
@@ -226,7 +226,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
                                 custom/user-share-emacs-directory)))
     (startup-redirect-eln-cache path))
   ;; Silence compiler warnings as they can be disruptive
-  (setq-default native-comp-async-report-warnings-errors nil))
+  ;; (setq-default native-comp-async-report-warnings-errors nil)
+  )
 #+end_src
 *** Other variables
 #+begin_src emacs-lisp
@@ -273,7 +274,7 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               enable-local-variables :all)
 
 ;; showing init time in scratch buffer
-(if (custom/termux-p)
+(if on-termux-p
     (add-hook
      'after-init-hook
      (lambda ()
@@ -282,7 +283,7 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
   (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
-(if (custom/termux-p)
+(if on-termux-p
     (setq browse-url-browser-function 'browse-url-xdg-open))
 #+end_src
 *** Other
@@ -410,7 +411,7 @@ Default package management using =package.el=
     (package-refresh-contents))
   )
 #+end_src
-**** Not normal packages (vc)
+**** Not normal packages (vc) :ARCHIVE:
 =package-vc-install= can install pacakges directly from their source.
 That is great for packages not available in elpas.
 [[https://github.com/slotThe/vc-use-package][vc-use-package]] integrates it into =use-package=.
@@ -610,7 +611,7 @@ Built-in =abbrev-mode= allows for abbreviations.
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
   :bind ("C-x \"" . unexpand-abbrev)
   :config
-  (if (custom/termux-p)
+  (if on-termux-p
       (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
     (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
   )
@@ -749,7 +750,7 @@ Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so calle
 [[https://github.com/mickeynp/ligature.el][ligature.el]] allows us in Emacs to use them.
 #+begin_src emacs-lisp
 (use-package ligature
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :hook (prog-mode . ligature-mode)
   :config
   (ligature-set-ligatures 't '("www"))
@@ -856,7 +857,7 @@ I use [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[h
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-(if (custom/termux-p)
+(if on-termux-p
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
   (progn
     (use-package ewal-doom-themes
@@ -1026,8 +1027,7 @@ Built-in =savehist-mode= saves minibuffer history
   :custom
   (savehist-file (expand-file-name "history"
                                    custom/user-share-emacs-directory))
-  (savehist-additional-variables '(comint-input-ring))
-  )
+  (savehist-additional-variables '(comint-input-ring)))
 #+end_src
 **** Consult
 [[https://github.com/minad/consult][Consult]] has lots of useful commands with minibuffer completion.
@@ -1067,8 +1067,7 @@ Built-in =savehist-mode= saves minibuffer history
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-  )
+  (meow-normal-define-key '("P" . consult-yank-from-kill-ring)))
 #+end_src
 **** Annotations (marginalia)
 [[https://github.com/minad/marginalia][Marginalia]] shows candidatate's annotations
@@ -1149,8 +1148,7 @@ Handles symbols that start or end with a single quote (') correctly."
                      (substring sym 1 -1))
                     (t sym)))) ; No changes needed
           (helpful-symbol (intern sym)))
-      (message "No symbol found at point!")))
-  )
+      (message "No symbol found at point!"))))
 #+end_src
 **** Meow's describe-key override
 Meow sometimes uses =desribe-key= even with =C-h k= remapped to =helpful-key=.
@@ -1160,15 +1158,14 @@ I override it.
   :init
   (advice-add #'describe-key :override #'meow-helpful-key)
   (defun meow-helpful-key (&rest args)
-    (funcall #'helpful-key (cdaar args)))
-  )
+    (funcall #'helpful-key (cdaar args))))
 #+end_src
 *** Which-key
 [[https://github.com/justbur/emacs-which-key][It]] shows you available keybindings, the default ones and the ones you create.
 It takes few seconds to load and that's why I defer it by 5 seconds.
 #+begin_src emacs-lisp
 (use-package which-key
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :defer 5
   :custom
   (which-key-side-window-location 'bottom)
@@ -1188,7 +1185,7 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
 [[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
 #+begin_src emacs-lisp
 (use-package elfeed
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :custom
   ;; cache? directory
   (elfeed-db-directory
@@ -1363,22 +1360,87 @@ In tables pressing RET doesn't follow links. I fix that.
         (org-open-at-point)
       (org-return))))
 #+end_src
-*** Automatic TODO inserting
+*** DWIM inserting behaviour
 #+begin_src emacs-lisp
 (use-package org
   :config
-  (defun org-insert-heading-dwim (orig-fun &rest args)
+  (define-advice org-meta-return
+      (:around (orig-fun &rest args))
+    "Depending on the context, it insert things differently."
     (cond
      ((org-at-item-checkbox-p)
       (org-insert-todo-heading t))
-     ((and (org-at-item-p)
-           (ignore-errors (org-entry-is-todo-p)))
-      (apply orig-fun args))
      ((ignore-errors (org-entry-is-todo-p))
-      (org-insert-todo-heading t))
+      (if (org-at-item-p)
+          (apply orig-fun args)
+        (org-insert-todo-heading t)))
+     ;; we're in a list with ::
+     ((ignore-errors (let* ((itemp (org-in-item-p))
+                            (struct (save-excursion (goto-char itemp)
+                                                    (org-list-struct)))
+                            (prevs (org-list-prevs-alist struct))
+                            (desc (eq (org-list-get-list-type
+                                       itemp struct prevs)
+		                              'descriptive)))
+                       desc))
+      ;; if current item has ::, use default function,
+      ;; otherwise insert an item without ::
+      (if-let* ((itemp (org-in-item-p))
+                (struct (save-excursion (goto-char itemp)
+                                        (org-list-struct)))
+                (prevs (org-list-prevs-alist struct))
+                (desc (nth 5 (seq-find (lambda (item)
+                                         (eq itemp (car item)))
+                                       struct))))
+          (apply orig-fun args)
+        (let* ((itemp (org-in-item-p))
+               (pos (save-excursion (1+ (progn (end-of-line) (point)))))
+               (struct (save-excursion (goto-char itemp)
+                                       (org-list-struct)))
+               (prevs (org-list-prevs-alist struct)))
+          (org-list-insert-item pos struct prevs)
+          (end-of-line))))
      (t (apply orig-fun args))))
+  ;; (defun org-insert-dwim (orig-fun &rest args)
+;;     "Depending on the context, it insert things differently.
+;; It is meant to be used with advice functions."
+;;     (cond
+;;      ((org-at-item-checkbox-p)
+;;       (org-insert-todo-heading t))
+;;      ((ignore-errors (org-entry-is-todo-p))
+;;       (if (org-at-item-p)
+;;           (apply orig-fun args)
+;;         (org-insert-todo-heading t)))
+;;      ;; we're in a list with ::
+;;      ((ignore-errors (let* ((itemp (org-in-item-p))
+;;                             (struct (save-excursion (goto-char itemp)
+;;                                                     (org-list-struct)))
+;;                             (prevs (org-list-prevs-alist struct))
+;;                             (desc (eq (org-list-get-list-type
+;;                                        itemp struct prevs)
+;; 		                              'descriptive)))
+;;                        desc))
+;;       ;; if current item has ::, use default function,
+;;       ;; otherwise insert an item without ::
+;;       (if-let* ((itemp (org-in-item-p))
+;;                 (struct (save-excursion (goto-char itemp)
+;;                                         (org-list-struct)))
+;;                 (prevs (org-list-prevs-alist struct))
+;;                 (desc (nth 5 (seq-find (lambda (item)
+;;                                          (eq itemp (car item)))
+;;                                        struct))))
+;;           (apply orig-fun args)
+;;         (let* ((itemp (org-in-item-p))
+;;                (pos (save-excursion (1+ (progn (end-of-line) (point)))))
+;;                (struct (save-excursion (goto-char itemp)
+;;                                        (org-list-struct)))
+;;                (prevs (org-list-prevs-alist struct)))
+;;           (org-list-insert-item pos struct prevs)
+;;           (end-of-line))))
+;;      (t (apply orig-fun args))))
 
-  (advice-add 'org-meta-return :around 'org-insert-heading-dwim))
+  ;; (advice-add 'org-meta-return :around 'org-insert-dwim)
+  )
 #+end_src
 *** Agenda settings
 #+begin_src emacs-lisp
@@ -1622,7 +1684,7 @@ It's set up so it will display markers when entering insert mode.
 (use-package org-roam
   :init
   (setq org-roam-v2-ack t)
-  (if (custom/termux-p)
+  (if on-termux-p
       (setq org-roam-directory "~/storage/shared/org-roam")
     (setq org-roam-directory "~/org-roam"))
   :custom
@@ -1652,6 +1714,9 @@ It's set up so it will display markers when entering insert mode.
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+  (org-persist-directory (expand-file-name
+                          "org/org-persist/"
+                          custom/user-share-emacs-directory))
   :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
@@ -1707,6 +1772,22 @@ I like sometimes to use =consult-org-roam-search= to use grep on my notes, and t
   :custom
   (org-roam-ui-sync-theme t))
 #+end_src
+
+This makes inserting org roam links easy using =C-c C-l=.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :config
+  (defun org-roam-complete-link ()
+    "Create a org roam link using completion."
+    (concat "roam:" (org-roam-node-title (org-roam-node-read))))
+
+  (org-link-set-parameters "roam" :complete 'org-roam-complete-link)
+
+  (define-advice org-insert-link
+      (:after (&rest _))
+    "Replace all :roam links with ID links."
+    (org-roam-link-replace-all)))
+#+end_src
 *** TOC
 Table of contents after after typing =:toc:= in header
 #+begin_src emacs-lisp
@@ -1723,10 +1804,6 @@ Table of contents after after typing =:toc:= in header
   :config (require 'smartparens-config)) ;; load default config
 #+end_src
 ** Programming
-This section is not intended for Termux usage. That's why I include =unless= statement here.
-#+begin_src emacs-lisp
-(unless (custom/termux-p)
-#+end_src
 *** Compiling
 The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gavin Freeborn's video]] and [[https://www.masteringemacs.org/article/compiling-running-scripts-emacs][Mastering Emacs article]].
 #+begin_src emacs-lisp
@@ -1739,14 +1816,13 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
   (compilation-ask-about-save nil)
   (compilation-always-kill t)
   :config
-  (defun ad-compile-comint (orig-fun &rest args)
+  (define-advice compilation-start
+      (:around (orig-fun &rest args) start-in-comint-mode)
     "Sets compilation arguments to run in `comint-mode'."
     (unless (nth 1 args)
       ;; If the COMINT argument (second argument) is nil, set it to t.
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
-    (apply orig-fun args))
-  (advice-add 'compilation-start :around #'ad-compile-comint)
-  )
+    (apply orig-fun args)))
 #+end_src
 *** Flycheck :ARCHIVE:
 [[https://www.flycheck.org][Flycheck]] is on the fly syntax checker.
@@ -1819,7 +1895,7 @@ I don't use those much. I just have some files in my dotfiles in those languages
   (c-set-offset 'case-label '+)
   (c-set-offset 'access-label 0)
   (c-set-offset 'substatement-open 0)
-  )
+  (setcdr (assoc 'other c-default-style) "linux"))
 #+end_src
 **** Lisp
 #+begin_src emacs-lisp
@@ -1844,12 +1920,11 @@ Quick version update.
     (let ((date (format-time-string "%Y%m%d")))
       (save-excursion
         (goto-char (point-min))
-        (when (ignore-errors (search-forward ";; Version: "))
+        (when (search-forward ";; Version: " nil t)
           (delete-region (point) (line-end-position))
           (insert date))
         (goto-char (point-min))
-        (when (ignore-errors (re-search-forward
-                              "^(def\\(var\\|const\\).*[0-9]"))
+        (when (re-search-forward "^(def\\(var\\|const\\).*[0-9]" nil t)
           (delete-backward-char (length (thing-at-point 'symbol t)))
           (insert date)))
       (when (buffer-modified-p)
@@ -1863,11 +1938,10 @@ Quick version update.
 #+begin_src emacs-lisp
 (use-package python
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
-  :custom (python-indent-offset 2)
-  )
+  :custom (python-indent-offset 2))
 #+end_src
 **** Web
-***** Impatient mode
+***** Impatient mode :ARCHIVE:
 [[https://github.com/netguy204/imp.el][impatient-mode]] allows for nice website development where the website reacts immediately to any edits.
 Since it requires manual http startup and website opening, I automated this in one function.
 #+begin_src emacs-lisp
@@ -1904,24 +1978,19 @@ Here I add autocompletion when typing =>= in html modes.
 The tag is closed if the last typed character was > and if there
 were no > before it.
 It doesn't close empty tags."
-    (interactive)
-    (if (eql last-command-event ?>)
-        (unless (eql (save-excursion
-                       (backward-char)
-                       (char-before))
-                     ?>)
-          (let ((current-point (point))
-                ;; `sgml-close-tag' does some indenting
-                ;; so I disable indenting
-                (indent-line-function 'ignore)
-                (indent-region-function 'ignore)
-                (tag (save-excursion
-                       (search-backward "<")
+    (when (and (eql last-command-event ?>)
+               (not (eql (char-before (1- (point))) ?>)))
+      (save-excursion
+        (let (;; `sgml-close-tag' does some indenting
+              ;; so I disable indenting
+              (indent-line-function 'ignore)
+              (indent-region-function 'ignore)
+              (tag (save-excursion
+                     (when (search-backward "<" nil t)
                        (forward-char)
-                       (current-word))))
-            (unless (member tag html-empty-tag-list)
-              (sgml-close-tag))
-            (goto-char current-point)))))
+                       (current-word)))))
+          (unless (member tag html-empty-tag-list)
+            (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()
                               (add-hook 'post-self-insert-hook
                                         'html-close-tag nil t)))
@@ -1929,8 +1998,7 @@ It doesn't close empty tags."
   (defvar html-empty-tag-list
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen"
       "link" "meta" "param" "source" "track" "wbr")
-    "List of empty HTML tags.")
-  )
+    "List of empty HTML tags."))
 #+end_src
 ***** CSS
 #+begin_src emacs-lisp
@@ -1946,25 +2014,27 @@ It doesn't close empty tags."
 Emacs from version 29 supports tree-sitter.
 Tree-sitter is fast parser and smart syntax highlighter for languages.
 You need to have ~tree-sitter~ package installed on your system.
+This section is not intended for Termux usage. That's why I include =unless= statement here.
 #+begin_src emacs-lisp
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-        (c "https://github.com/tree-sitter/tree-sitter-c")
-        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-        (css "https://github.com/tree-sitter/tree-sitter-css")
-        ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        ;; (go "https://github.com/tree-sitter/tree-sitter-go")
-        ;; (html "https://github.com/tree-sitter/tree-sitter-html")
-        ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-        (json "https://github.com/tree-sitter/tree-sitter-json")
-        ;; (make "https://github.com/alemuller/tree-sitter-make")
-        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (python "https://github.com/tree-sitter/tree-sitter-python")))
-;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
-;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+(unless on-termux-p
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          ;; (go "https://github.com/tree-sitter/tree-sitter-go")
+          ;; (html "https://github.com/tree-sitter/tree-sitter-html")
+          ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          ;; (make "https://github.com/alemuller/tree-sitter-make")
+          ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (python "https://github.com/tree-sitter/tree-sitter-python")))
+  ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
+  ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+  ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+  ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 #+end_src
 Now after ~M-x treesit-install-language-grammar~ you can choose language and its tree-sitter parser thing will be installed.
 
@@ -1984,7 +2054,7 @@ This remaps specified major modes to its tree-sitter counterparts.
         (css-mode . css-ts-mode)
         (python-mode . python-ts-mode)
         (sh-mode . bash-ts-mode)
-        (js-json-mode . json-ts-mode)))
+        (js-json-mode . json-ts-mode))))
 #+end_src
 *** Templates
 **** Startup templates
@@ -2016,20 +2086,14 @@ This remaps specified major modes to its tree-sitter counterparts.
   :after yasnippet)
 #+end_src
 *** Making file executable if it's a script
-File that start with a shebang will get executable permissions.
-Note that with a new file, it will work 2nd time.
+Files that start with a shebang will get executable permissions.
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook
           (lambda ()
             (add-hook
-             'before-save-hook
+             'after-save-hook
              'executable-make-buffer-file-executable-if-script-p
              nil t)))
-#+end_src
-*** The end
-This is the end of =unless= statement.
-#+begin_src emacs-lisp
-)
 #+end_src
 ** Shells and terminals
 *** Shell
@@ -2094,7 +2158,7 @@ Eshell is an Emacs /shell/ that is written in Elisp.
 [[https://github.com/akermu/emacs-libvterm][Vterm]] is a terminal emulator within Emacs.
 #+begin_src emacs-lisp
 (use-package vterm
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   (vterm-mode . vterm-meow-setup)
   :bind (("C-c s v" . vterm))
@@ -2142,7 +2206,7 @@ I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using 
 [[https://github.com/joostkremers/writeroom-mode][Writeroom-mode]] makes a nice writing experience by making big margins and hiding almost everything.
 #+begin_src emacs-lisp
 (use-package writeroom-mode
-  :unless (custom/termux-p))
+  :unless on-termux-p)
 #+end_src
 ** display-buffer-alist
 This variable desribes the way chosen buffers are displaying and behaving.
@@ -2276,7 +2340,7 @@ A mode for m3u files
 #+end_src
 ** Local packages
 #+begin_src emacs-lisp
-(unless (custom/termux-p)
+(unless on-termux-p
   (use-package mb-transient
     :init
     (window-define-with-popup-frame mb-transient)

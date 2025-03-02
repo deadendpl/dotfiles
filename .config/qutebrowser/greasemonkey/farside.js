@@ -26,8 +26,6 @@
 // @match       *://*.reddit.com/*
 // @match       *://stackoverflow.com/*
 // @match       *://*.tiktok.com/*
-// @match       *://wikipedia.org/*
-// @match       *://*.wikipedia.org/*
 // @match       *://yahoo.com/*
 // @match       *://*.yahoo.com/*
 // @match       *://yandex.com/*

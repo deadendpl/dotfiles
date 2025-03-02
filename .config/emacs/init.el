@@ -1,14 +1,13 @@
-(defun custom/termux-p ()
-  "Checks if Emacs is running inside of Termux."
-  (and (getenv "TERMUX_VERSION")))
+(defvar on-termux-p (and (getenv "TERMUX_VERSION"))
+  "Checks if Emacs is running inside of Termux.")
 
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'scroll-bar-mode)
       (scroll-bar-mode -1)))         ; Disable visible scrollbar
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'tool-bar-mode)
       (tool-bar-mode -1)))           ; Disable the toolbar
-(unless (custom/termux-p)
+(unless on-termux-p
   (if (fboundp 'set-fringe-mode)
       (set-fringe-mode 10)))         ; Give some breathing room
 (tooltip-mode -1)                    ; Disable tooltips
@@ -52,7 +51,9 @@ Most of the stuff will get redirected here.")
  multisession-directory
  (expand-file-name "multisession" custom/user-share-emacs-directory)
  request-storage-directory
- (expand-file-name "request" custom/user-share-emacs-directory))
+ (expand-file-name "request" custom/user-share-emacs-directory)
+ ielm-history-file-name
+ (expand-file-name "ielm-history.eld" custom/user-share-emacs-directory))
 
 (when (and (featurep 'native-compile)
            package-native-compile)
@@ -61,7 +62,8 @@ Most of the stuff will get redirected here.")
                                 custom/user-share-emacs-directory)))
     (startup-redirect-eln-cache path))
   ;; Silence compiler warnings as they can be disruptive
-  (setq-default native-comp-async-report-warnings-errors nil))
+  ;; (setq-default native-comp-async-report-warnings-errors nil)
+  )
 
 (setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
               use-dialog-box nil ; turns off graphical dialog boxes
@@ -106,7 +108,7 @@ Most of the stuff will get redirected here.")
               enable-local-variables :all)
 
 ;; showing init time in scratch buffer
-(if (custom/termux-p)
+(if on-termux-p
     (add-hook
      'after-init-hook
      (lambda ()
@@ -115,7 +117,7 @@ Most of the stuff will get redirected here.")
   (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
-(if (custom/termux-p)
+(if on-termux-p
     (setq browse-url-browser-function 'browse-url-xdg-open))
 
 ;; Some file extensions set for certain modes
@@ -231,10 +233,6 @@ Most of the stuff will get redirected here.")
   (unless package-archive-contents
     (package-refresh-contents))
   )
-
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
-(require 'vc-use-package)
 
 (use-package meow
   :demand
@@ -412,7 +410,7 @@ Most of the stuff will get redirected here.")
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
   :bind ("C-x \"" . unexpand-abbrev)
   :config
-  (if (custom/termux-p)
+  (if on-termux-p
       (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
     (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
   )
@@ -488,7 +486,7 @@ Most of the stuff will get redirected here.")
   )
 
 (use-package ligature
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :hook (prog-mode . ligature-mode)
   :config
   (ligature-set-ligatures 't '("www"))
@@ -578,7 +576,7 @@ Most of the stuff will get redirected here.")
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-(if (custom/termux-p)
+(if on-termux-p
     (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
   (progn
     (use-package ewal-doom-themes
@@ -723,8 +721,7 @@ string specified by HEX."
   :custom
   (savehist-file (expand-file-name "history"
                                    custom/user-share-emacs-directory))
-  (savehist-additional-variables '(comint-input-ring))
-  )
+  (savehist-additional-variables '(comint-input-ring)))
 
 (use-package consult
   :init
@@ -761,8 +758,7 @@ string specified by HEX."
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-  )
+  (meow-normal-define-key '("P" . consult-yank-from-kill-ring)))
 
 (use-package marginalia
   :after vertico
@@ -833,18 +829,16 @@ Handles symbols that start or end with a single quote (') correctly."
                      (substring sym 1 -1))
                     (t sym)))) ; No changes needed
           (helpful-symbol (intern sym)))
-      (message "No symbol found at point!")))
-  )
+      (message "No symbol found at point!"))))
 
 (use-package helpful
   :init
   (advice-add #'describe-key :override #'meow-helpful-key)
   (defun meow-helpful-key (&rest args)
-    (funcall #'helpful-key (cdaar args)))
-  )
+    (funcall #'helpful-key (cdaar args))))
 
 (use-package which-key
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :defer 5
   :custom
   (which-key-side-window-location 'bottom)
@@ -861,7 +855,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (which-key-mode 1))
 
 (use-package elfeed
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :custom
   ;; cache? directory
   (elfeed-db-directory
@@ -1021,18 +1015,83 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package org
   :config
-  (defun org-insert-heading-dwim (orig-fun &rest args)
+  (define-advice org-meta-return
+      (:around (orig-fun &rest args))
+    "Depending on the context, it insert things differently."
     (cond
      ((org-at-item-checkbox-p)
       (org-insert-todo-heading t))
-     ((and (org-at-item-p)
-           (ignore-errors (org-entry-is-todo-p)))
-      (apply orig-fun args))
      ((ignore-errors (org-entry-is-todo-p))
-      (org-insert-todo-heading t))
+      (if (org-at-item-p)
+          (apply orig-fun args)
+        (org-insert-todo-heading t)))
+     ;; we're in a list with ::
+     ((ignore-errors (let* ((itemp (org-in-item-p))
+                            (struct (save-excursion (goto-char itemp)
+                                                    (org-list-struct)))
+                            (prevs (org-list-prevs-alist struct))
+                            (desc (eq (org-list-get-list-type
+                                       itemp struct prevs)
+		                              'descriptive)))
+                       desc))
+      ;; if current item has ::, use default function,
+      ;; otherwise insert an item without ::
+      (if-let* ((itemp (org-in-item-p))
+                (struct (save-excursion (goto-char itemp)
+                                        (org-list-struct)))
+                (prevs (org-list-prevs-alist struct))
+                (desc (nth 5 (seq-find (lambda (item)
+                                         (eq itemp (car item)))
+                                       struct))))
+          (apply orig-fun args)
+        (let* ((itemp (org-in-item-p))
+               (pos (save-excursion (1+ (progn (end-of-line) (point)))))
+               (struct (save-excursion (goto-char itemp)
+                                       (org-list-struct)))
+               (prevs (org-list-prevs-alist struct)))
+          (org-list-insert-item pos struct prevs)
+          (end-of-line))))
      (t (apply orig-fun args))))
+  ;; (defun org-insert-dwim (orig-fun &rest args)
+;;     "Depending on the context, it insert things differently.
+;; It is meant to be used with advice functions."
+;;     (cond
+;;      ((org-at-item-checkbox-p)
+;;       (org-insert-todo-heading t))
+;;      ((ignore-errors (org-entry-is-todo-p))
+;;       (if (org-at-item-p)
+;;           (apply orig-fun args)
+;;         (org-insert-todo-heading t)))
+;;      ;; we're in a list with ::
+;;      ((ignore-errors (let* ((itemp (org-in-item-p))
+;;                             (struct (save-excursion (goto-char itemp)
+;;                                                     (org-list-struct)))
+;;                             (prevs (org-list-prevs-alist struct))
+;;                             (desc (eq (org-list-get-list-type
+;;                                        itemp struct prevs)
+;; 		                              'descriptive)))
+;;                        desc))
+;;       ;; if current item has ::, use default function,
+;;       ;; otherwise insert an item without ::
+;;       (if-let* ((itemp (org-in-item-p))
+;;                 (struct (save-excursion (goto-char itemp)
+;;                                         (org-list-struct)))
+;;                 (prevs (org-list-prevs-alist struct))
+;;                 (desc (nth 5 (seq-find (lambda (item)
+;;                                          (eq itemp (car item)))
+;;                                        struct))))
+;;           (apply orig-fun args)
+;;         (let* ((itemp (org-in-item-p))
+;;                (pos (save-excursion (1+ (progn (end-of-line) (point)))))
+;;                (struct (save-excursion (goto-char itemp)
+;;                                        (org-list-struct)))
+;;                (prevs (org-list-prevs-alist struct)))
+;;           (org-list-insert-item pos struct prevs)
+;;           (end-of-line))))
+;;      (t (apply orig-fun args))))
 
-  (advice-add 'org-meta-return :around 'org-insert-heading-dwim))
+  ;; (advice-add 'org-meta-return :around 'org-insert-dwim)
+  )
 
 (use-package org
   :bind ("C-c n a" . org-agenda)
@@ -1238,7 +1297,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 (use-package org-roam
   :init
   (setq org-roam-v2-ack t)
-  (if (custom/termux-p)
+  (if on-termux-p
       (setq org-roam-directory "~/storage/shared/org-roam")
     (setq org-roam-directory "~/org-roam"))
   :custom
@@ -1268,6 +1327,9 @@ as you zoom text. It's fast, since no image regeneration is required."
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+  (org-persist-directory (expand-file-name
+                          "org/org-persist/"
+                          custom/user-share-emacs-directory))
   :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
@@ -1318,13 +1380,24 @@ as you zoom text. It's fast, since no image regeneration is required."
   :custom
   (org-roam-ui-sync-theme t))
 
+(use-package org-roam
+  :config
+  (defun org-roam-complete-link ()
+    "Create a org roam link using completion."
+    (concat "roam:" (org-roam-node-title (org-roam-node-read))))
+
+  (org-link-set-parameters "roam" :complete 'org-roam-complete-link)
+
+  (define-advice org-insert-link
+      (:after (&rest _))
+    "Replace all :roam links with ID links."
+    (org-roam-link-replace-all)))
+
 (use-package toc-org
   :hook (org-mode . #'toc-org-enable)
   :custom
   (toc-org-max-depth org-indent--deepest-level)
   (toc-org-enable-links-opening t))
-
-(unless (custom/termux-p)
 
 (use-package compile
   :init (setq-default compile-command nil)
@@ -1335,14 +1408,13 @@ as you zoom text. It's fast, since no image regeneration is required."
   (compilation-ask-about-save nil)
   (compilation-always-kill t)
   :config
-  (defun ad-compile-comint (orig-fun &rest args)
+  (define-advice compilation-start
+      (:around (orig-fun &rest args) start-in-comint-mode)
     "Sets compilation arguments to run in `comint-mode'."
     (unless (nth 1 args)
       ;; If the COMINT argument (second argument) is nil, set it to t.
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
-    (apply orig-fun args))
-  (advice-add 'compilation-start :around #'ad-compile-comint)
-  )
+    (apply orig-fun args)))
 
 (use-package lua-mode)
 (use-package nix-mode)
@@ -1379,7 +1451,7 @@ as you zoom text. It's fast, since no image regeneration is required."
   (c-set-offset 'case-label '+)
   (c-set-offset 'access-label 0)
   (c-set-offset 'substatement-open 0)
-  )
+  (setcdr (assoc 'other c-default-style) "linux"))
 
 (use-package inf-lisp
   :custom (inferior-lisp-program "sbcl --noinform"))
@@ -1395,12 +1467,11 @@ as you zoom text. It's fast, since no image regeneration is required."
     (let ((date (format-time-string "%Y%m%d")))
       (save-excursion
         (goto-char (point-min))
-        (when (ignore-errors (search-forward ";; Version: "))
+        (when (search-forward ";; Version: " nil t)
           (delete-region (point) (line-end-position))
           (insert date))
         (goto-char (point-min))
-        (when (ignore-errors (re-search-forward
-                              "^(def\\(var\\|const\\).*[0-9]"))
+        (when (re-search-forward "^(def\\(var\\|const\\).*[0-9]" nil t)
           (delete-backward-char (length (thing-at-point 'symbol t)))
           (insert date)))
       (when (buffer-modified-p)
@@ -1412,24 +1483,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 
 (use-package python
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
-  :custom (python-indent-offset 2)
-  )
-
-(use-package impatient-mode
-  :hook (impatient-mode . custom/impatient-open)
-  :preface
-  (defun custom/impatient-open ()
-    "Opens/closes impatient-mode website.
-Depending on `impatient-mode''s (variable) state,
-httpd gets started/stopped and the impatient website gets opened
-using `browse-url'."
-    (if impatient-mode
-        (if (httpd-running-p)
-            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))
-          (progn
-            (httpd-start)
-            (browse-url (concat "http://localhost:" (number-to-string httpd-port) "/imp"))))
-      (httpd-stop))))
+  :custom (python-indent-offset 2))
 
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda () (smartparens-mode 0)
@@ -1445,24 +1499,19 @@ using `browse-url'."
 The tag is closed if the last typed character was > and if there
 were no > before it.
 It doesn't close empty tags."
-    (interactive)
-    (if (eql last-command-event ?>)
-        (unless (eql (save-excursion
-                       (backward-char)
-                       (char-before))
-                     ?>)
-          (let ((current-point (point))
-                ;; `sgml-close-tag' does some indenting
-                ;; so I disable indenting
-                (indent-line-function 'ignore)
-                (indent-region-function 'ignore)
-                (tag (save-excursion
-                       (search-backward "<")
+    (when (and (eql last-command-event ?>)
+               (not (eql (char-before (1- (point))) ?>)))
+      (save-excursion
+        (let (;; `sgml-close-tag' does some indenting
+              ;; so I disable indenting
+              (indent-line-function 'ignore)
+              (indent-region-function 'ignore)
+              (tag (save-excursion
+                     (when (search-backward "<" nil t)
                        (forward-char)
-                       (current-word))))
-            (unless (member tag html-empty-tag-list)
-              (sgml-close-tag))
-            (goto-char current-point)))))
+                       (current-word)))))
+          (unless (member tag html-empty-tag-list)
+            (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()
                               (add-hook 'post-self-insert-hook
                                         'html-close-tag nil t)))
@@ -1470,8 +1519,7 @@ It doesn't close empty tags."
   (defvar html-empty-tag-list
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen"
       "link" "meta" "param" "source" "track" "wbr")
-    "List of empty HTML tags.")
-  )
+    "List of empty HTML tags."))
 
 (use-package css-mode
   :custom (css-indent-offset 2))
@@ -1479,24 +1527,25 @@ It doesn't close empty tags."
 (use-package js
   :custom (js-indent-level 2))
 
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-        (c "https://github.com/tree-sitter/tree-sitter-c")
-        (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-        (css "https://github.com/tree-sitter/tree-sitter-css")
-        ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        ;; (go "https://github.com/tree-sitter/tree-sitter-go")
-        ;; (html "https://github.com/tree-sitter/tree-sitter-html")
-        ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-        (json "https://github.com/tree-sitter/tree-sitter-json")
-        ;; (make "https://github.com/alemuller/tree-sitter-make")
-        ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-        (python "https://github.com/tree-sitter/tree-sitter-python")))
-;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
-;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+(unless on-termux-p
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          ;; (go "https://github.com/tree-sitter/tree-sitter-go")
+          ;; (html "https://github.com/tree-sitter/tree-sitter-html")
+          ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          ;; (make "https://github.com/alemuller/tree-sitter-make")
+          ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (python "https://github.com/tree-sitter/tree-sitter-python")))
+  ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
+  ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+  ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+  ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (unless (treesit-language-available-p 'bash)
   (message "Installing tree-sitter parsers")
@@ -1509,7 +1558,7 @@ It doesn't close empty tags."
         (css-mode . css-ts-mode)
         (python-mode . python-ts-mode)
         (sh-mode . bash-ts-mode)
-        (js-json-mode . json-ts-mode)))
+        (js-json-mode . json-ts-mode))))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -1529,11 +1578,9 @@ It doesn't close empty tags."
 (add-hook 'prog-mode-hook
           (lambda ()
             (add-hook
-             'before-save-hook
+             'after-save-hook
              'executable-make-buffer-file-executable-if-script-p
              nil t)))
-
-)
 
 (keymap-global-set "C-c s t" 'term)
 (keymap-global-set "C-c s s" 'shell)
@@ -1586,7 +1633,7 @@ It doesn't close empty tags."
   :hook (eshell-load . eat-eshell-mode))
 
 (use-package vterm
-  :unless (custom/termux-p)
+  :unless on-termux-p
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   (vterm-mode . vterm-meow-setup)
   :bind (("C-c s v" . vterm))
@@ -1625,7 +1672,7 @@ It doesn't close empty tags."
   (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
 
 (use-package writeroom-mode
-  :unless (custom/termux-p))
+  :unless on-termux-p)
 
 (defun custom/switch-to-buffer-other-window-for-alist (window)
   "Kind of `switch-to-buffer-other-window' but can be used in
@@ -1748,7 +1795,7 @@ Also see `window-delete-popup-frame'." command)
                           "nf-md-playlist_music_outline"
                           :face nerd-icons-dred)))
 
-(unless (custom/termux-p)
+(unless on-termux-p
   (use-package mb-transient
     :init
     (window-define-with-popup-frame mb-transient)
