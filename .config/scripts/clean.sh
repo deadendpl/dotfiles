@@ -21,7 +21,7 @@ forbidden_file_p() {
 yay --noconfirm -Sc && yay -Qtdq | yay --noconfirm -Rns -
 
 echo "Deleting files in pacman cache"
-find /var/cache/pacman/pkg/ -maxdepth 1 -type f -exec sudo rm {} \;
+sudo rm -r /var/cache/pacman/pkg/
 
 echo "Deleting files in cache"
 for file in $(find "$XDG_CACHE_HOME" -maxdepth 1 | tail -n +2); do
@@ -33,7 +33,7 @@ for file in $(find "$XDG_CACHE_HOME" -maxdepth 1 | tail -n +2); do
 done
 
 echo "Deleting files in trash"
-find "${XDG_DATA_HOME}/Trash/" -mindepth 1 -exec rm -r {} \;
+rm -r "${XDG_DATA_HOME}/Trash/"
 
 echo "Deleting logs"
 sudo rm -r /var/log/*

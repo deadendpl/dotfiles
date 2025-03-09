@@ -10,7 +10,7 @@ if pgrep "emacs" > /dev/null; then
 fi
 
 if [ "$emacs_killed" = 1 ]; then
-  while pgrep "emacs" > /dev/null; do
+  while pidof emacs > /dev/null; do
     sleep 0.05
   done
 fi

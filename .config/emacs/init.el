@@ -22,44 +22,46 @@
 
 (require 'xdg)
 
-(defvar custom/user-share-emacs-directory
-  (expand-file-name"emacs" (xdg-data-home))
+(defvar user-share-emacs-directory
+  (expand-file-name "emacs" (xdg-data-home))
   "Directory to redirect cache/dump files.
 Elisp packages cache folders/files normally clutter
 `user-emacs-directory'. The same goes for some default files like
 bookmarks file. In order to prevent that this variable exists.
 Most of the stuff will get redirected here.")
 
+(defun expand-file-name-user-share (file)
+  "Expand a FILE to `user-share-emacs-directory'."
+  (expand-file-name file user-share-emacs-directory))
+
 (setq-default
  bookmark-default-file
- (expand-file-name "bookmarks" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "bookmarks")
  auto-save-list-file-prefix
- (expand-file-name "auto-save-list/.saves-"
-                   custom/user-share-emacs-directory)
+ (expand-file-name-user-share "auto-save-list/.saves-")
  ;; custom settings that emacs autosets
  custom-file
- (expand-file-name "custom.el" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "custom.el")
  ;; moving backup files to trash directory
  backup-directory-alist '((".*" . "~/.local/share/Trash/files"))
  tramp-persistency-file-name
- (expand-file-name "tramp" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "tramp")
  save-place-file
- (expand-file-name "places" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "places")
  ;; cache from urls (eww)
  url-configuration-directory
- (expand-file-name "url" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "url")
  multisession-directory
- (expand-file-name "multisession" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "multisession")
  request-storage-directory
- (expand-file-name "request" custom/user-share-emacs-directory)
+ (expand-file-name-user-share "request")
  ielm-history-file-name
- (expand-file-name "ielm-history.eld" custom/user-share-emacs-directory))
+ (expand-file-name-user-share "ielm-history.eld"))
 
 (when (and (featurep 'native-compile)
            package-native-compile)
   ;; Set the right directory to store the native compilation cache
-  (let ((path (expand-file-name "eln-cache/"
-                                custom/user-share-emacs-directory)))
+  (let ((path (expand-file-name-user-share "eln-cache/")))
     (startup-redirect-eln-cache path))
   ;; Silence compiler warnings as they can be disruptive
   ;; (setq-default native-comp-async-report-warnings-errors nil)
@@ -105,7 +107,9 @@ Most of the stuff will get redirected here.")
               history-length t
               kill-do-not-save-duplicates t
               scroll-error-top-bottom t
-              enable-local-variables :all)
+              enable-local-variables :all
+              save-interprogram-paste-before-kill t
+              shell-command-prompt-show-cwd t)
 
 ;; showing init time in scratch buffer
 (if on-termux-p
@@ -132,8 +136,7 @@ Most of the stuff will get redirected here.")
 (defun custom/find-config-file ()
   "Opens config.org file in `user-emacs-directory'."
   (interactive)
-  (find-file (expand-file-name "config.org" user-emacs-directory))
-  )
+  (find-file (expand-file-name "config.org" user-emacs-directory)))
 
 ;; make utf-8 the coding system
 (set-language-environment "UTF-8")
@@ -221,8 +224,8 @@ Most of the stuff will get redirected here.")
 
 (use-package package
   :custom
-  (package-user-dir (expand-file-name "packages/" custom/user-share-emacs-directory))
-  (package-gnupghome-dir (expand-file-name "gpg" custom/user-share-emacs-directory))
+  (package-user-dir (expand-file-name-user-share "packages/"))
+  (package-gnupghome-dir (expand-file-name-user-share "gpg"))
   (package-archives '(("melpa" . "https://melpa.org/packages/")
                       ("elpa" . "https://elpa.gnu.org/packages/")
                       ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")
@@ -336,12 +339,10 @@ Most of the stuff will get redirected here.")
 
     (meow-define-keys 'insert
       '("C-." . meow-keypad))
-    (add-to-list 'meow-mode-state-list '(helpful-mode . normal))
-    )
+    (add-to-list 'meow-mode-state-list '(helpful-mode . normal)))
 
   (meow-setup)
-  (meow-global-mode 1)
-  )
+  (meow-global-mode 1))
 
 (use-package meow
   :config
@@ -420,7 +421,7 @@ Most of the stuff will get redirected here.")
          (kill-emacs . #'recentf-save-list))
   :bind (("C-c f r" . recentf-open))
   :custom
-  (recentf-save-file (expand-file-name "recentf" custom/user-share-emacs-directory)) ; location of the file
+  (recentf-save-file (expand-file-name-user-share "recentf")) ; location of the file
   (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
   )
 
@@ -436,7 +437,10 @@ Most of the stuff will get redirected here.")
   :custom (display-line-numbers-type 'relative))
 
 (use-package project
-  :custom (project-list-file (expand-file-name "projects" custom/user-share-emacs-directory)))
+  :custom
+  (project-list-file
+   (expand-file-name-user-share "projects"))
+  (project-switch-use-entire-map t))
 
 (use-package tab-bar
   :init
@@ -630,13 +634,14 @@ string specified by HEX."
   :init (global-corfu-mode t)
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
          ;; ((prog-mode ielm-mode) . corfu-mode)
-         (corfu-mode . corfu-popupinfo-mode))
+         (corfu-mode . corfu-popupinfo-mode)
+         (prog-mode . (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
                                  :background unspecified
                                  :foreground unspecified))))
   :custom
-  (corfu-auto t)
+  ;; (corfu-auto t)
   (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (corfu-quit-no-match t)
@@ -675,6 +680,12 @@ string specified by HEX."
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   ;; (add-hook 'completion-at-point-functions #'cape-history)
 )
+
+(use-package completion-preview
+  :hook (after-init . global-completion-preview-mode)
+  :config
+  (add-to-list 'global-completion-preview-modes
+               '(not prog-mode conf-mode)))
 
 (use-package vertico
   :hook (after-init . vertico-mode)
@@ -719,8 +730,7 @@ string specified by HEX."
 (use-package savehist
   :init (savehist-mode t)
   :custom
-  (savehist-file (expand-file-name "history"
-                                   custom/user-share-emacs-directory))
+  (savehist-file (expand-file-name-user-share "history"))
   (savehist-additional-variables '(comint-input-ring)))
 
 (use-package consult
@@ -776,8 +786,7 @@ string specified by HEX."
   (dired-listing-switches "-lvXAh --group-directories-first")
   (dired-switches-in-mode-line 0)
   (dired-kill-when-opening-new-dired-buffer t)
-  (image-dired-dir (expand-file-name "image-dired"
-                                     custom/user-share-emacs-directory))
+  (image-dired-dir (expand-file-name-user-share "image-dired"))
   (dired-auto-revert-buffer t)
   (dired-hide-details-hide-symlink-targets nil)
   (dired-recursive-copies 'always)
@@ -859,7 +868,7 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom
   ;; cache? directory
   (elfeed-db-directory
-   (expand-file-name "elfeed" custom/user-share-emacs-directory))
+   (expand-file-name-user-share "elfeed"))
   (elfeed-feeds  '("https://sachachua.com/blog/feed/"
                    "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
@@ -888,15 +897,11 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom
   (transient-show-during-minibuffer-read t)
   (transient-history-file
-   (expand-file-name "transient/history.el"
-                     custom/user-share-emacs-directory))
+   (expand-file-name-user-share "transient/history.el"))
   (transient-levels-file
-   (expand-file-name "transient/levels.el"
-                     custom/user-share-emacs-directory))
+   (expand-file-name-user-share "transient/levels.el"))
   (transient-values-file
-   (expand-file-name "transient/values.el"
-                     custom/user-share-emacs-directory))
-
+   (expand-file-name-user-share "transient/values.el"))
   :bind ("C-c w r" . window-resize-transient)
   :config
   (transient-define-prefix window-resize-transient ()
@@ -953,8 +958,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-hide-emphasis-markers t)
   (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
   (org-id-locations-file
-   (expand-file-name "org/.org-id-locations"
-                     custom/user-share-emacs-directory))
+   (expand-file-name-user-share "org/.org-id-locations"))
   (org-image-actual-width '(300 600))
   (org-indent-mode-turns-on-hiding-stars nil)
   (org-insert-heading-respect-content t)
@@ -969,6 +973,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-startup-folded t)
   (org-startup-indented t) ; use `org-indent-mode' at startup
   (org-startup-with-inline-images t)
+  (org-support-shift-select t)
   (org-tags-column 0)
   (org-todo-keywords
    '((sequence
@@ -1173,8 +1178,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-html-doctype "html5")
   (org-html-html5-fancy t)
   (org-publish-timestamp-directory
-   (expand-file-name "org/timestamps" custom/user-share-emacs-directory))
-  )
+   (expand-file-name-user-share "org/timestamps")))
 
 (use-package org
   :init
@@ -1189,8 +1193,11 @@ Handles symbols that start or end with a single quote (') correctly."
   :hook (org-mode . org-latex-resize-mode)
   :custom
   (org-preview-latex-default-process 'dvisvgm)
-  (org-preview-latex-image-directory (expand-file-name "org/lateximg/" custom/user-share-emacs-directory))
-  (org-latex-to-html-convert-command "latexmlc \\='literal:%i\\=' --profile=math --preload=siunitx.sty 2>/dev/null")
+  (org-preview-latex-image-directory
+   (expand-file-name-user-share "org/lateximg/"))
+  (org-latex-to-html-convert-command
+   (concat "latexmlc \\='literal:%i\\=' "
+           "--profile=math --preload=siunitx.sty 2>/dev/null"))
   :config
   (defun custom/org-resize-latex-overlays ()
     "Rescales all latex preview fragments correctly with the text size
@@ -1201,8 +1208,7 @@ as you zoom text. It's fast, since no image regeneration is required."
                            :scale (expt text-scale-mode-step
                                         text-scale-mode-amount))))
   (plist-put org-format-latex-options :foreground nil)
-  (plist-put org-format-latex-options :background nil)
-  )
+  (plist-put org-format-latex-options :background nil))
 
 (use-package org
   :config
@@ -1288,8 +1294,7 @@ as you zoom text. It's fast, since no image regeneration is required."
   :config
   (defun org-appear-meow-setup ()
     (add-hook 'meow-insert-enter-hook #'org-appear-manual-start nil t)
-    (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t))
-  )
+    (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t)))
 
 (use-package org-auto-tangle
   :hook (org-mode . org-auto-tangle-mode))
@@ -1302,7 +1307,7 @@ as you zoom text. It's fast, since no image regeneration is required."
     (setq org-roam-directory "~/org-roam"))
   :custom
   (org-directory org-roam-directory)
-  (org-roam-db-location (expand-file-name "org/org-roam.db" custom/user-share-emacs-directory))
+  (org-roam-db-location (expand-file-name-user-share "org/org-roam.db"))
   (org-roam-dailies-directory "journals/")
   (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
   (org-roam-capture-templates
@@ -1326,10 +1331,10 @@ as you zoom text. It's fast, since no image regeneration is required."
      ))
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
-      (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
-  (org-persist-directory (expand-file-name
-                          "org/org-persist/"
-                          custom/user-share-emacs-directory))
+      (file+head "%<%Y-%m-%d>.org"
+                 "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+  (org-persist-directory
+   (expand-file-name-user-share "org/org-persist/"))
   :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
@@ -1419,7 +1424,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 (use-package lua-mode)
 (use-package nix-mode)
 
-(use-package sh-script ;; sh-script is the package that declares redirecting shell mode to treesitter mode
+(use-package sh-script
   :hook ((bash-ts-mode fish-mode sh-mode) . custom/sh-set-compile-command)
   :preface
   (defun custom/sh-set-compile-command ()
@@ -1452,6 +1457,9 @@ as you zoom text. It's fast, since no image regeneration is required."
   (c-set-offset 'access-label 0)
   (c-set-offset 'substatement-open 0)
   (setcdr (assoc 'other c-default-style) "linux"))
+
+(use-package subword
+  :hook (after-init . global-subword-mode))
 
 (use-package inf-lisp
   :custom (inferior-lisp-program "sbcl --noinform"))
@@ -1486,13 +1494,12 @@ as you zoom text. It's fast, since no image regeneration is required."
   :custom (python-indent-offset 2))
 
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
-  :hook ((html-mode . (lambda () (smartparens-mode 0)
+  :hook ((html-mode . (lambda ()
                         (setq-local electric-pair-inhibit-predicate
                                     `(lambda (c)
                                        (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
-  ;; :custom (css-indent-offset 2)
   :config
   (defun html-close-tag ()
     "Closes tag.
@@ -1588,7 +1595,6 @@ It doesn't close empty tags."
       async-shell-command-buffer 'new-buffer)
 
 (use-package fish-mode
-  :mode ("\\.fish\\'")
   :custom (fish-indent-offset 2))
 
 (use-package eshell
@@ -1607,9 +1613,9 @@ It doesn't close empty tags."
   (eshell-aliases-file
    (expand-file-name "aliases" eshell-directory-name))
   (eshell-history-file-name
-   (expand-file-name "eshell-history" custom/user-share-emacs-directory))
+   (expand-file-name-user-share "eshell-history"))
   (eshell-last-dir-ring-file-name
-   (expand-file-name "eshell-lastdir" custom/user-share-emacs-directory))
+   (expand-file-name-user-share "eshell-lastdir"))
   (eshell-history-size 5000)
   (eshell-buffer-maximum-lines 5000)
   (eshell-hist-ignoredups t)
@@ -1643,17 +1649,18 @@ It doesn't close empty tags."
   :config
   (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
   (defun vterm-meow-setup ()
-    (add-hook 'meow-normal-mode-hook (lambda ()
-                                       (if (string-equal major-mode "vterm-mode")
-                                           (unless vterm-copy-mode
-                                             (vterm-copy-mode 1))))
+    (add-hook 'meow-normal-mode-hook
+              (lambda ()
+                (if (string-equal major-mode "vterm-mode")
+                    (unless vterm-copy-mode
+                      (vterm-copy-mode 1))))
               nil t)
-    (add-hook 'meow-insert-mode-hook (lambda ()
-                                       (if (string-equal major-mode "vterm-mode")
-                                           (if vterm-copy-mode
-                                               (vterm-copy-mode 0))))
-              nil t))
-  )
+    (add-hook 'meow-insert-mode-hook
+              (lambda ()
+                (if (string-equal major-mode "vterm-mode")
+                    (if vterm-copy-mode
+                        (vterm-copy-mode 0))))
+              nil t)))
 
 (use-package sudo-edit
   :bind ("C-x C-S-f" . sudo-edit-find-file))
