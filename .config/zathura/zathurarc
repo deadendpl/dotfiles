@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-include /home/oliwier/.cache/wal/colors-zathurarc
+include /home/oliwier/.cache/wal/colors-zathura
 
 set recolor "true"
 set adjust-open width
