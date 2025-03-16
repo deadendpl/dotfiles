@@ -162,8 +162,8 @@ Most of the stuff will get redirected here.")
 (defun launch-test-emacs ()
   "Launches Emacs that only loads test init file."
   (interactive)
-  (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
-  )
+  (start-process "emacs-test" nil "emacs" "-Q"
+                 "-l" "~/.config/emacs/test-init.el"))
 
 (blink-cursor-mode -1)
 
@@ -403,6 +403,7 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-+" 'text-scale-increase)
 (keymap-global-set "C--" 'text-scale-decrease)
 (keymap-global-set "C-x 4 k" 'other-window-prefix)
+(keymap-global-set "C-x B" 'scratch-buffer)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
@@ -412,9 +413,9 @@ Most of the stuff will get redirected here.")
   :bind ("C-x \"" . unexpand-abbrev)
   :config
   (if on-termux-p
-      (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
-    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
-  )
+      (setq abbrev-file-name
+            "~/storage/shared/Sync/backup/abbrev_defs.el")
+    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el")))
 
 (use-package recentf
   :hook ((after-init . recentf-mode)
@@ -422,11 +423,9 @@ Most of the stuff will get redirected here.")
   :bind (("C-c f r" . recentf-open))
   :custom
   (recentf-save-file (expand-file-name-user-share "recentf")) ; location of the file
-  (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
-  )
+  (recentf-max-saved-items nil)) ; infinite amount of entries in recentf file
 
 (use-package saveplace
-  :ensure nil
   :hook (after-init . save-place-mode))
 
 (use-package eww
@@ -457,8 +456,7 @@ Most of the stuff will get redirected here.")
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
   (tab-bar-new-button-show nil)        ;; hide tab new / + button
   (tab-bar-tab-hints t)                ;; show tab numbers
-  (tab-bar-auto-width-max nil)
-  )
+  (tab-bar-auto-width-max nil))
 
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
@@ -486,8 +484,7 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad"))))))
-  )
+        ("Use C-. in insert mode to access meow-keypad")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -555,8 +552,7 @@ Most of the stuff will get redirected here.")
   :hook (after-init . doom-modeline-mode)
   :custom
   (doom-modeline-battery t)
-  (doom-modeline-buffer-encoding 'nondefault)
-  )
+  (doom-modeline-buffer-encoding 'nondefault))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
@@ -564,7 +560,8 @@ Most of the stuff will get redirected here.")
 
 (use-package colorful-mode
   :hook (after-init . global-colorful-mode)
-  :custom (global-colorful-modes '(prog-mode conf-mode help-mode (not special-mode)))
+  :custom (global-colorful-modes
+           '(prog-mode conf-mode help-mode (not special-mode)))
   ;; the default box around the colors causes line to be slightly
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
@@ -683,6 +680,11 @@ string specified by HEX."
 
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
+  :bind (:map completion-preview-active-mode-map
+              ("TAB" . completion-preview-insert))
+  :custom-face
+  (completion-preview-exact ((nil (:underline
+                                   ,(ewal-get-color 'green)))))
   :config
   (add-to-list 'global-completion-preview-modes
                '(not prog-mode conf-mode)))
@@ -692,8 +694,7 @@ string specified by HEX."
   :bind (:map vertico-map
               ("C-j" . vertico-next)
               ("C-k" . vertico-previous)
-              ("C-l" . vertico-exit)
-              )
+              ("C-l" . vertico-exit))
   :custom
   (enable-recursive-minibuffers t)
   ;; `recentf-open' will not have sorted entries
@@ -807,8 +808,7 @@ string specified by HEX."
   :hook (dired-mode . diredfl-mode)
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
-  (add-to-list 'diredfl-compressed-extensions ".chd")
-)
+  (add-to-list 'diredfl-compressed-extensions ".chd"))
 
 (use-package helpful
   :bind
@@ -880,7 +880,9 @@ Handles symbols that start or end with a single quote (') correctly."
          ("C-;" . embark-dwim))
   :config
   ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
-  )
+  (with-eval-after-load 'meow
+    (meow-define-keys 'keypad
+      '("C-." . embark-act))))
 
 (use-package embark-consult)
 
@@ -1003,7 +1005,9 @@ Handles symbols that start or end with a single quote (') correctly."
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
-  )
+  (advice-add 'org-edit-src-save :before
+              (lambda ()
+                (call-interactively 'delete-trailing-whitespace))))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1119,10 +1123,9 @@ Handles symbols that start or end with a single quote (') correctly."
       ((agenda "")
        (alltodo "")))))
   (org-agenda-default-appointment-duration 60)
-  (org-agenda-files (list (expand-file-name "agenda/agenda.org"
-                                            org-roam-directory)
-                          (expand-file-name "agenda/inbox.org"
-                                            org-roam-directory)))
+  (org-agenda-files
+   `(,(expand-file-name "agenda/agenda.org" org-roam-directory)
+     ,(expand-file-name "agenda/inbox.org" org-roam-directory)))
   (org-agenda-hide-tags-regexp ".*")
   (org-agenda-include-all-todo nil)
   (org-agenda-mouse-1-follows-link t)
@@ -1138,11 +1141,10 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-agenda-start-day "+0d")
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
-  (org-archive-location (expand-file-name "agenda/agenda-archive.org::"
-                                          org-roam-directory))
+  (org-archive-location
+   (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-refile-use-outline-path nil)
-  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
-  )
+  (org-refile-targets '((org-agenda-files :maxlevel . 1))))
 
 (use-package org
   :config
@@ -1374,8 +1376,7 @@ as you zoom text. It's fast, since no image regeneration is required."
                                               org-roam-directory)
                             (file-name-nondirectory file))))
       (rename-file file new-file 1)
-      (org-insert-link nil (format "file:%s" new-file))))
-  )
+      (org-insert-link nil (format "file:%s" new-file)))))
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
@@ -1570,17 +1571,39 @@ It doesn't close empty tags."
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
   :custom
-  (auto-insert-directory (expand-file-name "templates/" user-emacs-directory))
+  (auto-insert-directory
+   (expand-file-name "templates/" user-emacs-directory))
   (auto-insert-query nil)
   :config
-  (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
-  (add-to-list 'auto-insert-alist '(sh-mode nil "#!/usr/bin/env bash\n\n"))
-  (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
-  (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(bash-ts-mode nil"#!/usr/bin/env bash\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(sh-mode nil "#!/usr/bin/env bash\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(fish-mode nil "#!/usr/bin/env fish\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
-  (add-to-list 'auto-insert-alist '("\\.user.js\\'" . "userscript.js")))
+  (add-to-list 'auto-insert-alist
+               '(perl-mode nil "#!/usr/bin/env perl\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(("\\.user.js\\'" . "JavaScript userscript")
+                 nil
+                 "// ==UserScript==" \n
+                 "// @name         " (read-string "Name: ") \n
+                 "// @version      " (format-time-string "%Y.%m.%d") \n
+                 "// @description  " (read-string "Description: ") \n
+                 "// @author       "
+                 (concat user-full-name
+                         (if (string= user-full-name "")
+                             user-mail-address
+                           (concat " (" user-mail-address ")"))) \n
+                 "// @match        " (read-string "URL: " "https://") \n
+                 "// ==/UserScript==" \n \n
+                 "(function() {" \n
+                 "'use strict';" \n -
+                 "})();" '(beginning-of-line) '(delete-char 2))))
 
 (add-hook 'prog-mode-hook
           (lambda ()
@@ -1857,7 +1880,7 @@ Also see `window-delete-popup-frame'." command)
   "Create a buffer with last week activity on AniList."
   (interactive)
   (let ((query
-         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native userPreferred } } progress status type } } } }\", \"variables\": {}}"
+         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native } } progress status type } } } }\", \"variables\": {}}"
                  (let ((one-week-ago (time-subtract (current-time)
                                                     (days-to-time 7))))
                    (format-time-string "%s" one-week-ago)))))

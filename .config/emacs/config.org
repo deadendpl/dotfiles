@@ -90,7 +90,7 @@
         - [[#js][JS]]
     - [[#tree-sitter][Tree-sitter]]
     - [[#templates][Templates]]
-      - [[#startup-templates][Startup templates]]
+      - [[#startup-templates-auto-insert][Startup templates (auto-insert)]]
       - [[#command-templates][Command templates]]
     - [[#making-file-executable-if-its-a-script][Making file executable if it's a script]]
   - [[#shells-and-terminals][Shells and terminals]]
@@ -331,8 +331,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
 (defun launch-test-emacs ()
   "Launches Emacs that only loads test init file."
   (interactive)
-  (start-process "emacs-test" nil "emacs" "-Q" "-l" "~/.config/emacs/test-init.el")
-  )
+  (start-process "emacs-test" nil "emacs" "-Q"
+                 "-l" "~/.config/emacs/test-init.el"))
 
 (blink-cursor-mode -1)
 
@@ -601,6 +601,7 @@ When doing big movements, I will get a flash at the current line.
 (keymap-global-set "C-+" 'text-scale-increase)
 (keymap-global-set "C--" 'text-scale-decrease)
 (keymap-global-set "C-x 4 k" 'other-window-prefix)
+(keymap-global-set "C-x B" 'scratch-buffer)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
@@ -614,9 +615,9 @@ Built-in =abbrev-mode= allows for abbreviations.
   :bind ("C-x \"" . unexpand-abbrev)
   :config
   (if on-termux-p
-      (setq abbrev-file-name "~/storage/shared/Sync/backup/abbrev_defs.el")
-    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el"))
-  )
+      (setq abbrev-file-name
+            "~/storage/shared/Sync/backup/abbrev_defs.el")
+    (setq abbrev-file-name "~/Sync/backup/abbrev_defs.el")))
 #+end_src
 
 I have /btw/ set for /by the way/.
@@ -630,13 +631,11 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
   :bind (("C-c f r" . recentf-open))
   :custom
   (recentf-save-file (expand-file-name-user-share "recentf")) ; location of the file
-  (recentf-max-saved-items nil) ; infinite amount of entries in recentf file
-  )
+  (recentf-max-saved-items nil)) ; infinite amount of entries in recentf file
 #+end_src
 *** Remembering file place
 #+begin_src emacs-lisp
 (use-package saveplace
-  :ensure nil
   :hook (after-init . save-place-mode))
 #+end_src
 *** EWW
@@ -678,8 +677,7 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
   (tab-bar-close-button-show nil)      ;; hide tab close / X button
   (tab-bar-new-button-show nil)        ;; hide tab new / + button
   (tab-bar-tab-hints t)                ;; show tab numbers
-  (tab-bar-auto-width-max nil)
-  )
+  (tab-bar-auto-width-max nil))
 #+end_src
 *** Ibuffer
 #+begin_src emacs-lisp
@@ -713,8 +711,7 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad"))))))
-  )
+        ("Use C-. in insert mode to access meow-keypad")))))))
 #+end_src
 *** Fonts
 **** Setting fonts
@@ -726,7 +723,6 @@ It's tangled to =early-init.el=, because it improves startup time a bit.
                     :weight 'medium)
 (set-face-attribute 'variable-pitch nil
                     :family "Ubuntu Nerd Font"
-                    :height 100
                     :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
                     :family "JetBrainsMono NFM Mono")
@@ -737,18 +733,7 @@ It's tangled to =early-init.el=, because it improves startup time a bit.
 ;; Makes commented text and keywords italics.
 ;; This is working in emacsclient but not emacs.
 ;; Your font must have an italic face available.
-(set-face-attribute 'font-lock-comment-face nil
-                    :slant 'italic)
-;; (set-face-attribute 'font-lock-keyword-face nil
-;;   :slant 'italic)
-
-;; This sets the default font on all graphical frames created after restarting Emacs.
-;; Does the same thing as 'set-face-attribute default' above, but emacsclient fonts
-;; are not right, idk why
-;; (add-to-list 'default-frame-alist '(font . "JetBrainsMono NFM-9"))
-
-;; Uncomment the following line if line spacing needs adjusting.
-;; (setq-default line-spacing 0.12)
+(custom-set-faces '(font-lock-comment-face ((nil (:slant italic)))))
 #+end_src
 **** Enabling programming ligatures
 Some fonts like [[https://github.com/tonsky/FiraCode/][Fira Code]] have so called /programming ligatures/ that are essentailly nice symbols for combinations of symbols.
@@ -828,8 +813,7 @@ Adding highlights to TODO and related words.
   :hook (after-init . doom-modeline-mode)
   :custom
   (doom-modeline-battery t)
-  (doom-modeline-buffer-encoding 'nondefault)
-  )
+  (doom-modeline-buffer-encoding 'nondefault))
 #+end_src
 *** Rainbow delimiters
 Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]].
@@ -843,7 +827,8 @@ Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]]
 #+begin_src emacs-lisp
 (use-package colorful-mode
   :hook (after-init . global-colorful-mode)
-  :custom (global-colorful-modes '(prog-mode conf-mode help-mode (not special-mode)))
+  :custom (global-colorful-modes
+           '(prog-mode conf-mode help-mode (not special-mode)))
   ;; the default box around the colors causes line to be slightly
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
@@ -977,6 +962,11 @@ With Emacs 29, true transparency has been added.
 #+begin_src emacs-lisp
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
+  :bind (:map completion-preview-active-mode-map
+              ("TAB" . completion-preview-insert))
+  :custom-face
+  (completion-preview-exact ((nil (:underline
+                                   ,(ewal-get-color 'green)))))
   :config
   (add-to-list 'global-completion-preview-modes
                '(not prog-mode conf-mode)))
@@ -992,8 +982,7 @@ I don't need it loading immediately so I defer it by a second.
   :bind (:map vertico-map
               ("C-j" . vertico-next)
               ("C-k" . vertico-previous)
-              ("C-l" . vertico-exit)
-              )
+              ("C-l" . vertico-exit))
   :custom
   (enable-recursive-minibuffers t)
   ;; `recentf-open' will not have sorted entries
@@ -1125,8 +1114,7 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   :hook (dired-mode . diredfl-mode)
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
-  (add-to-list 'diredfl-compressed-extensions ".chd")
-)
+  (add-to-list 'diredfl-compressed-extensions ".chd"))
 #+end_src
 ** Docs
 *** Helpful
@@ -1215,7 +1203,9 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
          ("C-;" . embark-dwim))
   :config
   ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
-  )
+  (with-eval-after-load 'meow
+    (meow-define-keys 'keypad
+      '("C-." . embark-act))))
 
 (use-package embark-consult)
 #+end_src
@@ -1350,7 +1340,9 @@ Here I'm improving it as much as I can.
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
-  )
+  (advice-add 'org-edit-src-save :before
+              (lambda ()
+                (call-interactively 'delete-trailing-whitespace))))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1473,10 +1465,9 @@ In tables pressing RET doesn't follow links. I fix that.
       ((agenda "")
        (alltodo "")))))
   (org-agenda-default-appointment-duration 60)
-  (org-agenda-files (list (expand-file-name "agenda/agenda.org"
-                                            org-roam-directory)
-                          (expand-file-name "agenda/inbox.org"
-                                            org-roam-directory)))
+  (org-agenda-files
+   `(,(expand-file-name "agenda/agenda.org" org-roam-directory)
+     ,(expand-file-name "agenda/inbox.org" org-roam-directory)))
   (org-agenda-hide-tags-regexp ".*")
   (org-agenda-include-all-todo nil)
   (org-agenda-mouse-1-follows-link t)
@@ -1492,11 +1483,10 @@ In tables pressing RET doesn't follow links. I fix that.
   (org-agenda-start-day "+0d")
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
-  (org-archive-location (expand-file-name "agenda/agenda-archive.org::"
-                                          org-roam-directory))
+  (org-archive-location
+   (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-refile-use-outline-path nil)
-  (org-refile-targets '((org-agenda-files :maxlevel . 1)))
-  )
+  (org-refile-targets '((org-agenda-files :maxlevel . 1))))
 #+end_src
 *** Saving agenda files
 #+begin_src emacs-lisp
@@ -1764,8 +1754,7 @@ It's set up so it will display markers when entering insert mode.
                                               org-roam-directory)
                             (file-name-nondirectory file))))
       (rename-file file new-file 1)
-      (org-insert-link nil (format "file:%s" new-file))))
-  )
+      (org-insert-link nil (format "file:%s" new-file)))))
 #+end_src
 I like sometimes to use =consult-org-roam-search= to use grep on my notes, and that is in [[https://github.com/jgru/consult-org-roam][consult-org-roam]].
 #+begin_src emacs-lisp
@@ -2068,23 +2057,45 @@ This remaps specified major modes to its tree-sitter counterparts.
         (js-json-mode . json-ts-mode))))
 #+end_src
 *** Templates
-**** Startup templates
+**** Startup templates (auto-insert)
 ~autoinsert~ is built-in mode for inserting text when creating a new file
 #+begin_src emacs-lisp
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
   :custom
-  (auto-insert-directory (expand-file-name "templates/" user-emacs-directory))
+  (auto-insert-directory
+   (expand-file-name "templates/" user-emacs-directory))
   (auto-insert-query nil)
   :config
-  (add-to-list 'auto-insert-alist '(bash-ts-mode nil "#!/usr/bin/env bash\n\n"))
-  (add-to-list 'auto-insert-alist '(sh-mode nil "#!/usr/bin/env bash\n\n"))
-  (add-to-list 'auto-insert-alist '(fish-mode nil "#!/usr/bin/env fish\n\n"))
-  (add-to-list 'auto-insert-alist '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(bash-ts-mode nil"#!/usr/bin/env bash\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(sh-mode nil "#!/usr/bin/env bash\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(fish-mode nil "#!/usr/bin/env fish\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(perl-mode nil "#!/usr/bin/env perl\n\n"))
-  (add-to-list 'auto-insert-alist '("\\.user.js\\'" . "userscript.js")))
+  (add-to-list 'auto-insert-alist
+               '(perl-mode nil "#!/usr/bin/env perl\n\n"))
+  (add-to-list 'auto-insert-alist
+               '(("\\.user.js\\'" . "JavaScript userscript")
+                 nil
+                 "// ==UserScript==" \n
+                 "// @name         " (read-string "Name: ") \n
+                 "// @version      " (format-time-string "%Y.%m.%d") \n
+                 "// @description  " (read-string "Description: ") \n
+                 "// @author       "
+                 (concat user-full-name
+                         (if (string= user-full-name "")
+                             user-mail-address
+                           (concat " (" user-mail-address ")"))) \n
+                 "// @match        " (read-string "URL: " "https://") \n
+                 "// ==/UserScript==" \n \n
+                 "(function() {" \n
+                 "'use strict';" \n -
+                 "})();" '(beginning-of-line) '(delete-char 2))))
 #+end_src
 **** Command templates :ARCHIVE:
 [[https://github.com/joaotavora/yasnippet][yasnippet]] implements snippets for commands etc.
@@ -2409,7 +2420,7 @@ It looks at anime/manga progress over past week.
   "Create a buffer with last week activity on AniList."
   (interactive)
   (let ((query
-         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native userPreferred } } progress status type } } } }\", \"variables\": {}}"
+         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native } } progress status type } } } }\", \"variables\": {}}"
                  (let ((one-week-ago (time-subtract (current-time)
                                                     (days-to-time 7))))
                    (format-time-string "%s" one-week-ago)))))
