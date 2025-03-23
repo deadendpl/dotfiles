@@ -63,6 +63,7 @@ Most of the stuff will get redirected here.")
   ;; Set the right directory to store the native compilation cache
   (let ((path (expand-file-name-user-share "eln-cache/")))
     (startup-redirect-eln-cache path))
+  (setq native-comp-async-report-warnings-errors nil)
   ;; Silence compiler warnings as they can be disruptive
   ;; (setq-default native-comp-async-report-warnings-errors nil)
   )
@@ -215,6 +216,16 @@ Most of the stuff will get redirected here.")
 
 (keymap-global-set "<remap> <indent-region>" 'indent-dwim)
 
+(with-eval-after-load 'hl-line
+  (define-advice face-at-point (:around (orig-fun &rest args))
+    "Disable `hl-line-mode' temporarily if it's non-nil."
+    (if hl-line-mode
+        (progn
+          (hl-line-mode -1)
+          (prog1 (apply orig-fun args)
+            (hl-line-mode 1)))
+      (apply orig-fun args))))
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -253,11 +264,6 @@ Most of the stuff will get redirected here.")
      '("}" . tab-next))
 
     (meow-leader-define-key
-     ;; SPC j/k will run the original command in MOTION state.
-     '("j" . "H-j")
-     '("k" . "H-k")
-     '("{" . "H-{")
-     '("}" . "H-}")
      ;; Use SPC (0-9) for digit arguments.
      '("1" . meow-digit-argument)
      '("2" . meow-digit-argument)
@@ -375,8 +381,7 @@ Most of the stuff will get redirected here.")
                      tab-select
                      tab-next
                      tab-previous))
-    (advice-add command :after #'custom/pulse-line))
-  )
+    (advice-add command :after #'custom/pulse-line)))
 
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
@@ -484,7 +489,8 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad")))))))
+        ("Use C-. in insert mode to access meow-keypad")
+        ("Use C-x ( and C-x ) in meow beacon state")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -583,22 +589,34 @@ Most of the stuff will get redirected here.")
     (use-package ewal-doom-themes
       :demand
       :config
+      (defun ewal-dark-background-p ()
+        "Return non-nil if background color is dark."
+        (color-dark-p (mapcar (lambda (x)
+                                (/ x 255.0))
+                              (color-hex-to-rgb
+                               (ewal-load-color 'background)))))
+
       (defun ewal-setup (theme)
         "Set some faces if THEME is ewal theme."
         (when (eq theme 'ewal-doom-one)
-          (set-face-attribute 'line-number nil
-                              :foreground (ewal--get-base-color 'green)
-                              :inherit 'default)
-          (with-eval-after-load 'org
-            (set-face-attribute 'org-scheduled-today nil :foreground
-                                (ewal--get-base-color 'green)))))
-
-      (defun set-comment-face-italic (&rest _)
-        (set-face-attribute 'font-lock-comment-face nil
-                            :slant 'italic))
+          (let ((color (ewal--get-base-color 'green)))
+            (set-face-attribute 'line-number nil
+                                :foreground color
+                                :inherit 'default)
+            (eval
+             `(with-eval-after-load 'org
+                (set-face-attribute 'org-scheduled-today nil
+                                    :foreground ,color)))
+            (eval `(with-eval-after-load 'completion-preview
+                     (set-face-attribute 'completion-preview-exact nil
+                                         :underline ,color))))
+          (with-eval-after-load 'hl-line
+            (if (ewal-dark-background-p)
+                (set-face-attribute 'hl-line nil :background "gray5")
+              (set-face-attribute 'hl-line nil :background 'unspecified
+                                  :inherit 'highlight)))))
 
       (add-hook 'enable-theme-functions 'ewal-setup)
-      (add-hook 'enable-theme-functions 'set-comment-face-italic)
 
       (defun color-hex-to-rgb (hex)
         "Return list of red, green and blue colors for the hex color
@@ -607,23 +625,18 @@ string specified by HEX."
               (string-to-number (substring hex 3 5) 16)
               (string-to-number (substring hex 5 7) 16)))
 
-      (if (color-dark-p (mapcar (lambda (x)
-                                  (/ x 255.0))
-                                (color-hex-to-rgb
-                                 (ewal-load-color 'background))))
+      (if (ewal-dark-background-p)
           (load-theme 'ewal-doom-one t)
         (progn
           (setq ewal-doom-one-brighter-comments t
-                ewal-doom-one-comment-bg nil)
+                ewal-doom-one-comment-bg nil
+                ewal-dark-palette-p nil)
           (load-theme 'ewal-doom-one t)
 
           (with-eval-after-load 'eww
             (set-face-attribute
              'eww-form-text nil :box
-             `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
-      )
-    )
-  )
+             `(:line-width 1 :color ,(ewal-get-color 'foreground)))))))))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -682,9 +695,6 @@ string specified by HEX."
   :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
               ("TAB" . completion-preview-insert))
-  :custom-face
-  (completion-preview-exact ((nil (:underline
-                                   ,(ewal-get-color 'green)))))
   :config
   (add-to-list 'global-completion-preview-modes
                '(not prog-mode conf-mode)))
@@ -756,16 +766,13 @@ string specified by HEX."
    ("M-P" . consult-history)
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
-   ([remap eshell-previous-matching-input] . consult-history)
-   )
+   ([remap eshell-previous-matching-input] . consult-history))
   :custom
   (consult-async-min-input 0)
   :config
-  (advice-add 'consult-buffer :around
-              (lambda (orig-fun &rest args)
-                ;; no live preview as loading org mode takes few seconds
-                (let ((consult-preview-key nil))
-                  (apply orig-fun args))))
+  ;; no live preview as loading org mode takes few seconds
+  (consult-customize consult-buffer consult-project-buffer
+                     :preview-key nil)
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
@@ -800,8 +807,7 @@ string specified by HEX."
          '("\\.\\(mkv\\|mp4\\)$" "xdg-open")
          ;; everything else
          '("\\..*$" "xdg-open")))
-  (dired-dwim-target t)
-  )
+  (dired-dwim-target t))
 
 (use-package diredfl
   :after dired
@@ -865,6 +871,7 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package elfeed
   :unless on-termux-p
+  :hook (elfeed-mode . hl-line-mode)
   :custom
   ;; cache? directory
   (elfeed-db-directory
@@ -1007,7 +1014,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
   (advice-add 'org-edit-src-save :before
               (lambda ()
-                (call-interactively 'delete-trailing-whitespace))))
+                (delete-trailing-whitespace (point-min) (point-max)))))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1329,8 +1336,7 @@ as you zoom text. It's fast, since no image regeneration is required."
      ("a" "animanga" plain "%?"
       :target (file+head "animan/${slug}.org"
                          "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
-      :unnarrowed t)
-     ))
+      :unnarrowed t)))
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org"
@@ -1435,8 +1441,7 @@ as you zoom text. It's fast, since no image regeneration is required."
     (if buffer-file-name
         (setq-local compile-command
                     (shell-quote-argument (buffer-file-name)))))
-  :custom (sh-basic-offset 2)
-  )
+  :custom (sh-basic-offset 2))
 
 (use-package cc-mode
   :hook ((c++-mode .  custom/c++-set-compile-command)
@@ -1464,6 +1469,12 @@ as you zoom text. It's fast, since no image regeneration is required."
 
 (use-package inf-lisp
   :custom (inferior-lisp-program "sbcl --noinform"))
+
+(use-package sly
+  :custom (sly-mrepl-history-file-name
+           (expand-file-name-user-share "sly-mrepl-history"))
+  :bind (:map sly-mode-map
+              ("C-c C-e" . sly-eval-buffer)))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 
@@ -1819,6 +1830,7 @@ Also see `window-delete-popup-frame'." command)
   '("\\.m3u\\'" "\\.m3u8\\'")      ; files for which to activate this mode
   '((lambda () (setq mode-name "M3U"))) ; other functions to call
   "A mode for M3U playlist files") ; doc string for this mode
+
 (with-eval-after-load 'nerd-icons
   (add-to-list 'nerd-icons-mode-icon-alist
                '(m3u-mode nerd-icons-mdicon

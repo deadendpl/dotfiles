@@ -176,10 +176,12 @@ def afterwards():
     if args.light == True:
       subprocess.run(["emacsclient", "-e",
                       "(setq ewal-doom-one-brighter-comments t " +
-                      "ewal-doom-one-comment-bg nil)"])
+                      "ewal-doom-one-comment-bg nil " +
+                      "ewal-dark-palette-p nil)"])
     else:
       subprocess.run(["emacsclient", "-e",
-                        "(setq ewal-doom-one-brighter-comments nil)"])
+                      "(setq ewal-doom-one-brighter-comments nil " +
+                      "ewal-dark-palette-p t)"])
     subprocess.Popen(["emacsclient", "-e", "(load-theme 'ewal-doom-one t)"])
 
   if qutebrowserp:

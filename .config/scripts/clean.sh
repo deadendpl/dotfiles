@@ -34,6 +34,7 @@ done
 
 echo "Deleting files in trash"
 rm -r "${XDG_DATA_HOME}/Trash/"
+mkdir "${XDG_DATA_HOME}/Trash/"
 
 echo "Deleting logs"
 sudo rm -r /var/log/*

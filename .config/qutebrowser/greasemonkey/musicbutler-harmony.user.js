@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Harmony button on MusicButler
-// @version      2025.03.15
+// @version      2025.03.17
 // @description  Add Harmony button under Spotify and Apple Music links on MusicButler
 // @author       deadendpl
 // @match        https://www.musicbutler.io/
@@ -13,8 +13,9 @@
   'use strict';
 
   var elements = document.getElementsByClassName("block");
+  var length = elements.length;
 
-  for(var i = 0; i < elements.length; i++)
+  for(var i = 0; i < length; i++)
     if(elements[i].tagName == 'A')
       if(elements[i].href.search("open.spotify.com") >= 0 ||
          elements[i].href.search("music.apple.com") >= 0)
@@ -36,6 +37,6 @@
         a.append(img);
         div.append(a);
 
-        elements[i].append(div)
+        elements[i].append(div);
       }
 })();
