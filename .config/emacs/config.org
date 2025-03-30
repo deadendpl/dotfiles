@@ -93,6 +93,7 @@
       - [[#startup-templates-auto-insert][Startup templates (auto-insert)]]
       - [[#command-templates][Command templates]]
     - [[#making-file-executable-if-its-a-script][Making file executable if it's a script]]
+    - [[#highlighting-fill-column][Highlighting =fill-column=]]
   - [[#shells-and-terminals][Shells and terminals]]
     - [[#shell][Shell]]
     - [[#eshell][Eshell]]
@@ -277,7 +278,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               scroll-error-top-bottom t
               enable-local-variables :all
               save-interprogram-paste-before-kill t
-              shell-command-prompt-show-cwd t)
+              shell-command-prompt-show-cwd t
+              fill-column 72)
 
 ;; showing init time in scratch buffer
 (if on-termux-p
@@ -319,6 +321,7 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
         (make-directory dir t)))))
 (advice-add 'find-file :before #'make-directory-maybe)
 (advice-add 'find-file-other-window :before #'make-directory-maybe)
+(advice-add 'find-file-other-tab :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -717,7 +720,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use C-. in insert mode to access meow-keypad")
-        ("Use C-x ( and C-x ) in meow beacon state")))))))
+        ("Use C-x ( and C-x ) in meow beacon state")
+        ("Use C-c M-o in comint to clear the buffer")))))))
 #+end_src
 *** Fonts
 **** Setting fonts
@@ -884,7 +888,12 @@ I use [[https://github.com/dylanaraps/pywal][pywal]] for my theming so I use [[h
             (if (ewal-dark-background-p)
                 (set-face-attribute 'hl-line nil :background "gray5")
               (set-face-attribute 'hl-line nil :background 'unspecified
-                                  :inherit 'highlight)))))
+                                  :inherit 'highlight)))
+
+          (with-eval-after-load 'eww
+            (set-face-attribute
+             'eww-form-text nil :box
+             `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
 
       (add-hook 'enable-theme-functions 'ewal-setup)
 
@@ -901,12 +910,7 @@ string specified by HEX."
           (setq ewal-doom-one-brighter-comments t
                 ewal-doom-one-comment-bg nil
                 ewal-dark-palette-p nil)
-          (load-theme 'ewal-doom-one t)
-
-          (with-eval-after-load 'eww
-            (set-face-attribute
-             'eww-form-text nil :box
-             `(:line-width 1 :color ,(ewal-get-color 'foreground)))))))))
+          (load-theme 'ewal-doom-one t))))))
 #+end_src
 
 With Emacs 29, true transparency has been added.
@@ -976,7 +980,7 @@ With Emacs 29, true transparency has been added.
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
-              ("TAB" . completion-preview-insert))
+              ("<tab>" . completion-preview-insert))
   :config
   (add-to-list 'global-completion-preview-modes
                '(not prog-mode conf-mode)))
@@ -1107,12 +1111,7 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$"
-           "xdg-open")
-         '("\\.\\(pdf\\|epub\\)$" "xdg-open")
-         '("\\.\\(mkv\\|mp4\\)$" "xdg-open")
-         ;; everything else
-         '("\\..*$" "xdg-open")))
+   '(("\\..*$" "xdg-open")))
   (dired-dwim-target t))
 
 (use-package diredfl
@@ -1148,7 +1147,8 @@ Handles symbols that start or end with a single quote (') correctly."
                     ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
                      (substring sym 0 -1)) ; Remove trailing '
                     ;; is in org mode and is surrounded by =
-                    ((and (eq major-mode 'org-mode)
+                    ((and (or (eq major-mode 'org-mode)
+                              (eq major-mode 'org-agenda-mode))
                           (and (char-equal ?= (aref sym 0))
                                (char-equal ?= (aref sym (1- (length sym))))))
                      (substring sym 1 -1))
@@ -1197,8 +1197,8 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
   ;; cache? directory
   (elfeed-db-directory
    (expand-file-name-user-share "elfeed"))
-  (elfeed-feeds  '("https://sachachua.com/blog/feed/"
-                   "https://planet.emacslife.com/atom.xml"))
+  (elfeed-feeds '("https://sachachua.com/blog/feed/"
+                  "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
   :bind (:map elfeed-search-mode-map
               ("f" . elfeed-search-show-entry)))
@@ -1570,6 +1570,8 @@ as you zoom text. It's fast, since no image regeneration is required."
 *** Meow settings
 #+begin_src emacs-lisp
 (use-package org
+  :bind (:map org-mode-map
+              ("C-c M-m" . meow-org-motion-mode))
   :config
   ;; meow custom state (inspired by
   ;; https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
@@ -1615,9 +1617,6 @@ as you zoom text. It's fast, since no image regeneration is required."
     ;; Narrowing/widening
     '("N" .  org-narrow-to-subtree)
     '("W" .  widen))
-
-  (meow-define-keys 'normal
-    '("O" . meow-org-motion-mode))
 
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
@@ -1692,33 +1691,36 @@ It's set up so it will display markers when entering insert mode.
   (if on-termux-p
       (setq org-roam-directory "~/storage/shared/org-roam")
     (setq org-roam-directory "~/org-roam"))
+  :hook (org-roam-find-file . org-roam-set-modified-date-setup)
   :custom
   (org-directory org-roam-directory)
   (org-roam-db-location (expand-file-name-user-share "org/org-roam.db"))
   (org-roam-dailies-directory "journals/")
-  (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+  (org-roam-node-display-template
+   (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+  (org-roam-file-exclude-regexp '("attachments/"))
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :target (file+head "${slug}.org"
-                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: %^g\n")
       :unnarrowed t)
      ("g" "video game" plain "%?"
       :target (file+head "games/${slug}.org"
-                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: %^g\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
       :unnarrowed t)
      ("b" "book" plain "%?"
       :target (file+head "books/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :books:\n#+date: %U\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: :books:\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
       :unnarrowed t)
      ("a" "animanga" plain "%?"
       :target (file+head "animan/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: :animan:\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
       :unnarrowed t)))
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org"
-                 "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+                 "%(org-roam-created-date-property)\n#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
   (org-persist-directory
    (expand-file-name-user-share "org/org-persist/"))
   :bind (("C-c n A a" . org-roam-alias-add)
@@ -1742,6 +1744,13 @@ It's set up so it will display markers when entering insert mode.
     "Opens org-roam-directory in `dired'."
     (interactive)
     (dired org-roam-directory))
+  (defun org-roam-created-date-property ()
+    "Return a property drawer with created date."
+    (concat
+     ":PROPERTIES:\n"
+     ":CREATED_AT: "
+     (format-time-string "[%Y-%m-%d %a]")
+     "\n:END:"))
   :config
   (org-roam-setup)
   (require 'org-roam-export)
@@ -1753,6 +1762,7 @@ It's set up so it will display markers when entering insert mode.
     "Add ID properties to all headlines in the current file."
     (interactive)
     (org-map-entries 'org-id-get-create))
+
   (defun org-move-file-and-insert-link (file)
     "Move FILE to attachment directory and link to it."
     (interactive "fFile: ")
@@ -1760,7 +1770,18 @@ It's set up so it will display markers when entering insert mode.
                                               org-roam-directory)
                             (file-name-nondirectory file))))
       (rename-file file new-file 1)
-      (org-insert-link nil (format "file:%s" new-file)))))
+      (org-insert-link nil (format "file:%s" new-file))))
+
+  (defun org-roam-set-modified-date-property ()
+    "Update the updated at property in org roam file."
+    (save-excursion
+      (goto-char (point-min))
+      (org-set-property "MODIFIED_AT"
+                        (format-time-string "[%Y-%m-%d %a]"))))
+
+  (defun org-roam-set-modified-date-setup ()
+    (add-hook 'before-save-hook
+              'org-roam-set-modified-date-property nil t)))
 #+end_src
 I like sometimes to use =consult-org-roam-search= to use grep on my notes, and that is in [[https://github.com/jgru/consult-org-roam][consult-org-roam]].
 #+begin_src emacs-lisp
@@ -2127,6 +2148,11 @@ Files that start with a shebang will get executable permissions.
              'after-save-hook
              'executable-make-buffer-file-executable-if-script-p
              nil t)))
+#+end_src
+*** Highlighting =fill-column=
+#+begin_src emacs-lisp
+(use-package display-fill-column-indicator
+  :hook (prog-mode . display-fill-column-indicator-mode))
 #+end_src
 ** Shells and terminals
 *** Shell

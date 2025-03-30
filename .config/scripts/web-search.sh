@@ -18,6 +18,7 @@ declare -a search_engines=(
   "YouTube (Piped)"
   "SearXNG"
   "VGMdb"
+  "Wikipedia"
 )
 
 selected_engine=$(printf '%s\n' "${search_engines[@]}" | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l ${#search_engines[@]} -i -p "Search engine:")
@@ -81,6 +82,9 @@ case $selected_engine in
     QUERY=$(echo '' | rofi -config ${XDG_CONFIG_HOME}/rofi/config-bare.rasi -dmenu -l 0 -p "Search $selected_engine:") || exit
     xdg-open "${URL}${QUERY}&type=" 2> /dev/null
     exit 0
+    ;;
+  "Wikipedia")
+    URL="https://wikipedia.org/w/index.php?&search="
     ;;
   *)
     exit 0

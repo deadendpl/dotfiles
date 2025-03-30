@@ -16,8 +16,8 @@ if status is-interactive
   set fish_greeting
 end
 
-set EDITOR emacsclient -t -a ""
-set VISUAL emacsclient -c -a ""
+set EDITOR emacsclient -t -a \"\"
+set VISUAL emacsclient -c -a \"\"
 
 
 # pacman and yay on Arch

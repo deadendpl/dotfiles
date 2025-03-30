@@ -3,8 +3,9 @@
 if systemctl status cups >> /dev/null; then
   sudo systemctl stop cups || exit
   # killing left out hp processes
-  ps -Af | grep "hp-" | grep -v "grep" | awk '{print $2}' | xargs kill
+  ps -Af | grep "hp-[systray|toolbox]" | awk '{print $2}' | xargs kill
 else
   sudo systemctl start cups || exit
+  cd /tmp
   nohup hp-toolbox &
 fi

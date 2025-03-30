@@ -110,7 +110,8 @@ Most of the stuff will get redirected here.")
               scroll-error-top-bottom t
               enable-local-variables :all
               save-interprogram-paste-before-kill t
-              shell-command-prompt-show-cwd t)
+              shell-command-prompt-show-cwd t
+              fill-column 72)
 
 ;; showing init time in scratch buffer
 (if on-termux-p
@@ -150,6 +151,7 @@ Most of the stuff will get redirected here.")
         (make-directory dir t)))))
 (advice-add 'find-file :before #'make-directory-maybe)
 (advice-add 'find-file-other-window :before #'make-directory-maybe)
+(advice-add 'find-file-other-tab :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -490,7 +492,8 @@ Most of the stuff will get redirected here.")
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use C-. in insert mode to access meow-keypad")
-        ("Use C-x ( and C-x ) in meow beacon state")))))))
+        ("Use C-x ( and C-x ) in meow beacon state")
+        ("Use C-c M-o in comint to clear the buffer")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -614,7 +617,12 @@ Most of the stuff will get redirected here.")
             (if (ewal-dark-background-p)
                 (set-face-attribute 'hl-line nil :background "gray5")
               (set-face-attribute 'hl-line nil :background 'unspecified
-                                  :inherit 'highlight)))))
+                                  :inherit 'highlight)))
+
+          (with-eval-after-load 'eww
+            (set-face-attribute
+             'eww-form-text nil :box
+             `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
 
       (add-hook 'enable-theme-functions 'ewal-setup)
 
@@ -631,12 +639,7 @@ string specified by HEX."
           (setq ewal-doom-one-brighter-comments t
                 ewal-doom-one-comment-bg nil
                 ewal-dark-palette-p nil)
-          (load-theme 'ewal-doom-one t)
-
-          (with-eval-after-load 'eww
-            (set-face-attribute
-             'eww-form-text nil :box
-             `(:line-width 1 :color ,(ewal-get-color 'foreground)))))))))
+          (load-theme 'ewal-doom-one t))))))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -694,7 +697,7 @@ string specified by HEX."
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
-              ("TAB" . completion-preview-insert))
+              ("<tab>" . completion-preview-insert))
   :config
   (add-to-list 'global-completion-preview-modes
                '(not prog-mode conf-mode)))
@@ -801,12 +804,7 @@ string specified by HEX."
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   (list '("\\.\\(png\\|jpg\\|jpeg\\|gif\\|svg\\|bmp\\|webp\\)$"
-           "xdg-open")
-         '("\\.\\(pdf\\|epub\\)$" "xdg-open")
-         '("\\.\\(mkv\\|mp4\\)$" "xdg-open")
-         ;; everything else
-         '("\\..*$" "xdg-open")))
+   '(("\\..*$" "xdg-open")))
   (dired-dwim-target t))
 
 (use-package diredfl
@@ -838,7 +836,8 @@ Handles symbols that start or end with a single quote (') correctly."
                     ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
                      (substring sym 0 -1)) ; Remove trailing '
                     ;; is in org mode and is surrounded by =
-                    ((and (eq major-mode 'org-mode)
+                    ((and (or (eq major-mode 'org-mode)
+                              (eq major-mode 'org-agenda-mode))
                           (and (char-equal ?= (aref sym 0))
                                (char-equal ?= (aref sym (1- (length sym))))))
                      (substring sym 1 -1))
@@ -876,8 +875,8 @@ Handles symbols that start or end with a single quote (') correctly."
   ;; cache? directory
   (elfeed-db-directory
    (expand-file-name-user-share "elfeed"))
-  (elfeed-feeds  '("https://sachachua.com/blog/feed/"
-                   "https://planet.emacslife.com/atom.xml"))
+  (elfeed-feeds '("https://sachachua.com/blog/feed/"
+                  "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
   :bind (:map elfeed-search-mode-map
               ("f" . elfeed-search-show-entry)))
@@ -1220,6 +1219,8 @@ as you zoom text. It's fast, since no image regeneration is required."
   (plist-put org-format-latex-options :background nil))
 
 (use-package org
+  :bind (:map org-mode-map
+              ("C-c M-m" . meow-org-motion-mode))
   :config
   ;; meow custom state (inspired by
   ;; https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
@@ -1266,9 +1267,6 @@ as you zoom text. It's fast, since no image regeneration is required."
     '("N" .  org-narrow-to-subtree)
     '("W" .  widen))
 
-  (meow-define-keys 'normal
-    '("O" . meow-org-motion-mode))
-
   ;; unfolding every header when using `meow-visit'
   (advice-add 'meow-visit :before
               (lambda (&rest _)
@@ -1314,33 +1312,36 @@ as you zoom text. It's fast, since no image regeneration is required."
   (if on-termux-p
       (setq org-roam-directory "~/storage/shared/org-roam")
     (setq org-roam-directory "~/org-roam"))
+  :hook (org-roam-find-file . org-roam-set-modified-date-setup)
   :custom
   (org-directory org-roam-directory)
   (org-roam-db-location (expand-file-name-user-share "org/org-roam.db"))
   (org-roam-dailies-directory "journals/")
-  (org-roam-node-display-template (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+  (org-roam-node-display-template
+   (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+  (org-roam-file-exclude-regexp '("attachments/"))
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :target (file+head "${slug}.org"
-                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: %^g\n")
       :unnarrowed t)
      ("g" "video game" plain "%?"
       :target (file+head "games/${slug}.org"
-                         "#+title: ${title}\n#+filetags: %^g\n#+date: %U\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: %^g\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
       :unnarrowed t)
      ("b" "book" plain "%?"
       :target (file+head "books/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :books:\n#+date: %U\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: :books:\n#+todo: DROPPED(d) UNFINISHED(u) UNREAD(U) TODO(t) | READ(r)\n* Status\n* Notes")
       :unnarrowed t)
      ("a" "animanga" plain "%?"
       :target (file+head "animan/${slug}.org"
-                         "#+title: ${title}\n#+filetags: :animan:\n#+date: %U\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: :animan:\n#+TODO: DROPPED(d) UNFINISHED(u) TODO(t) | COMPLETED(c)\n* Anime :anime:\n* Manga :manga:")
       :unnarrowed t)))
   (org-roam-dailies-capture-templates
    '(("d" "default" entry "* %?" :target
       (file+head "%<%Y-%m-%d>.org"
-                 "#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
+                 "%(org-roam-created-date-property)\n#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
   (org-persist-directory
    (expand-file-name-user-share "org/org-persist/"))
   :bind (("C-c n A a" . org-roam-alias-add)
@@ -1364,6 +1365,13 @@ as you zoom text. It's fast, since no image regeneration is required."
     "Opens org-roam-directory in `dired'."
     (interactive)
     (dired org-roam-directory))
+  (defun org-roam-created-date-property ()
+    "Return a property drawer with created date."
+    (concat
+     ":PROPERTIES:\n"
+     ":CREATED_AT: "
+     (format-time-string "[%Y-%m-%d %a]")
+     "\n:END:"))
   :config
   (org-roam-setup)
   (require 'org-roam-export)
@@ -1375,6 +1383,7 @@ as you zoom text. It's fast, since no image regeneration is required."
     "Add ID properties to all headlines in the current file."
     (interactive)
     (org-map-entries 'org-id-get-create))
+
   (defun org-move-file-and-insert-link (file)
     "Move FILE to attachment directory and link to it."
     (interactive "fFile: ")
@@ -1382,7 +1391,18 @@ as you zoom text. It's fast, since no image regeneration is required."
                                               org-roam-directory)
                             (file-name-nondirectory file))))
       (rename-file file new-file 1)
-      (org-insert-link nil (format "file:%s" new-file)))))
+      (org-insert-link nil (format "file:%s" new-file))))
+
+  (defun org-roam-set-modified-date-property ()
+    "Update the updated at property in org roam file."
+    (save-excursion
+      (goto-char (point-min))
+      (org-set-property "MODIFIED_AT"
+                        (format-time-string "[%Y-%m-%d %a]"))))
+
+  (defun org-roam-set-modified-date-setup ()
+    (add-hook 'before-save-hook
+              'org-roam-set-modified-date-property nil t)))
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
@@ -1622,6 +1642,9 @@ It doesn't close empty tags."
              'after-save-hook
              'executable-make-buffer-file-executable-if-script-p
              nil t)))
+
+(use-package display-fill-column-indicator
+  :hook (prog-mode . display-fill-column-indicator-mode))
 
 (keymap-global-set "C-c s t" 'term)
 (keymap-global-set "C-c s s" 'shell)
