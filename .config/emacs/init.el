@@ -779,7 +779,17 @@ string specified by HEX."
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring)))
+  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+  (setq consult--source-project-root
+         `( :name     "Project Root"
+            :narrow   ?r
+            :category file
+            :face     consult-file
+            :history  file-name-history
+            :action   ,(lambda (root)
+                         (let ((default-directory root))
+                           (project-find-file)))
+            :items    ,#'consult--project-known-roots)))
 
 (use-package marginalia
   :after vertico

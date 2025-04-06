@@ -3,9 +3,11 @@
 if systemctl status cups >> /dev/null; then
   sudo systemctl stop cups || exit
   # killing left out hp processes
-  ps -Af | grep "hp-[systray|toolbox]" | awk '{print $2}' | xargs kill
+  pgrep -f "python /usr/bin/hp-[systray|toolbox]" | xargs kill
+  echo "Killed processes"
 else
   sudo systemctl start cups || exit
   cd /tmp
   nohup hp-toolbox &
+  echo "Started processes"
 fi

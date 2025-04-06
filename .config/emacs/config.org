@@ -1080,7 +1080,17 @@ Built-in =savehist-mode= saves minibuffer history
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring)))
+  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+  (setq consult--source-project-root
+         `( :name     "Project Root"
+            :narrow   ?r
+            :category file
+            :face     consult-file
+            :history  file-name-history
+            :action   ,(lambda (root)
+                         (let ((default-directory root))
+                           (project-find-file)))
+            :items    ,#'consult--project-known-roots)))
 #+end_src
 **** Annotations (marginalia)
 [[https://github.com/minad/marginalia][Marginalia]] shows candidatate's annotations
