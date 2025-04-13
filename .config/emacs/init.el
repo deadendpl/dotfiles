@@ -493,7 +493,8 @@ Most of the stuff will get redirected here.")
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use C-. in insert mode to access meow-keypad")
         ("Use C-x ( and C-x ) in meow beacon state")
-        ("Use C-c M-o in comint to clear the buffer")))))))
+        ("Use C-c M-o in comint to clear the buffer")
+        ("Use F in dired to get file size")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -648,7 +649,7 @@ string specified by HEX."
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
          ;; ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode)
-         (prog-mode . (lambda () (setq-local corfu-auto t))))
+         ((prog-mode ielm-mode) . (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
                                  :background unspecified
@@ -775,6 +776,8 @@ string specified by HEX."
   :config
   ;; no live preview as loading org mode takes few seconds
   (consult-customize consult-buffer consult-project-buffer
+                     consult-buffer-other-tab consult-buffer-other-window
+                     consult-buffer-other-frame
                      :preview-key nil)
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
@@ -801,7 +804,8 @@ string specified by HEX."
   :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :bind (:map dired-mode-map
-              ("b" . dired-up-directory))
+              ("b" . dired-up-directory)
+              ("F" . dired-do-du))
   :custom
   (insert-directory-program "ls")
   (dired-listing-switches "-lvXAh --group-directories-first")
@@ -815,7 +819,17 @@ string specified by HEX."
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
    '(("\\..*$" "xdg-open")))
-  (dired-dwim-target t))
+  (dired-dwim-target t)
+  :config
+  (defun dired-do-du (files)
+    "Return file size of marked files using du."
+    (interactive (list (dired-get-marked-files t)))
+    (if (> (length files) 1)
+        (shell-command (format "du -c -h -s -L %s"
+                               (mapconcat
+                                #'shell-quote-argument files " ")))
+      (shell-command (format "du -h -s -L %s"
+                             (shell-quote-argument (car files)))))))
 
 (use-package diredfl
   :after dired
@@ -1195,6 +1209,7 @@ Handles symbols that start or end with a single quote (') correctly."
   ;; html5
   (org-html-doctype "html5")
   (org-html-html5-fancy t)
+  (org-html-postamble nil)
   (org-publish-timestamp-directory
    (expand-file-name-user-share "org/timestamps")))
 
@@ -1567,14 +1582,15 @@ It doesn't close empty tags."
 
   (defvar html-empty-tag-list
     '("area" "base" "br" "col" "embed" "hr" "img" "input" "keygen"
-      "link" "meta" "param" "source" "track" "wbr")
+      "link" "meta" "param" "php" "source" "track" "wbr")
     "List of empty HTML tags."))
 
 (use-package css-mode
   :custom (css-indent-offset 2))
 
 (use-package js
-  :custom (js-indent-level 2))
+  :custom (js-indent-level 2)
+  :hook (js-mode . (lambda () (setq indent-tabs-mode nil))))
 
 (unless on-termux-p
   (setq treesit-language-source-alist

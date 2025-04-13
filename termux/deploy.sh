@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 termux-change-repo
 termux-setup-storage
-pkg install --yes emacs sqlite fish eza git openssh openssh-sftp-server iproute2 wget stow
+pkg install --yes emacs sqlite fish eza git openssh openssh-sftp-server \
+    iproute2 wget stow which
 chsh -s fish
 
 # linking directories

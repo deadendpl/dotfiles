@@ -68,7 +68,7 @@ else
 fi
 #+end_src
 * Packages
-** Arco Linux pacman repo
+** Arco Linux pacman repo :ARCHIVE:
 Some packages installed below are from Arco Linux's repo because I don't want to install everything from AUR.
 #+begin_src sh
 repo_lines="

@@ -91,6 +91,8 @@ bindsym {
   print               exec $scripts/hypr/screenshot.sh
   --locked            XF86MonBrightnessUp exec light -A 3
   --locked            XF86MonBrightnessDown exec light -U 3
+  --locked            Shift+XF86MonBrightnessUp exec light -A 1
+  --locked            Shift+XF86MonBrightnessDown exec light -U 1
   --locked            XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
   --locked            XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
   --locked            XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
