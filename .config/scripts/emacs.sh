@@ -4,7 +4,7 @@ if [ "$DESKTOP_SESSION" ]; then
   gui=1
 fi
 
-if pgrep "emacs" > /dev/null; then
+if pidof emacs > /dev/null; then
   pkill emacs
   emacs_killed=1
 fi

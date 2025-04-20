@@ -24,7 +24,6 @@
 // @match       *://*.medium.com/*
 // @match       *://reddit.com/*
 // @match       *://*.reddit.com/*
-// @match       *://stackoverflow.com/*
 // @match       *://*.tiktok.com/*
 // @match       *://yahoo.com/*
 // @match       *://*.yahoo.com/*
@@ -137,13 +136,6 @@ switch (true) {
   site = [
     // proxitok
     'tik,https://farside.link/proxitok'];
-  break;
-
-  case hostname.endsWith('stackoverflow.com'):
-
-  site = [
-    // anonymousoverflow
-    'sta,https://farside.link/anonymousoverflow'];
   break;
 
   case hostname.endsWith('wikipedia.org'):

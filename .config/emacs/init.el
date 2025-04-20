@@ -228,6 +228,8 @@ Most of the stuff will get redirected here.")
             (hl-line-mode 1)))
       (apply orig-fun args))))
 
+(global-visual-wrap-prefix-mode t)
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -535,7 +537,32 @@ Most of the stuff will get redirected here.")
   (add-to-list 'nerd-icons-mode-icon-alist
                '(lisp-data-mode nerd-icons-sucicon
                                 "nf-custom-scheme"
-                                :face nerd-icons-orange)))
+                                :face nerd-icons-orange))
+  (add-to-list 'nerd-icons-mode-icon-alist
+               '(conf-space-mode nerd-icons-codicon "nf-cod-settings"
+                                 :face nerd-icons-lyellow))
+
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("rasi" nerd-icons-codicon "nf-cod-settings"
+                 :face nerd-icons-dorange))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("cfg" nerd-icons-codicon "nf-cod-settings"
+                 :face nerd-icons-dorange))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("qml" nerd-icons-devicon "nf-dev-qt"
+                 :face nerd-icons-yellow))
+  (add-to-list 'nerd-icons-extension-icon-alist
+               '("asc" nerd-icons-octicon "nf-oct-key"
+                 :face nerd-icons-lblue))
+  ;; (add-to-list 'nerd-icons-regexp-icon-alist
+  ;;              '(".*" nerd-icons-octicon "nf-oct-file_binary"
+  ;;                :face nerd-icons-dsilver) t)
+  (add-to-list 'nerd-icons-regexp-icon-alist
+               '("config$" nerd-icons-codicon "nf-cod-settings"
+                 :face nerd-icons-dorange))
+  (add-to-list 'nerd-icons-regexp-icon-alist
+               '("rc$" nerd-icons-codicon "nf-cod-settings"
+                 :face nerd-icons-dorange)))
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode)
@@ -824,7 +851,7 @@ string specified by HEX."
   (defun dired-do-du (files)
     "Return file size of marked files using du."
     (interactive (list (dired-get-marked-files t)))
-    (if (> (length files) 1)
+    (if (length> files 1)
         (shell-command (format "du -c -h -s -L %s"
                                (mapconcat
                                 #'shell-quote-argument files " ")))
@@ -1601,21 +1628,22 @@ It doesn't close empty tags."
           (css "https://github.com/tree-sitter/tree-sitter-css")
           ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
           ;; (go "https://github.com/tree-sitter/tree-sitter-go")
-          ;; (html "https://github.com/tree-sitter/tree-sitter-html")
-          ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
           (json "https://github.com/tree-sitter/tree-sitter-json")
           ;; (make "https://github.com/alemuller/tree-sitter-make")
           ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-          (python "https://github.com/tree-sitter/tree-sitter-python")))
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (php "https://github.com/tree-sitter/tree-sitter-php")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
   ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
   ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
   ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(unless (treesit-language-available-p 'bash)
-  (message "Installing tree-sitter parsers")
-  (mapc #'treesit-install-language-grammar
-        (mapcar #'car treesit-language-source-alist)))
+(dolist (lang treesit-language-source-alist)
+  (unless (treesit-language-available-p (car lang))
+    (unless (eq (car lang) 'php) ; php doesn't install
+      (treesit-install-language-grammar (car lang)))))
 
 (setq major-mode-remap-alist
       '((c-or-c++-mode . c-or-c++-ts-mode)
@@ -1623,7 +1651,8 @@ It doesn't close empty tags."
         (css-mode . css-ts-mode)
         (python-mode . python-ts-mode)
         (sh-mode . bash-ts-mode)
-        (js-json-mode . json-ts-mode))))
+        (js-json-mode . json-ts-mode)
+        (js-mode . js-ts-mode))))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)

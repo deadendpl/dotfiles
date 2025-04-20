@@ -32,6 +32,9 @@ default_border          pixel
 # font
 font JetBrains Mono Nerd Font 10
 
+# hiding border if there's only 1 window in a workspace
+hide_edge_borders smart
+
 ### Input configuration
 input * {
   dwt                 disabled
@@ -80,7 +83,7 @@ bindsym {
   $mod+F7             exec networkmanager_dmenu
   $mod+Shift+F7       exec rofi-bluetooth
   $mod+F10            exec wdisplays
-  $mod+F9             exec $script/udiskie-unmount.sh
+  $mod+F9             exec $scripts/udiskie-unmount.sh
   $mod+Delete         exec $scripts/rofi-kill.sh
 
   # Reload the configuration file
