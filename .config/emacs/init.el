@@ -856,7 +856,12 @@ string specified by HEX."
                                (mapconcat
                                 #'shell-quote-argument files " ")))
       (shell-command (format "du -h -s -L %s"
-                             (shell-quote-argument (car files)))))))
+                             (shell-quote-argument (car files)))))
+    ;; `message' gets rebound so it doesn't send anything to
+    ;; messages buffer, otherwise the output of du doesn't show up
+    (cl-letf (((symbol-function 'message)
+               (lambda (&rest args) (apply #'format args))))
+      (dired-post-do-command))))
 
 (use-package diredfl
   :after dired
@@ -939,7 +944,17 @@ Handles symbols that start or end with a single quote (') correctly."
   ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
   (with-eval-after-load 'meow
     (meow-define-keys 'keypad
-      '("C-." . embark-act))))
+      '("C-." . embark-act)))
+
+  (defun delete-file-or-directory (path)
+    "Delete file or directory at PATH."
+    (interactive "f")
+    (when (yes-or-no-p (format "Delete %s" path))
+      (if (file-directory-p path)
+          (delete-directory path t)
+        (delete-file path))))
+
+  (keymap-set embark-file-map "d" #'delete-file-or-directory))
 
 (use-package embark-consult)
 
