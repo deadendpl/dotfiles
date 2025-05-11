@@ -15,6 +15,12 @@ The script assumes that you:
 - have *GRUB* as a bootloader
 - have no display (login) manager
 - execute the script with your user, not root
+* Installing git
+#+begin_src sh
+if ! pacman -Q git >> /dev/null; then
+  sudo pacman -S --noconfirm git
+fi
+#+end_src
 * Services
 ** Bluetooth
 #+begin_src sh :shebang "#!/usr/bin/env bash"
@@ -33,6 +39,9 @@ I think pipewire sets up its' service automatically with reboot.
 #+begin_src sh
 if pacman -Q pulseaudio >> /dev/null; then
   sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
+fi
+
+if ! pacman -Q pipewire >> /dev/null; then
   sudo pacman -S --noconfirm pipewire pipewire-pulse pipewire-audio
 fi
 #+end_src
@@ -86,91 +95,101 @@ sudo pacman -Syyu
 #+end_src
 ** Chaotic AUR pacman repo
 #+begin_src sh
-sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
-sudo pacman-key --lsign-key 3056513887B78AEB
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+sudo -v
 
-sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
-sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
-#+end_src
-** Dependencies
-*** Normal dependencies
-#+BEGIN_SRC sh
-if pacman -Q hyprland >> /dev/null; then
-  echo "Normal packages are installed."
-else
-  sudo pacman -Syyu --noconfirm sway \
-                                htop \
-                                papirus-icon-theme \
-                                waybar \
-                                eza \
-                                qt5-wayland \
-                                swaybg \
-                                blueberry \
-                                swaync \
-                                wdisplays \
-                                wl-clipboard \
-                                grim \
-                                slurp \
-                                bat-extras \
-                                fish \
-                                starship \
-                                pcmanfm-gtk3 \
-                                file-roller \
-                                p7zip \
-                                unrar \
-                                zathura \
-                                zathura-pdf-mupdf \
-                                gammastep \
-                                lolcat \
-                                ttf-ubuntu-nerd \
-                                ttf-jetbrains-mono-nerd \
-                                noto-fonts-emoji \
-                                pavucontrol \
-                                qt5ct \
-                                foot \
-                                networkmanager \
-                                qutebrowser \
-                                python-adblock \
-                                mpv \
-                                mpv-mpris \
-                                polkit-gnome \
-                                grimshot \
-                                dracula-cursors-git \
-                                light \
-                                chafa \
-                                ripgrep \
-                                fzf \
-                                hyprpicker-git \
-                                swayimg \
-                                emacs-wayland \
-                                lf \
-                                stow \
-                                expac \
-                                python-tldextract \
-                                python-pynacl \
-                                fastfetch \
-                                git \
-                                tree-sitter \
-                                udiskie \
-                                swaylock
-                                # hyprland \
-                                # neovim \
-                                # otf-codenewroman-nerd \
+if ! pacman -Q chaotic-keyring >> /dev/null && pacman -Q chaotic-keyring >> /dev/null; then
+  sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
+  sudo pacman-key --lsign-key 3056513887B78AEB
+  sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+  sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+
+  if ! grep "chaotic" /etc/pacman.conf >> /dev/null; then
+    echo -e "\n[chaotic-aur]" | sudo tee -a /etc/pacman.conf
+    echo -e "Include = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
+  fi
 fi
 #+end_src
-*** Yay dependencies
+** Yay setup
 yay is AUR wrapper which can also be used as frontend to pacman.
 #+begin_src sh
 if pacman -Q yay >> /dev/null; then
   echo "It seems yay is installed."
 else
+  sudo pacman -S --noconfirm base-devel
   git clone https://aur.archlinux.org/yay-bin
   cd yay-bin
   makepkg -si --noconfirm
   cd ..
   rm -rf yay-bin/
+fi
+#+end_src
+** Dependencies
+*** Normal dependencies
+#+BEGIN_SRC sh
+sudo -v
+
+if pacman -Q waybar >> /dev/null; then
+  echo "Normal packages are installed."
+else
+  yay -Syyu --noconfirm sway \
+                        htop \
+                        papirus-icon-theme \
+                        waybar \
+                        eza \
+                        qt5-wayland \
+                        swaybg \
+                        blueberry \
+                        swaync \
+                        wdisplays \
+                        wl-clipboard \
+                        grim \
+                        slurp \
+                        bat-extras \
+                        fish \
+                        starship \
+                        pcmanfm-gtk3 \
+                        file-roller \
+                        p7zip \
+                        unrar \
+                        zathura \
+                        zathura-pdf-mupdf \
+                        gammastep \
+                        lolcat \
+                        ttf-ubuntu-nerd \
+                        ttf-jetbrains-mono-nerd \
+                        noto-fonts-emoji \
+                        pavucontrol \
+                        qt5ct \
+                        foot \
+                        networkmanager \
+                        python-adblock \
+                        mpv \
+                        mpv-mpris \
+                        polkit-gnome \
+                        grimshot \
+                        dracula-cursors-git \
+                        light \
+                        chafa \
+                        ripgrep \
+                        fzf \
+                        swayimg \
+                        emacs-wayland \
+                        lf \
+                        stow \
+                        expac \
+                        python-tldextract \
+                        python-pynacl \
+                        fastfetch \
+                        tree-sitter \
+                        udiskie \
+                        xorg-xwayland \
+                        brave-bin
+                        # qutebrowser \
+                        # swaylock
+                        # hyprpicker-git \
+                        # hyprland \
+                        # neovim \
+                        # otf-codenewroman-nerd \
 fi
 #+end_src
 
@@ -199,6 +218,8 @@ fi
 *** Pywal dependencies
 Pywal is like Material You from Android but on Linux
 #+begin_src sh
+sudo -v
+
 if pacman -Q wpgtk >> /dev/null; then
   echo "It seems pywal packages are installed."
 else
@@ -209,7 +230,7 @@ else
                      python-prctl \
                      python-daemon \
                      python-haishoku \
-                     chaotic-aur/qt5-styleplugins \
+                     qt5-styleplugins \
                      chaotic-aur/qt6gtk2 \
                      python-zombie-imp \
                      gradience \
@@ -218,8 +239,8 @@ else
                      # chaotic-aur/adw-gtk3
 
   # using pip like this can break stuff, be careful
-  sudo pip install yapsy --break-system-packages
-  sudo pip install anyascii --break-system-packages
+  # sudo pip install yapsy --break-system-packages
+  # sudo pip install anyascii --break-system-packages
   sudo pip install modern_colorthief --break-system-packages
 
   wpg-install.sh -g
@@ -228,10 +249,12 @@ fi
 *** Optional software
 You don't need to do this part.
 #+begin_src sh
+sudo -v
+
 if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
-  yay -S --noconfirm appimagelauncher-bin \
+  yay -S --noconfirm appimagelauncher \
                      keepassxc \
                      syncthing \
                      gnome-disk-utility \
@@ -249,6 +272,8 @@ fi
 * Touchpad setup on Xorg
 Sway is set up but SDDM uses Xorg, and that doesn't support touchpad tapping.
 #+begin_src sh
+sudo -v
+
 if [ -e "/etc/X11/xorg.conf.d/90-touchpad.conf" ]; then
   echo "It seems you already have touchpad configuration. No changes have been made."
 else
@@ -271,6 +296,8 @@ fi
 * Latex working in Emacs
 Org mode supports latex displaying but that requires some setup.
 #+begin_src sh
+sudo -v
+
 if pacman -Q texlive-bin >> /dev/null; then
   echo "Latex is setup."
 else
@@ -281,15 +308,19 @@ fi
 #+end_src
 * GRUB theme
 #+begin_src sh
-git clone https://gitlab.com/imnotpua/grub_gtg
+sudo -v
 
-cd grub_gtg
+if [ ! -e "/boot/grub/themes/grub_gtg" ]; then
+  git clone https://gitlab.com/imnotpua/grub_gtg
 
-echo "YOU NEED TO TYPE FONT SIZE AND THEME DIRECTORY"
-sudo bash ./install.sh
+  cd grub_gtg
 
-cd ../
-rm -rf grub_gtg
+  echo "YOU NEED TO TYPE FONT SIZE AND THEME DIRECTORY"
+  sudo bash ./install.sh
+
+  cd ../
+  rm -rf grub_gtg
+fi
 #+end_src
 * Fish setup
 #+begin_src sh
@@ -302,7 +333,9 @@ rm omf
 * Setting defaults
 It sets some apps to be defaults for some files
 #+begin_src sh
-xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+if pacman -Q qutebrowser >> /dev/null; then
+  xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+fi
 #+end_src
 
 This sets GTK theming and fonts, on bigger screen you might want to increase the size of fonts.
@@ -321,5 +354,7 @@ yay -S --noconfirm xdg-user-dirs
 xdg-user-dirs-update
 
 # enabling syncthing service
-systemctl --user enable syncthing
+if pacman -Q syncthing >> /dev/null; then
+  systemctl --user enable syncthing
+fi
 #+end_src
