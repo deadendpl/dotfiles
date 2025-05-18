@@ -183,7 +183,8 @@ else
                      xdg-ninja \
                      otf-ipaexfont \
                      playerctl \
-                     ntfs-3g
+                     ntfs-3g \
+                     audio-share-bin
                      # syncthing-gtk
 fi
 

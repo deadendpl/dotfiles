@@ -399,6 +399,12 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
       (apply orig-fun args))))
 
 (global-visual-wrap-prefix-mode t)
+
+(defun scratch-buffer-other-window ()
+  (interactive)
+  (switch-to-buffer-other-window (get-scratch-buffer-create)))
+
+(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -1577,7 +1583,8 @@ In tables pressing RET doesn't follow links. I fix that.
                   org-agenda-do-date-later
                   org-agenda-do-date-earlier
                   org-archive-subtree
-                  org-agenda-refile))
+                  org-agenda-refile
+                  org-agenda-archive))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)

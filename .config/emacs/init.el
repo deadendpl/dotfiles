@@ -230,6 +230,12 @@ Most of the stuff will get redirected here.")
 
 (global-visual-wrap-prefix-mode t)
 
+(defun scratch-buffer-other-window ()
+  (interactive)
+  (switch-to-buffer-other-window (get-scratch-buffer-create)))
+
+(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -1232,7 +1238,8 @@ Handles symbols that start or end with a single quote (') correctly."
                   org-agenda-do-date-later
                   org-agenda-do-date-earlier
                   org-archive-subtree
-                  org-agenda-refile))
+                  org-agenda-refile
+                  org-agenda-archive))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
