@@ -258,6 +258,11 @@ Most of the stuff will get redirected here.")
     (package-refresh-contents))
   )
 
+(use-package gcmh
+  :demand
+  :config
+  (add-hook 'after-init-hook #'gcmh-mode 100))
+
 (use-package meow
   :demand
   :custom

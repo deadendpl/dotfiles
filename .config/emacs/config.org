@@ -15,6 +15,7 @@
     - [[#package-management-setup][Package management setup]]
       - [[#normal-packages][Normal packages]]
       - [[#not-normal-packages-vc][Not normal packages (vc)]]
+  - [[#gcmh][GCMH]]
   - [[#keybindings][Keybindings]]
     - [[#modal-editing-meow][Modal editing (Meow)]]
     - [[#flashing][Flashing]]
@@ -445,6 +446,13 @@ That is great for packages not available in elpas.
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
+#+end_src
+** GCMH
+#+begin_src emacs-lisp
+(use-package gcmh
+  :demand
+  :config
+  (add-hook 'after-init-hook #'gcmh-mode 100))
 #+end_src
 ** Keybindings
 *** Modal editing (Meow)
