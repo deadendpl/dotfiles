@@ -123,20 +123,21 @@ def afterwards():
   swaybgp = False
   qutebrowserp = False
   for proc in psutil.process_iter(attrs=["pid", "name"]):
-    if proc.info["name"] == "swaybg":
-      if args.old != True:
-        pid = proc.info["pid"]
-        psutil.Process(pid).terminate()  # Terminate the process
-      else:
-        swaybgp = True
-    elif proc.info["name"] == "waybar":
-      waybarp = True
-    elif proc.info["name"] == "emacs":
-      emacsp = True
-    elif proc.info["name"] == "sway":
-      swayp = True
-    elif proc.info["name"] == "qutebrowser":
-      qutebrowserp = True
+    match(proc.info["name"]):
+      case("swaybg"):
+        if args.old != True:
+          pid = proc.info["pid"]
+          psutil.Process(pid).terminate()  # Terminate the process
+        else:
+          swaybgp = True
+      case("waybar"):
+        waybarp = True
+      case("emacs"):
+        emacsp = True
+      case("sway"):
+        swayp = True
+      case("qutebrowser"):
+        qutebrowserp = True
 
   # sway
   if swayp:
