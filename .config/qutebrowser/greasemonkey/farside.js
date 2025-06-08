@@ -175,12 +175,15 @@ switch (true) {
 
   case hostname.endsWith('youtube.com'):
 
-  site = [
-    // invidious
-    'inv,https://farside.link/invidious',
-    // piped
-    // 'pip,https://farside.link/piped'
-  ];
+  // when video is in an iframe, the anubis verification is looping
+  // so I disable it when the video is in an iframe
+  if(window.location == window.parent.location)
+    site = [
+      // invidious
+      'inv,https://farside.link/invidious',
+      // piped
+      // 'pip,https://farside.link/piped'
+    ];
   break;
 };
 

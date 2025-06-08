@@ -107,7 +107,9 @@ else
                                 git \
                                 tree-sitter \
                                 udiskie \
-                                swaylock
+                                swaylock \
+                                fcron \
+                                webp-pixbuf-loader # for swaybg to work with webp
                                 # hyprland \
                                 # neovim \
                                 # otf-codenewroman-nerd \
@@ -230,6 +232,15 @@ curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install 
 fish omf --noninteractive
 fish -c "omf install foreign-env"
 rm omf
+
+sudo systemctl enable fcron
+# write out current crontab
+fcrontab -l > cron-file
+# echo new cron into cron file
+echo "*/5 * * * * sudo -u \$USER DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\$(id -u \$USER)/bus /home/\$USER/.config/scripts/battery-check.sh" >> cron-file
+# install new cron file
+fcrontab cron-file
+rm cron-file
 
 xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
 

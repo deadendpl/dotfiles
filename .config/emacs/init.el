@@ -1612,6 +1612,7 @@ as you zoom text. It's fast, since no image regeneration is required."
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
   :config
+  (keymap-set sgml-mode-map "RET" #'newline-and-indent)
   (defun html-close-tag ()
     "Closes tag.
 The tag is closed if the last typed character was > and if there
