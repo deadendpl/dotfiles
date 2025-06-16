@@ -504,10 +504,7 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-. in insert mode to access meow-keypad")
-        ("Use C-x ( and C-x ) in meow beacon state")
-        ("Use C-c M-o in comint to clear the buffer")
-        ("Use F in dired to get file size")))))))
+        ("Use C-c M-o in comint to clear the buffer")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -860,7 +857,7 @@ string specified by HEX."
   (dired-dwim-target t)
   :config
   (defun dired-do-du (files)
-    "Return file size of marked files using du."
+    "Return file size of current or marked FILES file using du."
     (interactive (list (dired-get-marked-files t)))
     (if (length> files 1)
         (shell-command (format "du -c -h -s -L %s"
@@ -1621,16 +1618,18 @@ It doesn't close empty tags."
     (when (and (eql last-command-event ?>)
                (not (eql (char-before (1- (point))) ?>)))
       (save-excursion
-        (let (;; `sgml-close-tag' does some indenting
-              ;; so I disable indenting
-              (indent-line-function 'ignore)
-              (indent-region-function 'ignore)
-              (tag (save-excursion
-                     (when (search-backward "<" nil t)
-                       (forward-char)
-                       (current-word)))))
-          (unless (member tag html-empty-tag-list)
-            (sgml-close-tag))))))
+        (if-let (;; `sgml-close-tag' does some indenting
+                 ;; so I disable indenting
+                 (indent-line-function 'ignore)
+                 (indent-region-function 'ignore)
+                 (tag (save-excursion
+                        (when (search-backward "<" nil t)
+                          (forward-char)
+                          ;; when we have </foo, return nil
+                          (or (not (= (following-char) ?/))
+                              (current-word))))))
+            (unless (member tag html-empty-tag-list)
+              (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()
                               (add-hook 'post-self-insert-hook
                                         'html-close-tag nil t)))

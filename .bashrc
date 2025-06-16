@@ -30,6 +30,6 @@ if command -v nixos-rebuild > /dev/null; then
 fi
 
 
-if [ -n "$PS1" ] && command -v starship; then
+if [ -n "$PS1" ] && command -v starship > /dev/null; then
   eval "$(starship init bash)"
 fi
