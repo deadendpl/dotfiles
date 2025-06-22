@@ -504,7 +504,8 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-c M-o in comint to clear the buffer")))))))
+        ("Use C-c M-o in comint to clear the buffer")
+        ("Use f in embark to open directory in vterm")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -1431,6 +1432,7 @@ as you zoom text. It's fast, since no image regeneration is required."
          ("C-c n f"   . org-roam-node-find)
          ("C-c n i"   . org-roam-node-insert)
          ("C-c n l"   . org-roam-buffer-toggle)
+         ("C-c n p"   . org-roam-increment-progress-property)
          ("C-c n r"   . org-roam-ref-add)
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
@@ -1478,7 +1480,37 @@ as you zoom text. It's fast, since no image regeneration is required."
 
   (defun org-roam-set-modified-date-setup ()
     (add-hook 'before-save-hook
-              'org-roam-set-modified-date-property nil t)))
+              'org-roam-set-modified-date-property nil t))
+
+  (defun org-increment-progress-property ()
+    "Increment value of progress property at point.
+It's value needs to be number/anything.
+123/124 or 45/? for example."
+    (interactive)
+    (let* ((orig (org-entry-get (point) "progress"))
+           (split (split-string orig "/"))
+           (number (string-to-number (car split)))
+           (rest (cadr split)))
+      (org-set-property "progress" (format "%s/%s" (1+ number) rest))))
+
+  (defun org-roam-increment-progress-property ()
+    "Increment value of progress property of chosen node."
+    (interactive)
+    (save-window-excursion
+      (let ((node (org-roam-node-read)))
+        (org-roam-node-open node)
+        (save-excursion
+          ;; org-roam node has property drawer at the very beginning
+          ;; of a file
+          (goto-char (point-min))
+          (if (org-entry-get (point) "progress")
+              (org-increment-progress-property)
+            (consult-org-heading)
+            (org-increment-progress-property))
+          (save-buffer)
+          (message "Updated %s progress to %s"
+                   (org-roam-node-title (org-roam-node-at-point))
+                   (org-entry-get (point) "progress")))))))
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
@@ -1799,7 +1831,15 @@ It doesn't close empty tags."
                 (if (string-equal major-mode "vterm-mode")
                     (if vterm-copy-mode
                         (vterm-copy-mode 0))))
-              nil t)))
+              nil t))
+  ;; embark setup
+  (with-eval-after-load 'embark
+    (defun vterm-dir (directory)
+      "Spawn vterm in specified DIRECTORY."
+      (interactive "D")
+      (let ((default-directory directory))
+        (vterm)))
+    (keymap-set embark-file-map "t" 'vterm-dir)))
 
 (use-package sudo-edit
   :bind ("C-x C-S-f" . sudo-edit-find-file))
