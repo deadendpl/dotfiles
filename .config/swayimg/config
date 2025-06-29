@@ -14,9 +14,12 @@ scale = optimal
 # background = none
 # Anti-aliasing
 antialiasing = none
+# Looping file list mode (yes/no)
+loop = yes
 # Slideshow image duration in seconds
-slideshow = no
-slideshow_time = 3
+
+[slideshow]
+time = 3
 
 [font]
 # Font used to show image info
@@ -29,8 +32,6 @@ color = #cccccc
 [list]
 # Default order of the image list (none, alpha, or random)
 order = alpha
-# Looping file list mode (yes/no)
-loop = yes
 # Read directories recursively (yes/no)
 recursive = no
 # Allways open all files in the same directory
@@ -71,7 +72,7 @@ o = next_frame
 
 F4 = animation
 s = animation
-F9 = slideshow
+F9 = mode slideshow
 
 F11 = fullscreen
 f = fullscreen
