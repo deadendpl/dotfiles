@@ -236,6 +236,8 @@ Most of the stuff will get redirected here.")
 
 (keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
 
+(add-hook 'after-init-hook #'editorconfig-mode)
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -505,7 +507,7 @@ Most of the stuff will get redirected here.")
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use C-c M-o in comint to clear the buffer")
-        ("Use f in embark to open directory in vterm")))))))
+        ("Use t in embark to open directory in vterm")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -1810,6 +1812,15 @@ It doesn't close empty tags."
 
 (use-package vterm
   :unless on-termux-p
+  :init
+  ;; embark setup
+  (with-eval-after-load 'embark
+    (defun vterm-dir (directory)
+      "Spawn vterm in specified DIRECTORY."
+      (interactive "D")
+      (let ((default-directory directory))
+        (vterm)))
+    (keymap-set embark-file-map "t" 'vterm-dir))
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   (vterm-mode . vterm-meow-setup)
   :bind (("C-c s v" . vterm))
@@ -1830,15 +1841,7 @@ It doesn't close empty tags."
                 (if (string-equal major-mode "vterm-mode")
                     (if vterm-copy-mode
                         (vterm-copy-mode 0))))
-              nil t))
-  ;; embark setup
-  (with-eval-after-load 'embark
-    (defun vterm-dir (directory)
-      "Spawn vterm in specified DIRECTORY."
-      (interactive "D")
-      (let ((default-directory directory))
-        (vterm)))
-    (keymap-set embark-file-map "t" 'vterm-dir)))
+              nil t)))
 
 (use-package sudo-edit
   :bind ("C-x C-S-f" . sudo-edit-find-file))
