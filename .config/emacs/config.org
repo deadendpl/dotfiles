@@ -837,20 +837,38 @@ Adding highlights to TODO and related words.
                '("rc$" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange)))
 
-(use-package nerd-icons-dired
-  :hook (dired-mode . nerd-icons-dired-mode)
-  :config
+;; (use-package nerd-icons-dired
+;;   :hook (dired-mode . nerd-icons-dired-mode)
+;;   :config
+;;   (advice-add #'wdired-change-to-wdired-mode :before
+;;               (lambda ()
+;;                 (if nerd-icons-dired-mode
+;;                     (nerd-icons-dired-mode -1))))
+;;   (dolist (func '(wdired-finish-edit
+;;                   wdired-exit
+;;                   wdired-abort-changes))
+;;     (advice-add func :after
+;;                 (lambda ()
+;;                   (unless nerd-icons-dired-mode
+;;                     (nerd-icons-dired-mode 1))))))
+
+(use-package nerd-icons-multimodal
+  :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
+  :init
+  (global-nerd-icons-multimodal-mode 1)
   (advice-add #'wdired-change-to-wdired-mode :before
               (lambda ()
-                (if nerd-icons-dired-mode
-                    (nerd-icons-dired-mode -1))))
+                (if nerd-icons-multimodal-mode
+                    (nerd-icons-multimodal-mode -1))
+                (revert-buffer)))
   (dolist (func '(wdired-finish-edit
                   wdired-exit
                   wdired-abort-changes))
     (advice-add func :after
                 (lambda ()
-                  (unless nerd-icons-dired-mode
-                    (nerd-icons-dired-mode 1))))))
+                  (unless nerd-icons-multimodal-mode
+                    (nerd-icons-multimodal-mode 1))
+                  (revert-buffer)))))
 
 (use-package nerd-icons-ibuffer
   :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
