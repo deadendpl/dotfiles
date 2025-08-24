@@ -1423,7 +1423,7 @@ as you zoom text. It's fast, since no image regeneration is required."
       :unnarrowed t)
      ("g" "video game" plain "%?"
       :target (file+head "games/${slug}.org"
-                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: %^g\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
+                         "%(org-roam-created-date-property)\n#+title: ${title}\n#+filetags: :games:%^g\n#+TODO: DROPPED(d) ENDLESS(e) UNFINISHED(u) UNPLAYED(U) TODO(t) | BEATEN(b) COMPLETED(c) MASTERED(m)\n* Status\n| Region | Rating | Ownership | Achievements |\n* Notes")
 
       :unnarrowed t)
      ("b" "book" plain "%?"

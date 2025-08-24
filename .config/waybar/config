@@ -12,10 +12,11 @@
     "wlr/taskbar",
   ],
 
-  // "modules-center": [
+  "modules-center": [
     // "hyprland/window",
     // "sway/window",
-  // ],
+    "mpris"
+  ],
 
   "modules-right": [
     "tray",
@@ -134,9 +135,9 @@
 
   "network": {
     // "interface": "wlp2*", // (Optional) To force the use of this interface
-    "format-wifi": "{essid} ({signalStrength}%) 󰖩",
+    "format-wifi": "{signalStrength}% 󰖩",
     "format-ethernet": "{ipaddr}/{cidr} 󰈀",
-    "tooltip-format": "{ifname} via {gwaddr} 󰛳",
+    "tooltip-format": "{essid} on {ifname} via {gwaddr}",
     "format-linked": "{ifname} (No IP) 󱚵",
     "format-disconnected": "Disconnected ",
     "format-disabled": "󰖪",
@@ -186,4 +187,15 @@
   //   "tooltip-format": "Turn on/off eye protection!",
   //   "on-click": "~/.config/scripts/hypr/gammastep.sh",
   // },
+
+  "mpris": {
+	"format": "{status_icon} {dynamic}",
+	"format-paused": "{status_icon} {dynamic}",
+    "dynamic-len": 100,
+
+	"status-icons": {
+	  "paused": "⏸",
+      "playing": "▶"
+	}
+  }
 }

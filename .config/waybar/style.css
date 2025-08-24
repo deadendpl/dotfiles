@@ -12,10 +12,22 @@ label.module {
 }
 
 window#waybar {
-  background: @background;
-  opacity: 0.8;
+  background: transparent;
+  /* opacity: 0.8; */
   color: @foreground;
-  border-bottom: 2px solid @background;
+  /* border-bottom: 2px solid @background; */
+}
+
+.modules-left, .modules-right {
+  background: alpha(@background, 0.5);
+  border-radius: 8px;
+}
+
+#mpris {
+  background: alpha(@background, 0.8);
+  color: @foreground;
+  padding: 0 10px;
+  border-radius: 100px;
 }
 
 #workspaces button {

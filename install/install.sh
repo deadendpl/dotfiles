@@ -50,7 +50,7 @@ sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mi
 sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
 sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
 
-if pacman -Q hyprland >> /dev/null; then
+if pacman -Q sway >> /dev/null; then
   echo "Normal packages are installed."
 else
   sudo pacman -Syyu --noconfirm sway \
@@ -71,7 +71,7 @@ else
                                 starship \
                                 pcmanfm-gtk3 \
                                 file-roller \
-                                p7zip \
+                                7zip \
                                 unrar \
                                 zathura \
                                 zathura-pdf-mupdf \
@@ -84,21 +84,18 @@ else
                                 qt5ct \
                                 foot \
                                 networkmanager \
-                                qutebrowser \
                                 python-adblock \
                                 mpv \
                                 mpv-mpris \
                                 polkit-gnome \
-                                grimshot \
+                                sway-contrib \
                                 dracula-cursors-git \
                                 light \
                                 chafa \
                                 ripgrep \
                                 fzf \
-                                hyprpicker-git \
                                 swayimg \
                                 emacs-wayland \
-                                lf \
                                 stow \
                                 expac \
                                 python-tldextract \
@@ -109,8 +106,14 @@ else
                                 udiskie \
                                 swaylock \
                                 fcron \
+                                chaotic-aur/zen-browser-bin \
+                                xorg-xwayland \
+                                unzip \
                                 webp-pixbuf-loader # for swaybg to work with webp
+                                # qutebrowser \
+                                # lf \
                                 # hyprland \
+                                # hyprpicker-git \
                                 # neovim \
                                 # otf-codenewroman-nerd \
 fi
@@ -130,9 +133,9 @@ if pacman -Q rofi-lbonn-wayland-git >> /dev/null; then
 else
   yay -S --noconfirm networkmanager-dmenu-git \
                      rofi-bluetooth-git \
-                     ctpv-git \
                      cp-p-git \
                      rofi-lbonn-wayland-git
+                     # ctpv-git \
                      # clipboard \
                      # pokemonsay-newgenerations-git \
                      # fortune-mod-vimtips \
@@ -155,7 +158,7 @@ else
                      python-prctl \
                      python-daemon \
                      python-haishoku \
-                     chaotic-aur/qt5-styleplugins \
+                     qt5-styleplugins \
                      chaotic-aur/qt6gtk2 \
                      python-zombie-imp \
                      gradience \
@@ -164,9 +167,9 @@ else
                      # chaotic-aur/adw-gtk3
 
   # using pip like this can break stuff, be careful
-  sudo pip install yapsy --break-system-packages
-  sudo pip install anyascii --break-system-packages
-  sudo pip install modern_colorthief --break-system-packages
+  # sudo pip install yapsy --break-system-packages
+  # sudo pip install anyascii --break-system-packages
+  # sudo pip install modern_colorthief --break-system-packages
 
   wpg-install.sh -g
 fi
@@ -174,7 +177,7 @@ fi
 if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
-  yay -S --noconfirm appimagelauncher-bin \
+  yay -S --noconfirm chaotic-aur/appimagelauncher \
                      keepassxc \
                      syncthing \
                      gnome-disk-utility \
@@ -256,4 +259,6 @@ yay -S --noconfirm xdg-user-dirs
 xdg-user-dirs-update
 
 # enabling syncthing service
-systemctl --user enable syncthing
+if pacman -Q syncthing >> /dev/null; then
+  systemctl --user enable syncthing
+fi

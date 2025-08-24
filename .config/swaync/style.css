@@ -1,5 +1,4 @@
 @import url("../../.cache/wal/gtk-colors.css");
-@import url("./styles/widgets.css");
 
 .control-center {
   background: alpha(@background, 0.9);
@@ -15,22 +14,12 @@
   opacity: 0.1;
 }
 
-/* Window behind control center and on all other monitors */
-.blank-window {
-  background: alpha(@background, 0.25);
-}
-
 /* ============NOTIFICATIONS============ */
 .notification {
   /* box-shadow: 3px 3px 0 0 @color6; */
   background: alpha(@background, .8);
   border: 3px solid @color6;
 }
-
-/* .notification-action { */
-/*   border-radius: 0px 0px 13px 5px; */
-/*   background: @background; */
-/* } */
 
 .notification-group-icon, .notification-group-header {
   color: @foreground;
@@ -43,30 +32,13 @@
   color: @background;
 }
 
-/* applies only to floating block, not the notifications in control center */
-.floating-notifications {
-  padding: 0;
-}
-
 .notification-row {
-  /* outline: none; */
   margin: 0;
-  padding: 10px;
-  /* font-family: "Ubuntu Nerd Font"; */
 }
 
-.notification-row:focus,
-.notification-row:hover {
-  background: alpha(@color6, .2);
-}
-
-/* .low {border: 1px solid @color3;} */
-/* .normal {border: 1px solid @color13;} /\* or color5 *\/ */
-/* .critical { */
-/*   box-shadow: 3px 3px 0 0 red; */
-/*   background: alpha(black, .89); */
-/*   border: 1px solid white; */
-/*   color: #eeeeee; */
+/* .notification-row:focus, */
+/* .notification-row:hover { */
+/*   background: alpha(@color6, .2); */
 /* } */
 
 .notification-content {
@@ -82,7 +54,6 @@
   color: transparent;
 }
 
-/* yet another useless wrapper */
 .notification-default-action,
 .notification-action {
   /* padding: 0; */
@@ -91,10 +62,6 @@
   border: none;
   color: @foreground;
 }
-
-/* .image { */
-/*   margin-right: -15px; */
-/* } */
 
 .body-image {
   margin-top: 6px;
@@ -105,10 +72,11 @@
 .summary {
   font-size: 1.2em;
   font-weight: bold;
-  background: transparent;
+  /* background: transparent; */
   color: @color3;
-  text-shadow: none;
+  /* text-shadow: none; */
 }
+
 
 .time {
   font-size: 1.2em;
@@ -121,6 +89,6 @@
 .body {
   font-size: 0.8em;
   font-weight: normal;
-  background: transparent;
+  /* background: transparent; */
   color: @foreground;
 }
