@@ -1066,7 +1066,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-insert-heading-respect-content t)
   (org-link-file-path-type 'relative)
   (org-list-allow-alphabetical t)
-  (org-log-done t)
+  (org-log-done 'time)
   ;; time tamps from headers and etc. get put into :LOGBOOK: drawer
   (org-log-into-drawer t)
   (org-pretty-entities t)
@@ -1207,15 +1207,15 @@ Handles symbols that start or end with a single quote (') correctly."
   :custom-face (org-agenda-date-today ((nil (:height 1.3))))
   :custom
   (org-agenda-block-separator 8411)
-  (org-agenda-category-icon-alist
-   `(("tech" (,(nerd-icons-mdicon "nf-md-laptop" :height 1.5))
-      nil nil :ascent center)
-     ("school" (,(nerd-icons-mdicon "nf-md-school" :height 1.5))
-      nil nil :ascent center)
-     ("personal" (,(nerd-icons-mdicon "nf-md-drama_masks" :height 1.5))
-      nil nil :ascent center)
-     ("content" (,(nerd-icons-faicon "nf-fae-popcorn" :height 1.5))
-      nil nil :ascent center)))
+  ;; (org-agenda-category-icon-alist
+  ;;  `(("tech" (,(nerd-icons-mdicon "nf-md-laptop" :height 1.5))
+  ;;     nil nil :ascent center)
+  ;;    ("school" (,(nerd-icons-mdicon "nf-md-school" :height 1.5))
+  ;;     nil nil :ascent center)
+  ;;    ("personal" (,(nerd-icons-mdicon "nf-md-drama_masks" :height 1.5))
+  ;;     nil nil :ascent center)
+  ;;    ("content" (,(nerd-icons-faicon "nf-fae-popcorn" :height 1.5))
+  ;;     nil nil :ascent center)))
   (org-agenda-columns-add-appointments-to-effort-sum t)
   (org-agenda-custom-commands
    '(("i" "Ideas" todo "IDEA")
@@ -1244,7 +1244,8 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-archive-location
    (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-refile-use-outline-path nil)
-  (org-refile-targets '((org-agenda-files :maxlevel . 1))))
+  ;; (org-refile-targets '((org-agenda-files :maxlevel . 1)))
+  )
 
 (use-package org
   :config
@@ -1411,7 +1412,9 @@ as you zoom text. It's fast, since no image regeneration is required."
   :hook (org-roam-find-file . org-roam-set-modified-date-setup)
   :custom
   (org-directory org-roam-directory)
-  (org-roam-db-location (expand-file-name-user-share "org/org-roam.db"))
+  (org-roam-db-location (expand-file-name
+                         "org-roam.db"
+                         (concat org-roam-directory "/attachments")))
   (org-roam-dailies-directory "journals/")
   (org-roam-node-display-template
    (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
@@ -2083,3 +2086,9 @@ Also see `window-delete-popup-frame'." command)
           (save-excursion
             (pp out buffer))))
       (switch-to-buffer-other-window buffer))))
+
+(use-package ace-window
+  :bind ("C-x o" . ace-window)
+  :custom
+  (aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  :custom-face (aw-leading-char-face ((nil (:inherit highlight :foreground nil)))))

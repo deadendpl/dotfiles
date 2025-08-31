@@ -59,7 +59,7 @@ bindsym {
   $mod+e              exec $editor
   $mod+Alt+e          exec $editor -e "(scratch-buffer)"
   $mod+f              exec pcmanfm
-  $mod+Shift+f        exec $term -e fish -c lf
+  # $mod+Shift+f        exec $term -e fish -c lf
   $mod+Return         exec $menu
   $mod+Shift+Return   exec $scripts/hub.sh
   $mod+n              exec swaync-client -t

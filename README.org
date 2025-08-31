@@ -7,16 +7,16 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 [[file:screenshots/sway/2024-06-16_14-06-22.png]]
 [[file:screenshots/sway/2024-06-16_14-07-23.png]]
 
-| Type of program           | My default choice |
-|---------------------------+-------------------|
-| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]              |
-| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]              |
-| File Manager              | [[https://github.com/gokcehan/lf][lf]], pcmanfm       |
-| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]       |
-| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]             |
-| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]            |
-| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]              |
-| Window Manager            | [[https://github.com/swaywm/sway/][sway]]              |
+| Type of program           | My default choice         |
+|---------------------------+---------------------------|
+| Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]                      |
+| Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]                      |
+| File Manager              | dired (in Emacs), pcmanfm |
+| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]               |
+| editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]                     |
+| Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]                    |
+| Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                      |
+| Window Manager            | [[https://github.com/swaywm/sway/][sway]]                      |
 
 At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. It will use a image file as a argument, or a directory and choose random file from there.
 You can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.

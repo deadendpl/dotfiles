@@ -39,6 +39,6 @@ mkdir "${XDG_DATA_HOME}/Trash/"
 echo "Deleting logs"
 sudo rm -r /var/log/*
 
-if pacman -Q apache >> /dev/null; then
+if pacman -Q apache &> /dev/null; then
   sudo mkdir /var/log/httpd
 fi
