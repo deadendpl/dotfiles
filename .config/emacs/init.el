@@ -238,6 +238,15 @@ Most of the stuff will get redirected here.")
 
 (add-hook 'after-init-hook #'editorconfig-mode)
 
+(defun download-file (url)
+  "Download a file from an URL."
+  (interactive "sURL: ")
+  (let ((filename (file-name-nondirectory url))
+        (destination (read-file-name "Destination: ")))
+    (if (f-directory-p destination)
+        (url-copy-file url (concat destination filename))
+      (url-copy-file url destination))))
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -1051,7 +1060,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
-      "* TODO %?")))
+      "* TODO %?\nSCHEDULED: %^t")))
   (org-confirm-babel-evaluate nil)
   (org-cycle-separator-lines 0)
   (org-display-remote-inline-images 'download)
