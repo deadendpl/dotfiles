@@ -1319,7 +1319,9 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
           (delete-directory path t)
         (delete-file path))))
 
-  (keymap-set embark-file-map "d" #'delete-file-or-directory))
+  (keymap-set embark-file-map "d" #'delete-file-or-directory)
+  (keymap-set embark-file-map "i" #'embark-insert-relative-path)
+  (keymap-set embark-file-map "I" #'embark-insert))
 
 (use-package embark-consult)
 #+end_src

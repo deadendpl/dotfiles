@@ -991,7 +991,9 @@ Handles symbols that start or end with a single quote (') correctly."
           (delete-directory path t)
         (delete-file path))))
 
-  (keymap-set embark-file-map "d" #'delete-file-or-directory))
+  (keymap-set embark-file-map "d" #'delete-file-or-directory)
+  (keymap-set embark-file-map "i" #'embark-insert-relative-path)
+  (keymap-set embark-file-map "I" #'embark-insert))
 
 (use-package embark-consult)
 
