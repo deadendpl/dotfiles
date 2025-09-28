@@ -1139,7 +1139,8 @@ Built-in =savehist-mode= saves minibuffer history
    ("M-P" . consult-history)
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
-   ([remap eshell-previous-matching-input] . consult-history))
+   ([remap eshell-previous-matching-input] . consult-history)
+   ([remap yank-pop] . consult-yank-pop))
   :custom
   (consult-async-min-input 0)
   :config

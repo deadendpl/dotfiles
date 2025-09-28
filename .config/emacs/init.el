@@ -515,8 +515,8 @@ Most of the stuff will get redirected here.")
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-c M-o in comint to clear the buffer")
-        ("Use t in embark to open directory in vterm")))))))
+        ("Use t in embark to open directory in vterm")
+        ("Use M-y to paste from kill-ring with completion")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -834,7 +834,8 @@ string specified by HEX."
    ("M-P" . consult-history)
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
-   ([remap eshell-previous-matching-input] . consult-history))
+   ([remap eshell-previous-matching-input] . consult-history)
+   ([remap yank-pop] . consult-yank-pop))
   :custom
   (consult-async-min-input 0)
   :config
