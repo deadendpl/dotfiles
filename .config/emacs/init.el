@@ -493,6 +493,14 @@ Most of the stuff will get redirected here.")
   :bind ("C-x C-b" . ibuffer)
   :custom (ibuffer-default-sorting-mode 'filename/process))
 
+(use-package ibuffer-project
+  :hook (ibuffer-mode . (lambda ()
+                          (setq ibuffer-filter-groups
+                                (ibuffer-project-generate-filter-groups))))
+  :config
+  (setq ibuffer-project-root-functions
+        (remove '(identity . "Directory") ibuffer-project-root-functions)))
+
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
                                      (emacs-lock-mode 'kill))))
@@ -847,7 +855,7 @@ string specified by HEX."
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+  ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
   (setq consult--source-project-root
          `( :name     "Project Root"
             :narrow   ?r
@@ -1692,8 +1700,8 @@ It doesn't close empty tags."
                         (when (search-backward "<" nil t)
                           (forward-char)
                           ;; when we have </foo, return nil
-                          (or (not (= (following-char) ?/))
-                              (current-word))))))
+                          (and (not (= (following-char) ?/))
+                               (current-word))))))
             (unless (member tag html-empty-tag-list)
               (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()

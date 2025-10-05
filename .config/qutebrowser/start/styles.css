@@ -1,10 +1,9 @@
 @import url('../../../../.cache/wal/colors.css');
 
 body {
-  /* font-family: Ubuntu Nerd Font, sans-serif; */
+  font-family: "Ubuntu Nerd Font", sans-serif;
   background-color: var(--background);
   text-align: center;
-  align-items: center;
 }
 
 h1 {

@@ -720,6 +720,14 @@ At first I wanted to use [[https://github.com/nex3/perspective-el][perspective]]
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
   :custom (ibuffer-default-sorting-mode 'filename/process))
+
+(use-package ibuffer-project
+  :hook (ibuffer-mode . (lambda ()
+                          (setq ibuffer-filter-groups
+                                (ibuffer-project-generate-filter-groups))))
+  :config
+  (setq ibuffer-project-root-functions
+        (remove '(identity . "Directory") ibuffer-project-root-functions)))
 #+end_src
 ** Appearance
 *** Dashboard (enlight)
@@ -747,8 +755,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
         ("Projects" project-switch-project "p"))
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
-        ("Use C-c M-o in comint to clear the buffer")
-        ("Use t in embark to open directory in vterm")))))))
+        ("Use t in embark to open directory in vterm")
+        ("Use M-y to paste from kill-ring with completion")))))))
 #+end_src
 *** Fonts
 **** Setting fonts
@@ -1152,7 +1160,7 @@ Built-in =savehist-mode= saves minibuffer history
   ;; adding project source
   ;; (push 'consult--source-project-recent-file consult-buffer-sources)
   (push 'consult--source-project-buffer consult-buffer-sources)
-  (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+  ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
   (setq consult--source-project-root
          `( :name     "Project Root"
             :narrow   ?r
@@ -2168,8 +2176,8 @@ It doesn't close empty tags."
                         (when (search-backward "<" nil t)
                           (forward-char)
                           ;; when we have </foo, return nil
-                          (or (not (= (following-char) ?/))
-                              (current-word))))))
+                          (and (not (= (following-char) ?/))
+                               (current-word))))))
             (unless (member tag html-empty-tag-list)
               (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()
