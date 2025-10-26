@@ -54,8 +54,8 @@ args = parser.parse_args()
 if args.time:
   current_hour = time.localtime()[3]
 
-  if current_hour >= 8 and current_hour < 18:
-    args.light = True
+if current_hour >= 8 and current_hour < 16:
+  args.light = True
 
 def get_recursive_files(directory):
   "Returns a list of all files names from a directory recursively."
