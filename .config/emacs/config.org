@@ -677,7 +677,9 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
 *** EWW
 #+begin_src emacs-lisp
 (use-package eww
-  :custom (eww-auto-rename-buffer 'title))
+  :custom
+  (eww-auto-rename-buffer 'title)
+  (url-privacy-level '(email lastloc cookies)))
 #+end_src
 *** Line numbers
 #+begin_src emacs-lisp
@@ -829,19 +831,9 @@ Adding highlights to TODO and related words.
                '(lisp-data-mode nerd-icons-sucicon
                                 "nf-custom-scheme"
                                 :face nerd-icons-orange))
-  (add-to-list 'nerd-icons-mode-icon-alist
-               '(conf-space-mode nerd-icons-codicon "nf-cod-settings"
-                                 :face nerd-icons-lyellow))
-
   (add-to-list 'nerd-icons-extension-icon-alist
                '("rasi" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("cfg" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("qml" nerd-icons-devicon "nf-dev-qt"
-                 :face nerd-icons-yellow))
   (add-to-list 'nerd-icons-extension-icon-alist
                '("asc" nerd-icons-octicon "nf-oct-key"
                  :face nerd-icons-lblue))

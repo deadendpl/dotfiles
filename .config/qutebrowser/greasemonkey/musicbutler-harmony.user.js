@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Harmony button on MusicButler
-// @version      2025.04.24
+// @version      2025.10.29
 // @description  Add Harmony button under Spotify and Apple Music links on MusicButler
 // @author       deadendpl
 // @match        https://www.musicbutler.io/
@@ -30,16 +30,16 @@
     var elements = document.getElementsByClassName("block");
     var length = elements.length;
 
-    for(var i = 0; i < length; i++)
-      if(elements[i].tagName == 'A')
-        if(elements[i].href.search("open.spotify.com") >= 0 ||
-           elements[i].href.search("music.apple.com") >= 0)
-          if(! isHarmonyAttribute(elements[i]))
+    for(var element of elements)
+      if(element.tagName == 'A')
+        if(element.href.search("open.spotify.com") >= 0 ||
+           element.href.search("music.apple.com") >= 0)
+          if(! isHarmonyAttribute(element))
           {
-            var url = elements[i].href;
+            var url = element.href;
             var full_url = "https://harmony.pulsewidth.org.uk/release" +
-				"?url=" + url +
-				"&gtin=&region=&musicbrainz=&deezer=&itunes=" +
+                "?url=" + url +
+                "&gtin=&region=&musicbrainz=&deezer=&itunes=" +
                 "&spotify=&tidal=&beatport=";
             var div = document.createElement("div");
             var a = document.createElement("a");
@@ -54,8 +54,8 @@
             a.append(img);
             div.append(a);
 
-            elements[i].append(div);
-            setHarmonyAttribute(elements[i]);
+            element.append(div);
+            setHarmonyAttribute(element);
           }
   }
 

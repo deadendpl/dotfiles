@@ -460,7 +460,9 @@ Most of the stuff will get redirected here.")
   :hook (after-init . save-place-mode))
 
 (use-package eww
-  :custom (eww-auto-rename-buffer 'title))
+  :custom
+  (eww-auto-rename-buffer 'title)
+  (url-privacy-level '(email lastloc cookies)))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -566,19 +568,9 @@ Most of the stuff will get redirected here.")
                '(lisp-data-mode nerd-icons-sucicon
                                 "nf-custom-scheme"
                                 :face nerd-icons-orange))
-  (add-to-list 'nerd-icons-mode-icon-alist
-               '(conf-space-mode nerd-icons-codicon "nf-cod-settings"
-                                 :face nerd-icons-lyellow))
-
   (add-to-list 'nerd-icons-extension-icon-alist
                '("rasi" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("cfg" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("qml" nerd-icons-devicon "nf-dev-qt"
-                 :face nerd-icons-yellow))
   (add-to-list 'nerd-icons-extension-icon-alist
                '("asc" nerd-icons-octicon "nf-oct-key"
                  :face nerd-icons-lblue))
