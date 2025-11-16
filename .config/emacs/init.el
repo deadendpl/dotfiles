@@ -1265,7 +1265,7 @@ Handles symbols that start or end with a single quote (') correctly."
     "Saves opened agenda files."
     (interactive)
     (save-some-buffers t #'org-agenda-file-p)
-    (with-open-buffer
+    (with-current-buffer
      (find-file-noselect
       (replace-regexp-in-string "::.*$" ""
                                 org-archive-location) nil t)
