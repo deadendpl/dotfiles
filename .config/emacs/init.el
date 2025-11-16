@@ -1264,7 +1264,12 @@ Handles symbols that start or end with a single quote (') correctly."
   (defun org-agenda-save-buffers ()
     "Saves opened agenda files."
     (interactive)
-    (save-some-buffers t #'org-agenda-file-p))
+    (save-some-buffers t #'org-agenda-file-p)
+    (with-open-buffer
+     (find-file-noselect
+      (replace-regexp-in-string "::.*$" ""
+                                org-archive-location) nil t)
+     (save-buffer)))
 
   ;; automatically save agenda files after some commands
   (dolist (func '(org-agenda-todo
@@ -1635,8 +1640,14 @@ It's value needs to be number/anything.
 (use-package sly
   :custom (sly-mrepl-history-file-name
            (expand-file-name-user-share "sly-mrepl-history"))
-  :bind (:map sly-mode-map
-              ("C-c C-e" . sly-eval-buffer)))
+  (defun sly-eval-region-or-buffer ()
+    "Evaluate the forms in the active region or the whole current buffer."
+    (interactive)
+    (if (use-region-p)
+        (sly-eval-region (region-beginning) (region-end))
+      (sly-eval-buffer)))
+  (keymap-set sly-mode-map "C-c C-e" #'sly-eval-region-or-buffer)
+  (keymap-set sly-mode-map "C-c C-r" #'sly-restart-inferior-lisp))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 

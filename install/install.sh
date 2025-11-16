@@ -76,7 +76,6 @@ else
                                 zathura \
                                 zathura-pdf-mupdf \
                                 gammastep \
-                                lolcat \
                                 ttf-ubuntu-nerd \
                                 ttf-jetbrains-mono-nerd \
                                 noto-fonts-emoji \
@@ -177,7 +176,7 @@ fi
 if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
-  yay -S --noconfirm chaotic-aur/appimagelauncher \
+  yay -S --noconfirm appimagelauncher \
                      keepassxc \
                      syncthing \
                      gnome-disk-utility \
@@ -189,7 +188,7 @@ else
                      otf-ipaexfont \
                      playerctl \
                      ntfs-3g \
-                     audio-share-bin
+                     sbcl
                      # syncthing-gtk
 fi
 
@@ -262,3 +261,15 @@ xdg-user-dirs-update
 if pacman -Q syncthing >> /dev/null; then
   systemctl --user enable syncthing
 fi
+
+cd ../tools/pyrice-in-common-lisp/
+if ! pacman -Q sbcl >> /dev/null; then
+  sudo pacman --noconfirm -S sbcl
+fi
+curl https://beta.quicklisp.org/quicklisp.lisp -o ~/quicklisp.lisp
+sbcl --non-interactive --load ~/quicklisp.lisp \
+     --eval "(quicklisp-quickstart:install)" \
+     --eval "(ql:add-to-init-file)" \
+     --eval "(quit)"
+make
+cp pyrice ~/.local/bin/

@@ -103,7 +103,7 @@ def gradience_wrap():
     os.mkdir(os.environ["XDG_CONFIG_HOME"] + "/presets/user")
   shutil.copyfile(os.environ["XDG_CACHE_HOME"] + "/wal/pywal.json",
                   os.environ["XDG_CONFIG_HOME"] + "/presets/user/pywal.json")
-  subprocess.Popen(["gradience-cli", "apply", "-n", "pywal", "--gtk", "gtk4"])
+  subprocess.Popen(["gradience-cli", "apply", "-n", "pywal", "--gtk", "both"])
 
 def gtk2_icon_setup():
   if os.environ["GTK2_RC_FILES"]:

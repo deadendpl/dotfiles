@@ -168,7 +168,6 @@ environment.systemPackages = with pkgs; [
   # cli utils
   (import ./cp-p.nix { inherit (pkgs) lib stdenv fetchFromGitHub; })
   wget
-  lolcat
   htop
   btop
   unstable.fastfetch

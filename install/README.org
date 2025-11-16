@@ -123,7 +123,6 @@ else
                                 zathura \
                                 zathura-pdf-mupdf \
                                 gammastep \
-                                lolcat \
                                 ttf-ubuntu-nerd \
                                 ttf-jetbrains-mono-nerd \
                                 noto-fonts-emoji \
@@ -236,7 +235,7 @@ You don't need to do this part.
 if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
-  yay -S --noconfirm chaotic-aur/appimagelauncher \
+  yay -S --noconfirm appimagelauncher \
                      keepassxc \
                      syncthing \
                      gnome-disk-utility \
@@ -248,7 +247,7 @@ else
                      otf-ipaexfont \
                      playerctl \
                      ntfs-3g \
-                     audio-share-bin
+                     sbcl
                      # syncthing-gtk
 fi
 #+end_src
@@ -341,4 +340,19 @@ xdg-user-dirs-update
 if pacman -Q syncthing >> /dev/null; then
   systemctl --user enable syncthing
 fi
+#+end_src
+* Compiling pyrice
+It's a pywal wrapper I wrote in Common Lisp.
+#+begin_src sh
+cd ../tools/pyrice-in-common-lisp/
+if ! pacman -Q sbcl >> /dev/null; then
+  sudo pacman --noconfirm -S sbcl
+fi
+curl https://beta.quicklisp.org/quicklisp.lisp -o ~/quicklisp.lisp
+sbcl --non-interactive --load ~/quicklisp.lisp \
+     --eval "(quicklisp-quickstart:install)" \
+     --eval "(ql:add-to-init-file)" \
+     --eval "(quit)"
+make
+cp pyrice ~/.local/bin/
 #+end_src
