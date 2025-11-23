@@ -1103,7 +1103,7 @@ I don't need it loading immediately so I defer it by a second.
   ;;       orderless-component-separator #'orderless-escapable-split-on-space)
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+        completion-category-overrides '((file (styles orderless partial-completion)))))
 #+end_src
 
 Built-in =savehist-mode= saves minibuffer history
@@ -1617,7 +1617,7 @@ In tables pressing RET doesn't follow links. I fix that.
     (with-current-buffer
      (find-file-noselect
       (replace-regexp-in-string "::.*$" ""
-                                org-archive-location) nil t)
+                                org-archive-location) nil nil)
      (save-buffer)))
 
   ;; automatically save agenda files after some commands

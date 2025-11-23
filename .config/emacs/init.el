@@ -804,7 +804,7 @@ string specified by HEX."
   ;;       orderless-component-separator #'orderless-escapable-split-on-space)
   (setq completion-styles '(orderless basic)
         completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion)))))
+        completion-category-overrides '((file (styles orderless partial-completion)))))
 
 (use-package savehist
   :init (savehist-mode t)
@@ -1268,7 +1268,7 @@ Handles symbols that start or end with a single quote (') correctly."
     (with-current-buffer
      (find-file-noselect
       (replace-regexp-in-string "::.*$" ""
-                                org-archive-location) nil t)
+                                org-archive-location) nil nil)
      (save-buffer)))
 
   ;; automatically save agenda files after some commands
