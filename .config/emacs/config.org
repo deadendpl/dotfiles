@@ -2154,6 +2154,10 @@ using `browse-url'."
 ***** HTML
 Here I add autocompletion when typing =>= in html modes.
 #+begin_src emacs-lisp
+(use-package nxml
+  :hook (nxml-mode . (lambda () (run-hooks 'prog-mode-hook)))
+  :config (keymap-set nxml-mode-map "RET" #'newline-and-indent))
+
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda ()
                         (setq-local electric-pair-inhibit-predicate

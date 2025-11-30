@@ -1678,6 +1678,10 @@ It's value needs to be number/anything.
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
   :custom (python-indent-offset 2))
 
+(use-package nxml
+  :hook (nxml-mode . (lambda () (run-hooks 'prog-mode-hook)))
+  :config (keymap-set nxml-mode-map "RET" #'newline-and-indent))
+
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda ()
                         (setq-local electric-pair-inhibit-predicate
