@@ -238,14 +238,15 @@ Most of the stuff will get redirected here.")
 
 (add-hook 'after-init-hook #'editorconfig-mode)
 
-(defun download-file (url)
-  "Download a file from an URL."
-  (interactive "sURL: ")
-  (let ((filename (file-name-nondirectory url))
-        (destination (read-file-name "Destination: ")))
+(defun download-file (url destination)
+  "Download a file from an URL to a DESTINATION."
+  (interactive "sURL: \nFFile: ")
+  (let ((filename (file-name-nondirectory url)))
     (if (f-directory-p destination)
         (url-copy-file url (concat destination filename))
       (url-copy-file url destination))))
+
+(setq calendar-week-start-day 1)
 
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)

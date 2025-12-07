@@ -235,6 +235,7 @@ mode "playerctl" {
 for_window {
   # the command for checking: swaymsg -t "get_tree"
   # [app_id="^swayimg"] fullscreen
+  [instance="pinentry-gtk"] floating enable
   [app_id="org.pulseaudio.pavucontrol"] floating enable
   [app_id="pavucontrol"] floating enable
   [app_id="blueman-manager"] floating enable
