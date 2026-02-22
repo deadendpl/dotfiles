@@ -71,6 +71,8 @@
     - [[#org-appear][Org appear]]
     - [[#org-auto-tangle][Org auto tangle]]
     - [[#org-roam][Org Roam]]
+      - [[#anilist-incrementing-progress][AniList incrementing progress]]
+      - [[#anilist-lookup][AniList lookup]]
     - [[#toc][TOC]]
   - [[#parenthesis][Parenthesis]]
   - [[#programming][Programming]]
@@ -107,7 +109,6 @@
   - [[#pop-up-windows][Pop up windows]]
   - [[#m3u-mode][M3U mode]]
   - [[#local-packages][Local packages]]
-  - [[#anilist-activity-lookup][Anilist activity lookup]]
   - [[#ace-window][ace-window]]
 
 * INFO and CREDITS
@@ -417,6 +418,16 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
     (if (f-directory-p destination)
         (url-copy-file url (concat destination filename))
       (url-copy-file url destination))))
+
+(defmacro set-newline-and-indent-for-mode (mode)
+  "Set RET to `newline-and-indent' for MODE."
+  (let ((keymap-name (intern (concat (symbol-name mode) "-map"))))
+    `(with-eval-after-load ',mode
+       (keymap-set ,keymap-name "RET" #'newline-and-indent))))
+
+(dolist (mode '(nxml-mode
+                yaml-mode))
+  (set-newline-and-indent-for-mode mode))
 
 (setq calendar-week-start-day 1)
 #+end_src
@@ -909,7 +920,8 @@ Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]]
 (use-package colorful-mode
   :hook (after-init . global-colorful-mode)
   :custom (global-colorful-modes
-           '(prog-mode conf-mode help-mode (not special-mode)))
+           '(prog-mode conf-mode help-mode fundamental-mode
+                       (not special-mode)))
   ;; the default box around the colors causes line to be slightly
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
@@ -1059,7 +1071,6 @@ With Emacs 29, true transparency has been added.
 The completion that you get when doing =M-x= for example that lists candidates to choose from.
 **** Vertico
 I switched from [[https://github.com/abo-abo/swiper#ivy][Ivy]] to [[https://github.com/minad/vertico][Vertico]] because it's simpler.
-I don't need it loading immediately so I defer it by a second.
 #+begin_src emacs-lisp
 (use-package vertico
   :hook (after-init . vertico-mode)
@@ -1075,8 +1086,7 @@ I don't need it loading immediately so I defer it by a second.
   :config
   (vertico-mode)
   (vertico-mouse-mode t)
-  (vertico-multiform-mode)
-  )
+  (vertico-multiform-mode))
 #+end_src
 
 =vertico-directory= extension makes file navigation easier
@@ -1151,10 +1161,9 @@ Built-in =savehist-mode= saves minibuffer history
                      consult-buffer-other-frame
                      :preview-key nil)
   ;; adding project source
-  ;; (push 'consult--source-project-recent-file consult-buffer-sources)
-  (push 'consult--source-project-buffer consult-buffer-sources)
+  (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-  (setq consult--source-project-root
+  (setq consult-source-project-root
          `( :name     "Project Root"
             :narrow   ?r
             :category file
@@ -1201,16 +1210,17 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   (defun dired-do-du (files)
     "Return file size of current or marked FILES file using du."
     (interactive (list (dired-get-marked-files t)))
-    (if (length> files 1)
-        (shell-command (format "du -c -h -s -L %s"
-                               (mapconcat
-                                #'shell-quote-argument files " ")))
-      (shell-command (format "du -h -s -L %s"
-                             (shell-quote-argument (car files)))))
-    ;; `message' gets rebound so it doesn't send anything to
-    ;; messages buffer, otherwise the output of du doesn't show up
-    (cl-letf (((symbol-function 'message)
-               (lambda (&rest args) (apply #'format args))))
+    (let ((command-output
+           (if (length> files 1)
+               (shell-command-to-string (format "du -c -h -s -L %s"
+                                                (mapconcat
+                                                 #'shell-quote-argument
+                                                 files " ")))
+             (shell-command-to-string (format "du -h -s -L %s"
+                                              (shell-quote-argument
+                                               (car files)))))))
+
+      (message (string-trim-right command-output "\n"))
       (dired-post-do-command))))
 
 (use-package diredfl
@@ -1903,37 +1913,7 @@ It's set up so it will display markers when entering insert mode.
 
   (defun org-roam-set-modified-date-setup ()
     (add-hook 'before-save-hook
-              'org-roam-set-modified-date-property nil t))
-
-  (defun org-increment-progress-property ()
-    "Increment value of progress property at point.
-It's value needs to be number/anything.
-123/124 or 45/? for example."
-    (interactive)
-    (let* ((orig (org-entry-get (point) "progress"))
-           (split (split-string orig "/"))
-           (number (string-to-number (car split)))
-           (rest (cadr split)))
-      (org-set-property "progress" (format "%s/%s" (1+ number) rest))))
-
-  (defun org-roam-increment-progress-property ()
-    "Increment value of progress property of chosen node."
-    (interactive)
-    (save-window-excursion
-      (let ((node (org-roam-node-read)))
-        (org-roam-node-open node)
-        (save-excursion
-          ;; org-roam node has property drawer at the very beginning
-          ;; of a file
-          (goto-char (point-min))
-          (if (org-entry-get (point) "progress")
-              (org-increment-progress-property)
-            (consult-org-heading)
-            (org-increment-progress-property))
-          (save-buffer)
-          (message "Updated %s progress to %s"
-                   (org-roam-node-title (org-roam-node-at-point))
-                   (org-entry-get (point) "progress")))))))
+              'org-roam-set-modified-date-property nil t)))
 #+end_src
 I like sometimes to use =consult-org-roam-search= to use grep on my notes, and that is in [[https://github.com/jgru/consult-org-roam][consult-org-roam]].
 #+begin_src emacs-lisp
@@ -1963,6 +1943,161 @@ This makes inserting org roam links easy using =C-c C-l=.
       (:after (&rest _))
     "Replace all :roam links with ID links."
     (org-roam-link-replace-all)))
+#+end_src
+**** AniList incrementing progress
+My anime and manga notes have =progress= proprty which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
+This code lets me choose a node and increment its progress.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :config
+  (defun org-increment-progress-property ()
+    "Increment value of progress property at point.
+It's value needs to be number/anything.
+123/124 or 45/? for example."
+    (interactive)
+    (let* ((orig (org-entry-get (point) "progress"))
+           (split (split-string orig "/"))
+           (number (string-to-number (car split)))
+           (rest (cadr split)))
+      (org-set-property "progress" (format "%s/%s" (1+ number) rest))))
+
+  (defun org-roam-increment-progress-property (node)
+    "Increment value of progress property of anime or manga NODE."
+    (interactive (list
+                  (org-roam-node-read
+                   nil
+                   (lambda (node)
+                     (member "animan"
+                             (org-roam-node-tags node)))
+                   nil t)))
+    (org-roam-node-open node)
+    (save-window-excursion
+      (if (org-entry-get (point) "progress")
+          (org-increment-progress-property)
+        (consult-org-heading)
+        (org-increment-progress-property))
+      (save-buffer)
+      (message "Updated %s progress to %s"
+               (org-roam-node-title (org-roam-node-at-point))
+               (org-entry-get (point) "progress")))))
+#+end_src
+**** AniList lookup
+This shows my AniList activities from last week and makes links to org roam nodes.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :commands (anilist-get-weekly-progress)
+  :config
+  (defun anilist-get-weekly-progress ()
+    "Create a buffer with last month activity on AniList."
+    (interactive)
+    (let* ((timestamp
+            (format-time-string
+             "%s"
+             (time-subtract (current-time)
+                            (days-to-time 7))))
+           (query
+            (format
+             "{\"query\": \"query { Page(page: 1, perPage: 1000) { activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native } } progress status type } } } }\"}"
+             timestamp))
+           (json-array-type 'list)
+           (buffer (generate-new-buffer "*anilist-weekly-progress*")))
+
+      (with-current-buffer buffer
+        (call-process
+         "curl" nil t nil "-s"
+         "-X" "POST"
+         "--header" "Content-Type: application/json"
+         "--data" query
+         "--url" "https://graphql.anilist.co")
+
+        (goto-char (point-min))
+
+        (let* ((out (json-read))
+               (data (alist-get 'data out))
+               (page (alist-get 'Page data))
+               (activities (alist-get 'activities page)))
+
+          (erase-buffer)
+
+          (mapc
+           (lambda (item)
+             (let* ((media (alist-get 'media item))
+                    (raw-format (alist-get 'format media))
+                    (format (downcase (or raw-format "")))
+                    (titles (alist-get 'title media))
+                    (title (or (alist-get 'english titles)
+                               (alist-get 'romaji titles)
+                               (alist-get 'native titles)
+                               "Unknown"))
+                    (id (alist-get 'id media))
+                    (created (seconds-to-time
+                              (alist-get 'createdAt item)))
+                    (date (format-time-string "%Y-%m-%d" created))
+                    (progress (alist-get 'progress item))
+                    (status (alist-get 'status item)))
+
+               (insert (capitalize format) " ")
+
+               (insert-text-button
+                title
+                'anilist-type format
+                'anilist-id id
+                'follow-link t
+                'action
+                (lambda (button)
+                  (org-roam-open-animanga-node
+                   (button-get button 'anilist-type)
+                   (button-get button 'anilist-id))))
+
+               (insert
+                (format
+                 " has status %s with progress %s at date %s\n"
+                 status progress date))))
+           activities)))
+
+      (switch-to-buffer-other-window buffer)))
+
+  (defun org-roam-anilist-root-format (type)
+    (let* ((hierarchy
+            '((anime (tv tv_short movie special ova ona music))
+              (manga (manga novel one_shot))))
+           (type (if (stringp type)
+                     (intern type)
+                   type))
+           (type (if (eq type 'oneshot)
+                     'one_shot
+                   type)))
+      (symbol-name
+       (car
+        (seq-find
+         (lambda (item)
+           (member type (cadr item)))
+         hierarchy)))))
+
+  (defun org-roam-open-animanga-node (type id)
+    "Open node that matches its AniList properties with TYPE and ID."
+    (if-let* ((root-type (org-roam-anilist-root-format type))
+              (results
+               (org-roam-db-query
+                [:select [id properties]
+                         :from nodes
+                         :join tags
+                         :on (= tags:node-id nodes:id)
+                         :where (= tags:tag "animan")
+                         :group-by nodes:id]))
+              (matched-result
+               (seq-find
+                (lambda (item)
+                  (when-let* ((props (nth 1 item))
+                              (url (alist-get "ANILIST"
+                                              props nil nil
+                                              #'equal)))
+                    (and (string-search root-type url)
+                         (string-search
+                          (number-to-string id) url))))
+                results)))
+        (org-id-open (car matched-result) nil)
+      (message "No matching org-roam node found."))))
 #+end_src
 *** TOC
 Table of contents after after typing =:toc:= in header
@@ -2096,6 +2231,14 @@ sh-script is the package that declares redirecting shell mode to treesitter mode
 **** Elisp
 #+begin_src emacs-lisp
 (defalias 'elisp-mode 'emacs-lisp-mode)
+(with-eval-after-load 'elisp-mode
+  (defun elisp-eval-dwim ()
+    "Evaluate current defun or region if it's active."
+    (interactive)
+    (if (region-active-p)
+        (eval-region (region-beginning) (region-end))
+      (eval-defun nil)))
+  (keymap-set emacs-lisp-mode-map "C-c C-c" #'elisp-eval-dwim))
 #+end_src
 If I'll not forget about it then probably I will get the most use out of [[https://github.com/Malabarba/elisp-bug-hunter][bug-hunter]] with checking errors in my config.
 #+begin_src emacs-lisp
@@ -2627,40 +2770,6 @@ A mode for m3u files
                       mb-search-work))
         (add-to-list 'vertico-multiform-commands
                      `(,func (vertico-sort-function . nil)))))))
-#+end_src
-** Anilist activity lookup
-It looks at anime/manga progress over past week.
-#+begin_src emacs-lisp
-(defun anilist-get-weekly-progress ()
-  "Create a buffer with last week activity on AniList."
-  (interactive)
-  (let ((query
-         (format "{\"query\": \"query ExampleQuery { Page(page: 1, perPage: 1000) { activities: activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native } } progress status type } } } }\", \"variables\": {}}"
-                 (let ((one-week-ago (time-subtract (current-time)
-                                                    (days-to-time 7))))
-                   (format-time-string "%s" one-week-ago)))))
-    (let ((buffer (generate-new-buffer "anilist-weekly-progress")))
-      (with-current-buffer buffer
-        (lisp-data-mode)
-        (call-process
-         "curl" nil t nil "-s"
-         "-X" "POST"
-         "--header" "Content-Type: application/json"
-         "--data" query
-         "--url" "https://graphql.anilist.co")
-        (goto-char (point-min))
-        (let ((out (json-read)))
-          ;; converting unix timestamps to normal dates
-          (mapcar
-           (lambda (item)
-             (setcdr (car item)
-                     (format-time-string "%Y-%m-%d" (cdr (car item)))))
-           (append (cdar (cdadar out)) nil))
-          (goto-char (point-max))
-          (delete-backward-char (buffer-size))
-          (save-excursion
-            (pp out buffer))))
-      (switch-to-buffer-other-window buffer))))
 #+end_src
 ** ace-window
 #+begin_src emacs-lisp

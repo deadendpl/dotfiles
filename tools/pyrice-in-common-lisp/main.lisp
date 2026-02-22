@@ -20,29 +20,50 @@
     (uiop:native-namestring
      (nth (random (1- (length wallpaper-list))) wallpaper-list))))
 
+(defun run-program-with-error-command (args error-format-string)
+  "Runs a program and returns the command if it errors.
+ARGS is a list of arguments."
+  (handler-case (uiop:run-program args)
+    (uiop/run-program:subprocess-error (c)
+      (format t error-format-string
+              (uiop/run-program:subprocess-error-command c)))))
+
+;; FIXME
+;; the order of wal and wpg executions should be reversed
+;; wpgtk doesn't work now, and that's why wal goes first
 (defun pywal-run (wallpaper backend &key (light nil))
   "Run pywal and wpgtk commands using BACKEND on WALLPAPER.
 Light theme is generated if LIGHT-P is non-nil."
-  (let ((wpg-args `("wpg" "--noreload" "--backend" ,backend
-                          "-ns" ,wallpaper))
-        (wal-args `("wal" "--cols16" "--backend" ,backend
-                          "-nei" ,wallpaper))
-        (gsettings-icons-args
-          `("gsettings" "set" "org.gnome.desktop.interface" "icon-theme"
-                        ,(if light
-                             "Papirus-Light"
-                             "Papirus-Dark")))
+  (let* ((wpg-args `("wpg" "--noreload" "--backend" ,backend
+                           "-ns" ,wallpaper))
+         (wal-args `("wal" "--cols16" "--backend" ,backend
+                           "-nei" ,wallpaper))
+         (wpg-args (if light (append wpg-args '("-L")) wpg-args))
+         (wal-args (if light (append wal-args '("-l")) wal-args)))
+    (if (and
+         (eql 0 (nth-value
+                 2 (run-program-with-error-command
+                    wpg-args
+                    "Wpgtk returned an error. The command run was ~a~%")))
+         (eql 0 (nth-value
+                 2 (run-program-with-error-command
+                    wal-args
+                    "Pywal returned an error. The command run was ~a~%"))))
+        (format t "Generated pywal theme.~%"))))
+
+(defun gsettings-run (light)
+  "Run gsettings shell commands.
+The commands will be different based on LIGHT's value."
+  (let ((gsettings-icons-args
+           `("gsettings" "set" "org.gnome.desktop.interface"
+                         "icon-theme" ,(if light
+                                           "Papirus-Light"
+                                           "Papirus-Dark")))
         (gsettings-theme-args
-          `("gsettings" "set" "org.gnome.desktop.interface" "color-scheme"
-                        ,(if light
-                             "prefer-light"
-                             "prefer-dark"))))
-    (when light
-      (setf wpg-args (append wpg-args '("-L")))
-      (setf wal-args (append wal-args '("-l"))))
-    (uiop:run-program wpg-args)
-    (uiop:run-program wal-args)
-    (format t "Generated pywal theme.~%")
+           `("gsettings" "set" "org.gnome.desktop.interface"
+                         "color-scheme" ,(if light
+                                             "prefer-light"
+                                             "prefer-dark"))))
     (uiop:run-program gsettings-icons-args)
     (uiop:run-program gsettings-theme-args)
     (format t "Set GTK preffered color scheme and icons.~%")))
@@ -250,6 +271,7 @@ It changes 2 variables depending on value of LIGHT."
                   (t (get-random-file-from-dir "~/Pictures/bg/")))))
       (format t "Using image at path: ~a~%" wallpaper-path)
       (pywal-run wallpaper-path backend :light light)
+      (gsettings-run light)
       (swaybg-setup wallpaper-path old))
     (sway-setup)
     (waybar-setup)
