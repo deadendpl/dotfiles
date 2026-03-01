@@ -240,11 +240,14 @@ Most of the stuff will get redirected here.")
 
 (defun download-file (url destination)
   "Download a file from an URL to a DESTINATION."
-  (interactive "sURL: \nFFile: ")
-  (let ((filename (file-name-nondirectory url)))
-    (if (f-directory-p destination)
-        (url-copy-file url (concat destination filename))
-      (url-copy-file url destination))))
+  (interactive (let* ((url (read-string "URL: "))
+                      (filename (file-name-nondirectory url)))
+                 (list url
+                       (read-file-name "Destination: " default-directory
+                                       filename))))
+  (if (f-directory-p destination)
+      (url-copy-file url (concat destination filename))
+    (url-copy-file url destination)))
 
 (defmacro set-newline-and-indent-for-mode (mode)
   "Set RET to `newline-and-indent' for MODE."
@@ -400,25 +403,29 @@ Most of the stuff will get redirected here.")
   (add-to-list 'meow-selection-command-fallback
                '(meow-save . kill-ring-save-visual-line)))
 
-(use-package pulse
-  :config
-  (defun custom/pulse-line (&rest _)
-    "Pulse the current line."
-    (pulse-momentary-highlight-one-line (point)))
+;; (use-package pulse
+;;   :config
+;;   (defun custom/pulse-line (&rest _)
+;;     "Pulse the current line."
+;;     (pulse-momentary-highlight-one-line (point)))
+;;
+;;   (dolist (command '(meow-beginning-of-thing
+;;                      meow-end-of-thing
+;;                      windmove-up
+;;                      windmove-down
+;;                      windmove-left
+;;                      windmove-right
+;;                      other-window
+;;                      scroll-up-command
+;;                      scroll-down-command
+;;                      tab-select
+;;                      tab-next
+;;                      tab-previous))
+;;     (advice-add command :after #'custom/pulse-line)))
 
-  (dolist (command '(meow-beginning-of-thing
-                     meow-end-of-thing
-                     windmove-up
-                     windmove-down
-                     windmove-left
-                     windmove-right
-                     other-window
-                     scroll-up-command
-                     scroll-down-command
-                     tab-select
-                     tab-next
-                     tab-previous))
-    (advice-add command :after #'custom/pulse-line)))
+(use-package winpulse
+  :vc (:url "https://github.com/xenodium/winpulse")
+  :hook (after-init . winpulse-mode))
 
 ;; Make ESC quit prompts immediately
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
@@ -537,7 +544,7 @@ Most of the stuff will get redirected here.")
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use t in embark to open directory in vterm")
-        ("Use M-y to paste from kill-ring with completion")))))))
+        ("Use C-c ~ in sly code buffer to sync the current package in REPL")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -653,70 +660,10 @@ Most of the stuff will get redirected here.")
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
 
-(use-package doom-themes
-  ;; :demand
-  :custom
-  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  :config
-  ;; Enable flashing modeline on errors
-  (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-(if on-termux-p
-    (load-theme 'doom-dracula t) ;; if on termux, use some doom theme
-  (use-package ewal-doom-themes
-    :demand
-    :config
-    (defun ewal-dark-background-p ()
-      "Return non-nil if background color is dark."
-      (color-dark-p (mapcar (lambda (x)
-                              (/ x 255.0))
-                            (color-hex-to-rgb
-                             (ewal-load-color 'background)))))
-
-    (defun ewal-setup (theme)
-      "Set some faces if THEME is ewal theme."
-      (when (eq theme 'ewal-doom-one)
-        (let ((color (ewal--get-base-color 'green)))
-          (set-face-attribute 'line-number nil
-                              :foreground color
-                              :inherit 'default)
-          (eval
-           `(with-eval-after-load 'org
-              (set-face-attribute 'org-scheduled-today nil
-                                  :foreground ,color)))
-          (eval `(with-eval-after-load 'completion-preview
-                   (set-face-attribute 'completion-preview-exact nil
-                                       :underline ,color))))
-        (with-eval-after-load 'hl-line
-          (if (ewal-dark-background-p)
-              (set-face-attribute 'hl-line nil :background "gray5")
-            (set-face-attribute 'hl-line nil :background 'unspecified
-                                :inherit 'highlight)))
-
-        (with-eval-after-load 'eww
-          (set-face-attribute
-           'eww-form-text nil :box
-           `(:line-width 1 :color ,(ewal-get-color 'foreground))))))
-
-    (add-hook 'enable-theme-functions 'ewal-setup)
-
-    (defun color-hex-to-rgb (hex)
-      "Return list of red, green and blue colors for the hex color
-string specified by HEX."
-      (list (string-to-number (substring hex 1 3) 16)
-            (string-to-number (substring hex 3 5) 16)
-            (string-to-number (substring hex 5 7) 16)))
-
-    (if (ewal-dark-background-p)
-        (load-theme 'ewal-doom-one t)
-      (progn
-        (setq ewal-doom-one-brighter-comments t
-              ewal-doom-one-comment-bg nil
-              ewal-dark-palette-p nil)
-        (load-theme 'ewal-doom-one t)))))
+(add-hook 'server-after-make-frame-hook
+          (lambda (&rest _)
+            (when (and (not (member 'modus-ewal custom-enabled-themes)))
+              (load-theme 'modus-ewal t))))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -1290,7 +1237,8 @@ Handles symbols that start or end with a single quote (') correctly."
                   org-agenda-do-date-earlier
                   org-archive-subtree
                   org-agenda-refile
-                  org-agenda-archive))
+                  org-agenda-archive
+                  org-agenda-deadline))
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
@@ -1769,6 +1717,7 @@ It's value needs to be number/anything.
 (use-package sly
   :custom (sly-mrepl-history-file-name
            (expand-file-name-user-share "sly-mrepl-history"))
+  :config
   (defun sly-eval-region-or-buffer ()
     "Evaluate the forms in the active region or the whole current buffer."
     (interactive)
@@ -1879,10 +1828,10 @@ It doesn't close empty tags."
           ;; (make "https://github.com/alemuller/tree-sitter-make")
           ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
           (python "https://github.com/tree-sitter/tree-sitter-python")
-          (php "https://github.com/tree-sitter/tree-sitter-php")))
+          (php "https://github.com/tree-sitter/tree-sitter-php")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
   ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-  ;; (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
   ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (dolist (lang treesit-language-source-alist)

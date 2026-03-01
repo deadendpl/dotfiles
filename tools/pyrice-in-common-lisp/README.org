@@ -1,1 +1,1 @@
-Install SBCL with Quicklisp and run =make=.
+Install SBCL with [[https://www.quicklisp.org/][Quicklisp]] and run =make=.

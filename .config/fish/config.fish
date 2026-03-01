@@ -25,6 +25,11 @@ if command -q pacman
   source "$SHELLS_CONFIG_DIR/pacman.sh"
 end
 
+# for modus emacs theme to work correctly
+if command -q foot
+  export TERM=foot-direct
+end
+
 if test -n "$TERMUX_VERSION"
   # termux config
   source "$SHELLS_CONFIG_DIR/termux.sh"
