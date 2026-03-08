@@ -2,9 +2,10 @@
 
 ;; Copyright (C) 2026
 
-;; Author:  <oliwier@archlinux>
+;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: faces theme
-;; Package-Requires: (modus-themes)
+;; Version: 20260308
+;; Package-Requires: ((modus-themes) (ewal))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -56,7 +57,7 @@
                         "#ffffff"
                       "#000000")
                     0.9))))
-    `(meow-beacon-fake-selection
+    `(secondary-selection
       ((,c :background
            ,(modus-themes-generate-color-blend
              bg-main

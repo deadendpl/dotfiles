@@ -240,7 +240,7 @@ Most of the stuff will get redirected here.")
 
 (defun download-file (url destination)
   "Download a file from an URL to a DESTINATION."
-  (interactive (let* ((url (read-string "URL: "))
+  (interactive (let* ((url (read-string "URL: " (ffap-url-at-point)))
                       (filename (file-name-nondirectory url)))
                  (list url
                        (read-file-name "Destination: " default-directory
@@ -665,6 +665,17 @@ Most of the stuff will get redirected here.")
             (when (and (not (member 'modus-ewal custom-enabled-themes)))
               (load-theme 'modus-ewal t))))
 
+;; it only needs to be run once, so I remove it
+(add-hook 'server-after-make-frame-hook
+          (lambda ()
+            (remove-hook
+             'server-after-make-frame-hook
+             (lambda (&rest _)
+               (when (and (not (member 'modus-ewal
+                                       custom-enabled-themes)))
+                 (load-theme 'modus-ewal t)))))
+          100)
+
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
 (use-package corfu
@@ -1075,9 +1086,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
-  (advice-add 'org-edit-src-save :before
-              (lambda ()
-                (delete-trailing-whitespace (point-min) (point-max)))))
+  (advice-add 'org-edit-src-save :before #'whitespace-cleanup))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -1726,6 +1735,9 @@ It's value needs to be number/anything.
       (sly-eval-buffer)))
   (keymap-set sly-mode-map "C-c C-e" #'sly-eval-region-or-buffer)
   (keymap-set sly-mode-map "C-c C-r" #'sly-restart-inferior-lisp))
+
+(use-package lisp-semantic-hl
+  :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
 (with-eval-after-load 'elisp-mode
