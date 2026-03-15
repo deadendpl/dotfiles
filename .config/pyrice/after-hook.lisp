@@ -164,7 +164,8 @@ It changes 2 variables depending on value of LIGHT."
 (defun emacs-modus-setup ()
   "Handles Emacs theme based on modus."
   (when (command-running-p "emacs")
-    (uiop:run-program "emacsclient -e \"(modus-ewal-regenerate-theme)\"")
+    (uiop:run-program
+     "emacsclient -e \"(modus-ewal-theme-regenerate-theme)\"")
     (format t "Reloaded Emacs theme.~%")))
 
 (gsettings-run *light-theme-p*)

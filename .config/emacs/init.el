@@ -166,7 +166,7 @@ Most of the stuff will get redirected here.")
   "Launches Emacs that only loads test init file."
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q"
-                 "-l" "~/.config/emacs/test-init.el"))
+                 "--init-directory" "~/.config/emacs/test"))
 
 (blink-cursor-mode -1)
 
@@ -602,21 +602,6 @@ Most of the stuff will get redirected here.")
                '("rc$" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange)))
 
-;; (use-package nerd-icons-dired
-;;   :hook (dired-mode . nerd-icons-dired-mode)
-;;   :config
-;;   (advice-add #'wdired-change-to-wdired-mode :before
-;;               (lambda ()
-;;                 (if nerd-icons-dired-mode
-;;                     (nerd-icons-dired-mode -1))))
-;;   (dolist (func '(wdired-finish-edit
-;;                   wdired-exit
-;;                   wdired-abort-changes))
-;;     (advice-add func :after
-;;                 (lambda ()
-;;                   (unless nerd-icons-dired-mode
-;;                     (nerd-icons-dired-mode 1))))))
-
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
   :init
@@ -660,21 +645,31 @@ Most of the stuff will get redirected here.")
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
 
-(add-hook 'server-after-make-frame-hook
-          (lambda (&rest _)
-            (when (and (not (member 'modus-ewal custom-enabled-themes)))
-              (load-theme 'modus-ewal t))))
-
-;; it only needs to be run once, so I remove it
-(add-hook 'server-after-make-frame-hook
-          (lambda ()
-            (remove-hook
-             'server-after-make-frame-hook
-             (lambda (&rest _)
-               (when (and (not (member 'modus-ewal
-                                       custom-enabled-themes)))
-                 (load-theme 'modus-ewal t)))))
-          100)
+(if on-termux-p
+    (use-package doom-themes
+      :demand
+      :config (load-theme 'doom-dracula t))
+  (use-package modus-ewal-theme
+    :demand
+    :load-path "~/dev/modus-ewal-theme/"
+    :config
+    (unless (daemonp)
+      (load-theme 'modus-ewal t))
+    (add-hook 'server-after-make-frame-hook
+              (lambda ()
+                (when (and (not (member 'modus-ewal
+                                        custom-enabled-themes)))
+                  (modus-ewal-theme-regenerate-theme))))
+    ;; it only needs to be run once, so I remove it
+    (add-hook 'server-after-make-frame-hook
+              (lambda ()
+                (remove-hook
+                 'server-after-make-frame-hook
+                 (lambda ()
+                   (when (and (not (member 'modus-ewal
+                                           custom-enabled-themes)))
+                     (modus-ewal-theme-regenerate-theme)))))
+              100)))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -948,24 +943,45 @@ Handles symbols that start or end with a single quote (') correctly."
   :bind (("C-." . embark-act)
          ("C-;" . embark-dwim))
   :config
-  ;; (add-to-list 'embark-default-action-overrides '(execute-extended-command . helpful-function))
   (with-eval-after-load 'meow
     (meow-define-keys 'keypad
       '("C-." . embark-act)))
 
   (defun delete-file-or-directory (path)
     "Delete file or directory at PATH."
-    (interactive "f")
+    (interactive "fFile: ")
     (when (yes-or-no-p (format "Delete %s" path))
       (if (file-directory-p path)
           (delete-directory path t)
         (delete-file path))))
 
-  (keymap-set embark-file-map "d" #'delete-file-or-directory)
-  (keymap-set embark-file-map "i" #'embark-insert-relative-path)
-  (keymap-set embark-file-map "I" #'embark-insert))
+  (defun embark-insert-filename (file)
+    "Insert the filename of FILE.
+If FILE is a directory, inserts the path to the directory."
+    (interactive "fFile: ")
+    (embark-insert (list (if (file-directory-p file)
+                             (directory-file-name file)
+                           (file-name-nondirectory file)))))
 
-(use-package embark-consult)
+  (defun embark-insert-absolute-path (file)
+    "Insert the absolute path to FILE."
+    (interactive "fFile: ")
+    (embark-insert (list (expand-file-name file))))
+
+  (defvar-keymap embark-file-insert-map
+    :doc "Keymap for different ways of inserting files."
+    :parent nil
+    "n" #'embark-insert-filename
+    "r" #'embark-insert-relative-path
+    "a" #'embark-insert-absolute-path)
+  (fset 'embark-file-insert-map embark-file-insert-map)
+
+  (keymap-set embark-file-map "d" #'delete-file-or-directory)
+  (keymap-set embark-file-map "i" #'embark-file-insert-map)
+  (keymap-unset embark-file-map "I"))
+
+(use-package embark-consult
+  :after embark)
 
 (use-package magit
   :custom
@@ -1139,47 +1155,7 @@ Handles symbols that start or end with a single quote (') correctly."
                (prevs (org-list-prevs-alist struct)))
           (org-list-insert-item pos struct prevs)
           (end-of-line))))
-     (t (apply orig-fun args))))
-  ;; (defun org-insert-dwim (orig-fun &rest args)
-;;     "Depending on the context, it insert things differently.
-;; It is meant to be used with advice functions."
-;;     (cond
-;;      ((org-at-item-checkbox-p)
-;;       (org-insert-todo-heading t))
-;;      ((ignore-errors (org-entry-is-todo-p))
-;;       (if (org-at-item-p)
-;;           (apply orig-fun args)
-;;         (org-insert-todo-heading t)))
-;;      ;; we're in a list with ::
-;;      ((ignore-errors (let* ((itemp (org-in-item-p))
-;;                             (struct (save-excursion (goto-char itemp)
-;;                                                     (org-list-struct)))
-;;                             (prevs (org-list-prevs-alist struct))
-;;                             (desc (eq (org-list-get-list-type
-;;                                        itemp struct prevs)
-;; 		                              'descriptive)))
-;;                        desc))
-;;       ;; if current item has ::, use default function,
-;;       ;; otherwise insert an item without ::
-;;       (if-let* ((itemp (org-in-item-p))
-;;                 (struct (save-excursion (goto-char itemp)
-;;                                         (org-list-struct)))
-;;                 (prevs (org-list-prevs-alist struct))
-;;                 (desc (nth 5 (seq-find (lambda (item)
-;;                                          (eq itemp (car item)))
-;;                                        struct))))
-;;           (apply orig-fun args)
-;;         (let* ((itemp (org-in-item-p))
-;;                (pos (save-excursion (1+ (progn (end-of-line) (point)))))
-;;                (struct (save-excursion (goto-char itemp)
-;;                                        (org-list-struct)))
-;;                (prevs (org-list-prevs-alist struct)))
-;;           (org-list-insert-item pos struct prevs)
-;;           (end-of-line))))
-;;      (t (apply orig-fun args))))
-
-  ;; (advice-add 'org-meta-return :around 'org-insert-dwim)
-  )
+     (t (apply orig-fun args)))))
 
 (use-package org
   :bind ("C-c n a" . org-agenda)
@@ -1559,24 +1535,25 @@ It's value needs to be number/anything.
              "{\"query\": \"query { Page(page: 1, perPage: 1000) { activities(userId: 6071947, createdAt_greater: %s) { ... on ListActivity { createdAt media { format id title { romaji english native } } progress status type } } } }\"}"
              timestamp))
            (json-array-type 'list)
-           (buffer (generate-new-buffer "*anilist-weekly-progress*")))
+           (process (process-lines
+                     "curl"
+                     "-s"
+                     "-X" "POST"
+                     "--header" "Content-Type: application/json"
+                     "--data" query
+                     "--url" "https://graphql.anilist.co"))
+           (out (json-read-from-string (car process)))
+           (buffer (get-buffer-create "*anilist-weekly-progress*")))
 
       (with-current-buffer buffer
-        (call-process
-         "curl" nil t nil "-s"
-         "-X" "POST"
-         "--header" "Content-Type: application/json"
-         "--data" query
-         "--url" "https://graphql.anilist.co")
-
         (goto-char (point-min))
 
-        (let* ((out (json-read))
-               (data (alist-get 'data out))
+        (let* ((data (alist-get 'data out))
                (page (alist-get 'Page data))
                (activities (alist-get 'activities page)))
 
-          (erase-buffer)
+          (unless (string-empty-p (buffer-string))
+            (erase-buffer))
 
           (mapc
            (lambda (item)
@@ -1606,12 +1583,17 @@ It's value needs to be number/anything.
                 (lambda (button)
                   (org-roam-open-animanga-node
                    (button-get button 'anilist-type)
-                   (button-get button 'anilist-id))))
+                   (button-get button 'anilist-id)
+                   t)))
 
-               (insert
-                (format
-                 " has status %s with progress %s at date %s\n"
-                 status progress date))))
+               (let ((progress-string
+                      (when progress
+                        (format "at progress %s" progress))))
+                 (insert
+                  (concat (format " has status \"%s\"" status)
+                          (when progress-string
+                            (format " %s" progress-string))
+                          (format " at date %s\n" date))))))
            activities)))
 
       (switch-to-buffer-other-window buffer)))
@@ -1633,8 +1615,10 @@ It's value needs to be number/anything.
            (member type (cadr item)))
          hierarchy)))))
 
-  (defun org-roam-open-animanga-node (type id)
-    "Open node that matches its AniList properties with TYPE and ID."
+  (defun org-roam-open-animanga-node (type id &optional open-in-web)
+    "Open node that matches its AniList properties with TYPE and ID.
+Opens the AniList entry in a web browser if the node is not found and
+OPEN-IN-WEB is non-nil."
     (if-let* ((root-type (org-roam-anilist-root-format type))
               (results
                (org-roam-db-query
@@ -1656,7 +1640,13 @@ It's value needs to be number/anything.
                           (number-to-string id) url))))
                 results)))
         (org-id-open (car matched-result) nil)
-      (message "No matching org-roam node found."))))
+      (if open-in-web
+          (progn
+            (message "%s. %s."
+                     "No matching org-roam node found"
+                     "Opening the AniList entry in the browser")
+            (browse-url (format "https://anilist.co/%s/%s" type id)))
+          (message "No matching org-roam node found.")))))
 
 (use-package toc-org
   :hook (org-mode . #'toc-org-enable)
@@ -1840,7 +1830,7 @@ It doesn't close empty tags."
           ;; (make "https://github.com/alemuller/tree-sitter-make")
           ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
           (python "https://github.com/tree-sitter/tree-sitter-python")
-          (php "https://github.com/tree-sitter/tree-sitter-php")
+          ;; (php "https://github.com/tree-sitter/tree-sitter-php")
           (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
   ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
@@ -1858,7 +1848,8 @@ It doesn't close empty tags."
         (python-mode . python-ts-mode)
         (sh-mode . bash-ts-mode)
         (js-json-mode . json-ts-mode)
-        (js-mode . js-ts-mode))))
+        (js-mode . js-ts-mode)
+        (javascript-mode . js-ts-mode))))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)

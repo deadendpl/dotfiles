@@ -155,6 +155,7 @@ else
                                 chaotic-aur/zen-browser-bin \
                                 xorg-xwayland \
                                 unzip \
+                                wl-clip-persist \
                                 webp-pixbuf-loader # for swaybg to work with webp
                                 # qutebrowser \
                                 # lf \

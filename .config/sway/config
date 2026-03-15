@@ -24,6 +24,7 @@ exec {
   ~/.local/bin/pyrice
   $scripts/emacs.sh
   /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+  wl-clip-persist -c primary
 }
 
 # disabling window name in the window's border
