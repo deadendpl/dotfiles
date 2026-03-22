@@ -166,7 +166,8 @@ Most of the stuff will get redirected here.")
   "Launches Emacs that only loads test init file."
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q"
-                 "--init-directory" "~/.config/emacs/test"))
+                 "--init-directory" "~/.config/emacs/test"
+                 "-l" "~/.config/emacs/test/init.el"))
 
 (blink-cursor-mode -1)
 
@@ -234,7 +235,12 @@ Most of the stuff will get redirected here.")
   (interactive)
   (switch-to-buffer-other-window (get-scratch-buffer-create)))
 
+(defun scratch-buffer-other-tab ()
+  (interactive)
+  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
+
 (keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
+(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
 
 (add-hook 'after-init-hook #'editorconfig-mode)
 
@@ -260,6 +266,8 @@ Most of the stuff will get redirected here.")
   (set-newline-and-indent-for-mode mode))
 
 (setq calendar-week-start-day 1)
+
+(setq isearch-lazy-count t)
 
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
@@ -361,8 +369,8 @@ Most of the stuff will get redirected here.")
      '("L" . meow-right-expand)
      '("m" . meow-join)
      '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
+     ;; '("o" . meow-block)
+     ;; '("O" . meow-to-block)
      '("p" . meow-yank)
      '("q" . meow-quit)
      '("Q" . meow-goto-line)
@@ -379,7 +387,7 @@ Most of the stuff will get redirected here.")
      '("X" . meow-goto-line)
      '("y" . meow-save)
      '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
+     ;; '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore))
 
@@ -455,6 +463,20 @@ Most of the stuff will get redirected here.")
 (keymap-global-set "C-x B" 'scratch-buffer)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+
+(use-package expreg
+  :defer nil
+  :after meow
+  :config
+  (meow-normal-define-key '("o" . expreg-expand)
+                          '("z" . expreg-contract))
+  (remove-hook 'expreg-functions #'expreg--word)
+  (remove-hook 'expreg-functions #'expreg--subword)
+  (advice-add 'expreg-expand :after
+              (lambda ()
+                ;; don't exchange point and mark if it can't expand more
+                (unless (= (expreg--current-depth) 0)
+                  (exchange-point-and-mark)))))
 
 (use-package abbrev
   :ensure nil
@@ -1648,6 +1670,72 @@ OPEN-IN-WEB is non-nil."
             (browse-url (format "https://anilist.co/%s/%s" type id)))
           (message "No matching org-roam node found.")))))
 
+(use-package org-roam
+  :commands (org-roam-show-games-closed-with-year)
+  :config
+  (defun org-roam-get-games-closed-with-year (year)
+    "Return the games nodes beaten in the YEAR."
+    (let ((games-list))
+      (dolist (item (org-roam-db-query
+                     [:select [id title file pos]
+                      :from nodes
+                      :join tags
+                      :on tags:node-id := nodes:id
+                      :where (= "games" tags:tag)
+                      :group-by nodes:id]))
+        (let* ((id       (nth 0 item))
+               (title    (nth 1 item))
+               (file     (nth 2 item))
+               (position (nth 3 item)))
+          (when-let ((date (with-temp-buffer
+                             (insert-file-contents file)
+                             (org-mode)
+                             (goto-char position)
+                             (when (re-search-forward
+                                    (format "CLOSED: \\[%s.*+\\]" year)
+                                    nil t)
+                               (search-backward "CLOSED")
+                               (search-forward "[")
+                               (when (equal id (org-roam-node-id
+                                                (org-roam-node-at-point)))
+                                 (thing-at-point 'symbol t))))))
+            (add-to-list 'games-list (list id title date)))))
+      games-list))
+
+  (defun org-roam-show-games-closed-with-year (year)
+    "Show the games nodes beaten in the YEAR in a separate buffer."
+    (interactive "nEnter a year: ")
+    (message "Looking for beaten games...")
+    (let* ((buffer-name (format "*org-roam-games-list-%s*" year))
+           (buffer (progn
+                     (when (get-buffer buffer-name)
+                       (kill-buffer buffer-name))
+                     (get-buffer-create buffer-name)))
+           (data (org-roam-get-games-closed-with-year year))
+           (longest-title-length
+            (apply #'max (seq-map (lambda (item)
+                                    (length (nth 1 item)))
+                                  data))))
+      (with-current-buffer buffer
+        (tabulated-list-mode)
+        (setq-local tabulated-list-format
+                    `[("Game" ,longest-title-length t)
+                      ("Date" ,(/ (window-width) 2) t)]
+                    tabulated-list-sort-key
+                    (list "Date" t))
+        (setq-local tabulated-list-entries
+                    (mapcar (lambda (item)
+                              `(,(nth 0 item)
+                                [,(nth 1 item)
+                                 ,(nth 2 item)]))
+                            data))
+        (tabulated-list-print)
+        (tabulated-list-init-header)
+        (keymap-local-set "RET" (lambda () (interactive)
+                                  (org-id-open (tabulated-list-get-id)
+                                               nil))))
+      (pop-to-buffer buffer))))
+
 (use-package toc-org
   :hook (org-mode . #'toc-org-enable)
   :custom
@@ -2171,9 +2259,3 @@ Also see `window-delete-popup-frame'." command)
                       mb-search-work))
         (add-to-list 'vertico-multiform-commands
                      `(,func (vertico-sort-function . nil)))))))
-
-(use-package ace-window
-  :bind ("C-x o" . ace-window)
-  :custom
-  (aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
-  :custom-face (aw-leading-char-face ((nil (:inherit highlight :foreground nil)))))

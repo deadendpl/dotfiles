@@ -20,6 +20,7 @@
     - [[#modal-editing-meow][Modal editing (Meow)]]
     - [[#flashing][Flashing]]
     - [[#setting-keybindings][Setting keybindings]]
+    - [[#expreg][Expreg]]
   - [[#built-in-packages][Built-in packages]]
     - [[#abbreviations][Abbreviations]]
     - [[#recentf---file-history][recentf - file history]]
@@ -74,6 +75,7 @@
     - [[#org-roam][Org Roam]]
       - [[#anilist-incrementing-progress][AniList incrementing progress]]
       - [[#anilist-lookup][AniList lookup]]
+      - [[#game-completion-showcase][Game completion showcase]]
     - [[#toc][TOC]]
   - [[#parenthesis][Parenthesis]]
   - [[#programming][Programming]]
@@ -110,7 +112,6 @@
   - [[#pop-up-windows][Pop up windows]]
   - [[#m3u-mode][M3U mode]]
   - [[#local-packages][Local packages]]
-  - [[#ace-window][ace-window]]
 
 * INFO and CREDITS
 Credits to:
@@ -340,7 +341,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
   "Launches Emacs that only loads test init file."
   (interactive)
   (start-process "emacs-test" nil "emacs" "-Q"
-                 "--init-directory" "~/.config/emacs/test"))
+                 "--init-directory" "~/.config/emacs/test"
+                 "-l" "~/.config/emacs/test/init.el"))
 
 (blink-cursor-mode -1)
 
@@ -408,7 +410,12 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
   (interactive)
   (switch-to-buffer-other-window (get-scratch-buffer-create)))
 
+(defun scratch-buffer-other-tab ()
+  (interactive)
+  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
+
 (keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
+(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
 
 (add-hook 'after-init-hook #'editorconfig-mode)
 
@@ -434,6 +441,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
   (set-newline-and-indent-for-mode mode))
 
 (setq calendar-week-start-day 1)
+
+(setq isearch-lazy-count t)
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -558,8 +567,8 @@ That is great for packages not available in elpas.
      '("L" . meow-right-expand)
      '("m" . meow-join)
      '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
+     ;; '("o" . meow-block)
+     ;; '("O" . meow-to-block)
      '("p" . meow-yank)
      '("q" . meow-quit)
      '("Q" . meow-goto-line)
@@ -576,7 +585,7 @@ That is great for packages not available in elpas.
      '("X" . meow-goto-line)
      '("y" . meow-save)
      '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
+     ;; '("z" . meow-pop-selection)
      '("'" . repeat)
      '("<escape>" . ignore))
 
@@ -660,6 +669,23 @@ When doing big movements, I will get a flash at the current line.
 (keymap-global-set "C-x B" 'scratch-buffer)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+#+end_src
+*** Expreg
+Expreg expand current region by semantic units and uses tree-sitter if it can.
+#+begin_src emacs-lisp
+(use-package expreg
+  :defer nil
+  :after meow
+  :config
+  (meow-normal-define-key '("o" . expreg-expand)
+                          '("z" . expreg-contract))
+  (remove-hook 'expreg-functions #'expreg--word)
+  (remove-hook 'expreg-functions #'expreg--subword)
+  (advice-add 'expreg-expand :after
+              (lambda ()
+                ;; don't exchange point and mark if it can't expand more
+                (unless (= (expreg--current-depth) 0)
+                  (exchange-point-and-mark)))))
 #+end_src
 ** Built-in packages
 *** Abbreviations
@@ -2048,6 +2074,79 @@ OPEN-IN-WEB is non-nil."
             (browse-url (format "https://anilist.co/%s/%s" type id)))
           (message "No matching org-roam node found.")))))
 #+end_src
+**** Game completion showcase
+I have nodes about games.
+They usually have a completion date, so I wrote some code to nicely display games that I finished in a specified year.
+The date retrieval is the way it is because I can have multiple nodes in a one game node.
+Various ports of one video game for example.
+For these cases, I want to check their completion date and see if I'm still on the right node.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :commands (org-roam-show-games-closed-with-year)
+  :config
+  (defun org-roam-get-games-closed-with-year (year)
+    "Return the games nodes beaten in the YEAR."
+    (let ((games-list))
+      (dolist (item (org-roam-db-query
+                     [:select [id title file pos]
+                      :from nodes
+                      :join tags
+                      :on tags:node-id := nodes:id
+                      :where (= "games" tags:tag)
+                      :group-by nodes:id]))
+        (let* ((id       (nth 0 item))
+               (title    (nth 1 item))
+               (file     (nth 2 item))
+               (position (nth 3 item)))
+          (when-let ((date (with-temp-buffer
+                             (insert-file-contents file)
+                             (org-mode)
+                             (goto-char position)
+                             (when (re-search-forward
+                                    (format "CLOSED: \\[%s.*+\\]" year)
+                                    nil t)
+                               (search-backward "CLOSED")
+                               (search-forward "[")
+                               (when (equal id (org-roam-node-id
+                                                (org-roam-node-at-point)))
+                                 (thing-at-point 'symbol t))))))
+            (add-to-list 'games-list (list id title date)))))
+      games-list))
+
+  (defun org-roam-show-games-closed-with-year (year)
+    "Show the games nodes beaten in the YEAR in a separate buffer."
+    (interactive "nEnter a year: ")
+    (message "Looking for beaten games...")
+    (let* ((buffer-name (format "*org-roam-games-list-%s*" year))
+           (buffer (progn
+                     (when (get-buffer buffer-name)
+                       (kill-buffer buffer-name))
+                     (get-buffer-create buffer-name)))
+           (data (org-roam-get-games-closed-with-year year))
+           (longest-title-length
+            (apply #'max (seq-map (lambda (item)
+                                    (length (nth 1 item)))
+                                  data))))
+      (with-current-buffer buffer
+        (tabulated-list-mode)
+        (setq-local tabulated-list-format
+                    `[("Game" ,longest-title-length t)
+                      ("Date" ,(/ (window-width) 2) t)]
+                    tabulated-list-sort-key
+                    (list "Date" t))
+        (setq-local tabulated-list-entries
+                    (mapcar (lambda (item)
+                              `(,(nth 0 item)
+                                [,(nth 1 item)
+                                 ,(nth 2 item)]))
+                            data))
+        (tabulated-list-print)
+        (tabulated-list-init-header)
+        (keymap-local-set "RET" (lambda () (interactive)
+                                  (org-id-open (tabulated-list-get-id)
+                                               nil))))
+      (pop-to-buffer buffer))))
+#+end_src
 *** TOC
 Table of contents after after typing =:toc:= in header
 #+begin_src emacs-lisp
@@ -2724,12 +2823,4 @@ A mode for m3u files
                       mb-search-work))
         (add-to-list 'vertico-multiform-commands
                      `(,func (vertico-sort-function . nil)))))))
-#+end_src
-** ace-window
-#+begin_src emacs-lisp
-(use-package ace-window
-  :bind ("C-x o" . ace-window)
-  :custom
-  (aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
-  :custom-face (aw-leading-char-face ((nil (:inherit highlight :foreground nil)))))
 #+end_src
