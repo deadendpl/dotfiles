@@ -152,11 +152,12 @@ else
                                 udiskie \
                                 swaylock \
                                 fcron \
-                                chaotic-aur/zen-browser-bin \
                                 xorg-xwayland \
                                 unzip \
                                 wl-clip-persist \
+                                glide-browser-bin \
                                 webp-pixbuf-loader # for swaybg to work with webp
+                                # chaotic-aur/zen-browser-bin \
                                 # qutebrowser \
                                 # lf \
                                 # hyprland \
@@ -319,7 +320,7 @@ rm cron-file
 * Setting defaults
 It sets some apps to be defaults for some files
 #+begin_src sh
-xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+basename $(ls ~/.local/share/applications/*Glide*) | xargs xdg-settings set default-web-browser
 #+end_src
 
 This sets GTK theming and fonts, on bigger screen you might want to increase the size of fonts.

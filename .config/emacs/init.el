@@ -384,7 +384,7 @@ Most of the stuff will get redirected here.")
      '("w" . meow-mark-word)
      '("W" . meow-mark-symbol)
      '("x" . meow-line)
-     '("X" . meow-goto-line)
+     ;; '("X" . meow-goto-line)
      '("y" . meow-save)
      '("Y" . meow-sync-grab)
      ;; '("z" . meow-pop-selection)
@@ -478,6 +478,15 @@ Most of the stuff will get redirected here.")
                 (unless (= (expreg--current-depth) 0)
                   (exchange-point-and-mark)))))
 
+(use-package surround
+  :defer nil
+  :after meow
+  :config
+  (keymap-set surround-keymap "i" #'surround-insert)
+  (keymap-set surround-keymap "m" #'surround-mark)
+  (keymap-unset surround-keymap "s" t)
+  (keymap-set meow-normal-state-keymap "S" surround-keymap))
+
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
@@ -502,7 +511,8 @@ Most of the stuff will get redirected here.")
 (use-package eww
   :custom
   (eww-auto-rename-buffer 'title)
-  (url-privacy-level '(email lastloc cookies)))
+  (url-privacy-level '(email lastloc cookies))
+  (shr-fill-text nil))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -1252,6 +1262,12 @@ If FILE is a directory, inserts the path to the directory."
                     (org-agenda-save-buffers))))))
 
 (use-package org
+  :config
+  (add-hook 'org-mode-hook (lambda () (when (org-agenda-file-p)
+                                        (setq org-log-done 'time)))
+            100))
+
+(use-package org
   :custom
   (org-export-allow-bind-keywords t)
   (org-export-backends '(ascii html icalendar latex odt md))
@@ -1812,7 +1828,12 @@ OPEN-IN-WEB is non-nil."
         (sly-eval-region (region-beginning) (region-end))
       (sly-eval-buffer)))
   (keymap-set sly-mode-map "C-c C-e" #'sly-eval-region-or-buffer)
-  (keymap-set sly-mode-map "C-c C-r" #'sly-restart-inferior-lisp))
+  (keymap-set sly-mode-map "C-c C-r" #'sly-restart-inferior-lisp)
+  ;; this overrides my previous prompt binding so I remove it
+  (with-eval-after-load 'sly-mrepl
+    (keymap-unset sly-prefix-map "C-p" t)
+    (keymap-set sly-mrepl-mode-map "C-c C-p" #'sly-mrepl-previous-prompt)
+    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt)))
 
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))

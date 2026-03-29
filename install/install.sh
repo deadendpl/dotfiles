@@ -105,11 +105,12 @@ else
                                 udiskie \
                                 swaylock \
                                 fcron \
-                                chaotic-aur/zen-browser-bin \
                                 xorg-xwayland \
                                 unzip \
                                 wl-clip-persist \
+                                glide-browser-bin \
                                 webp-pixbuf-loader # for swaybg to work with webp
+                                # chaotic-aur/zen-browser-bin \
                                 # qutebrowser \
                                 # lf \
                                 # hyprland \
@@ -245,7 +246,7 @@ echo "*/5 * * * * sudo -u \$USER DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\$
 fcrontab cron-file
 rm cron-file
 
-xdg-settings set default-web-browser org.qutebrowser.qutebrowser.desktop
+basename $(ls ~/.local/share/applications/*Glide*) | xargs xdg-settings set default-web-browser
 
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
