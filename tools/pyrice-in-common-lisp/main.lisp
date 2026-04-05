@@ -150,6 +150,8 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
           (if (and (>= current-hour 6)
                    (< current-hour 17))
               (setf light t)))))
+    (setf *light-theme-p* light)
+    (setf *old-wallpaper-p* old)
     (let ((wallpaper-path
             (cond ((uiop:directory-exists-p wallpaper)
                    (get-random-image-from-dir wallpaper))

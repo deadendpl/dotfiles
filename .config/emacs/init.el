@@ -152,6 +152,7 @@ Most of the stuff will get redirected here.")
 (advice-add 'find-file :before #'make-directory-maybe)
 (advice-add 'find-file-other-window :before #'make-directory-maybe)
 (advice-add 'find-file-other-tab :before #'make-directory-maybe)
+(advice-add 'find-file-other-frame :before #'make-directory-maybe)
 
 ;; cleaning whistespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
@@ -173,7 +174,8 @@ Most of the stuff will get redirected here.")
 
 (keymap-set prog-mode-map "RET" #'newline-and-indent)
 
-(defun execute-extended-command-other-window (prefixarg &optional command-name typed)
+(defun execute-extended-command-other-window
+    (prefixarg &optional command-name typed)
   "Execute `execute-extended-command' in a new window."
   (interactive
    (let ((execute-extended-command--last-typed nil))
@@ -183,7 +185,8 @@ Most of the stuff will get redirected here.")
   (with-suppressed-warnings ((interactive-only execute-extended-command))
     (execute-extended-command prefixarg command-name typed)))
 
-(defun execute-extended-command-other-tab (prefixarg &optional command-name typed)
+(defun execute-extended-command-other-tab
+    (prefixarg &optional command-name typed)
   "Execute `execute-extended-command' in a new tab."
   (interactive
    (let ((execute-extended-command--last-typed nil))
@@ -218,16 +221,6 @@ Most of the stuff will get redirected here.")
     (indent-region (point-min) (point-max))))
 
 (keymap-global-set "<remap> <indent-region>" 'indent-dwim)
-
-(with-eval-after-load 'hl-line
-  (define-advice face-at-point (:around (orig-fun &rest args))
-    "Disable `hl-line-mode' temporarily if it's non-nil."
-    (if hl-line-mode
-        (progn
-          (hl-line-mode -1)
-          (prog1 (apply orig-fun args)
-            (hl-line-mode 1)))
-      (apply orig-fun args))))
 
 (global-visual-wrap-prefix-mode t)
 
@@ -552,6 +545,40 @@ Most of the stuff will get redirected here.")
   :config
   (setq ibuffer-project-root-functions
         (remove '(identity . "Directory") ibuffer-project-root-functions)))
+
+(use-package hl-line
+  :hook (after-init . global-hl-line-mode)
+  :config
+  (define-advice face-at-point (:around (orig-fun &rest args))
+    "Disable `hl-line-mode' temporarily if it's non-nil."
+    (cond
+     (global-hl-line-mode
+      (progn
+        (global-hl-line-mode -1)
+        (prog1 (apply orig-fun args)
+          (global-hl-line-mode 1))))
+     (hl-line-mode
+      (progn
+        (hl-line-mode -1)
+        (prog1 (apply orig-fun args)
+          (hl-line-mode 1))))
+     (t (apply orig-fun args))))
+
+  ;; https://fediscience.org/@ericsfraga/116279043710841253
+  (defun get-visual-line-range ()
+    "Identify current visual line (for highlighting mostly).
+
+Use the visual line functions to define the range in the buffer
+that should be highlighted when `hl-line-mode' is enabled. By
+default, the whole line in the file is highlighted."
+    (let (b e)
+      (save-excursion
+        (beginning-of-visual-line)
+        (setq b (point))
+        (end-of-visual-line)
+        (setq e (point)))
+      (cons b e)))
+  (setq-default hl-line-range-function #'get-visual-line-range))
 
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
@@ -1442,6 +1469,7 @@ as you zoom text. It's fast, since no image regeneration is required."
                  "%(org-roam-created-date-property)\n#+title: %<%Y-%m-%d>\n#+filetags: :dailie:\n"))))
   (org-persist-directory
    (expand-file-name-user-share "org/org-persist/"))
+  (org-roam-extract-new-file-path "${slug}.org")
   :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
@@ -1940,9 +1968,9 @@ It doesn't close empty tags."
           ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
           (python "https://github.com/tree-sitter/tree-sitter-python")
           ;; (php "https://github.com/tree-sitter/tree-sitter-php")
-          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")))
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
-  ;; (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
   ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (dolist (lang treesit-language-source-alist)
@@ -2011,6 +2039,16 @@ It doesn't close empty tags."
 (keymap-global-set "C-c s s" 'shell)
 (setq explicit-shell-file-name "/bin/bash"
       async-shell-command-buffer 'new-buffer)
+
+(define-advice shell-command (:around (orig-fun &rest args))
+  "Apply ANSI colors to the output buffer."
+  (let ((buffer-name (or (nth 1 args)
+                         shell-command-buffer-name)))
+    (prog1 (apply orig-fun args)
+      (when (and (not (equal buffer-name t))
+                 (get-buffer buffer-name))
+        (with-current-buffer buffer-name
+          (ansi-color-apply-on-region (point-min) (point-max)))))))
 
 (use-package fish-mode
   :custom (fish-indent-offset 2))

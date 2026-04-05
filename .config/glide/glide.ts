@@ -20,11 +20,40 @@
 // if keepassxc or other password managers don't work
 
 glide.o.hint_size = "15px";
+// glide.o.hint_chars = "asdfghjhkl";
 
-glide.prefs.set(
-  "browser.startup.homepage",
-  "file:///home/oliwier/.config/qutebrowser/start/start.html",
-);
+const prefs: Record<string, any> = {
+  "toolkit.scrollbox.pagescroll.maxOverlapLines": 50,
+  "toolkit.scrollbox.pagescroll.maxOverlapPercent": 50,
+  "sidebar.verticalTabs": true,
+  "sidebar.verticalTabs.dragToPinPromo.dismissed": true,
+  "browser.theme.toolbar-theme": 2,
+  // "browser.startup.homepage":
+  // "file:///home/oliwier/.config/qutebrowser/start/start.html",
+  "browser.display.use_system_colors": true,
+  "signon.generation.enabled": false,
+  "browser.ml.enable": false,
+  "browser.newtabpage.enabled": false,
+  "browser.download.useDownloadDir": false,
+  "browser.startup.blankWindow": true,
+  "browser.theme.windows.accent-color-in-tabs.enabled": true,
+  // no looking for sponsor websites to add to the new tab page shortcuts
+  "browser.topsites.contile.enabled": false,
+  "browser.uidensity": 1,
+  "font.name.monospace.x-western": "JetBrainsMono Nerd Font Mono",
+  "font.name.sans-serif.x-western": "Ubuntu Nerd Font",
+  "font.name.serif.x-western": "Ubuntu Nerd Font",
+  "general.smoothScroll": false,
+  "media.gmp-widevinecdm.enabled": true,
+  "privacy.trackingprotection.enabled": true,
+  "sidebar.verticalTabs": true,
+  "signon.rememberSignons": false,
+  "toolkit.scrollbox.smoothScroll": false,
+  "ui.tooltip.delay_ms": 300,
+};
+
+for(const[key, value] of Object.entries(prefs))
+  glide.prefs.set(key, value);
 
 glide.keymaps.set("normal", "<leader>r", "config_reload");
 // doesn't work
@@ -37,11 +66,22 @@ glide.keymaps.set("normal", "L", "forward");
 glide.keymaps.set("normal", "d", "tab_close");
 glide.keymaps.set("normal", "r", "reload");
 glide.keymaps.set("normal", "O", "tab_new");
+glide.keymaps.set(["normal"], "o", () =>
+  glide.keys.send("<C-l>", { skip_mappings: true }),
+  { description: "Invoke URL bar in current tab" }
+);
 glide.keymaps.set("normal", "u", "tab_reopen");
-// doesn't work
-// glide.keymaps.set("normal", "<C-d>", () => {
-//   glide.caret_move("down", 10);
-// });
+glide.keymaps.set("normal", "<C-d>", "scroll_page_down");
+glide.keymaps.set("normal", "<C-u>", "scroll_page_up");
+glide.keymaps.set(["normal"], "gj", () =>
+  glide.keys.send("<C-S-PageDown>", { skip_mappings: true }),
+  { description: "Move the tab down" }
+);
+glide.keymaps.set(["normal"], "gk", () =>
+  glide.keys.send("<C-S-PageUp>", { skip_mappings: true }),
+  { description: "Move the tab up" }
+);
+glide.keymaps.set("normal", "'", "repeat");
 
 glide.keymaps.del("normal", "<C-j>");
 glide.keymaps.del("normal", "<C-k>");

@@ -17,6 +17,24 @@ The commands will be different based on LIGHT's value."
     (uiop:run-program gsettings-theme-args)
     (format t "Set GTK preffered color scheme and icons.~%")))
 
+(defun reload-gtk-theme ()
+  "Run commands to reload current GTK theme."
+  (let* ((theme-output
+           (nth-value
+            0 (uiop:run-program
+               "gsettings get org.gnome.desktop.interface gtk-theme"
+               :output 'string)))
+         (theme (subseq theme-output 1 (- (length theme-output) 2))))
+    (uiop:run-program
+     "gsettings set org.gnome.desktop.interface gtk-theme ''")
+    (sleep 0.1)
+    (uiop:run-program
+     (format
+      nil
+      "gsettings set org.gnome.desktop.interface gtk-theme \"~A\""
+      theme))
+    (format t "Reloaded GTK theme.~%")))
+
 (defun read-colors-file ()
   (with-open-file (stream (merge-pathnames "colors" *wal-directory*)
                           :direction :input)
@@ -169,6 +187,7 @@ It changes 2 variables depending on value of LIGHT."
     (format t "Reloaded Emacs theme.~%")))
 
 (gsettings-run *light-theme-p*)
+(reload-gtk-theme)
 (swaybg-setup *wallpaper-path* *old-wallpaper-p*)
 (sway-setup)
 (waybar-setup)

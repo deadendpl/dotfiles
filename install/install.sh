@@ -109,6 +109,7 @@ else
                                 unzip \
                                 wl-clip-persist \
                                 glide-browser-bin \
+                                rofi
                                 webp-pixbuf-loader # for swaybg to work with webp
                                 # chaotic-aur/zen-browser-bin \
                                 # qutebrowser \
@@ -135,7 +136,6 @@ else
   yay -S --noconfirm networkmanager-dmenu-git \
                      rofi-bluetooth-git \
                      cp-p-git \
-                     rofi-lbonn-wayland-git
                      # ctpv-git \
                      # clipboard \
                      # pokemonsay-newgenerations-git \
