@@ -1,5 +1,5 @@
-(defvar on-termux-p (and (getenv "TERMUX_VERSION"))
-  "Checks if Emacs is running inside of Termux.")
+(defvar on-termux-p (getenv "TERMUX_VERSION")
+  "Non-nil means Emacs is running inside of Termux.")
 
 (unless on-termux-p
   (if (fboundp 'scroll-bar-mode)
@@ -15,10 +15,6 @@
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
-(electric-pair-mode 1)               ; Turns on automatic parens pairing
-(electric-indent-mode -1)            ; Turns off the weird default indenting.
-(column-number-mode 1)               ; Column number in modeline
-(display-battery-mode 1)             ; Setting battery percentage in modeline
 
 (require 'xdg)
 
@@ -86,7 +82,6 @@ Most of the stuff will get redirected here.")
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files with ".#"
               make-backup-files nil
-              require-final-newline t
               show-paren-when-point-inside-paren t
               show-paren-when-point-in-periphery t
               truncate-string-ellipsis "…"
@@ -103,6 +98,7 @@ Most of the stuff will get redirected here.")
               mouse-wheel-scroll-amount-horizontal 1
               kill-do-not-save-duplicates nil
               comment-empty-lines t
+              comment-column 0
               url-privacy-level 'paranoid
               electric-pair-skip-self nil
               history-length t
@@ -111,7 +107,8 @@ Most of the stuff will get redirected here.")
               enable-local-variables :all
               save-interprogram-paste-before-kill t
               shell-command-prompt-show-cwd t
-              fill-column 72)
+              fill-column 72
+              find-library-include-other-files nil)
 
 ;; showing init time in scratch buffer
 (if on-termux-p
@@ -154,11 +151,8 @@ Most of the stuff will get redirected here.")
 (advice-add 'find-file-other-tab :before #'make-directory-maybe)
 (advice-add 'find-file-other-frame :before #'make-directory-maybe)
 
-;; cleaning whistespace when saving file
+;; cleaning whitespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
-
-;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
-(add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
 
 ;; removing warning when using some commands
 (setq disabled-command-function nil)
@@ -171,33 +165,6 @@ Most of the stuff will get redirected here.")
                  "-l" "~/.config/emacs/test/init.el"))
 
 (blink-cursor-mode -1)
-
-(keymap-set prog-mode-map "RET" #'newline-and-indent)
-
-(defun execute-extended-command-other-window
-    (prefixarg &optional command-name typed)
-  "Execute `execute-extended-command' in a new window."
-  (interactive
-   (let ((execute-extended-command--last-typed nil))
-     (list current-prefix-arg
-           (read-extended-command))))
-  (switch-to-buffer-other-window (current-buffer))
-  (with-suppressed-warnings ((interactive-only execute-extended-command))
-    (execute-extended-command prefixarg command-name typed)))
-
-(defun execute-extended-command-other-tab
-    (prefixarg &optional command-name typed)
-  "Execute `execute-extended-command' in a new tab."
-  (interactive
-   (let ((execute-extended-command--last-typed nil))
-     (list current-prefix-arg
-           (read-extended-command))))
-  (display-buffer-in-new-tab (current-buffer) nil)
-  (with-suppressed-warnings ((interactive-only execute-extended-command))
-    (execute-extended-command prefixarg command-name typed)))
-
-(keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
-(keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
 (defun desktop-and-tabs-clear (arg)
   "Clear desktop, close all tabs."
@@ -224,17 +191,6 @@ Most of the stuff will get redirected here.")
 
 (global-visual-wrap-prefix-mode t)
 
-(defun scratch-buffer-other-window ()
-  (interactive)
-  (switch-to-buffer-other-window (get-scratch-buffer-create)))
-
-(defun scratch-buffer-other-tab ()
-  (interactive)
-  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
-
-(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
-(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
-
 (add-hook 'after-init-hook #'editorconfig-mode)
 
 (defun download-file (url destination)
@@ -248,15 +204,12 @@ Most of the stuff will get redirected here.")
       (url-copy-file url (concat destination filename))
     (url-copy-file url destination)))
 
-(defmacro set-newline-and-indent-for-mode (mode)
-  "Set RET to `newline-and-indent' for MODE."
-  (let ((keymap-name (intern (concat (symbol-name mode) "-map"))))
-    `(with-eval-after-load ',mode
-       (keymap-set ,keymap-name "RET" #'newline-and-indent))))
-
-(dolist (mode '(nxml-mode
-                yaml-mode))
-  (set-newline-and-indent-for-mode mode))
+;; `conf-mode' and other configuration modes are not derived from
+;; `prog-mode', so I add its hook manually
+(dolist (mode '(yaml-mode
+                conf-mode))
+  (add-hook (intern (format "%s-hook" mode))
+            (lambda () (run-hooks 'prog-mode-hook))))
 
 (setq calendar-week-start-day 1)
 
@@ -283,6 +236,29 @@ Most of the stuff will get redirected here.")
   (unless package-archive-contents
     (package-refresh-contents))
   )
+
+(setq-default require-final-newline 'visit-save)
+
+(defun not-modified-when-newline ()
+  "Mark current buffer as unmodified if the file has a new line difference.
+This is meant to not distract the user if `require-final-newline' is set
+to `visit' or `visit-save' and working on files that don't have empty
+newlines at their end."
+  (and buffer-file-name
+       (memq require-final-newline '(visit visit-save))
+       (string-search
+        "No newline at end of file"
+        (shell-command-to-string
+         (format "diff %s %s"
+                 buffer-file-name
+                 (let ((inhibit-message t))
+                   (make-temp-file
+                    nil nil nil
+                    (buffer-substring-no-properties
+                     (point-min) (point-max)))))))
+       (set-buffer-modified-p nil)))
+
+(add-hook 'find-file-hook #'not-modified-when-newline)
 
 (use-package gcmh
   :demand
@@ -457,6 +433,42 @@ Most of the stuff will get redirected here.")
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(defun execute-extended-command-other-window
+    (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new window."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
+  (switch-to-buffer-other-window (current-buffer))
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
+
+(defun execute-extended-command-other-tab
+    (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new tab."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
+  (display-buffer-in-new-tab (current-buffer) nil)
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
+
+(keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
+(keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
+
+(defun scratch-buffer-other-window ()
+  (interactive)
+  (switch-to-buffer-other-window (get-scratch-buffer-create)))
+
+(defun scratch-buffer-other-tab ()
+  (interactive)
+  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
+
+(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
+(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
+
 (use-package expreg
   :defer nil
   :after meow
@@ -580,6 +592,23 @@ default, the whole line in the file is highlighted."
       (cons b e)))
   (setq-default hl-line-range-function #'get-visual-line-range))
 
+(use-package electric
+  :hook (prog-mode-hook . electric-indent-local-mode)
+  :config
+  ;; electric-indent-mode is on by default which may be funky in
+  ;; non-programming buffers
+  (electric-indent-mode -1)
+  (electric-pair-mode 1))
+
+(use-package comint
+  :ensure nil
+  :custom
+  (comint-prompt-read-only t)
+  (comint-buffer-maximum-size nil)
+  (ansi-color-for-comint-mode t)
+  :config
+  (setq-default comint-scroll-to-bottom-on-input 'this))
+
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
                                      (emacs-lock-mode 'kill))))
@@ -603,7 +632,8 @@ default, the whole line in the file is highlighted."
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use t in embark to open directory in vterm")
-        ("Use C-c ~ in sly code buffer to sync the current package in REPL")))))))
+        ("Use C-c ~ in sly code buffer to sync the current package in REPL")
+        ("Use registers for keyboard macros")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -691,6 +721,9 @@ default, the whole line in the file is highlighted."
   (doom-modeline-battery t)
   (doom-modeline-buffer-encoding 'nondefault))
 
+(column-number-mode 1)   ; Column number in modeline
+(display-battery-mode 1) ; Setting battery percentage in modeline
+
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
   :custom (rainbow-delimiters-max-face-count 5))
@@ -718,7 +751,7 @@ default, the whole line in the file is highlighted."
               (lambda ()
                 (when (and (not (member 'modus-ewal
                                         custom-enabled-themes)))
-                  (modus-ewal-theme-regenerate-theme))))
+                  (load-theme 'modus-ewal t))))
     ;; it only needs to be run once, so I remove it
     (add-hook 'server-after-make-frame-hook
               (lambda ()
@@ -727,7 +760,7 @@ default, the whole line in the file is highlighted."
                  (lambda ()
                    (when (and (not (member 'modus-ewal
                                            custom-enabled-themes)))
-                     (modus-ewal-theme-regenerate-theme)))))
+                     (load-theme 'modus-ewal t)))))
               100)))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
@@ -744,7 +777,7 @@ default, the whole line in the file is highlighted."
                                  :foreground unspecified))))
   :custom
   ;; (corfu-auto t)
-  (corfu-auto-prefix 1)
+  ;; (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
@@ -769,8 +802,7 @@ default, the whole line in the file is highlighted."
   :hook (corfu-mode . nerd-icons-corfu-setup)
   :preface
   (defun nerd-icons-corfu-setup ()
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-  )
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 
 (use-package cape
   :init
@@ -887,12 +919,18 @@ default, the whole line in the file is highlighted."
               ("M-A" . marginalia-cycle))
   :init (marginalia-mode))
 
+(setq completion-ignore-case t)
+(setq read-buffer-completion-ignore-case t)
+(setq-default case-fold-search t)   ; For general regexp
+(setq read-file-name-completion-ignore-case t)
+(setq minibuffer-history-case-insensitive-variables t)
+
 (use-package dired
   :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :bind (:map dired-mode-map
-              ("b" . dired-up-directory)
-              ("F" . dired-do-du))
+         ("b" . dired-up-directory)
+         ("F" . dired-do-du))
   :custom
   (insert-directory-program "ls")
   (dired-listing-switches "-lvXAh --group-directories-first")
@@ -922,7 +960,20 @@ default, the whole line in the file is highlighted."
                                                (car files)))))))
 
       (message (string-trim-right command-output "\n"))
-      (dired-post-do-command))))
+      (dired-post-do-command)))
+
+  (when on-termux-p
+    (define-advice dired-do-open (:around (old-fun &rest args))
+      "Open the files when running in Termux (by default it doesn't work)."
+      (if (getenv "TERMUX_VERSION")
+          (let ((files (if (mouse-event-p last-nonmenu-event)
+                           (save-excursion
+                             (mouse-set-point last-nonmenu-event)
+                             (dired-get-marked-files nil args))
+                         (dired-get-marked-files nil args))))
+            (dolist (file files)
+              (call-process shell-command-guess-open nil 0 nil file)))
+        (apply old-fun args)))))
 
 (use-package diredfl
   :after dired
@@ -1030,10 +1081,10 @@ If FILE is a directory, inserts the path to the directory."
   (defvar-keymap embark-file-insert-map
     :doc "Keymap for different ways of inserting files."
     :parent nil
+    :prefix 'embark-file-insert-map
     "n" #'embark-insert-filename
     "r" #'embark-insert-relative-path
     "a" #'embark-insert-absolute-path)
-  (fset 'embark-file-insert-map embark-file-insert-map)
 
   (keymap-set embark-file-map "d" #'delete-file-or-directory)
   (keymap-set embark-file-map "i" #'embark-file-insert-map)
@@ -1486,6 +1537,7 @@ as you zoom text. It's fast, since no image regeneration is required."
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
          ("C-c n T"   . org-roam-tag-remove)
+         ("C-c n e"   . custom/org-roam-extract-subtree)
          :map org-mode-map ("C-c C-S-l" . org-move-file-and-insert-link))
   :preface
   (defun custom/org-roam-notes-dired ()
@@ -1529,7 +1581,16 @@ as you zoom text. It's fast, since no image regeneration is required."
 
   (defun org-roam-set-modified-date-setup ()
     (add-hook 'before-save-hook
-              'org-roam-set-modified-date-property nil t)))
+              'org-roam-set-modified-date-property nil t))
+
+  (defun custom/org-roam-extract-subtree ()
+    "Make a node out of the subtree at point, but ask for a template."
+    (interactive)
+    (let* ((node-name (org-get-heading))
+           (subtree (org-cut-subtree))
+           (new-node (org-roam-node-create :title node-name)))
+      (org-roam-capture- :node new-node)
+      (yank))))
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
@@ -1620,6 +1681,9 @@ It's value needs to be number/anything.
 
           (unless (string-empty-p (buffer-string))
             (erase-buffer))
+
+          (unless activities
+            (insert "There was no activity past week."))
 
           (mapc
            (lambda (item)
@@ -1794,6 +1858,7 @@ OPEN-IN-WEB is non-nil."
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)
   (compilation-always-kill t)
+  (ansi-color-for-compilation-mode t)
   :config
   (define-advice compilation-start
       (:around (orig-fun &rest args) start-in-comint-mode)
@@ -1803,8 +1868,10 @@ OPEN-IN-WEB is non-nil."
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
     (apply orig-fun args)))
 
-(use-package lua-mode)
+;; (use-package lua-mode)
 (use-package nix-mode)
+(use-package lua-ts-mode
+  :custom (lua-ts-indent-offset standard-indent))
 
 (use-package sh-script
   :hook ((bash-ts-mode fish-mode sh-mode) . custom/sh-set-compile-command)
@@ -1866,6 +1933,13 @@ OPEN-IN-WEB is non-nil."
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
 
+(use-package better-calculate-lisp-indent
+  :vc (:url "https://codeberg.org/rossabaker/better-calculate-lisp-indent.el")
+  :demand
+  :config
+  (advice-add #'calculate-lisp-indent
+              :override #'better-calculate-lisp-indent))
+
 (defalias 'elisp-mode 'emacs-lisp-mode)
 (with-eval-after-load 'elisp-mode
   (defun elisp-eval-dwim ()
@@ -1903,10 +1977,6 @@ OPEN-IN-WEB is non-nil."
   :hook (python-base-mode . (lambda () (if buffer-file-name (setq-local compile-command (concat "python " (shell-quote-argument (buffer-file-name)))))))
   :custom (python-indent-offset 2))
 
-(use-package nxml
-  :hook (nxml-mode . (lambda () (run-hooks 'prog-mode-hook)))
-  :config (keymap-set nxml-mode-map "RET" #'newline-and-indent))
-
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda ()
                         (setq-local electric-pair-inhibit-predicate
@@ -1915,7 +1985,6 @@ OPEN-IN-WEB is non-nil."
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
   :config
-  (keymap-set sgml-mode-map "RET" #'newline-and-indent)
   (defun html-close-tag ()
     "Closes tag.
 The tag is closed if the last typed character was > and if there
@@ -1969,7 +2038,8 @@ It doesn't close empty tags."
           (python "https://github.com/tree-sitter/tree-sitter-python")
           ;; (php "https://github.com/tree-sitter/tree-sitter-php")
           (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")))
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
   ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
@@ -1987,6 +2057,10 @@ It doesn't close empty tags."
         (js-json-mode . json-ts-mode)
         (js-mode . js-ts-mode)
         (javascript-mode . js-ts-mode))))
+
+(add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -2107,6 +2181,7 @@ It doesn't close empty tags."
     (keymap-set embark-file-map "t" 'vterm-dir))
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   (vterm-mode . vterm-meow-setup)
+  (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
   :bind (("C-c s v" . vterm))
   :custom
   (vterm-max-scrollback 5000)
@@ -2116,15 +2191,17 @@ It doesn't close empty tags."
   (defun vterm-meow-setup ()
     (add-hook 'meow-normal-mode-hook
               (lambda ()
-                (if (string-equal major-mode "vterm-mode")
-                    (unless vterm-copy-mode
-                      (vterm-copy-mode 1))))
+                (when (eq major-mode 'vterm-mode)
+                  (unless vterm-copy-mode
+                    (vterm-copy-mode 1)
+                    (hl-line-mode 1))))
               nil t)
     (add-hook 'meow-insert-mode-hook
               (lambda ()
-                (if (string-equal major-mode "vterm-mode")
-                    (if vterm-copy-mode
-                        (vterm-copy-mode 0))))
+                (when (eq major-mode 'vterm-mode)
+                  (when vterm-copy-mode
+                    (vterm-copy-mode 0)
+                    (hl-line-mode -1))))
               nil t)))
 
 (use-package sudo-edit

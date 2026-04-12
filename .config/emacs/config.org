@@ -15,11 +15,14 @@
     - [[#package-management-setup][Package management setup]]
       - [[#normal-packages][Normal packages]]
       - [[#not-normal-packages-vc][Not normal packages (vc)]]
+    - [[#inserting-newlines-configuration][Inserting newlines configuration]]
   - [[#gcmh][GCMH]]
   - [[#keybindings][Keybindings]]
     - [[#modal-editing-meow][Modal editing (Meow)]]
     - [[#flashing][Flashing]]
     - [[#setting-keybindings][Setting keybindings]]
+    - [[#m-x-in-other-window-or-frame][M-x in other window or frame]]
+    - [[#scratch-buffer-in-other-window-or-frame][scratch-buffer in other window or frame]]
     - [[#expreg][Expreg]]
     - [[#surround][Surround]]
   - [[#built-in-packages][Built-in packages]]
@@ -32,6 +35,8 @@
     - [[#tabs][Tabs]]
     - [[#ibuffer][Ibuffer]]
     - [[#highlighting-current-line][Highlighting current line]]
+    - [[#electric][Electric]]
+    - [[#comint][Comint]]
   - [[#appearance][Appearance]]
     - [[#dashboard-enlight][Dashboard (enlight)]]
     - [[#fonts][Fonts]]
@@ -53,6 +58,7 @@
       - [[#vertico][Vertico]]
       - [[#consult][Consult]]
       - [[#annotations-marginalia][Annotations (marginalia)]]
+    - [[#ignore-letter-casing][Ignore letter casing]]
   - [[#dired][Dired]]
   - [[#docs][Docs]]
     - [[#helpful][Helpful]]
@@ -164,8 +170,8 @@ Here are some tweaks that idk where to put.
 *** Termux check
 I'll disable some stuff for Termux specifically so I create a variable that checks if I'm on Termux.
 #+begin_src emacs-lisp
-(defvar on-termux-p (and (getenv "TERMUX_VERSION"))
-  "Checks if Emacs is running inside of Termux.")
+(defvar on-termux-p (getenv "TERMUX_VERSION")
+  "Non-nil means Emacs is running inside of Termux.")
 #+end_src
 *** Some modes turned on and off
 Those =fbound= are because Termux Emacs doesn't have some functions at all and that spitted out errors.
@@ -184,10 +190,6 @@ Those =fbound= are because Termux Emacs doesn't have some functions at all and t
 (global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
-(electric-pair-mode 1)               ; Turns on automatic parens pairing
-(electric-indent-mode -1)            ; Turns off the weird default indenting.
-(column-number-mode 1)               ; Column number in modeline
-(display-battery-mode 1)             ; Setting battery percentage in modeline
 #+end_src
 *** Uncluttering user-emacs-directory
 #+begin_src emacs-lisp
@@ -262,7 +264,6 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               sentence-end-double-space nil ; sentences end with 1 space
               create-lockfiles nil ; no files with ".#"
               make-backup-files nil
-              require-final-newline t
               show-paren-when-point-inside-paren t
               show-paren-when-point-in-periphery t
               truncate-string-ellipsis "…"
@@ -279,6 +280,7 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               mouse-wheel-scroll-amount-horizontal 1
               kill-do-not-save-duplicates nil
               comment-empty-lines t
+              comment-column 0
               url-privacy-level 'paranoid
               electric-pair-skip-self nil
               history-length t
@@ -287,7 +289,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               enable-local-variables :all
               save-interprogram-paste-before-kill t
               shell-command-prompt-show-cwd t
-              fill-column 72)
+              fill-column 72
+              find-library-include-other-files nil)
 
 ;; showing init time in scratch buffer
 (if on-termux-p
@@ -332,11 +335,8 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
 (advice-add 'find-file-other-tab :before #'make-directory-maybe)
 (advice-add 'find-file-other-frame :before #'make-directory-maybe)
 
-;; cleaning whistespace when saving file
+;; cleaning whitespace when saving file
 (add-hook 'before-save-hook #'delete-trailing-whitespace)
-
-;; `conf-mode' is not derived from `prog-mode', so I add its hook manually
-(add-hook 'conf-mode-hook (lambda () (run-hooks 'prog-mode-hook)))
 
 ;; removing warning when using some commands
 (setq disabled-command-function nil)
@@ -349,33 +349,6 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
                  "-l" "~/.config/emacs/test/init.el"))
 
 (blink-cursor-mode -1)
-
-(keymap-set prog-mode-map "RET" #'newline-and-indent)
-
-(defun execute-extended-command-other-window
-    (prefixarg &optional command-name typed)
-  "Execute `execute-extended-command' in a new window."
-  (interactive
-   (let ((execute-extended-command--last-typed nil))
-     (list current-prefix-arg
-           (read-extended-command))))
-  (switch-to-buffer-other-window (current-buffer))
-  (with-suppressed-warnings ((interactive-only execute-extended-command))
-    (execute-extended-command prefixarg command-name typed)))
-
-(defun execute-extended-command-other-tab
-    (prefixarg &optional command-name typed)
-  "Execute `execute-extended-command' in a new tab."
-  (interactive
-   (let ((execute-extended-command--last-typed nil))
-     (list current-prefix-arg
-           (read-extended-command))))
-  (display-buffer-in-new-tab (current-buffer) nil)
-  (with-suppressed-warnings ((interactive-only execute-extended-command))
-    (execute-extended-command prefixarg command-name typed)))
-
-(keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
-(keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
 
 (defun desktop-and-tabs-clear (arg)
   "Clear desktop, close all tabs."
@@ -402,17 +375,6 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
 
 (global-visual-wrap-prefix-mode t)
 
-(defun scratch-buffer-other-window ()
-  (interactive)
-  (switch-to-buffer-other-window (get-scratch-buffer-create)))
-
-(defun scratch-buffer-other-tab ()
-  (interactive)
-  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
-
-(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
-(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
-
 (add-hook 'after-init-hook #'editorconfig-mode)
 
 (defun download-file (url destination)
@@ -426,15 +388,12 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
       (url-copy-file url (concat destination filename))
     (url-copy-file url destination)))
 
-(defmacro set-newline-and-indent-for-mode (mode)
-  "Set RET to `newline-and-indent' for MODE."
-  (let ((keymap-name (intern (concat (symbol-name mode) "-map"))))
-    `(with-eval-after-load ',mode
-       (keymap-set ,keymap-name "RET" #'newline-and-indent))))
-
-(dolist (mode '(nxml-mode
-                yaml-mode))
-  (set-newline-and-indent-for-mode mode))
+;; `conf-mode' and other configuration modes are not derived from
+;; `prog-mode', so I add its hook manually
+(dolist (mode '(yaml-mode
+                conf-mode))
+  (add-hook (intern (format "%s-hook" mode))
+            (lambda () (run-hooks 'prog-mode-hook))))
 
 (setq calendar-week-start-day 1)
 
@@ -479,6 +438,35 @@ That is great for packages not available in elpas.
 (unless (package-installed-p 'vc-use-package)
   (package-vc-install "https://github.com/slotThe/vc-use-package"))
 (require 'vc-use-package)
+#+end_src
+*** Inserting newlines configuration
+Having a newline at the end of a files makes navigation easier at times.
+With require-final-newline set to 'visit-save, a newline is inserted when you visit the file and save the file.
+An annoyance for me was seeing that the file was modified when a newline during a visit was inserted.
+I fix it by setting the buffer as not modified if that newline is the only difference between the file's buffer and original file.
+#+begin_src emacs-lisp
+(setq-default require-final-newline 'visit-save)
+
+(defun not-modified-when-newline ()
+  "Mark current buffer as unmodified if the file has a new line difference.
+This is meant to not distract the user if `require-final-newline' is set
+to `visit' or `visit-save' and working on files that don't have empty
+newlines at their end."
+  (and buffer-file-name
+       (memq require-final-newline '(visit visit-save))
+       (string-search
+        "No newline at end of file"
+        (shell-command-to-string
+         (format "diff %s %s"
+                 buffer-file-name
+                 (let ((inhibit-message t))
+                   (make-temp-file
+                    nil nil nil
+                    (buffer-substring-no-properties
+                     (point-min) (point-max)))))))
+       (set-buffer-modified-p nil)))
+
+(add-hook 'find-file-hook #'not-modified-when-newline)
 #+end_src
 ** GCMH
 #+begin_src emacs-lisp
@@ -666,8 +654,48 @@ When doing big movements, I will get a flash at the current line.
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 #+end_src
+*** M-x in other window or frame
+#+begin_src emacs-lisp
+(defun execute-extended-command-other-window
+    (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new window."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
+  (switch-to-buffer-other-window (current-buffer))
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
+
+(defun execute-extended-command-other-tab
+    (prefixarg &optional command-name typed)
+  "Execute `execute-extended-command' in a new tab."
+  (interactive
+   (let ((execute-extended-command--last-typed nil))
+     (list current-prefix-arg
+           (read-extended-command))))
+  (display-buffer-in-new-tab (current-buffer) nil)
+  (with-suppressed-warnings ((interactive-only execute-extended-command))
+    (execute-extended-command prefixarg command-name typed)))
+
+(keymap-global-set "C-x 4 x" #'execute-extended-command-other-window)
+(keymap-global-set "C-x t x" #'execute-extended-command-other-tab)
+#+end_src
+*** scratch-buffer in other window or frame
+#+begin_src emacs-lisp
+(defun scratch-buffer-other-window ()
+  (interactive)
+  (switch-to-buffer-other-window (get-scratch-buffer-create)))
+
+(defun scratch-buffer-other-tab ()
+  (interactive)
+  (switch-to-buffer-other-tab (get-scratch-buffer-create)))
+
+(keymap-global-set "C-x 4 B" 'scratch-buffer-other-window)
+(keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
+#+end_src
 *** Expreg
-[[https://github.com/casouri/expreg][Expreg]] expand current region by semantic units and uses tree-sitter if it can.
+[[https://github.com/casouri/expreg][Expreg]] expands current region by semantic units and uses tree-sitter if it can.
 #+begin_src emacs-lisp
 (use-package expreg
   :defer nil
@@ -822,6 +850,29 @@ default, the whole line in the file is highlighted."
       (cons b e)))
   (setq-default hl-line-range-function #'get-visual-line-range))
 #+end_src
+*** Electric
+This built-in package includes =electric-indent-mode= which automatically indents code on a newline and =electric-pair-mode= and which automatically insert closing delimiters.
+#+begin_src emacs-lisp
+(use-package electric
+  :hook (prog-mode-hook . electric-indent-local-mode)
+  :config
+  ;; electric-indent-mode is on by default which may be funky in
+  ;; non-programming buffers
+  (electric-indent-mode -1)
+  (electric-pair-mode 1))
+#+end_src
+*** Comint
+It provides the building blocks for making REPLs and shells.
+#+begin_src emacs-lisp
+(use-package comint
+  :ensure nil
+  :custom
+  (comint-prompt-read-only t)
+  (comint-buffer-maximum-size nil)
+  (ansi-color-for-comint-mode t)
+  :config
+  (setq-default comint-scroll-to-bottom-on-input 'this))
+#+end_src
 ** Appearance
 *** Dashboard (enlight)
 I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for a very minimal dashboard.
@@ -849,7 +900,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
        ("Things to remember"
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use t in embark to open directory in vterm")
-        ("Use C-c ~ in sly code buffer to sync the current package in REPL")))))))
+        ("Use C-c ~ in sly code buffer to sync the current package in REPL")
+        ("Use registers for keyboard macros")))))))
 #+end_src
 *** Fonts
 **** Setting fonts
@@ -970,6 +1022,9 @@ Adding highlights to TODO and related words.
   :custom
   (doom-modeline-battery t)
   (doom-modeline-buffer-encoding 'nondefault))
+
+(column-number-mode 1)   ; Column number in modeline
+(display-battery-mode 1) ; Setting battery percentage in modeline
 #+end_src
 *** Rainbow delimiters
 Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]].
@@ -1008,7 +1063,7 @@ The theme will not load without Emacs daemon.
               (lambda ()
                 (when (and (not (member 'modus-ewal
                                         custom-enabled-themes)))
-                  (modus-ewal-theme-regenerate-theme))))
+                  (load-theme 'modus-ewal t))))
     ;; it only needs to be run once, so I remove it
     (add-hook 'server-after-make-frame-hook
               (lambda ()
@@ -1017,7 +1072,7 @@ The theme will not load without Emacs daemon.
                  (lambda ()
                    (when (and (not (member 'modus-ewal
                                            custom-enabled-themes)))
-                     (modus-ewal-theme-regenerate-theme)))))
+                     (load-theme 'modus-ewal t)))))
               100)))
 #+end_src
 *** Transparency
@@ -1042,7 +1097,7 @@ With Emacs 29, true transparency has been added.
                                  :foreground unspecified))))
   :custom
   ;; (corfu-auto t)
-  (corfu-auto-prefix 1)
+  ;; (corfu-auto-prefix 1)
   (corfu-popupinfo-delay nil)
   (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
@@ -1067,8 +1122,7 @@ With Emacs 29, true transparency has been added.
   :hook (corfu-mode . nerd-icons-corfu-setup)
   :preface
   (defun nerd-icons-corfu-setup ()
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-  )
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 #+end_src
 **** cape
 #+begin_src emacs-lisp
@@ -1209,6 +1263,14 @@ Built-in =savehist-mode= saves minibuffer history
               ("M-A" . marginalia-cycle))
   :init (marginalia-mode))
 #+end_src
+*** Ignore letter casing
+#+begin_src emacs-lisp
+(setq completion-ignore-case t)
+(setq read-buffer-completion-ignore-case t)
+(setq-default case-fold-search t)   ; For general regexp
+(setq read-file-name-completion-ignore-case t)
+(setq minibuffer-history-case-insensitive-variables t)
+#+end_src
 ** Dired
 Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories.
 #+begin_src emacs-lisp
@@ -1216,8 +1278,8 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :bind (:map dired-mode-map
-              ("b" . dired-up-directory)
-              ("F" . dired-do-du))
+         ("b" . dired-up-directory)
+         ("F" . dired-do-du))
   :custom
   (insert-directory-program "ls")
   (dired-listing-switches "-lvXAh --group-directories-first")
@@ -1247,7 +1309,20 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
                                                (car files)))))))
 
       (message (string-trim-right command-output "\n"))
-      (dired-post-do-command))))
+      (dired-post-do-command)))
+
+  (when on-termux-p
+    (define-advice dired-do-open (:around (old-fun &rest args))
+      "Open the files when running in Termux (by default it doesn't work)."
+      (if (getenv "TERMUX_VERSION")
+          (let ((files (if (mouse-event-p last-nonmenu-event)
+                           (save-excursion
+                             (mouse-set-point last-nonmenu-event)
+                             (dired-get-marked-files nil args))
+                         (dired-get-marked-files nil args))))
+            (dolist (file files)
+              (call-process shell-command-guess-open nil 0 nil file)))
+        (apply old-fun args)))))
 
 (use-package diredfl
   :after dired
@@ -1372,10 +1447,10 @@ If FILE is a directory, inserts the path to the directory."
   (defvar-keymap embark-file-insert-map
     :doc "Keymap for different ways of inserting files."
     :parent nil
+    :prefix 'embark-file-insert-map
     "n" #'embark-insert-filename
     "r" #'embark-insert-relative-path
     "a" #'embark-insert-absolute-path)
-  (fset 'embark-file-insert-map embark-file-insert-map)
 
   (keymap-set embark-file-map "d" #'delete-file-or-directory)
   (keymap-set embark-file-map "i" #'embark-file-insert-map)
@@ -1886,6 +1961,7 @@ It's set up so it will display markers when entering insert mode.
          ("C-c n R"   . org-roam-ref-remove)
          ("C-c n t"   . org-roam-tag-add)
          ("C-c n T"   . org-roam-tag-remove)
+         ("C-c n e"   . custom/org-roam-extract-subtree)
          :map org-mode-map ("C-c C-S-l" . org-move-file-and-insert-link))
   :preface
   (defun custom/org-roam-notes-dired ()
@@ -1929,7 +2005,16 @@ It's set up so it will display markers when entering insert mode.
 
   (defun org-roam-set-modified-date-setup ()
     (add-hook 'before-save-hook
-              'org-roam-set-modified-date-property nil t)))
+              'org-roam-set-modified-date-property nil t))
+
+  (defun custom/org-roam-extract-subtree ()
+    "Make a node out of the subtree at point, but ask for a template."
+    (interactive)
+    (let* ((node-name (org-get-heading))
+           (subtree (org-cut-subtree))
+           (new-node (org-roam-node-create :title node-name)))
+      (org-roam-capture- :node new-node)
+      (yank))))
 #+end_src
 I like sometimes to use =consult-org-roam-search= to use grep on my notes, and that is in [[https://github.com/jgru/consult-org-roam][consult-org-roam]].
 #+begin_src emacs-lisp
@@ -2035,6 +2120,9 @@ This shows my AniList activities from last week and makes links to org roam node
 
           (unless (string-empty-p (buffer-string))
             (erase-buffer))
+
+          (unless activities
+            (insert "There was no activity past week."))
 
           (mapc
            (lambda (item)
@@ -2229,6 +2317,7 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)
   (compilation-always-kill t)
+  (ansi-color-for-compilation-mode t)
   :config
   (define-advice compilation-start
       (:around (orig-fun &rest args) start-in-comint-mode)
@@ -2269,8 +2358,10 @@ With this major modes automatically turn on eglot.
 *** Language support
 I don't use those much. I just have some files in my dotfiles in those languages.
 #+begin_src emacs-lisp
-(use-package lua-mode)
+;; (use-package lua-mode)
 (use-package nix-mode)
+(use-package lua-ts-mode
+  :custom (lua-ts-indent-offset standard-indent))
 #+end_src
 *** Languages
 **** Shells
@@ -2339,6 +2430,13 @@ sh-script is the package that declares redirecting shell mode to treesitter mode
 
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
+
+(use-package better-calculate-lisp-indent
+  :vc (:url "https://codeberg.org/rossabaker/better-calculate-lisp-indent.el")
+  :demand
+  :config
+  (advice-add #'calculate-lisp-indent
+              :override #'better-calculate-lisp-indent))
 #+end_src
 **** Elisp
 #+begin_src emacs-lisp
@@ -2410,10 +2508,6 @@ using `browse-url'."
 ***** HTML
 Here I add autocompletion when typing =>= in html modes.
 #+begin_src emacs-lisp
-(use-package nxml
-  :hook (nxml-mode . (lambda () (run-hooks 'prog-mode-hook)))
-  :config (keymap-set nxml-mode-map "RET" #'newline-and-indent))
-
 (use-package sgml-mode ;; `html-mode' is defined in sgml-mode package
   :hook ((html-mode . (lambda ()
                         (setq-local electric-pair-inhibit-predicate
@@ -2422,7 +2516,6 @@ Here I add autocompletion when typing =>= in html modes.
          ;; `sgml-mode' is not derived from `prog-mode', so I add its hook manually
          (sgml-mode . (lambda () (run-hooks 'prog-mode-hook))))
   :config
-  (keymap-set sgml-mode-map "RET" #'newline-and-indent)
   (defun html-close-tag ()
     "Closes tag.
 The tag is closed if the last typed character was > and if there
@@ -2486,7 +2579,8 @@ This section is not intended for Termux usage. That's why I include =unless= sta
           (python "https://github.com/tree-sitter/tree-sitter-python")
           ;; (php "https://github.com/tree-sitter/tree-sitter-php")
           (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")))
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")))
   ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
   ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 #+end_src
@@ -2500,7 +2594,7 @@ Any unavailable parsers get installed.
       (treesit-install-language-grammar (car lang)))))
 #+end_src
 
-This remaps specified major modes to its tree-sitter counterparts.
+This remaps specified major modes to its tree-sitter counterparts and adds modes for languages that are not built-in.
 #+begin_src emacs-lisp
 (setq major-mode-remap-alist
       '((c-or-c++-mode . c-or-c++-ts-mode)
@@ -2511,6 +2605,10 @@ This remaps specified major modes to its tree-sitter counterparts.
         (js-json-mode . json-ts-mode)
         (js-mode . js-ts-mode)
         (javascript-mode . js-ts-mode))))
+
+(add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 #+end_src
 *** Templates
 **** Startup templates (auto-insert)
@@ -2662,6 +2760,7 @@ Eshell is an Emacs /shell/ that is written in Elisp.
     (keymap-set embark-file-map "t" 'vterm-dir))
   :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
   (vterm-mode . vterm-meow-setup)
+  (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
   :bind (("C-c s v" . vterm))
   :custom
   (vterm-max-scrollback 5000)
@@ -2671,15 +2770,17 @@ Eshell is an Emacs /shell/ that is written in Elisp.
   (defun vterm-meow-setup ()
     (add-hook 'meow-normal-mode-hook
               (lambda ()
-                (if (string-equal major-mode "vterm-mode")
-                    (unless vterm-copy-mode
-                      (vterm-copy-mode 1))))
+                (when (eq major-mode 'vterm-mode)
+                  (unless vterm-copy-mode
+                    (vterm-copy-mode 1)
+                    (hl-line-mode 1))))
               nil t)
     (add-hook 'meow-insert-mode-hook
               (lambda ()
-                (if (string-equal major-mode "vterm-mode")
-                    (if vterm-copy-mode
-                        (vterm-copy-mode 0))))
+                (when (eq major-mode 'vterm-mode)
+                  (when vterm-copy-mode
+                    (vterm-copy-mode 0)
+                    (hl-line-mode -1))))
               nil t)))
 #+end_src
 ** Sudo edit
