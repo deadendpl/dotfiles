@@ -73,8 +73,6 @@ else
                                 file-roller \
                                 7zip \
                                 unrar \
-                                zathura \
-                                zathura-pdf-mupdf \
                                 gammastep \
                                 ttf-ubuntu-nerd \
                                 ttf-jetbrains-mono-nerd \
@@ -109,8 +107,11 @@ else
                                 unzip \
                                 wl-clip-persist \
                                 glide-browser-bin \
-                                rofi
+                                rofi \
+                                sioyek-git \
                                 webp-pixbuf-loader # for swaybg to work with webp
+                                # zathura \
+                                # zathura-pdf-mupdf \
                                 # chaotic-aur/zen-browser-bin \
                                 # qutebrowser \
                                 # lf \
@@ -141,7 +142,6 @@ else
                      # pokemonsay-newgenerations-git \
                      # fortune-mod-vimtips \
                      # udiskie-dmenu-git \
-                     # sioyek \
                      # krabby-bin \
                      # dracula-gtk-theme \
                      # catppuccin-gtk-theme-mocha \
@@ -163,6 +163,8 @@ else
                      chaotic-aur/qt6gtk2 \
                      python-zombie-imp \
                      gradience \
+                     python-anyascii \
+                     python-material-color-utilities \
                      wpgtk \
                      gtk-theme-flat-color-git
                      # chaotic-aur/adw-gtk3
