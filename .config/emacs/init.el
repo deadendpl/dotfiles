@@ -69,7 +69,7 @@ Most of the stuff will get redirected here.")
               use-file-dialog nil
               initial-buffer-choice t ; scratch buffer as a startup buffer
               initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
-              ;; initial-scratch-message nil ; scratch buffer message
+              initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               vc-follow-symlinks t ; follow symlinks
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
@@ -96,7 +96,6 @@ Most of the stuff will get redirected here.")
               auto-window-vscroll nil
               mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
               mouse-wheel-scroll-amount-horizontal 1
-              kill-do-not-save-duplicates nil
               comment-empty-lines t
               comment-column 0
               url-privacy-level 'paranoid
@@ -108,16 +107,19 @@ Most of the stuff will get redirected here.")
               save-interprogram-paste-before-kill t
               shell-command-prompt-show-cwd t
               fill-column 72
-              find-library-include-other-files nil)
+              find-library-include-other-files nil
+              ffap-machine-p-known 'reject
+              reb-re-syntax 'string
+              window-combination-resize t)
 
 ;; showing init time in scratch buffer
-(if on-termux-p
-    (add-hook
-     'after-init-hook
-     (lambda ()
-       (setq initial-scratch-message
-             (concat "Initialization time: " (emacs-init-time)))))
-  (setq initial-scratch-message nil))
+;; (if on-termux-p
+;;     (add-hook
+;;      'after-init-hook
+;;      (lambda ()
+;;        (setq initial-scratch-message
+;;              (concat "Initialization time: " (emacs-init-time)))))
+;;   (setq initial-scratch-message nil))
 
 ;; this opens links in android's default apps in termux
 (if on-termux-p
@@ -213,7 +215,18 @@ Most of the stuff will get redirected here.")
 
 (setq calendar-week-start-day 1)
 
-(setq isearch-lazy-count t)
+(with-eval-after-load 'savehist
+  (setq savehist-additional-variables
+        (append savehist-additional-variables
+                '(search-ring regexp-search-ring kill-ring)))
+
+  ;; kill-ring has text properties which can make the savehist file big
+  ;; this code will clean the kill-ring of text properties
+  (add-hook 'savehist-save-hook
+            (lambda ()
+              (setq kill-ring
+                    (mapcar #'substring-no-properties
+                            (cl-remove-if-not #'stringp kill-ring))))))
 
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
@@ -251,7 +264,11 @@ newlines at their end."
         (shell-command-to-string
          (format "diff %s %s"
                  buffer-file-name
-                 (let ((inhibit-message t))
+                 ;; making temporary files calls `message' to say "Wrote
+                 ;; [temporary file]", I don't want to pollute the
+                 ;; messages buffer with that so I locally redefine the
+                 ;; `message' function
+                 (cl-flet ((message (&rest args) nil))
                    (make-temp-file
                     nil nil nil
                     (buffer-substring-no-properties
@@ -269,8 +286,21 @@ newlines at their end."
   :demand
   :custom
   (meow-use-clipboard t)
-  (meow-expand-hint-remove-delay 0) ;; when set to 0, it disables numbers popup
+  ;; when set to 0, it disables numbers popup
+  (meow-expand-hint-remove-delay 0)
   :config
+  ;; it breaks appending in beacon state
+  (defun custom/meow-append-dwim ()
+    "If there is region active, call `meow-append'.
+Else, go to insert mode and move point 1 character forward if it makes
+sense to do so."
+    (interactive)
+    (if (region-active-p)
+        (meow-append)
+      (meow-insert)
+      (unless (= (point) (line-end-position))
+        (forward-char))))
+
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
     (meow-motion-overwrite-define-key
@@ -314,7 +344,7 @@ newlines at their end."
      '("]" . meow-end-of-thing)
      '("{" . tab-previous)
      '("}" . tab-next)
-     '("a" . meow-append)
+     '("a" . custom/meow-append-dwim)
      '("A" . meow-open-below)
      '("b" . meow-back-word)
      '("B" . meow-back-symbol)
@@ -379,6 +409,13 @@ newlines at their end."
         (kill-ring-save (point) end-point))))
   (add-to-list 'meow-selection-command-fallback
                '(meow-save . kill-ring-save-visual-line)))
+
+(use-package meow
+  :config
+  (with-current-buffer "*Messages*"
+    ;; selects nil as the local keymap so no keys are bound
+    (use-local-map nil)
+    (meow-normal-mode 1)))
 
 ;; (use-package pulse
 ;;   :config
@@ -609,6 +646,14 @@ default, the whole line in the file is highlighted."
   :config
   (setq-default comint-scroll-to-bottom-on-input 'this))
 
+(use-package isearch
+  :ensure nil
+  :custom
+  (isearch-repeat-on-direction-change t)
+  (isearch-lazy-count t)
+  :bind (:map isearch-mode-map
+         ("C-g" . isearch-cancel))) ; instead of `isearch-abort'
+
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
                                      (emacs-lock-mode 'kill))))
@@ -633,7 +678,8 @@ default, the whole line in the file is highlighted."
         ("Instead of holding h/l, use letter finding keybindings")
         ("Use t in embark to open directory in vterm")
         ("Use C-c ~ in sly code buffer to sync the current package in REPL")
-        ("Use registers for keyboard macros")))))))
+        ("Use registers for keyboard macros")
+        ("Use k in dired to remove a line")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -865,7 +911,9 @@ default, the whole line in the file is highlighted."
   :init (savehist-mode t)
   :custom
   (savehist-file (expand-file-name-user-share "history"))
-  (savehist-additional-variables '(comint-input-ring)))
+  :config
+  (setq savehist-additional-variables
+        (append savehist-additional-variables '(comint-input-ring))))
 
 (use-package consult
   :init
@@ -903,15 +951,15 @@ default, the whole line in the file is highlighted."
   (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
   (setq consult-source-project-root
-         `( :name     "Project Root"
-            :narrow   ?r
-            :category file
-            :face     consult-file
-            :history  file-name-history
-            :action   ,(lambda (root)
-                         (let ((default-directory root))
-                           (project-find-file)))
-            :items    ,#'consult--project-known-roots)))
+        `(:name     "Project Root"
+          :narrow   ?r
+          :category file
+          :face     consult-file
+          :history  file-name-history
+          :action   ,(lambda (root)
+                       (let ((default-directory root))
+                        (project-find-file)))
+          :items    ,#'consult--project-known-roots)))
 
 (use-package marginalia
   :after vertico
@@ -943,7 +991,7 @@ default, the whole line in the file is highlighted."
   (dired-recursive-deletes 'always)
   (dired-vc-rename-file t)
   (dired-guess-shell-alist-user
-   '(("\\..*$" "xdg-open")))
+   '((".*" "xdg-open")))
   (dired-dwim-target t)
   :config
   (defun dired-do-du (files)
@@ -981,6 +1029,10 @@ default, the whole line in the file is highlighted."
   :config
   (set-face-attribute 'diredfl-dir-name nil :bold t)
   (add-to-list 'diredfl-compressed-extensions ".chd"))
+
+(use-package wdired
+  :custom
+  (wdired-allow-to-change-permissions t))
 
 (use-package helpful
   :bind
@@ -1935,6 +1987,7 @@ OPEN-IN-WEB is non-nil."
 
 (use-package better-calculate-lisp-indent
   :vc (:url "https://codeberg.org/rossabaker/better-calculate-lisp-indent.el")
+  ;; there's no nice way of lazy-loading it
   :demand
   :config
   (advice-add #'calculate-lisp-indent
