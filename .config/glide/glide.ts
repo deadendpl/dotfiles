@@ -19,7 +19,7 @@
 // https://github.com/glide-browser/glide/discussions/127
 // if keepassxc or other password managers don't work
 
-glide.o.hint_size = "15px";
+glide.o.hint_size = "1rem";
 // glide.o.hint_chars = "asdfghjhkl";
 
 const prefs: Record<string, any> = {
@@ -82,6 +82,9 @@ glide.keymaps.set(["normal"], "gk", () =>
   { description: "Move the tab up" }
 );
 glide.keymaps.set("normal", "'", "repeat");
+glide.keymaps.set("normal", "/", () =>
+  glide.keys.send("<C-f>", { skip_mappings: true }),
+);
 
 glide.keymaps.del("normal", "<C-j>");
 glide.keymaps.del("normal", "<C-k>");

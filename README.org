@@ -12,7 +12,7 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 | Terminal Emulator         | [[https://codeberg.org/dnkl/foot][foot]]                      |
 | Shell                     | [[https://github.com/fish-shell/fish-shell][Fish]]                      |
 | File Manager              | dired (in Emacs), pcmanfm |
-| Web Browser               | [[https://www.qutebrowser.org/][qutebrowser]]               |
+| Web Browser               | [[https://glide-browser.app/][Glide]]                     |
 | editor (IDE or something) | [[https://www.gnu.org/software/emacs/][Emacs]]                     |
 | Bar                       | [[https://github.com/Alexays/Waybar][Waybar]]                    |
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                      |

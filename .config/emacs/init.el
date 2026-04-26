@@ -110,7 +110,8 @@ Most of the stuff will get redirected here.")
               find-library-include-other-files nil
               ffap-machine-p-known 'reject
               reb-re-syntax 'string
-              window-combination-resize t)
+              window-combination-resize t
+              show-paren-delay 0)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -511,14 +512,37 @@ sense to do so."
   :after meow
   :config
   (meow-normal-define-key '("o" . expreg-expand)
-                          '("z" . expreg-contract))
+                          '("z" . custom-meow-expreg-contract))
   (remove-hook 'expreg-functions #'expreg--word)
   (remove-hook 'expreg-functions #'expreg--subword)
   (advice-add 'expreg-expand :after
               (lambda ()
                 ;; don't exchange point and mark if it can't expand more
                 (unless (= (expreg--current-depth) 0)
-                  (exchange-point-and-mark)))))
+                  (exchange-point-and-mark))))
+
+  (defvar custom-meow-expreg-action nil
+    "What was the last action done by `custom-meow-expreg-contract'.
+If the value is `meow' then it did `meow-pop-selection'.
+If the value is `expreg' then it did `expreg-contract'.")
+
+  (defun custom-meow-expreg-contract ()
+    "Pop selection using meow or contract the expasion done by expreg."
+    (interactive)
+    (cond ((eq last-command 'meow-line)
+           (meow-pop-selection)
+           (setq custom-meow-expreg-action 'meow))
+
+          ((or (memq last-command '(expreg-expand expreg-contract)))
+           (expreg-contract)
+           (setq custom-meow-expreg-action 'expreg))
+
+          ((eq last-command 'custom-meow-expreg-contract)
+           (if (eq custom-meow-expreg-action 'meow)
+               (progn (meow-pop-selection)
+                      (setq custom-meow-expreg-action 'meow))
+             (expreg-contract)
+             (setq custom-meow-expreg-action 'expreg))))))
 
 (use-package surround
   :defer nil
@@ -816,7 +840,7 @@ default, the whole line in the file is highlighted."
   :hook (;; (meow-insert-exit . custom/corfu-cleanup)
          ;; ((prog-mode ielm-mode) . corfu-mode)
          (corfu-mode . corfu-popupinfo-mode)
-         ((prog-mode ielm-mode) . (lambda () (setq-local corfu-auto t))))
+         ((prog-mode ielm-mode org-mode) . (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
                                  :background unspecified
@@ -926,7 +950,6 @@ default, the whole line in the file is highlighted."
                            #'completion--in-region)
                          args)))
   :bind
-  ;; ([remap project-find-file] . consult-project-buffer)
   (([remap goto-line] . consult-goto-line)
    ([remap imenu] . consult-imenu)
    ([remap switch-to-buffer] . consult-buffer)
@@ -1152,7 +1175,8 @@ If FILE is a directory, inserts the path to the directory."
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
                                   ("~/dev" . 1)))
-  (magit-format-file-function #'magit-format-file-nerd-icons))
+  (magit-format-file-function #'magit-format-file-nerd-icons)
+  (magit-clone-default-directory "~/dev/"))
 
 (use-package transient
   :custom
@@ -2099,6 +2123,7 @@ It doesn't close empty tags."
 (dolist (lang treesit-language-source-alist)
   (unless (treesit-language-available-p (car lang))
     (unless (eq (car lang) 'php) ; php doesn't install
+      (message "Installing %s tree-sitter grammar" (car lang))
       (treesit-install-language-grammar (car lang)))))
 
 (setq major-mode-remap-alist

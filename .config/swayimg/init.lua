@@ -89,7 +89,8 @@ swayimg.viewer.on_key("q", function()
   swayimg.exit()
 end)
 
--- bind the hjkl to move the image to a side by 1/10 of the application window size
+-- bind the hjkl to move the image to a side by 1/10 of the application
+-- window size
 swayimg.viewer.on_key("h", function()
   go_by_1_10th("left")
 end)
@@ -110,9 +111,20 @@ swayimg.viewer.on_key("0", function()
   swayimg.viewer.set_fix_scale("real")
 end)
 
+-- FIXME doesn't work
+swayimg.viewer.on_key("Shift-j", function()
+  swayimg.viewer.switch_image("next")
+end)
+
+-- FIXME doesn't work
+swayimg.viewer.on_key("Shift-k", function()
+  swayimg.viewer.switch_image("prev")
+end)
+
 swayimg.viewer.on_key("i", text_toggle)
 
--- bind mouse vertical scroll button with pressed Ctrl to zoom in the image at mouse pointer coordinates
+-- bind mouse vertical scroll button with pressed Ctrl to zoom in the
+-- image at mouse pointer coordinates
 swayimg.viewer.on_mouse("Ctrl-ScrollUp", function()
   local pos = swayimg.get_mouse_pos()
   local scale = swayimg.viewer.get_scale()
