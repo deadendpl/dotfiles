@@ -91,7 +91,7 @@ Most of the stuff will get redirected here.")
               hscroll-margin 2
               hscroll-step 1
               scroll-conservatively 10
-              scroll-margin 0
+              scroll-margin 10
               scroll-preserve-screen-position t
               auto-window-vscroll nil
               mouse-wheel-scroll-amount '(1 ((shift) . hscroll))
@@ -110,8 +110,7 @@ Most of the stuff will get redirected here.")
               find-library-include-other-files nil
               ffap-machine-p-known 'reject
               reb-re-syntax 'string
-              window-combination-resize t
-              show-paren-delay 0)
+              window-combination-resize t)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -128,6 +127,8 @@ Most of the stuff will get redirected here.")
 
 ;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . js-json-mode))
+(add-to-list 'auto-mode-alist '("\\`\\(README\\|CHANGELOG\\|COPYING\\|LICENSE\\)\\'" . text-mode))
+(add-to-list 'auto-mode-alist '("PKGBUILD" . sh-mode))
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*"
@@ -229,6 +230,11 @@ Most of the stuff will get redirected here.")
                     (mapcar #'substring-no-properties
                             (cl-remove-if-not #'stringp kill-ring))))))
 
+(use-package paren
+  :custom (show-paren-delay 0)
+  :config
+  (show-paren-mode 1))
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
@@ -265,11 +271,13 @@ newlines at their end."
         (shell-command-to-string
          (format "diff %s %s"
                  buffer-file-name
-                 ;; making temporary files calls `message' to say "Wrote
-                 ;; [temporary file]", I don't want to pollute the
-                 ;; messages buffer with that so I locally redefine the
-                 ;; `message' function
-                 (cl-flet ((message (&rest args) nil))
+                 ;; TODO make the "Wrote [temporary file]" message
+                 ;; disappear. From what I traced, `write-region' sends
+                 ;; that message which can be altered with VISIT
+                 ;; argument
+                 ;; Now I use `inhibit-message' but I would like to not
+                 ;; pollute the messages buffer with the message at all
+                 (let ((inhibit-message t))
                    (make-temp-file
                     nil nil nil
                     (buffer-substring-no-properties
@@ -290,17 +298,11 @@ newlines at their end."
   ;; when set to 0, it disables numbers popup
   (meow-expand-hint-remove-delay 0)
   :config
-  ;; it breaks appending in beacon state
-  (defun custom/meow-append-dwim ()
-    "If there is region active, call `meow-append'.
-Else, go to insert mode and move point 1 character forward if it makes
-sense to do so."
-    (interactive)
-    (if (region-active-p)
-        (meow-append)
-      (meow-insert)
-      (unless (= (point) (line-end-position))
-        (forward-char))))
+  (define-advice meow-append (:before (&rest args) forward-char-dwim)
+    "Move point 1 character forward if it makes sense to do so."
+    (unless (or (region-active-p)
+                (= (point) (line-end-position)))
+      (forward-char)))
 
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -345,7 +347,7 @@ sense to do so."
      '("]" . meow-end-of-thing)
      '("{" . tab-previous)
      '("}" . tab-next)
-     '("a" . custom/meow-append-dwim)
+     '("a" . meow-append)
      '("A" . meow-open-below)
      '("b" . meow-back-word)
      '("B" . meow-back-symbol)
@@ -416,7 +418,15 @@ sense to do so."
   (with-current-buffer "*Messages*"
     ;; selects nil as the local keymap so no keys are bound
     (use-local-map nil)
-    (meow-normal-mode 1)))
+    (meow-normal-mode 1))
+  (add-hook 'special-mode-hook
+            (lambda ()
+              (when (cl-find "*Warnings*" (buffer-list)
+                             :test (lambda (x y)
+                                     (equal x (buffer-name y))))
+                (with-current-buffer "*Warnings*"
+                  (use-local-map nil)
+                  (meow-normal-mode 1))))))
 
 ;; (use-package pulse
 ;;   :config
@@ -455,6 +465,7 @@ sense to do so."
 (keymap-global-set "C-c w l" 'windmove-right)
 (keymap-global-set "C-c w v" 'split-window-right)
 (keymap-global-set "C-c w s" 'split-window-below)
+(keymap-global-set "C-c w S" 'window-swap-states)
 (keymap-global-set "C-c w c" 'delete-window)
 (keymap-global-set "C-c w w" 'other-window)
 (keymap-global-set "C-c w q l" 'windmove-delete-right)
@@ -527,9 +538,31 @@ If the value is `meow' then it did `meow-pop-selection'.
 If the value is `expreg' then it did `expreg-contract'.")
 
   (defun custom-meow-expreg-contract ()
-    "Pop selection using meow or contract the expasion done by expreg."
+    "Pop meow's selection if the last action was related to it or
+contract the expasion done by expreg if the last action was related to
+it."
     (interactive)
-    (cond ((eq last-command 'meow-line)
+    (cond ((memq last-command '(meow-line
+                                meow-inner-of-thing
+                                meow-bounds-of-thing
+                                meow-beginning-of-thing
+                                meow-end-of-thing
+                                meow-till
+                                meow-find
+                                meow-next-word
+                                meow-back-word
+                                meow-mark-word
+                                meow-mark-symbol
+                                meow-expand-0
+                                meow-expand-1
+                                meow-expand-2
+                                meow-expand-3
+                                meow-expand-4
+                                meow-expand-5
+                                meow-expand-6
+                                meow-expand-7
+                                meow-expand-8
+                                meow-expand-9))
            (meow-pop-selection)
            (setq custom-meow-expreg-action 'meow))
 
@@ -537,12 +570,11 @@ If the value is `expreg' then it did `expreg-contract'.")
            (expreg-contract)
            (setq custom-meow-expreg-action 'expreg))
 
-          ((eq last-command 'custom-meow-expreg-contract)
-           (if (eq custom-meow-expreg-action 'meow)
-               (progn (meow-pop-selection)
-                      (setq custom-meow-expreg-action 'meow))
-             (expreg-contract)
-             (setq custom-meow-expreg-action 'expreg))))))
+          (t (if (eq custom-meow-expreg-action 'meow)
+                 (progn (meow-pop-selection)
+                        (setq custom-meow-expreg-action 'meow))
+               (expreg-contract)
+               (setq custom-meow-expreg-action 'expreg))))))
 
 (use-package surround
   :defer nil
@@ -588,7 +620,8 @@ If the value is `expreg' then it did `expreg-contract'.")
   :custom
   (project-list-file
    (expand-file-name-user-share "projects"))
-  (project-switch-use-entire-map t))
+  (project-switch-use-entire-map t)
+  (project-vc-extra-root-markers '(".project")))
 
 (use-package tab-bar
   :init
@@ -677,6 +710,14 @@ default, the whole line in the file is highlighted."
   (isearch-lazy-count t)
   :bind (:map isearch-mode-map
          ("C-g" . isearch-cancel))) ; instead of `isearch-abort'
+
+(use-package ediff
+  :custom
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
+  (ediff-keep-variants nil)
+  (ediff-make-buffers-readonly-at-startup nil)
+  (ediff-show-clashes-only t))
 
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
@@ -815,6 +856,11 @@ default, the whole line in the file is highlighted."
     :demand
     :load-path "~/dev/modus-ewal-theme/"
     :config
+    (add-hook 'enable-theme-functions
+              (lambda (&rest _)
+                (set-face-attribute
+                 'modus-themes-button nil
+                 :inherit nil)))
     (unless (daemonp)
       (load-theme 'modus-ewal t))
     (add-hook 'server-after-make-frame-hook
@@ -1078,11 +1124,15 @@ Handles symbols that start or end with a single quote (') correctly."
                      (substring sym 1)) ; Remove leading '
                     ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
                      (substring sym 0 -1)) ; Remove trailing '
-                    ;; is in org mode and is surrounded by =
+                    ;; is in org mode and is surrounded by = or ~
                     ((and (or (eq major-mode 'org-mode)
                               (eq major-mode 'org-agenda-mode))
-                          (and (char-equal ?= (aref sym 0))
-                               (char-equal ?= (aref sym (1- (length sym))))))
+                          (or (and (char-equal ?= (aref sym 0))
+                                   (char-equal
+                                    ?= (aref sym (1- (length sym)))))
+                              (and (char-equal ?~ (aref sym 0))
+                                   (char-equal
+                                    ?~ (aref sym (1- (length sym)))))))
                      (substring sym 1 -1))
                     (t sym)))) ; No changes needed
           (helpful-symbol (intern sym)))
@@ -1140,6 +1190,30 @@ Handles symbols that start or end with a single quote (') correctly."
           (delete-directory path t)
         (delete-file path))))
 
+  (defun embark-save-filename (file)
+    "Save the filename of FILE to the kill ring.
+If FILE is a directory, saves the path to the directory."
+    (interactive "fFile: ")
+    (kill-new (if (file-directory-p file)
+                  (directory-file-name file)
+                (file-name-nondirectory file))))
+
+  (defun embark-save-absolute-path (file)
+    "Save the absolute path to FILE to the kill ring."
+    (interactive "fFile: ")
+    (kill-new (expand-file-name file)))
+
+  (defvar-keymap embark-file-save-map
+    :doc "Keymap for different ways of saving files to the kill ring."
+    :parent nil
+    :prefix 'embark-file-save-map
+    "n" #'embark-save-filename
+    "r" #'embark-save-relative-path
+    "a" #'embark-save-absolute-path)
+
+  (keymap-unset embark-file-map "W")
+  (keymap-set embark-file-map "w" #'embark-file-save-map)
+
   (defun embark-insert-filename (file)
     "Insert the filename of FILE.
 If FILE is a directory, inserts the path to the directory."
@@ -1176,7 +1250,8 @@ If FILE is a directory, inserts the path to the directory."
   (magit-repository-directories '(("~/.dotfiles" . 0)
                                   ("~/dev" . 1)))
   (magit-format-file-function #'magit-format-file-nerd-icons)
-  (magit-clone-default-directory "~/dev/"))
+  (magit-clone-default-directory "~/dev/")
+  (magit-diff-refine-hunk t))
 
 (use-package transient
   :custom
@@ -1221,6 +1296,8 @@ If FILE is a directory, inserts the path to the directory."
   (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
   (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
   (org-list-dt ((nil (:weight bold))))
+  (org-quote ((nil :slant italic)))
+  (org-verse ((nil :slant italic)))
   :custom
   (org-M-RET-may-split-line nil)
   (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
@@ -1255,11 +1332,13 @@ If FILE is a directory, inserts the path to the directory."
   (org-pretty-entities t)
   (org-return-follows-link t)
   (org-src-preserve-indentation t)
+  (org-src-window-setup 'current-window)
   (org-startup-folded t)
   (org-startup-indented t) ; use `org-indent-mode' at startup
   (org-startup-with-inline-images t)
   (org-support-shift-select t)
   (org-tags-column 0)
+  (org-auto-align-tags nil)
   (org-todo-keywords
    '((sequence
       "TODO(t)"  ; A task that needs doing & is ready to do
@@ -1569,8 +1648,8 @@ as you zoom text. It's fast, since no image regeneration is required."
                          "org-roam.db"
                          (concat org-roam-directory "/attachments")))
   (org-roam-dailies-directory "journals/")
-  (org-roam-node-display-template
-   (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
+  ;; (org-roam-node-display-template
+  ;;  (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
   (org-roam-file-exclude-regexp '("attachments/"))
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
@@ -1688,6 +1767,19 @@ as you zoom text. It's fast, since no image regeneration is required."
       (:after (&rest _))
     "Replace all :roam links with ID links."
     (org-roam-link-replace-all)))
+
+(use-package org-roam
+  :custom
+  (org-roam-node-annotation-function
+   #'custom-org-roam-node-read--annotation)
+  :config
+  (defun custom-org-roam-node-read--annotation (node)
+    (if-let ((tags (org-roam-node-tags node)))
+        (format " %s"
+                (mapconcat (lambda (tag)
+                             (propertize (concat "#" tag)
+                                         'face 'org-tag))
+                           tags " ")))))
 
 (use-package org-roam
   :config
@@ -1918,6 +2010,7 @@ OPEN-IN-WEB is non-nil."
         (keymap-local-set "RET" (lambda () (interactive)
                                   (org-id-open (tabulated-list-get-id)
                                                nil))))
+      (message "Looking for beaten games... Done")
       (pop-to-buffer buffer))))
 
 (use-package toc-org
@@ -2133,12 +2226,17 @@ It doesn't close empty tags."
         (python-mode . python-ts-mode)
         (sh-mode . bash-ts-mode)
         (js-json-mode . json-ts-mode)
-        (js-mode . js-ts-mode)
-        (javascript-mode . js-ts-mode))))
+        ;; I change javascript modes to use typescript tree-sitter mode
+        (js-mode . typescript-ts-mode)
+        (javascript-mode . typescript-ts-mode))))
 
 (add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+
+(when (< emacs-major-version 31)
+  (load (expand-file-name "treesit-predicate-rewrite"
+                          user-emacs-directory) nil nil nil t))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -2301,36 +2399,33 @@ It doesn't close empty tags."
 (use-package writeroom-mode
   :unless on-termux-p)
 
-(defun custom/switch-to-buffer-other-window-for-alist (window)
-  "Kind of `switch-to-buffer-other-window' but can be used in
-`display-buffer-alist' with body-function parameter."
-  (select-window window))
+;; (defun custom/switch-to-buffer-other-window-for-alist (window)
+;;   "Kind of `switch-to-buffer-other-window' but can be used in
+;; `display-buffer-alist' with body-function parameter."
+;;   (select-window window))
 
 (setq display-buffer-alist
       '(
-        ;; ("^\\*helpful"
-        ;;  (display-buffer--maybe-at-bottom)
-        ;;  (window-height . 12)
-        ;;  (dedicated . t))
-        ;; ("\\*Help\\*"
-        ;;  (display-buffer--maybe-at-bottom)
-        ;;  (window-height . 12)
-        ;;  ;; (dedicated . t)
-        ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
+        ("\\*Help\\*"
+         nil
+         (body-function . select-window))
 
+        ("*Calendar*"
+         (display-buffer--maybe-at-bottom))
         ("^CAPTURE"
          (display-buffer--maybe-at-bottom)
          (window-height . 12))
         (" \\*Agenda Commands\\*"
          (display-buffer--maybe-at-bottom)
-         (window-height . 12)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org Select\\*"
          (display-buffer--maybe-at-bottom)
-         (window-height . 12))
+         (window-parameters . ((mode-line-format . none))))
         ("\\*Org Links\\*"
+         (display-buffer-no-window)
+         (allow-no-window . t))
+        ("\\*Select Link\\*"
          (display-buffer--maybe-at-bottom)
-         (window-height . 1)
          (window-parameters . ((mode-line-format . none))))
         ("\\*Org todo\\*"
          (display-buffer--maybe-at-bottom)
@@ -2339,6 +2434,7 @@ It doesn't close empty tags."
          (display-buffer--maybe-at-bottom))
         ("\\*org-roam\\*"
          (display-buffer-in-direction)
+         (dedicated . t)
          (direction . right)
          (window-width . 0.33)
          (window-height . fit-window-to-buffer))
@@ -2346,38 +2442,28 @@ It doesn't close empty tags."
         ("\\*compilation\\*"
          (display-buffer--maybe-at-bottom)
          ;; (display-buffer-below-selected)
-         (window-height . 12)
+         (window-height . 0.25)
          (dedicated . t)
-         ;; (body-function . custom/switch-to-buffer-other-window-for-alist)
+        ;; (body-function . select-window)
          )
         ("\\*Compile-log\\*"
          (display-buffer--maybe-at-bottom)
          (window-height . 12)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
+         (body-function . select-window))
 
         ("\\*which-key\\*"
          (window-parameters . ((mode-line-format . none))))
 
-        ("\\*Messages\\*"
+        ("\\*\\(Messages\\|Backtrace\\|Warnings\\)\\*"
          (display-buffer--maybe-at-bottom)
-         (window-height . 12)
+         (window-height . 0.25)
          (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
-        ("\\*Backtrace\\*"
-         (display-buffer--maybe-at-bottom)
-         (window-height . 12)
-         (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
-        ("\\*Warnings\\*"
-         (display-buffer--maybe-at-bottom)
-         (window-height . 12)
-         (dedicated . t)
-         (body-function . custom/switch-to-buffer-other-window-for-alist))
+         (body-function . select-window))
         ;; ("\\*Async Shell Command\\*"
         ;;  (display-buffer--maybe-at-bottom)
         ;;  (window-height . 12)
         ;;  (dedicated . t)
-        ;;  (body-function . custom/switch-to-buffer-other-window-for-alist))
+        ;;  (body-function . select-window))
         )
 
       switch-to-buffer-obey-display-actions t ; `switch-to-buffer' will respect `display-buffer-alist'
