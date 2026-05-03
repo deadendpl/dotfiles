@@ -84,9 +84,7 @@ glide.keymaps.set(["normal"], "gk", () =>
   { description: "Move the tab up" }
 );
 glide.keymaps.set("normal", "'", "repeat");
-glide.keymaps.set("normal", "/", () =>
-  glide.findbar.open();
-);
+glide.keymaps.set("normal", "/", glide.findbar.open);
 
 glide.keymaps.del("normal", "<C-j>");
 glide.keymaps.del("normal", "<C-k>");
