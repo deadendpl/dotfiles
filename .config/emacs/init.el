@@ -110,7 +110,10 @@ Most of the stuff will get redirected here.")
               find-library-include-other-files nil
               ffap-machine-p-known 'reject
               reb-re-syntax 'string
-              window-combination-resize t)
+              window-combination-resize t
+              help-window-select t
+              font-use-system-font t
+              completions-detailed t)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -727,7 +730,8 @@ default, the whole line in the file is highlighted."
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
   (enlight-content
    (concat
-    (propertize "Welcome to the Church of Emacs" 'face 'success)
+    (propertize "Welcome to the Church of Emacs" 'face
+                'enlight-menu-section)
     "\n"
     (concat "Startup time: " (emacs-init-time))
     "\n"
@@ -800,7 +804,10 @@ default, the whole line in the file is highlighted."
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-regexp-icon-alist
                '("rc$" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange)))
+                 :face nerd-icons-dorange))
+  (add-to-list 'nerd-icons-dir-icon-alist
+               '("projects" nerd-icons-octicon
+                 "nf-oct-project_roadmap")))
 
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
@@ -854,7 +861,7 @@ default, the whole line in the file is highlighted."
       :config (load-theme 'doom-dracula t))
   (use-package modus-ewal-theme
     :demand
-    :load-path "~/dev/modus-ewal-theme/"
+    :load-path "~/Projects/modus-ewal-theme/"
     :config
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
@@ -999,7 +1006,7 @@ default, the whole line in the file is highlighted."
   (([remap goto-line] . consult-goto-line)
    ([remap imenu] . consult-imenu)
    ([remap switch-to-buffer] . consult-buffer)
-   ([remap project-find-file] . consult-project-buffer)
+   ;; ([remap project-find-file] . consult-project-buffer)
    ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
    ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
    ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
@@ -1008,27 +1015,41 @@ default, the whole line in the file is highlighted."
    ([remap previous-matching-history-element] . consult-history)
    ([remap eshell-previous-matching-input] . consult-history)
    ([remap yank-pop] . consult-yank-pop))
-  :custom
-  (consult-async-min-input 0)
-  :config
-  ;; no live preview as loading org mode takes few seconds
-  (consult-customize consult-buffer consult-project-buffer
-                     consult-buffer-other-tab consult-buffer-other-window
-                     consult-buffer-other-frame
-                     :preview-key nil)
-  ;; adding project source
-  (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
-  ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-  (setq consult-source-project-root
-        `(:name     "Project Root"
-          :narrow   ?r
-          :category file
-          :face     consult-file
-          :history  file-name-history
-          :action   ,(lambda (root)
-                       (let ((default-directory root))
-                        (project-find-file)))
-          :items    ,#'consult--project-known-roots)))
+   ;; ([remap project-find-regexp] . consult-project-grep))
+   :custom
+   (consult-async-min-input 0)
+   :config
+   ;; no live preview as loading org mode takes few seconds
+   (consult-customize consult-buffer consult-project-buffer
+                      consult-buffer-other-tab consult-buffer-other-window
+                      consult-buffer-other-frame
+                      :preview-key nil)
+   ;; adding project source
+   (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
+   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+   (setq consult-source-project-root
+         `(:name     "Project Root"
+           :narrow   ?r
+           :category file
+           :face     consult-file
+           :history  file-name-history
+           :action   ,(lambda (root)
+                        (let ((default-directory root))
+                         (project-find-file)))
+           :items    ,#'consult--project-known-roots))
+
+   (defun consult-project-grep ()
+     "Run `consult-grep' in current project or prompted one."
+     (interactive)
+     (if-let ((current-project (project-current)))
+         (consult-grep (project-root current-project))
+       (setq-local project-current-directory-override
+                   (funcall project-prompter))
+       (consult-grep (project-root (project-current)))
+       (kill-local-variable project-current-directory-override)))
+
+   (keymap-set project-prefix-map "f" #'consult-project-buffer)
+   (keymap-set project-prefix-map "g" #'consult-project-grep))
 
 (use-package marginalia
   :after vertico
@@ -1248,10 +1269,27 @@ If FILE is a directory, inserts the path to the directory."
    'magit-display-buffer-fullframe-status-topleft-v1)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
-                                  ("~/dev" . 1)))
+                                  ("~/Projects" . 1)))
   (magit-format-file-function #'magit-format-file-nerd-icons)
-  (magit-clone-default-directory "~/dev/")
-  (magit-diff-refine-hunk t))
+  (magit-clone-default-directory "~/Projects/")
+  (magit-diff-refine-hunk t)
+  :preface
+  ;; magit binds m to project status command in `project-prefix-map' if
+  ;; `magit-bind-magit-project-status' is non-nil but it happens after
+  ;; both project and magit are loaded which is not instant
+  ;; also, if I'm not in a project, a project prompt will show up
+  (define-advice magit-project-status (:around (orig-fun &rest args))
+    "Choose a project if there's no current project."
+    (unless (project-current)
+      (let ((buffer (current-buffer)))
+        (unwind-protect
+            (progn
+              (setq-local project-current-directory-override
+                          (funcall project-prompter))
+              (apply orig-fun args))
+          (with-current-buffer buffer
+            (kill-local-variable project-current-directory-override))))))
+  (keymap-set project-prefix-map "m" #'magit-project-status))
 
 (use-package transient
   :custom
@@ -1282,9 +1320,12 @@ If FILE is a directory, inserts the path to the directory."
   :bind
   ("C-c n c" . org-capture)
   (:map org-mode-map
-        ("C-x n t" . org-toggle-narrow-to-subtree)
-        ("C-x n r" . custom/org-reverso-grammar-subtree)
-        ([remap imenu] . consult-org-heading))
+   ("C-x n t" . org-toggle-narrow-to-subtree)
+   ("C-x n r" . custom/org-reverso-grammar-subtree)
+   ([remap imenu] . consult-org-heading))
+  :hook (org-ctrl-c-ctrl-c . (lambda ()
+                               (when (org-at-table-p)
+                                 (org-table-recalculate))))
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -1769,17 +1810,33 @@ as you zoom text. It's fast, since no image regeneration is required."
     (org-roam-link-replace-all)))
 
 (use-package org-roam
-  :custom
-  (org-roam-node-annotation-function
-   #'custom-org-roam-node-read--annotation)
+  :after hl-line
+  :custom-face
+  (org-roam-dailies-calendar-note ((nil (:inherit 'hl-line)))))
+
+(use-package org-roam
+  ;; :custom
+  ;; (org-roam-node-annotation-function
+  ;;  #'custom-org-roam-node-read--annotation)
   :config
   (defun custom-org-roam-node-read--annotation (node)
-    (if-let ((tags (org-roam-node-tags node)))
-        (format " %s"
-                (mapconcat (lambda (tag)
-                             (propertize (concat "#" tag)
-                                         'face 'org-tag))
-                           tags " ")))))
+    (if-let* ((node (get-text-property 0 'node node))
+              (tags (org-roam-node-tags node)))
+        ;; (format " %s"
+        ;;         (mapconcat (lambda (tag)
+        ;;                      (propertize (concat "#" tag)
+        ;;                                  'face 'org-tag))
+        ;;                    tags " "))
+        (marginalia--fields
+         ((mapconcat (lambda (tag)
+                       (propertize (concat "#" tag)
+                                   'face 'org-tag))
+                     tags " ")
+          :format " %s"))))
+  (add-to-list 'marginalia-annotators
+               '(org-roam-node
+                 custom-org-roam-node-read--annotation
+                 none)))
 
 (use-package org-roam
   :config
@@ -2405,12 +2462,7 @@ It doesn't close empty tags."
 ;;   (select-window window))
 
 (setq display-buffer-alist
-      '(
-        ("\\*Help\\*"
-         nil
-         (body-function . select-window))
-
-        ("*Calendar*"
+      '(("*Calendar*"
          (display-buffer--maybe-at-bottom))
         ("^CAPTURE"
          (display-buffer--maybe-at-bottom)
@@ -2516,7 +2568,7 @@ Also see `window-delete-popup-frame'." command)
     (advice-add 'window-popup-mb-transient :after
                 (lambda () (modify-frame-parameters nil '((width . 54)))
                   (set-window-parameter nil 'mode-line-format 'none)))
-    :load-path "~/dev/emacs-mb-transient/"
+    :load-path "~/Projects/emacs-mb-transient/"
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)
     :config
@@ -2524,7 +2576,7 @@ Also see `window-delete-popup-frame'." command)
                  '(mb-transient--search (vertico-sort-function . nil))))
 
   (use-package mb-search
-    :load-path "~/dev/emacs-mb-search/"
+    :load-path "~/Projects/emacs-mb-search/"
     :commands (mb-search-annotation
                mb-search-area
                mb-search-artist

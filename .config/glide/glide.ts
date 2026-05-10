@@ -92,9 +92,10 @@ glide.keymaps.del("normal", "<A-h>");
 glide.keymaps.del("normal", "<A-l>");
 
 // insert mode bindings like the ones from emacs
-glide.keymaps.set("insert", "<C-a>", () =>
-  glide.keys.send("<Home>", { skip_mappings: true }),
-);
+// this one would overwrite select all which I don't want happening
+// glide.keymaps.set("insert", "<C-a>", () =>
+//   glide.keys.send("<Home>", { skip_mappings: true }),
+// );
 glide.keymaps.set("insert", "<C-e>", () =>
   glide.keys.send("<End>", { skip_mappings: true }),
 );

@@ -109,6 +109,7 @@ else
                                 glide-browser-bin \
                                 rofi \
                                 sioyek-git \
+                                seahorse \
                                 webp-pixbuf-loader # for swaybg to work with webp
                                 # zathura \
                                 # zathura-pdf-mupdf \

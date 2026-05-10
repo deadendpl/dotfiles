@@ -293,7 +293,10 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
               find-library-include-other-files nil
               ffap-machine-p-known 'reject
               reb-re-syntax 'string
-              window-combination-resize t)
+              window-combination-resize t
+              help-window-select t
+              font-use-system-font t
+              completions-detailed t)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -402,7 +405,10 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
 
 (setq calendar-week-start-day 1)
 
-(setq isearch-lazy-count t)
+(use-package paren
+  :custom (show-paren-delay 0)
+  :config
+  (show-paren-mode 1))
 #+end_src
 *** Package management setup
 **** Normal packages
@@ -989,7 +995,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
   (enlight-content
    (concat
-    (propertize "Welcome to the Church of Emacs" 'face 'success)
+    (propertize "Welcome to the Church of Emacs" 'face
+                'enlight-menu-section)
     "\n"
     (concat "Startup time: " (emacs-init-time))
     "\n"
@@ -1013,14 +1020,14 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
 It's tangled to =early-init.el=, because it improves startup time a bit.
 #+begin_src emacs-lisp :tangle early-init.el
 (set-face-attribute 'default nil
-                    :font "JetBrainsMono NFM"
+                    ;; :font "JetBrainsMono NFM"
                     :height 90
                     :weight 'medium)
 (set-face-attribute 'variable-pitch nil
                     :family "Ubuntu Nerd Font"
                     :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-                    :family "JetBrainsMono NFM Mono")
+;; (set-face-attribute 'fixed-pitch nil
+;;                     :family "JetBrainsMono NFM Mono")
 (set-face-attribute 'fixed-pitch-serif nil
                     :inherit 'fixed-pitch
                     :slant 'italic)
@@ -1093,7 +1100,10 @@ Adding highlights to TODO and related words.
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-regexp-icon-alist
                '("rc$" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange)))
+                 :face nerd-icons-dorange))
+  (add-to-list 'nerd-icons-dir-icon-alist
+               '("projects" nerd-icons-octicon
+                 "nf-oct-project_roadmap")))
 
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
@@ -1160,7 +1170,7 @@ The theme will not load without Emacs daemon.
       :config (load-theme 'doom-dracula t))
   (use-package modus-ewal-theme
     :demand
-    :load-path "~/dev/modus-ewal-theme/"
+    :load-path "~/Projects/modus-ewal-theme/"
     :config
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
@@ -1334,7 +1344,7 @@ Built-in =savehist-mode= saves minibuffer history
   (([remap goto-line] . consult-goto-line)
    ([remap imenu] . consult-imenu)
    ([remap switch-to-buffer] . consult-buffer)
-   ([remap project-find-file] . consult-project-buffer)
+   ;; ([remap project-find-file] . consult-project-buffer)
    ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
    ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
    ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
@@ -1343,27 +1353,41 @@ Built-in =savehist-mode= saves minibuffer history
    ([remap previous-matching-history-element] . consult-history)
    ([remap eshell-previous-matching-input] . consult-history)
    ([remap yank-pop] . consult-yank-pop))
-  :custom
-  (consult-async-min-input 0)
-  :config
-  ;; no live preview as loading org mode takes few seconds
-  (consult-customize consult-buffer consult-project-buffer
-                     consult-buffer-other-tab consult-buffer-other-window
-                     consult-buffer-other-frame
-                     :preview-key nil)
-  ;; adding project source
-  (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
-  ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-  (setq consult-source-project-root
-        `(:name     "Project Root"
-          :narrow   ?r
-          :category file
-          :face     consult-file
-          :history  file-name-history
-          :action   ,(lambda (root)
-                       (let ((default-directory root))
-                        (project-find-file)))
-          :items    ,#'consult--project-known-roots)))
+   ;; ([remap project-find-regexp] . consult-project-grep))
+   :custom
+   (consult-async-min-input 0)
+   :config
+   ;; no live preview as loading org mode takes few seconds
+   (consult-customize consult-buffer consult-project-buffer
+                      consult-buffer-other-tab consult-buffer-other-window
+                      consult-buffer-other-frame
+                      :preview-key nil)
+   ;; adding project source
+   (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
+   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+   (setq consult-source-project-root
+         `(:name     "Project Root"
+           :narrow   ?r
+           :category file
+           :face     consult-file
+           :history  file-name-history
+           :action   ,(lambda (root)
+                        (let ((default-directory root))
+                         (project-find-file)))
+           :items    ,#'consult--project-known-roots))
+
+   (defun consult-project-grep ()
+     "Run `consult-grep' in current project or prompted one."
+     (interactive)
+     (if-let ((current-project (project-current)))
+         (consult-grep (project-root current-project))
+       (setq-local project-current-directory-override
+                   (funcall project-prompter))
+       (consult-grep (project-root (project-current)))
+       (kill-local-variable project-current-directory-override)))
+
+   (keymap-set project-prefix-map "f" #'consult-project-buffer)
+   (keymap-set project-prefix-map "g" #'consult-project-grep))
 #+end_src
 **** Annotations (marginalia)
 [[https://github.com/minad/marginalia][Marginalia]] shows candidatate's annotations
@@ -1611,10 +1635,27 @@ If FILE is a directory, inserts the path to the directory."
    'magit-display-buffer-fullframe-status-topleft-v1)
   (magit-bury-buffer-function 'magit-restore-window-configuration)
   (magit-repository-directories '(("~/.dotfiles" . 0)
-                                  ("~/dev" . 1)))
+                                  ("~/Projects" . 1)))
   (magit-format-file-function #'magit-format-file-nerd-icons)
-  (magit-clone-default-directory "~/dev/")
-  (magit-diff-refine-hunk t))
+  (magit-clone-default-directory "~/Projects/")
+  (magit-diff-refine-hunk t)
+  :preface
+  ;; magit binds m to project status command in `project-prefix-map' if
+  ;; `magit-bind-magit-project-status' is non-nil but it happens after
+  ;; both project and magit are loaded which is not instant
+  ;; also, if I'm not in a project, a project prompt will show up
+  (define-advice magit-project-status (:around (orig-fun &rest args))
+    "Choose a project if there's no current project."
+    (unless (project-current)
+      (let ((buffer (current-buffer)))
+        (unwind-protect
+            (progn
+              (setq-local project-current-directory-override
+                          (funcall project-prompter))
+              (apply orig-fun args))
+          (with-current-buffer buffer
+            (kill-local-variable project-current-directory-override))))))
+  (keymap-set project-prefix-map "m" #'magit-project-status))
 #+end_src
 ** Transient
 It creates nice keyboard driven menus. It's what Magit uses.
@@ -1654,9 +1695,12 @@ Here I'm improving it as much as I can.
   :bind
   ("C-c n c" . org-capture)
   (:map org-mode-map
-        ("C-x n t" . org-toggle-narrow-to-subtree)
-        ("C-x n r" . custom/org-reverso-grammar-subtree)
-        ([remap imenu] . consult-org-heading))
+   ("C-x n t" . org-toggle-narrow-to-subtree)
+   ("C-x n r" . custom/org-reverso-grammar-subtree)
+   ([remap imenu] . consult-org-heading))
+  :hook (org-ctrl-c-ctrl-c . (lambda ()
+                               (when (org-at-table-p)
+                                 (org-table-recalculate))))
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
@@ -2194,21 +2238,41 @@ This makes inserting org roam links easy using =C-c C-l=.
     "Replace all :roam links with ID links."
     (org-roam-link-replace-all)))
 #+end_src
-**** Node annotation
-Org roam supports giving your own annotation function.
+
+This makes it easier to see the calendar days that have org roam dailie notes.
 #+begin_src emacs-lisp
 (use-package org-roam
-  :custom
-  (org-roam-node-annotation-function
-   #'custom-org-roam-node-read--annotation)
+  :after hl-line
+  :custom-face
+  (org-roam-dailies-calendar-note ((nil (:inherit 'hl-line)))))
+#+end_src
+**** Node annotation
+Org roam supports giving your own annotation function.
+I make an annotation using marginalia.
+#+begin_src emacs-lisp
+(use-package org-roam
+  ;; :custom
+  ;; (org-roam-node-annotation-function
+  ;;  #'custom-org-roam-node-read--annotation)
   :config
   (defun custom-org-roam-node-read--annotation (node)
-    (if-let ((tags (org-roam-node-tags node)))
-        (format " %s"
-                (mapconcat (lambda (tag)
-                             (propertize (concat "#" tag)
-                                         'face 'org-tag))
-                           tags " ")))))
+    (if-let* ((node (get-text-property 0 'node node))
+              (tags (org-roam-node-tags node)))
+        ;; (format " %s"
+        ;;         (mapconcat (lambda (tag)
+        ;;                      (propertize (concat "#" tag)
+        ;;                                  'face 'org-tag))
+        ;;                    tags " "))
+        (marginalia--fields
+         ((mapconcat (lambda (tag)
+                       (propertize (concat "#" tag)
+                                   'face 'org-tag))
+                     tags " ")
+          :format " %s"))))
+  (add-to-list 'marginalia-annotators
+               '(org-roam-node
+                 custom-org-roam-node-read--annotation
+                 none)))
 #+end_src
 **** AniList incrementing progress
 My anime and manga notes have =progress= proprty which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
@@ -2998,12 +3062,7 @@ This variable desribes the way chosen buffers are displaying and behaving.
 ;;   (select-window window))
 
 (setq display-buffer-alist
-      '(
-        ("\\*Help\\*"
-         nil
-         (body-function . select-window))
-
-        ("*Calendar*"
+      '(("*Calendar*"
          (display-buffer--maybe-at-bottom))
         ("^CAPTURE"
          (display-buffer--maybe-at-bottom)
@@ -3117,7 +3176,7 @@ A mode for m3u files
     (advice-add 'window-popup-mb-transient :after
                 (lambda () (modify-frame-parameters nil '((width . 54)))
                   (set-window-parameter nil 'mode-line-format 'none)))
-    :load-path "~/dev/emacs-mb-transient/"
+    :load-path "~/Projects/emacs-mb-transient/"
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)
     :config
@@ -3125,7 +3184,7 @@ A mode for m3u files
                  '(mb-transient--search (vertico-sort-function . nil))))
 
   (use-package mb-search
-    :load-path "~/dev/emacs-mb-search/"
+    :load-path "~/Projects/emacs-mb-search/"
     :commands (mb-search-annotation
                mb-search-area
                mb-search-artist

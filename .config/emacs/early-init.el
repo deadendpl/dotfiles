@@ -31,14 +31,14 @@
 (push '(horizontal-scroll-bars) default-frame-alist)
 
 (set-face-attribute 'default nil
-                    :font "JetBrainsMono NFM"
+                    ;; :font "JetBrainsMono NFM"
                     :height 90
                     :weight 'medium)
 (set-face-attribute 'variable-pitch nil
                     :family "Ubuntu Nerd Font"
                     :weight 'medium)
-(set-face-attribute 'fixed-pitch nil
-                    :family "JetBrainsMono NFM Mono")
+;; (set-face-attribute 'fixed-pitch nil
+;;                     :family "JetBrainsMono NFM Mono")
 (set-face-attribute 'fixed-pitch-serif nil
                     :inherit 'fixed-pitch
                     :slant 'italic)
