@@ -6,12 +6,17 @@
 (ql:quickload :uiop)
 
 (defparameter *wal-directory*
-  (or (probe-file
-       (merge-pathnames "wal/"
-                        (uiop:ensure-directory-pathname
-                         (uiop:getenv "XDG_CACHE_HOME"))))
-      (probe-file (uiop:ensure-directory-pathname
-                   (uiop:native-namestring "~/.cache/wal/"))))
+  (or (ignore-errors
+       (probe-file (uiop:ensure-directory-pathname
+                    (uiop:getenv "PYWAL_CACHE_DIR"))))
+      (ignore-errors
+       (probe-file
+        (merge-pathnames "wal/"
+                         (uiop:ensure-directory-pathname
+                          (uiop:getenv "XDG_CACHE_HOME")))))
+      (ignore-errors
+       (probe-file (uiop:ensure-directory-pathname
+                    (uiop:native-namestring "~/.cache/wal/")))))
   "The directory where pywal processed files are.")
 
 (defparameter *config-directory*
@@ -91,17 +96,18 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
                     "Pywal returned an error. The command run was ~a~%"))))
         (format t "Generated pywal theme.~%"))))
 
-
 (defun run-before-hook ()
   "Run a before-hook.lisp file in the config directory."
   (let ((before-hook-file (ignore-errors (merge-pathnames
-                                          "before-hook.lisp" *config-directory*))))
+                                          "before-hook.lisp"
+                                          *config-directory*))))
     (load before-hook-file)))
 
 (defun run-after-hook ()
   "Run a after-hook.lisp file in the config directory."
   (let ((after-hook-file (ignore-errors (merge-pathnames
-                                         "after-hook.lisp" *config-directory*))))
+                                         "after-hook.lisp"
+                                         *config-directory*))))
     (load after-hook-file)))
 
 (defun cli-options ()
@@ -140,7 +146,8 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
          (backend (clingon:getopt cmd :backend))
          (wallpaper (car free-args)))
     (when (ignore-errors (probe-file (merge-pathnames
-                                      "before-hook.lisp" *config-directory*)))
+                                      "before-hook.lisp"
+                                      *config-directory*)))
       (format t "Before hook file located. Running the before hook...~%")
       (run-before-hook)
       (format t "Finished running before hook.~%"))
@@ -167,7 +174,8 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
       (format t "Using image at path: ~a~%" wallpaper-path)
       (pywal-run wallpaper-path backend :light light))
     (when (ignore-errors (probe-file (merge-pathnames
-                                      "after-hook.lisp" *config-directory*)))
+                                      "after-hook.lisp"
+                                      *config-directory*)))
       (format t "After hook file located. Running the after hook...~%")
       (run-after-hook)
       (format t "Finished running after hook.~%"))

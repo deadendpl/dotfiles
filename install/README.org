@@ -4,6 +4,8 @@
 
 I decided to put all installation shell scripts in this file because it's cool.
 The script generated from this is called [[./install.sh][install.sh]].
+Note that *it's not automated and may require manual intervention*.
+There are a lots of ~sudo -v~ as that can keep you from typing your root password.
 
 * WARNING
 _TO ANYONE THAT WANTS TO APPLY THESE DOTFILES_.
@@ -15,15 +17,19 @@ The script assumes that you:
 - have *GRUB* as a bootloader
 - have no display (login) manager
 - execute the script with your user, not root
+* Setup
+#+begin_src sh :shebang "#!/usr/bin/env bash"
+DOTFILES_INSTALL_DIR=$(pwd)
+#+end_src
 * Services
 ** Bluetooth
-#+begin_src sh :shebang "#!/usr/bin/env bash"
+#+begin_src sh
 sudo -v
 
 if pacman -Q bluez >> /dev/null; then
   echo "Bluetooth is set up."
 else
-  sudo pacman -S --noconfirm bluez
+  sudo pacman -S --noconfirm --needed bluez
   sudo systemctl enable bluetooth
 fi
 #+end_src
@@ -31,18 +37,24 @@ fi
 By default pulseadio is installed so I remove that.
 I think pipewire sets up its' service automatically with reboot.
 #+begin_src sh
+sudo -v
+
 if pacman -Q pulseaudio >> /dev/null; then
   sudo pacman -Rc --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth
-  sudo pacman -S --noconfirm pipewire pipewire-pulse pipewire-audio
+  sudo pacman -S --noconfirm --needed pipewire pipewire-pulse pipewire-audio
 fi
 #+end_src
 ** Display manager (SDDM)
 #+begin_src sh
+sudo -v
+
 if pacman -Q sddm >> /dev/null; then
   echo "It seems SDDM is installed."
 else
   echo "Installing SDDM"
-  sudo pacman -S --noconfirm sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
+  sudo pacman -S --noconfirm --needed sddm qt5-quickcontrols \
+                                           qt5-quickcontrols2 \
+                                           qt5-graphicaleffects
   sudo systemctl enable sddm
 fi
 
@@ -86,98 +98,107 @@ sudo pacman -Syyu
 #+end_src
 ** Chaotic AUR pacman repo
 #+begin_src sh
+sudo -v
+
 sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com
 sudo pacman-key --lsign-key 3056513887B78AEB
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+sudo pacman -U --noconfirm --needed 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+sudo pacman -U --noconfirm --needed 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 
-sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
-sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
+if ! grep chaotic-aur /etc/pacman.conf >> /dev/null; then
+  sudo bash -c "echo -e \"\n[chaotic-aur]\" >> \"/etc/pacman.conf\""
+  sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
+fi
 #+end_src
 ** Dependencies
 *** Normal dependencies
 #+BEGIN_SRC sh
+sudo -v
+
 if pacman -Q sway >> /dev/null; then
   echo "Normal packages are installed."
 else
-  sudo pacman -Syyu --noconfirm sway \
-                                htop \
-                                papirus-icon-theme \
-                                waybar \
-                                eza \
-                                qt5-wayland \
-                                swaybg \
-                                blueberry \
-                                swaync \
-                                wdisplays \
-                                wl-clipboard \
-                                grim \
-                                slurp \
-                                bat-extras \
-                                fish \
-                                starship \
-                                pcmanfm-gtk3 \
-                                file-roller \
-                                7zip \
-                                unrar \
-                                gammastep \
-                                ttf-ubuntu-nerd \
-                                ttf-jetbrains-mono-nerd \
-                                noto-fonts-emoji \
-                                pavucontrol \
-                                qt5ct \
-                                foot \
-                                networkmanager \
-                                python-adblock \
-                                mpv \
-                                mpv-mpris \
-                                polkit-gnome \
-                                sway-contrib \
-                                dracula-cursors-git \
-                                light \
-                                chafa \
-                                ripgrep \
-                                fzf \
-                                swayimg \
-                                emacs-wayland \
-                                stow \
-                                expac \
-                                python-tldextract \
-                                python-pynacl \
-                                fastfetch \
-                                git \
-                                tree-sitter \
-                                udiskie \
-                                swaylock \
-                                fcron \
-                                xorg-xwayland \
-                                unzip \
-                                wl-clip-persist \
-                                glide-browser-bin \
-                                rofi \
-                                sioyek-git \
-                                seahorse \
-                                webp-pixbuf-loader # for swaybg to work with webp
-                                # zathura \
-                                # zathura-pdf-mupdf \
-                                # chaotic-aur/zen-browser-bin \
-                                # qutebrowser \
-                                # lf \
-                                # hyprland \
-                                # hyprpicker-git \
-                                # neovim \
-                                # otf-codenewroman-nerd \
+  sudo pacman -Syyu --noconfirm --needed sway \
+                                         htop \
+                                         papirus-icon-theme \
+                                         waybar \
+                                         eza \
+                                         qt5-wayland \
+                                         swaybg \
+                                         blueman \
+                                         swaync \
+                                         wdisplays \
+                                         wl-clipboard \
+                                         grim \
+                                         slurp \
+                                         bat-extras \
+                                         fish \
+                                         starship \
+                                         pcmanfm \
+                                         file-roller \
+                                         7zip \
+                                         unrar \
+                                         gammastep \
+                                         ttf-ubuntu-nerd \
+                                         ttf-jetbrains-mono-nerd \
+                                         noto-fonts-emoji \
+                                         pavucontrol \
+                                         qt5ct \
+                                         foot \
+                                         networkmanager \
+                                         python-adblock \
+                                         mpv \
+                                         mpv-mpris \
+                                         polkit-gnome \
+                                         sway-contrib \
+                                         dracula-cursors-git \
+                                         light \
+                                         chafa \
+                                         ripgrep \
+                                         fzf \
+                                         swayimg \
+                                         emacs-wayland \
+                                         stow \
+                                         expac \
+                                         python-tldextract \
+                                         python-pynacl \
+                                         fastfetch \
+                                         git \
+                                         tree-sitter \
+                                         udiskie \
+                                         swaylock \
+                                         fcron \
+                                         xorg-xwayland \
+                                         unzip \
+                                         wl-clip-persist \
+                                         glide-browser-bin \
+                                         rofi \
+                                         sioyek-git \
+                                         seahorse \
+                                         sbcl \
+                                         webp-pixbuf-loader # for swaybg to work with webp
+                                         # zathura \
+                                         # zathura-pdf-mupdf \
+                                         # chaotic-aur/zen-browser-bin \
+                                         # qutebrowser \
+                                         # lf \
+                                         # hyprland \
+                                         # hyprpicker-git \
+                                         # neovim \
+                                         # otf-codenewroman-nerd \
 fi
 #+end_src
 *** Yay dependencies
 yay is AUR wrapper which can also be used as frontend to pacman.
 #+begin_src sh
+sudo -v
+
 if pacman -Q yay >> /dev/null; then
   echo "It seems yay is installed."
 else
   git clone https://aur.archlinux.org/yay-bin
   cd yay-bin
-  makepkg -si --noconfirm
+  makepkg -si --noconfirm --needed
   cd ..
   rm -rf yay-bin/
 fi
@@ -185,46 +206,48 @@ fi
 
 Now we install some packages with yay
 #+begin_src sh
-if pacman -Q rofi-lbonn-wayland-git >> /dev/null; then
+if pacman -Q rofi-bluetooth-git >> /dev/null; then
   echo "AUR essential packages are installed."
 else
-  yay -S --noconfirm networkmanager-dmenu-git \
-                     rofi-bluetooth-git \
-                     cp-p-git \
-                     # ctpv-git \
-                     # clipboard \
-                     # pokemonsay-newgenerations-git \
-                     # fortune-mod-vimtips \
-                     # udiskie-dmenu-git \
-                     # krabby-bin \
-                     # dracula-gtk-theme \
-                     # catppuccin-gtk-theme-mocha \
-                     # catppuccin-gtk-theme-latte \
-                     # bitwarden-rofi-git \
+  yay -S --noconfirm --needed networkmanager-dmenu-git \
+                              rofi-bluetooth-git \
+                              cp-p-git \
+                              # ctpv-git \
+                              # clipboard \
+                              # pokemonsay-newgenerations-git \
+                              # fortune-mod-vimtips \
+                              # udiskie-dmenu-git \
+                              # krabby-bin \
+                              # dracula-gtk-theme \
+                              # catppuccin-gtk-theme-mocha \
+                              # catppuccin-gtk-theme-latte \
+                              # bitwarden-rofi-git \
 fi
 #+end_src
 *** Pywal dependencies
 Pywal is like Material You from Android but on Linux
 #+begin_src sh
+sudo -v
+
 if pacman -Q wpgtk >> /dev/null; then
   echo "It seems pywal packages are installed."
 else
   echo "Installing pywal packages."
-  yay -S --noconfirm python-pywal16 \
-                     python-inotify-simple \
-                     python-psutil \
-                     python-prctl \
-                     python-daemon \
-                     python-haishoku \
-                     qt5-styleplugins \
-                     chaotic-aur/qt6gtk2 \
-                     python-zombie-imp \
-                     gradience \
-                     python-anyascii \
-                     python-material-color-utilities \
-                     wpgtk \
-                     gtk-theme-flat-color-git
-                     # chaotic-aur/adw-gtk3
+  yay -S --noconfirm --needed python-pywal16 \
+                              python-haishoku \
+                              qt5-styleplugins \
+                              chaotic-aur/qt6gtk2 \
+                              gradience \
+                              python-anyascii \
+                              python-material-color-utilities \
+                              python-zombie-imp \
+                              wpgtk \
+                              # gtk-theme-flat-color-git
+                              # python-inotify-simple \
+                              # python-psutil \
+                              # python-prctl \
+                              # python-daemon \
+                              # chaotic-aur/adw-gtk3
 
   # using pip like this can break stuff, be careful
   # sudo pip install yapsy --break-system-packages
@@ -237,28 +260,31 @@ fi
 *** Optional software
 You don't need to do this part.
 #+begin_src sh
+sudo -v
+
 if pacman -Q picard >> /dev/null; then
   echo "Optional packages are installed."
 else
-  yay -S --noconfirm appimagelauncher \
-                     keepassxc \
-                     syncthing \
-                     gnome-disk-utility \
-                     freefilesync \
-                     picard \
-                     rsgain \
-                     nicotine+ \
-                     xdg-ninja \
-                     otf-ipaexfont \
-                     playerctl \
-                     ntfs-3g \
-                     sbcl
-                     # syncthing-gtk
+  yay -S --noconfirm --needed appimagelauncher \
+                              keepassxc \
+                              syncthing \
+                              gnome-disk-utility \
+                              picard \
+                              rsgain \
+                              nicotine+ \
+                              xdg-ninja \
+                              otf-ipaexfont \
+                              playerctl \
+                              ntfs-3g \
+                              # freefilesync \
+                              # syncthing-gtk
 fi
 #+end_src
 * Touchpad setup on Xorg
 Sway is set up but SDDM uses Xorg, and that doesn't support touchpad tapping.
 #+begin_src sh
+sudo -v
+
 if [ -e "/etc/X11/xorg.conf.d/90-touchpad.conf" ]; then
   echo "It seems you already have touchpad configuration. No changes have been made."
 else
@@ -281,51 +307,60 @@ fi
 * Latex working in Emacs
 Org mode supports latex displaying but that requires some setup.
 #+begin_src sh
+sudo -v
+
 if pacman -Q texlive-bin >> /dev/null; then
   echo "Latex is setup."
 else
-  sudo pacman -S --noconfirm texlive-bin texlive-binextra texlive-latexrecommended texlive-latexextra texlive-plaingeneric
+  sudo pacman -S --noconfirm --needed texlive-bin \
+                                      texlive-binextra \
+                                      texlive-latexrecommended \
+                                      texlive-latexextra \
+                                      texlive-plaingeneric
   sudo texconfig rehash
   texhash
 fi
 #+end_src
 * GRUB theme
 #+begin_src sh
+sudo -v
+
+cd /tmp/
+
 git clone https://gitlab.com/imnotpua/grub_gtg
 
 cd grub_gtg
 
 echo "YOU NEED TO TYPE FONT SIZE AND THEME DIRECTORY"
 sudo bash ./install.sh
-
-cd ../
-rm -rf grub_gtg
 #+end_src
 * Fish setup
 #+begin_src sh
+sudo -v
+
+cd /tmp/
+
 chsh -s "$(command -v fish)"
 curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install -o "omf"
 fish omf --noninteractive
 fish -c "omf install foreign-env"
-rm omf
 #+end_src
 * Cron setup
 #+begin_src sh
+sudo -v
+
+FCRON_FILE=$(mktemp)
+
 sudo systemctl enable fcron
 # write out current crontab
-fcrontab -l > cron-file
+fcrontab -l > $FCRON_FILE
 # echo new cron into cron file
-echo "*/5 * * * * sudo -u \$USER DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\$(id -u \$USER)/bus /home/\$USER/.config/scripts/battery-check.sh" >> cron-file
+echo "*/5 * * * * sudo -u \$USER DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/\$(id -u \$USER)/bus /home/\$USER/.config/scripts/battery-check.sh" >> $FCRON_FILE
 # install new cron file
-fcrontab cron-file
-rm cron-file
+fcrontab $FCRON_FILE
 #+end_src
 * Setting defaults
 It sets some apps to be defaults for some files
-#+begin_src sh
-basename $(ls ~/.local/share/applications/*Glide*) | xargs xdg-settings set default-web-browser
-#+end_src
-
 This sets GTK theming and fonts, on bigger screen you might want to increase the size of fonts.
 #+begin_src sh
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
@@ -336,9 +371,33 @@ gsettings set org.gnome.desktop.interface document-font-name "Ubuntu Nerd Font 1
 gsettings set org.gnome.desktop.interface monospace-font-name "JetBrainsMono NFM 10"
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 #+end_src
+* Setting glide as the default browser
+Glide as of the time of writing ([2026-05-12 Tue]) has weird setup to make it work with =xdg-open=.
+You need to click its' "set as default browser" button or launch it with =--setDefaultBrowser= option to make it create a local .desktop entry.
+Then we need to use that local desktop entry as the default browser.
+#+begin_src sh
+if [ -d ~/.local/share/applications/ ]; then
+  mkdir -p ~/.local/share/applications/
+fi
+
+echo << EOF
+The glide browser will be turned on for a moment.
+After 20 seconds it will be closed.
+EOF
+
+glide-bin --setDefaultBrowser & disown
+
+sleep 20
+
+pkill glide
+
+basename $(ls ~/.local/share/applications/*Glide*) | xargs xdg-settings set default-web-browser
+#+end_src
 * Creating default directories
 #+begin_src sh
-yay -S --noconfirm xdg-user-dirs
+sudo -v
+
+yay -S --noconfirm --needed xdg-user-dirs
 xdg-user-dirs-update
 
 # enabling syncthing service
@@ -346,18 +405,63 @@ if pacman -Q syncthing >> /dev/null; then
   systemctl --user enable syncthing
 fi
 #+end_src
+* User group setup
+#+begin_src sh
+sudo -v
+
+sudo usermod -aG video,audio,input $(whoami)
+#+end_src
 * Compiling pyrice
 It's a pywal wrapper I wrote in Common Lisp.
 #+begin_src sh
 cd ../tools/pyrice-in-common-lisp/
 if ! pacman -Q sbcl >> /dev/null; then
-  sudo pacman --noconfirm -S sbcl
+  sudo pacman --noconfirm --needed -S sbcl
 fi
+echo "Note that you will need to exit SBCL manually."
 curl https://beta.quicklisp.org/quicklisp.lisp -o ~/quicklisp.lisp
-sbcl --non-interactive --load ~/quicklisp.lisp \
+sbcl --load ~/quicklisp.lisp \
      --eval "(quicklisp-quickstart:install)" \
      --eval "(ql:add-to-init-file)" \
      --eval "(quit)"
-make
-cp pyrice ~/.local/bin/
+make copy
+#+end_src
+* Installing rofi-bookmarks
+#+begin_src sh
+cd $DOTFILES_INSTALL_DIR/rofi-bookmarks
+makepkg -si --noconfirm --needed
+#+end_src
+* Installing gradience
+#+begin_src sh
+cd $DOTFILES_INSTALL_DIR/gradience
+
+yay -S --noconfirm --needed python-anyascii \
+                            python-yapsy \
+                            python-material-color-utilities \
+                            python-zombie-imp
+
+makepkg -si --noconfirm --needed
+#+end_src
+* Example wallpaper download
+#+begin_src sh
+read -p "Want to have an example wallpaper downloaded to make pyrice work? [y/n]: " -n 1 -r
+echo
+if [[ "$REPLY" = "y" ]]; then
+  mkdir -p ~/Pictures/bg/
+  curl -s -L "https://picsum.photos/1920/1080" --output ~/Pictures/bg/example-image
+fi
+#+end_src
+* Additional messages
+#+begin_src sh
+cat << EOF
+Installation has been completed.
+
+Some programs need to be manually opened to be configured.
+Emacs for example upon logging into sway will install its packages in
+the background but may require manual intervention.
+Also note that pyrice will look for images in ~/Pictures/bg/ so either
+change the command in sway config or put your wallpapers there.
+Also note that gradience GUI will not work as gradience is abandoned software.
+The gradience CLI still works though which is what pyrice can use.
+EOF
 #+end_src

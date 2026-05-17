@@ -2,6 +2,7 @@
 * {
   /* with font-family set, japanese characters don't display */
   /* font-family: Ubuntu Nerd Font; */
+  all: unset;
   font-size: 11pt;
 }
 
@@ -35,7 +36,7 @@ window#waybar {
   background-color: @background;
   color: @foreground;
   /* margin-right: 2px; */
-  padding: 0 3px;
+  padding: 0 4px;
 }
 
 #workspaces button.active, #workspaces button.focused {

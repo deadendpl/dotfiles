@@ -1,0 +1,25 @@
+pkgname=rofi-bookmarks
+pkgver=1.0
+pkgrel=1
+pkgdesc="Bookmarking software written in Common Lisp"
+arch=("x86_64")
+url="https://github.com/deadendpl/rofi-bookmarks"
+license=("GPL3")
+depends=("rofi")
+makedepends=("sbcl" "git")
+provides=("$pkgname")
+conflicts=("$pkgname")
+source=("git+${url}")
+sha256sums=("SKIP")
+# without this, the binary is very small and doesn't work
+options=(!strip)
+
+build() {
+  cd "$srcdir/$pkgname"
+  make
+}
+
+package() {
+  install -Dm755 "$srcdir/$pkgname/rofi-bookmarks" \
+          "$pkgdir/usr/bin/rofi-bookmarks"
+}

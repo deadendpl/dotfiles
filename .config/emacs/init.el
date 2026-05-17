@@ -613,7 +613,13 @@ it."
   :custom
   (eww-auto-rename-buffer 'title)
   (url-privacy-level '(email lastloc cookies))
-  (shr-fill-text nil))
+  (eww-use-external-browser-for-content-type
+   "\\`\\(video/\\|audio\\)"))
+
+(use-package shr
+  :custom
+  (shr-fill-text nil)
+  (shr-max-width nil))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -748,7 +754,8 @@ default, the whole line in the file is highlighted."
         ("Use t in embark to open directory in vterm")
         ("Use C-c ~ in sly code buffer to sync the current package in REPL")
         ("Use registers for keyboard macros")
-        ("Use k in dired to remove a line")))))))
+        ("Use k in dired to remove a line")
+        ("Use C-c c k to kill current compilation")))))))
 
 (use-package ligature
   :unless on-termux-p
@@ -855,13 +862,16 @@ default, the whole line in the file is highlighted."
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
 
+(setq modus-ewal-theme-install-dir
+      (when (file-exists-p "~/Projects/modus-ewal-theme/")
+        "~/Projects/modus-ewal-theme/"))
 (if on-termux-p
     (use-package doom-themes
       :demand
       :config (load-theme 'doom-dracula t))
   (use-package modus-ewal-theme
     :demand
-    :load-path "~/Projects/modus-ewal-theme/"
+    :load-path modus-ewal-theme-install-dir
     :config
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
@@ -1182,6 +1192,23 @@ Handles symbols that start or end with a single quote (') correctly."
   :config
   (which-key-mode 1))
 
+(defun shell-command-help (command)
+  "Run a COMMAND with a \"--help\" argument."
+  (interactive
+   (list (let ((candidates
+                (cl-sort (seq-filter (lambda (item)
+                                       (not (or (equal item ".")
+                                                (equal item ".."))))
+                                     (mapcan #'directory-files
+                                             (parse-colon-path
+                                              (getenv "PATH"))))
+                         (lambda (x y)
+                           (string< (downcase x) (downcase y))))))
+           (completing-read "Command: " candidates nil nil))))
+  (shell-command (concat command " --help")))
+
+(keymap-global-set "C-h !" #'shell-command-help)
+
 (use-package elfeed
   :unless on-termux-p
   :hook (elfeed-mode . hl-line-mode)
@@ -1289,7 +1316,9 @@ If FILE is a directory, inserts the path to the directory."
               (apply orig-fun args))
           (with-current-buffer buffer
             (kill-local-variable project-current-directory-override))))))
-  (keymap-set project-prefix-map "m" #'magit-project-status))
+  (keymap-set project-prefix-map "m" #'magit-project-status)
+  (with-eval-after-load 'project
+    (add-to-list 'project-switch-commands '(magit-project-status "Magit") t)))
 
 (use-package transient
   :custom
@@ -1352,7 +1381,9 @@ If FILE is a directory, inserts the path to the directory."
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
-      "* TODO %?\nSCHEDULED: %^t")))
+      "* TODO %?\nSCHEDULED: %^t")
+     ("a" "A heading" entry (file "agenda/inbox.org")
+      "* %?")))
   (org-confirm-babel-evaluate nil)
   (org-cycle-separator-lines 0)
   (org-display-remote-inline-images 'download)
@@ -2079,7 +2110,8 @@ OPEN-IN-WEB is non-nil."
 (use-package compile
   :init (setq-default compile-command nil)
   :bind (("C-c c c" . compile)
-         ("C-c c r" . recompile))
+         ("C-c c r" . recompile)
+         ("C-c c k" . kill-compilation))
   :custom
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)
@@ -2561,6 +2593,13 @@ Also see `window-delete-popup-frame'." command)
                           "nf-md-playlist_music_outline"
                           :face nerd-icons-dred)))
 
+(setq mb-transient-install-dir
+        (when (file-exists-p "~/Projects/emacs-mb-transient/")
+          "~/Projects/emacs-mb-transient/"))
+(setq mb-search-install-dir
+        (when (file-exists-p "~/Projects/emacs-mb-search/")
+          "~/Projects/emacs-mb-search/"))
+
 (unless on-termux-p
   (use-package mb-transient
     :init
@@ -2568,7 +2607,7 @@ Also see `window-delete-popup-frame'." command)
     (advice-add 'window-popup-mb-transient :after
                 (lambda () (modify-frame-parameters nil '((width . 54)))
                   (set-window-parameter nil 'mode-line-format 'none)))
-    :load-path "~/Projects/emacs-mb-transient/"
+    :load-path mb-transient-install-dir
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)
     :config
@@ -2576,7 +2615,7 @@ Also see `window-delete-popup-frame'." command)
                  '(mb-transient--search (vertico-sort-function . nil))))
 
   (use-package mb-search
-    :load-path "~/Projects/emacs-mb-search/"
+    :load-path mb-search-install-dir
     :commands (mb-search-annotation
                mb-search-area
                mb-search-artist

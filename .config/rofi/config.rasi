@@ -20,5 +20,8 @@ configuration {
 /* Keybindings */
 @import "keybindings.rasi"
 
+// what icon theme to use
+@import "~/.cache/wal/rofi-icon-theme.rasi"
+
 /* Pywal theme */
 @theme "~/.cache/wal/colors-rofi-custom.rasi"

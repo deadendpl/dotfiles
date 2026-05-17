@@ -186,6 +186,20 @@ It changes 2 variables depending on value of LIGHT."
      "emacsclient -e \"(modus-ewal-theme-regenerate-theme)\"")
     (format t "Reloaded Emacs theme.~%")))
 
+(defun rofi-setup ()
+  "Make a file that contains a icon theme to use for rofi."
+  (with-open-file (stream (merge-pathnames
+                           "wal/rofi-icon-theme.rasi"
+                           (uiop:ensure-directory-pathname
+                            (uiop:getenv "XDG_CACHE_HOME")))
+                          :direction :output
+                          :if-exists :supersede
+                          :if-does-not-exist :create)
+    (format stream "configuration {~%icon-theme: \"~A\";~%}"
+            (if *light-theme-p*
+                "Papirus-Light"
+                "Papirus-Dark"))))
+
 (gsettings-run *light-theme-p*)
 (reload-gtk-theme)
 (swaybg-setup *wallpaper-path* *old-wallpaper-p*)
@@ -197,4 +211,5 @@ It changes 2 variables depending on value of LIGHT."
 (emacs-modus-setup)
 (qutebrowser-setup)
 (swaync-setup)
+(rofi-setup)
 (uiop:launch-program "notify-send \"New rice applied\"")

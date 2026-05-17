@@ -38,6 +38,7 @@
     - [[#electric][Electric]]
     - [[#comint][Comint]]
     - [[#isearch][isearch]]
+    - [[#ediff][ediff]]
   - [[#appearance][Appearance]]
     - [[#dashboard-enlight][Dashboard (enlight)]]
     - [[#fonts][Fonts]]
@@ -65,6 +66,7 @@
     - [[#helpful][Helpful]]
       - [[#meows-describe-key-override][Meow's describe-key override]]
     - [[#which-key][Which-key]]
+    - [[#shell-commands---help-argument][Shell commands --help argument]]
   - [[#elfeed][Elfeed]]
   - [[#embark][Embark]]
   - [[#magit][Magit]]
@@ -83,6 +85,7 @@
     - [[#org-appear][Org appear]]
     - [[#org-auto-tangle][Org auto tangle]]
     - [[#org-roam][Org Roam]]
+      - [[#node-annotation][Node annotation]]
       - [[#anilist-incrementing-progress][AniList incrementing progress]]
       - [[#anilist-lookup][AniList lookup]]
       - [[#game-completion-showcase][Game completion showcase]]
@@ -105,6 +108,7 @@
         - [[#css][CSS]]
         - [[#js][JS]]
     - [[#tree-sitter][Tree-sitter]]
+      - [[#fix][Fix]]
     - [[#templates][Templates]]
       - [[#startup-templates-auto-insert][Startup templates (auto-insert)]]
       - [[#command-templates][Command templates]]
@@ -404,6 +408,19 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
             (lambda () (run-hooks 'prog-mode-hook))))
 
 (setq calendar-week-start-day 1)
+
+(with-eval-after-load 'savehist
+  (setq savehist-additional-variables
+        (append savehist-additional-variables
+                '(search-ring regexp-search-ring kill-ring)))
+
+  ;; kill-ring has text properties which can make the savehist file big
+  ;; this code will clean the kill-ring of text properties
+  (add-hook 'savehist-save-hook
+            (lambda ()
+              (setq kill-ring
+                    (mapcar #'substring-no-properties
+                            (cl-remove-if-not #'stringp kill-ring))))))
 
 (use-package paren
   :custom (show-paren-delay 0)
@@ -849,7 +866,13 @@ The cool thing is when you type /Btw/ you get /By the way/ with capital /B/ at t
   :custom
   (eww-auto-rename-buffer 'title)
   (url-privacy-level '(email lastloc cookies))
-  (shr-fill-text nil))
+  (eww-use-external-browser-for-content-type
+   "\\`\\(video/\\|audio\\)"))
+
+(use-package shr
+  :custom
+  (shr-fill-text nil)
+  (shr-max-width nil))
 #+end_src
 *** Line numbers
 #+begin_src emacs-lisp
@@ -1013,7 +1036,8 @@ I'm using [[https://github.com/ichernyshovvv/enlight][enlight]] as it allows for
         ("Use t in embark to open directory in vterm")
         ("Use C-c ~ in sly code buffer to sync the current package in REPL")
         ("Use registers for keyboard macros")
-        ("Use k in dired to remove a line")))))))
+        ("Use k in dired to remove a line")
+        ("Use C-c c k to kill current compilation")))))))
 #+end_src
 *** Fonts
 **** Setting fonts
@@ -1163,14 +1187,18 @@ Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]]
 *** Theme (modus-ewal)
 I have it written in a separate file.
 The theme will not load without Emacs daemon.
+The =:load-path= setup is because I prefer to use my local install of the package instead of the MELPA one, but if it's not available then I'll use the MELPA one.
 #+begin_src emacs-lisp
+(setq modus-ewal-theme-install-dir
+      (when (file-exists-p "~/Projects/modus-ewal-theme/")
+        "~/Projects/modus-ewal-theme/"))
 (if on-termux-p
     (use-package doom-themes
       :demand
       :config (load-theme 'doom-dracula t))
   (use-package modus-ewal-theme
     :demand
-    :load-path "~/Projects/modus-ewal-theme/"
+    :load-path modus-ewal-theme-install-dir
     :config
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
@@ -1540,6 +1568,27 @@ It takes few seconds to load and that's why I defer it by 5 seconds.
   :config
   (which-key-mode 1))
 #+end_src
+*** Shell commands --help argument
+I find it more convenient to run ~some-command --help~ in Emacs rather than in terminal since I can use the navigation already familiar to me.
+This function looks for all available commands, lists them through =completing-read=, and runs one of them with =--help= argument.
+#+begin_src emacs-lisp
+(defun shell-command-help (command)
+  "Run a COMMAND with a \"--help\" argument."
+  (interactive
+   (list (let ((candidates
+                (cl-sort (seq-filter (lambda (item)
+                                       (not (or (equal item ".")
+                                                (equal item ".."))))
+                                     (mapcan #'directory-files
+                                             (parse-colon-path
+                                              (getenv "PATH"))))
+                         (lambda (x y)
+                           (string< (downcase x) (downcase y))))))
+           (completing-read "Command: " candidates nil nil))))
+  (shell-command (concat command " --help")))
+
+(keymap-global-set "C-h !" #'shell-command-help)
+#+end_src
 ** Elfeed
 [[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
 #+begin_src emacs-lisp
@@ -1655,7 +1704,9 @@ If FILE is a directory, inserts the path to the directory."
               (apply orig-fun args))
           (with-current-buffer buffer
             (kill-local-variable project-current-directory-override))))))
-  (keymap-set project-prefix-map "m" #'magit-project-status))
+  (keymap-set project-prefix-map "m" #'magit-project-status)
+  (with-eval-after-load 'project
+    (add-to-list 'project-switch-commands '(magit-project-status "Magit") t)))
 #+end_src
 ** Transient
 It creates nice keyboard driven menus. It's what Magit uses.
@@ -1727,7 +1778,9 @@ Here I'm improving it as much as I can.
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
-      "* TODO %?\nSCHEDULED: %^t")))
+      "* TODO %?\nSCHEDULED: %^t")
+     ("a" "A heading" entry (file "agenda/inbox.org")
+      "* %?")))
   (org-confirm-babel-evaluate nil)
   (org-cycle-separator-lines 0)
   (org-display-remote-inline-images 'download)
@@ -2542,7 +2595,8 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
 (use-package compile
   :init (setq-default compile-command nil)
   :bind (("C-c c c" . compile)
-         ("C-c c r" . recompile))
+         ("C-c c r" . recompile)
+         ("C-c c k" . kill-compilation))
   :custom
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)
@@ -3169,6 +3223,13 @@ A mode for m3u files
 #+end_src
 ** Local packages
 #+begin_src emacs-lisp
+(setq mb-transient-install-dir
+        (when (file-exists-p "~/Projects/emacs-mb-transient/")
+          "~/Projects/emacs-mb-transient/"))
+(setq mb-search-install-dir
+        (when (file-exists-p "~/Projects/emacs-mb-search/")
+          "~/Projects/emacs-mb-search/"))
+
 (unless on-termux-p
   (use-package mb-transient
     :init
@@ -3176,7 +3237,7 @@ A mode for m3u files
     (advice-add 'window-popup-mb-transient :after
                 (lambda () (modify-frame-parameters nil '((width . 54)))
                   (set-window-parameter nil 'mode-line-format 'none)))
-    :load-path "~/Projects/emacs-mb-transient/"
+    :load-path mb-transient-install-dir
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)
     :config
@@ -3184,7 +3245,7 @@ A mode for m3u files
                  '(mb-transient--search (vertico-sort-function . nil))))
 
   (use-package mb-search
-    :load-path "~/Projects/emacs-mb-search/"
+    :load-path mb-search-install-dir
     :commands (mb-search-annotation
                mb-search-area
                mb-search-artist

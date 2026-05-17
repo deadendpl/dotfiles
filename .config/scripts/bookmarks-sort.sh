@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-file="${HOME}/Sync/foo/wazne/bookmarks"
+file="${HOME}/Sync/foo/wazne/bookmarks-for-emacs.tsv"
 
-if sort $file -o $file >> /dev/null; then
+if sort -f $file -o $file >> /dev/null; then
   notify-send "Bookmarks file got sorted"
 else
   notify-send "Bookmarks file didn't get sorted"

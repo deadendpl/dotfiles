@@ -129,10 +129,45 @@ glide.keymaps.set("insert", "<C-s>", () => {
   else
     glide.keys.send("<C-s>", { skip_mappings: true })
 });
+
 glide.keymaps.set("insert", "<C-r>", () => {
   if(glide.findbar.is_focused())
-    glide.findbar.previous_match()
+    glide.findbar.previous_match();
   else
-    glide.keys.send("<C-r>", { skip_mappings: true })
+    glide.keys.send("<C-r>", { skip_mappings: true });
 });
 
+function keyboard_quit_normal_mode () {
+  if(glide.findbar.is_open())
+    glide.findbar.close();
+  else
+    glide.keys.send("Escape", { skip_mappings: true });
+}
+
+function keyboard_quit_insert_mode () {
+  if(glide.findbar.is_open())
+    glide.findbar.close();
+  else
+    glide.excmds.execute("mode_change normal");
+}
+
+glide.keymaps.set("insert", "<C-g>", keyboard_quit_insert_mode);
+glide.keymaps.set("normal", "<C-g>", keyboard_quit_normal_mode);
+
+glide.excmds.create({
+  name: "tab_unload",
+  description: "Unload the selected tab",
+}, async () => {
+  glide.commandline.show({
+    title: "tabs",
+    options: (await glide.tabs.query({})).map(
+      (tab) => ({
+        label: tab.title,
+        async execute() {
+          glide.tabs.unload(tab);
+        },
+      })),
+  });
+});
+
+glide.keymaps.set("normal", "<leader>u", "tab_unload");
