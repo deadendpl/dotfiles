@@ -92,29 +92,22 @@ glide.keymaps.del("normal", "<A-h>");
 glide.keymaps.del("normal", "<A-l>");
 
 // insert mode bindings like the ones from emacs
-// this one would overwrite select all which I don't want happening
-// glide.keymaps.set("insert", "<C-a>", () =>
-//   glide.keys.send("<Home>", { skip_mappings: true }),
-// );
-glide.keymaps.set("insert", "<C-e>", () =>
-  glide.keys.send("<End>", { skip_mappings: true }),
+glide.keymaps.set("insert", "<C-a>", () =>
+  glide.keys.send("<Home>", { skip_mappings: true }),
 );
-glide.keymaps.set("insert", "<C-f>", () =>
-  glide.keys.send("<Right>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-b>", () =>
-  glide.keys.send("<Left>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-j>", () =>
-  glide.keys.send("<Down>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-k>", () =>
-  glide.keys.send("<Up>", { skip_mappings: true }),
-);
+glide.keymaps.set("insert", "<C-e>", "motion $");
+glide.keymaps.set("insert", "<C-f>", "caret_move right");
+glide.keymaps.set("insert", "<C-b>", "caret_move left",);
+glide.keymaps.set("insert", "<C-j>", "caret_move down");
+glide.keymaps.set("insert", "<C-k>", "caret_move up");
+glide.keymaps.set("insert", "<C-/>", "undo");
+
 glide.keymaps.set("insert", "<C-l>", () =>
   glide.keys.send("<Enter>", { skip_mappings: true }),
 );
-glide.keymaps.set("insert", "<C-g>", "mode_change normal");
+glide.keymaps.set("insert", "<C-x>h", () =>
+  glide.keys.send("<C-a>", { skip_mappings: true }),
+);
 
 // setting bindings for command line
 glide.keymaps.set("command", "<C-j>", "commandline_focus_next");
@@ -141,7 +134,7 @@ function keyboard_quit_normal_mode () {
   if(glide.findbar.is_open())
     glide.findbar.close();
   else
-    glide.keys.send("Escape", { skip_mappings: true });
+    glide.keys.send("<Escape>", { skip_mappings: true });
 }
 
 function keyboard_quit_insert_mode () {
@@ -153,6 +146,8 @@ function keyboard_quit_insert_mode () {
 
 glide.keymaps.set("insert", "<C-g>", keyboard_quit_insert_mode);
 glide.keymaps.set("normal", "<C-g>", keyboard_quit_normal_mode);
+
+glide.keymaps.set("hint", "<C-g>", "hints_remove");
 
 glide.excmds.create({
   name: "tab_unload",

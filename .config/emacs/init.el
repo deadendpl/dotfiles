@@ -262,30 +262,27 @@ Most of the stuff will get redirected here.")
 
 (setq-default require-final-newline 'visit-save)
 
+(defvar not-modified-temporary-file-path (make-temp-file nil)
+  "The dumpster file used by `not-modified-when-newline'.
+Instead of many temporary files being created, it's just this one.")
+
 (defun not-modified-when-newline ()
   "Mark current buffer as unmodified if the file has a new line difference.
 This is meant to not distract the user if `require-final-newline' is set
 to `visit' or `visit-save' and working on files that don't have empty
 newlines at their end."
-  (and buffer-file-name
-       (memq require-final-newline '(visit visit-save))
-       (string-search
-        "No newline at end of file"
-        (shell-command-to-string
-         (format "diff %s %s"
-                 buffer-file-name
-                 ;; TODO make the "Wrote [temporary file]" message
-                 ;; disappear. From what I traced, `write-region' sends
-                 ;; that message which can be altered with VISIT
-                 ;; argument
-                 ;; Now I use `inhibit-message' but I would like to not
-                 ;; pollute the messages buffer with the message at all
-                 (let ((inhibit-message t))
-                   (make-temp-file
-                    nil nil nil
-                    (buffer-substring-no-properties
-                     (point-min) (point-max)))))))
-       (set-buffer-modified-p nil)))
+  (when (and buffer-file-name
+             (memq require-final-newline '(visit visit-save)))
+    (let ((inhibit-message t))
+      (write-region (point-min) (point-max)
+                    not-modified-temporary-file-path))
+    (when (string-search
+           "No newline at end of file"
+           (shell-command-to-string
+            (format "diff %s %s"
+                    buffer-file-name
+                    not-modified-temporary-file-path)))
+      (set-buffer-modified-p nil))))
 
 (add-hook 'find-file-hook #'not-modified-when-newline)
 
@@ -734,28 +731,37 @@ default, the whole line in the file is highlighted."
   :custom
   (initial-buffer-choice #'enlight)
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
-  (enlight-content
-   (concat
-    (propertize "Welcome to the Church of Emacs" 'face
-                'enlight-menu-section)
-    "\n"
-    (concat "Startup time: " (emacs-init-time))
-    "\n"
-    (enlight-menu
-     '(("Org Mode"
-        ("Org-Agenda (current day)" (org-agenda nil "a") "a")
-        ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
-        ("Org-Roam notes" org-roam-node-find "n")
-        ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
-       ("Other"
-        ("Projects" project-switch-project "p"))
-       ("Things to remember"
-        ("Instead of holding h/l, use letter finding keybindings")
-        ("Use t in embark to open directory in vterm")
-        ("Use C-c ~ in sly code buffer to sync the current package in REPL")
-        ("Use registers for keyboard macros")
-        ("Use k in dired to remove a line")
-        ("Use C-c c k to kill current compilation")))))))
+  :config
+  (defun custom-enlight-content ()
+    (concat
+     (propertize "Welcome to the Church of Emacs" 'face
+                 'enlight-menu-section)
+     "\n"
+     (concat "Startup time: " (emacs-init-time))
+     "\n"
+     (enlight-menu
+      `(("Org Mode"
+         ("Org-Agenda (current day)" (org-agenda nil "a") "a")
+         ("Org-Agenda (all ideas)" (org-todo-list "IDEA") "i")
+         ("Org-Roam notes" org-roam-node-find "n")
+         ("Org-Roam today daily" org-roam-dailies-goto-today "d"))
+        ("Other"
+         ("Projects" project-switch-project "p"))
+        ("Recent files"
+         ,@(cl-loop for i from 0 to 4
+            with file = (recentf-elements 5)
+            collect `(,(nth i file) (find-file ,(nth i file))
+                      ,(number-to-string (1+ i)))))
+        ("Things to remember"
+         ("Instead of holding h/l, use letter finding keybindings")
+         ("Use t in embark to open directory in vterm")
+         ("Use registers for keyboard macros")
+         ("Use k in dired to remove a line")
+         ("Use C-c c k to kill current compilation"))))))
+  (setq enlight-content (custom-enlight-content))
+  (define-advice enlight (:before (&rest args))
+    "Update `enlight-content'"
+    (enlight--update 'enlight-content (custom-enlight-content))))
 
 (use-package ligature
   :unless on-termux-p
@@ -1224,7 +1230,8 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package embark
   :bind (("C-." . embark-act)
-         ("C-;" . embark-dwim))
+         ("C-;" . embark-dwim)
+         (:map vertico-map (("C->" . embark-act-all))))
   :config
   (with-eval-after-load 'meow
     (meow-define-keys 'keypad
@@ -1533,6 +1540,7 @@ If FILE is a directory, inserts the path to the directory."
   (org-agenda-start-day "+0d")
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
+  (org-agenda-restore-windows-after-quit t)
   (org-archive-location
    (expand-file-name "agenda/agenda-archive.org::" org-roam-directory))
   (org-refile-use-outline-path nil)
@@ -1846,18 +1854,10 @@ as you zoom text. It's fast, since no image regeneration is required."
   (org-roam-dailies-calendar-note ((nil (:inherit 'hl-line)))))
 
 (use-package org-roam
-  ;; :custom
-  ;; (org-roam-node-annotation-function
-  ;;  #'custom-org-roam-node-read--annotation)
   :config
   (defun custom-org-roam-node-read--annotation (node)
     (if-let* ((node (get-text-property 0 'node node))
               (tags (org-roam-node-tags node)))
-        ;; (format " %s"
-        ;;         (mapconcat (lambda (tag)
-        ;;                      (propertize (concat "#" tag)
-        ;;                                  'face 'org-tag))
-        ;;                    tags " "))
         (marginalia--fields
          ((mapconcat (lambda (tag)
                        (propertize (concat "#" tag)
@@ -2594,11 +2594,11 @@ Also see `window-delete-popup-frame'." command)
                           :face nerd-icons-dred)))
 
 (setq mb-transient-install-dir
-        (when (file-exists-p "~/Projects/emacs-mb-transient/")
-          "~/Projects/emacs-mb-transient/"))
+      (when (file-exists-p "~/Projects/emacs-mb-transient/")
+        "~/Projects/emacs-mb-transient/"))
 (setq mb-search-install-dir
-        (when (file-exists-p "~/Projects/emacs-mb-search/")
-          "~/Projects/emacs-mb-search/"))
+      (when (file-exists-p "~/Projects/emacs-mb-search/")
+        "~/Projects/emacs-mb-search/"))
 
 (unless on-termux-p
   (use-package mb-transient
