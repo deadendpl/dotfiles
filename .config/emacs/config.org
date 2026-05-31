@@ -5,6 +5,7 @@
 - [[#info-and-credits][INFO and CREDITS]]
 - [[#early-init][Early Init]]
 - [[#the-rest][The rest]]
+  - [[#enabling-lexical-binding][Enabling lexical binding]]
   - [[#sane-defaults-and-other][Sane defaults (and other)]]
     - [[#termux-check][Termux check]]
     - [[#some-modes-turned-on-and-off][Some modes turned on and off]]
@@ -60,6 +61,9 @@
       - [[#vertico][Vertico]]
       - [[#consult][Consult]]
       - [[#annotations-marginalia][Annotations (marginalia)]]
+    - [[#orderless][Orderless]]
+    - [[#prescient][Prescient]]
+    - [[#savehist][Savehist]]
     - [[#ignore-letter-casing][Ignore letter casing]]
   - [[#dired][Dired]]
   - [[#docs][Docs]]
@@ -134,6 +138,7 @@ Credits to:
 - [[https://sachachua.com/blog/][Sacha Chua]] for giving sum of Emacs news and content per week
 
 This config is used on Emacs _30.1_ and is intended for use with that version.
+There are headings with an ARCHIVE tag which means they are not tangled to the final init files and should probably be ignored.
 * Early Init
 #+begin_src emacs-lisp :tangle early-init.el
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
@@ -170,6 +175,10 @@ This config is used on Emacs _30.1_ and is intended for use with that version.
 #+end_src
 * The rest
 #+PROPERTY: header-args :tangle init.el
+** Enabling lexical binding
+#+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
+#+end_src
 ** Sane defaults (and other)
 Here are some tweaks that idk where to put.
 *** Termux check
@@ -822,7 +831,21 @@ it."
   (keymap-set surround-keymap "i" #'surround-insert)
   (keymap-set surround-keymap "m" #'surround-mark)
   (keymap-unset surround-keymap "s" t)
-  (keymap-set meow-normal-state-keymap "S" surround-keymap))
+  (keymap-set meow-normal-state-keymap "S" surround-keymap)
+  ;; with this, I don't need to press i to be able to insert pairs
+  ;; lexical binding needs to be turned on for this to work
+  (dolist (pair surround-pairs)
+    (let ((left  (car pair))
+          (right (cdr pair)))
+      (keymap-set surround-keymap left
+                  (cons (concat "insert-" left)
+                        (lambda () (interactive)
+                          (surround-insert left))))
+      (unless (string= left right)
+        (keymap-set surround-keymap right
+                    (cons (concat "insert-" right)
+                          (lambda () (interactive)
+                            (surround-insert right))))))))
 #+end_src
 ** Built-in packages
 *** Abbreviations
@@ -959,7 +982,7 @@ default, the whole line in the file is highlighted."
   (setq-default hl-line-range-function #'get-visual-line-range))
 #+end_src
 *** Electric
-This built-in package includes =electric-indent-mode= which automatically indents code on a newline and =electric-pair-mode= and which automatically insert closing delimiters.
+This built-in package includes =electric-indent-mode= which automatically indents code on a newline and =electric-pair-mode= and which automatically inserts closing delimiters.
 #+begin_src emacs-lisp
 (use-package electric
   :hook (prog-mode-hook . electric-indent-local-mode)
@@ -1237,14 +1260,13 @@ With Emacs 29, true transparency has been added.
 ** Completion
 *** In-buffer completion
 **** corfu
-[[https://github.com/minad/corfu][corfu]] is minimal completion provider aligning with Emacs built-in tools.
+[[https://github.com/minad/corfu][corfu]] show a in-buffer menu when =completion-at-point= functions return some candidates.
 #+begin_src emacs-lisp
 (use-package corfu
   :init (global-corfu-mode t)
-  :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-         ;; ((prog-mode ielm-mode) . corfu-mode)
-         (corfu-mode . corfu-popupinfo-mode)
-         ((prog-mode ielm-mode org-mode) . (lambda () (setq-local corfu-auto t))))
+  :hook ((corfu-mode . corfu-popupinfo-mode)
+         ((prog-mode ielm-mode org-mode) .
+          (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
                                  :background unspecified
@@ -1256,21 +1278,11 @@ With Emacs 29, true transparency has been added.
   (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
-  ;; :preface
-  ;; it doesn't exit when using meow, the fix was inspired by
-  ;; https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
-  ;; (defun custom/corfu-cleanup ()
-  ;;   "Close corfu popup if it is active."
-  ;;   (if (boundp 'corfu-mode)
-  ;;       (if corfu-mode (corfu-quit))))
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
               ("C-l" . corfu-insert)
-              ("<escape>" . corfu-quit))
-  :config
-  ;; (add-to-list 'meow-mode-state-list '(corfu-mode . insert))
-  )
+              ("<escape>" . corfu-quit)))
 
 (use-package nerd-icons-corfu
   :hook (corfu-mode . nerd-icons-corfu-setup)
@@ -1279,6 +1291,7 @@ With Emacs 29, true transparency has been added.
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 #+end_src
 **** cape
+[[https://github.com/minad/cape][CAPE]] provides a bunch of general completion-at-point functions which can make writing experience nicer.
 #+begin_src emacs-lisp
 (use-package cape
   :init
@@ -1287,11 +1300,10 @@ With Emacs 29, true transparency has been added.
   ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block))
 #+end_src
 **** completion-preview-mode
+=completion-preview-mode= is a built-in mode that shows a preview of the most likely matching candidate from a =completion-at-point= function without showing any completion UI.
 #+begin_src emacs-lisp
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
@@ -1337,32 +1349,9 @@ I switched from [[https://github.com/abo-abo/swiper#ivy][Ivy]] to [[https://gith
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 #+end_src
-
-[[https://github.com/oantolin/orderless][Orderless]] is used for using different completion style across whole Emacs.
-#+begin_src emacs-lisp
-(use-package orderless
-  :after vertico
-  :init
-  ;; Configure a custom style dispatcher (see the Consult wiki)
-  ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
-  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles orderless partial-completion)))))
-#+end_src
-
-Built-in =savehist-mode= saves minibuffer history
-#+begin_src emacs-lisp
-(use-package savehist
-  :init (savehist-mode t)
-  :custom
-  (savehist-file (expand-file-name-user-share "history"))
-  :config
-  (setq savehist-additional-variables
-        (append savehist-additional-variables '(comint-input-ring))))
-#+end_src
 **** Consult
 [[https://github.com/minad/consult][Consult]] has lots of useful commands with minibuffer completion.
+Those commands ususally have a preview functionality and some have narrowing functionality.
 #+begin_src emacs-lisp
 (use-package consult
   :init
@@ -1424,13 +1413,72 @@ Built-in =savehist-mode= saves minibuffer history
    (keymap-set project-prefix-map "g" #'consult-project-grep))
 #+end_src
 **** Annotations (marginalia)
-[[https://github.com/minad/marginalia][Marginalia]] shows candidatate's annotations
+[[https://github.com/minad/marginalia][Marginalia]] shows annotations for minibuffer candidates.
+Emacs has some annotations by default but Marginalia adds annotations to the default completion categories.
+Marginalia also has its own functions for showing an annotation which can pad the annotation text to the longest annotation in the list.
 #+begin_src emacs-lisp
 (use-package marginalia
   :after vertico
   :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle))
   :init (marginalia-mode))
+#+end_src
+*** Orderless
+[[https://github.com/oantolin/orderless][Orderless]] is used for using different completion style across whole Emacs.
+With Orderless, you can find things in a minibuffer by writing words without particular order separated by a specified separator (space by default).
+This helps a lot with searching things.
+At also has special characters that can help you narrow things down even more.
+
+Let's have =foo= as a string example:
+- =&foo= searches for candidates that have a string in its annotation
+- =^foo= searches for candidates starting with a string
+- =!foo= searches for candidates that don't have a string
+
+There are a few more special characters and with them, you get very flexible filtering across all minibuffer commands.
+#+begin_src emacs-lisp
+(use-package orderless
+  :after vertico
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
+  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles orderless partial-completion)))))
+#+end_src
+*** Prescient
+[[https://github.com/raxod502/prescient.el][Prescient]] remembers your completion choices and can sort the current completion candidates so that the previous choices will show up on the top of the list.
+Like Orderless, it also can filter completion candidates, but I only want the sorting part.
+#+begin_src emacs-lisp
+(use-package prescient
+  :custom
+  (prescient-filter-method nil)
+  (prescient-save-file (expand-file-name-user-share
+                        "prescient-save.el"))
+  (prescient-history-length most-positive-fixnum)
+  :config
+  (prescient-persist-mode 1))
+
+(use-package vertico-prescient
+  :hook (vertico-mode . vertico-prescient-mode)
+  :custom
+  (vertico-prescient-enable-filtering nil))
+
+(use-package corfu-prescient
+  :hook (corfu-mode . corfu-prescient-mode)
+  :custom
+  (corfu-prescient-enable-filtering nil))
+#+end_src
+*** Savehist
+Built-in =savehist-mode= saves minibuffer history.
+#+begin_src emacs-lisp
+(use-package savehist
+  :init (savehist-mode t)
+  :custom
+  (savehist-file (expand-file-name-user-share "history"))
+  :config
+  (setq savehist-additional-variables
+        (append savehist-additional-variables '(comint-input-ring))))
 #+end_src
 *** Ignore letter casing
 #+begin_src emacs-lisp
@@ -2040,7 +2088,7 @@ as you zoom text. It's fast, since no image regeneration is required."
   (plist-put org-format-latex-options :foreground nil)
   (plist-put org-format-latex-options :background nil))
 #+end_src
-*** Meow settings
+*** Meow settings :ARCHIVE:
 #+begin_src emacs-lisp
 (use-package org
   :bind (:map org-mode-map
@@ -2328,7 +2376,7 @@ I make an annotation using marginalia.
                  none)))
 #+end_src
 **** AniList incrementing progress
-My anime and manga notes have =progress= proprty which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
+My anime and manga notes have =progress= property which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
 This code lets me choose a node and increment its progress.
 #+begin_src emacs-lisp
 (use-package org-roam
@@ -2357,7 +2405,7 @@ It's value needs to be number/anything.
     (save-window-excursion
       (if (org-entry-get (point) "progress")
           (org-increment-progress-property)
-        (consult-org-heading)
+        (consult-org-heading "progress={[^^$]}")
         (org-increment-progress-property))
       (save-buffer)
       (message "Updated %s progress to %s"
@@ -2400,54 +2448,56 @@ This shows my AniList activities from last week and makes links to org roam node
                (page (alist-get 'Page data))
                (activities (alist-get 'activities page)))
 
-          (unless (string-empty-p (buffer-string))
-            (erase-buffer))
-
           (unless activities
-            (insert "There was no activity past week."))
+            (kill-buffer buffer)
+            (message "There was no activity past week."))
 
-          (mapc
-           (lambda (item)
-             (let* ((media (alist-get 'media item))
-                    (raw-format (alist-get 'format media))
-                    (format (downcase (or raw-format "")))
-                    (titles (alist-get 'title media))
-                    (title (or (alist-get 'english titles)
-                               (alist-get 'romaji titles)
-                               (alist-get 'native titles)
-                               "Unknown"))
-                    (id (alist-get 'id media))
-                    (created (seconds-to-time
-                              (alist-get 'createdAt item)))
-                    (date (format-time-string "%Y-%m-%d" created))
-                    (progress (alist-get 'progress item))
-                    (status (alist-get 'status item)))
+          (when activities
+            (unless (string-empty-p (buffer-string))
+              (erase-buffer))
 
-               (insert (capitalize format) " ")
+            (mapc
+             (lambda (item)
+               (let* ((media (alist-get 'media item))
+                      (raw-format (alist-get 'format media))
+                      (format (downcase (or raw-format "")))
+                      (titles (alist-get 'title media))
+                      (title (or (alist-get 'english titles)
+                                 (alist-get 'romaji titles)
+                                 (alist-get 'native titles)
+                                 "Unknown"))
+                      (id (alist-get 'id media))
+                      (created (seconds-to-time
+                                (alist-get 'createdAt item)))
+                      (date (format-time-string "%Y-%m-%d" created))
+                      (progress (alist-get 'progress item))
+                      (status (alist-get 'status item)))
 
-               (insert-text-button
-                title
-                'anilist-type format
-                'anilist-id id
-                'follow-link t
-                'action
-                (lambda (button)
-                  (org-roam-open-animanga-node
-                   (button-get button 'anilist-type)
-                   (button-get button 'anilist-id)
-                   t)))
+                 (insert (capitalize format) " ")
 
-               (let ((progress-string
-                      (when progress
-                        (format "at progress %s" progress))))
-                 (insert
-                  (concat (format " has status \"%s\"" status)
-                          (when progress-string
-                            (format " %s" progress-string))
-                          (format " at date %s\n" date))))))
-           activities)))
+                 (insert-text-button
+                  title
+                  'anilist-type format
+                  'anilist-id id
+                  'follow-link t
+                  'action
+                  (lambda (button)
+                    (org-roam-open-animanga-node
+                     (button-get button 'anilist-type)
+                     (button-get button 'anilist-id)
+                     t)))
 
-      (switch-to-buffer-other-window buffer)))
+                 (let ((progress-string
+                        (when progress
+                          (format "at progress %s" progress))))
+                   (insert
+                    (concat (format " has status \"%s\"" status)
+                            (when progress-string
+                              (format " %s" progress-string))
+                            (format " at date %s\n" date))))))
+             activities)
+
+            (switch-to-buffer-other-window buffer))))))
 
   (defun org-roam-anilist-root-format (type)
     (let* ((hierarchy

@@ -56,21 +56,32 @@ The commands will be different based on LIGHT's value."
                            "pywal" "--gtk" "both"))
     (format t "Applying Gradience theme in background.~%")))
 
-(defun gtk2-icon-setup (light)
-  "Change GTK 2 configuration to use Papirus light or dark icons
+(defun gtk-icon-setup (light)
+  "Change GTK 2 and 3 configurations to use Papirus light or dark icons
 depending on LIGHT's value"
-  (let ((config-file (uiop:native-namestring
-                      (merge-pathnames
-                       "gtk-2.0/gtkrc"
-                       (uiop:ensure-directory-pathname
-                        (uiop:getenv "XDG_CONFIG_HOME"))))))
-    (when (probe-file config-file)
+  (let ((gtk2-config-file (uiop:native-namestring
+                           (merge-pathnames
+                            "gtk-2.0/gtkrc"
+                            (uiop:ensure-directory-pathname
+                             (uiop:getenv "XDG_CONFIG_HOME")))))
+        (gtk3-config-file (uiop:native-namestring
+                           (merge-pathnames
+                            "gtk-3.0/settings.ini"
+                            (uiop:ensure-directory-pathname
+                             (uiop:getenv "XDG_CONFIG_HOME"))))))
+    (when (probe-file gtk2-config-file)
       (uiop:run-program `("sed" "-i"
-                                ,(if light
-                                     "s/Papirus-Dark/Papirus-Light/g"
-                                     "s/Papirus-Light/Papirus-Dark/g")
-                                ,config-file))))
-  (format t "Set up GTK 2 icons.~%"))
+                          ,(if light
+                            "s/Papirus-Dark/Papirus-Light/g"
+                            "s/Papirus-Light/Papirus-Dark/g")
+                          ,gtk2-config-file)))
+    (when (probe-file gtk3-config-file)
+      (uiop:run-program `("sed" "-i"
+                          ,(if light
+                            "s/Papirus-Dark/Papirus-Light/g"
+                            "s/Papirus-Light/Papirus-Dark/g")
+                          ,gtk3-config-file))))
+  (format t "Set up GTK 2 and 3 icons.~%"))
 
 (defun find-and-kill-process (name &key (signal "-TERM"))
   "Find processes whose command line contains NAME and send them SIGNAL."
@@ -200,13 +211,19 @@ It changes 2 variables depending on value of LIGHT."
                 "Papirus-Light"
                 "Papirus-Dark"))))
 
+(defun hyprland-setup ()
+  "Issue a reload request to Hyprland."
+  (when (command-running-p "Hyprland")
+    (uiop:run-program "hyprctl reload")))
+
 (gsettings-run *light-theme-p*)
-(reload-gtk-theme)
+;; (reload-gtk-theme)
 (swaybg-setup *wallpaper-path* *old-wallpaper-p*)
 (sway-setup)
+(hyprland-setup)
 (waybar-setup)
 (gradience-wrap)
-(gtk2-icon-setup *light-theme-p*)
+(gtk-icon-setup *light-theme-p*)
 ;; (emacs-setup *light-theme-p*)
 (emacs-modus-setup)
 (qutebrowser-setup)

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (defvar on-termux-p (getenv "TERMUX_VERSION")
   "Non-nil means Emacs is running inside of Termux.")
 
@@ -583,7 +585,21 @@ it."
   (keymap-set surround-keymap "i" #'surround-insert)
   (keymap-set surround-keymap "m" #'surround-mark)
   (keymap-unset surround-keymap "s" t)
-  (keymap-set meow-normal-state-keymap "S" surround-keymap))
+  (keymap-set meow-normal-state-keymap "S" surround-keymap)
+  ;; with this, I don't need to press i to be able to insert pairs
+  ;; lexical binding needs to be turned on for this to work
+  (dolist (pair surround-pairs)
+    (let ((left  (car pair))
+          (right (cdr pair)))
+      (keymap-set surround-keymap left
+                  (cons (concat "insert-" left)
+                        (lambda () (interactive)
+                          (surround-insert left))))
+      (unless (string= left right)
+        (keymap-set surround-keymap right
+                    (cons (concat "insert-" right)
+                          (lambda () (interactive)
+                            (surround-insert right))))))))
 
 (use-package abbrev
   :ensure nil
@@ -906,10 +922,9 @@ default, the whole line in the file is highlighted."
 
 (use-package corfu
   :init (global-corfu-mode t)
-  :hook (;; (meow-insert-exit . custom/corfu-cleanup)
-         ;; ((prog-mode ielm-mode) . corfu-mode)
-         (corfu-mode . corfu-popupinfo-mode)
-         ((prog-mode ielm-mode org-mode) . (lambda () (setq-local corfu-auto t))))
+  :hook ((corfu-mode . corfu-popupinfo-mode)
+         ((prog-mode ielm-mode org-mode) .
+          (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
                                  :background unspecified
@@ -921,21 +936,11 @@ default, the whole line in the file is highlighted."
   (corfu-quit-no-match t)
   (global-corfu-minibuffer nil)
   (tab-always-indent 'complete)
-  ;; :preface
-  ;; it doesn't exit when using meow, the fix was inspired by
-  ;; https://gitlab.com/daniel.arnqvist/emacs-config/-/blob/master/init.el?ref_type=heads#L147
-  ;; (defun custom/corfu-cleanup ()
-  ;;   "Close corfu popup if it is active."
-  ;;   (if (boundp 'corfu-mode)
-  ;;       (if corfu-mode (corfu-quit))))
   :bind (:map corfu-map
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
               ("C-l" . corfu-insert)
-              ("<escape>" . corfu-quit))
-  :config
-  ;; (add-to-list 'meow-mode-state-list '(corfu-mode . insert))
-  )
+              ("<escape>" . corfu-quit)))
 
 (use-package nerd-icons-corfu
   :hook (corfu-mode . nerd-icons-corfu-setup)
@@ -950,9 +955,7 @@ default, the whole line in the file is highlighted."
   ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block))
 
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
@@ -989,24 +992,6 @@ default, the whole line in the file is highlighted."
               ("M-DEL" . vertico-directory-delete-word))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-
-(use-package orderless
-  :after vertico
-  :init
-  ;; Configure a custom style dispatcher (see the Consult wiki)
-  ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
-  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles orderless partial-completion)))))
-
-(use-package savehist
-  :init (savehist-mode t)
-  :custom
-  (savehist-file (expand-file-name-user-share "history"))
-  :config
-  (setq savehist-additional-variables
-        (append savehist-additional-variables '(comint-input-ring))))
 
 (use-package consult
   :init
@@ -1072,6 +1057,43 @@ default, the whole line in the file is highlighted."
   :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle))
   :init (marginalia-mode))
+
+(use-package orderless
+  :after vertico
+  :init
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch)
+  ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles orderless partial-completion)))))
+
+(use-package prescient
+  :custom
+  (prescient-filter-method nil)
+  (prescient-save-file (expand-file-name-user-share
+                        "prescient-save.el"))
+  (prescient-history-length most-positive-fixnum)
+  :config
+  (prescient-persist-mode 1))
+
+(use-package vertico-prescient
+  :hook (vertico-mode . vertico-prescient-mode)
+  :custom
+  (vertico-prescient-enable-filtering nil))
+
+(use-package corfu-prescient
+  :hook (corfu-mode . corfu-prescient-mode)
+  :custom
+  (corfu-prescient-enable-filtering nil))
+
+(use-package savehist
+  :init (savehist-mode t)
+  :custom
+  (savehist-file (expand-file-name-user-share "history"))
+  :config
+  (setq savehist-additional-variables
+        (append savehist-additional-variables '(comint-input-ring))))
 
 (setq completion-ignore-case t)
 (setq read-buffer-completion-ignore-case t)
@@ -1627,63 +1649,6 @@ as you zoom text. It's fast, since no image regeneration is required."
   (plist-put org-format-latex-options :foreground nil)
   (plist-put org-format-latex-options :background nil))
 
-(use-package org
-  :bind (:map org-mode-map
-              ("C-c M-m" . meow-org-motion-mode))
-  :config
-  ;; meow custom state (inspired by
-  ;; https://aatmunbaxi.netlify.app/comp/meow_state_org_speed/)
-  (setq meow-org-motion-keymap (make-keymap))
-  (meow-define-state org-motion
-    "Org-mode structural motion"
-    :lighter "[O]"
-    :keymap meow-org-motion-keymap)
-
-  (meow-define-keys 'org-motion
-    '("<escape>" . meow-normal-mode)
-    '("SPC" . meow-keypad)
-    '("i" . meow-insert-mode)
-    '("g" . meow-normal-mode)
-    '("u" .  meow-undo)
-    ;; Moving between headlines
-    '("k" .  org-previous-visible-heading)
-    '("j" .  org-next-visible-heading)
-    '("<up>" .  org-previous-visible-heading)
-    '("<down>" .  org-next-visible-heading)
-    ;; Moving between headings at the same level
-    '("p" .  org-backward-heading-same-level)
-    '("n" .  org-forward-heading-same-level)
-    '("<left>" .  org-backward-heading-same-level)
-    '("<right>" .  org-forward-heading-same-level)
-    ;; Moving subtrees themselves
-    '("K" .  org-move-subtree-up)
-    '("J" .  org-move-subtree-down)
-    ;; Subtree de/promotion
-    '("L" .  org-demote-subtree)
-    '("H" .  org-promote-subtree)
-    ;; Completion-style search of headings
-    '("v" .  consult-org-heading)
-    ;; Setting subtree metadata
-    '("l" .  org-set-property)
-    '("t" .  org-todo)
-    '("d" .  org-deadline)
-    '("s" .  org-schedule)
-    '("e" .  org-set-effort)
-    ;; Block navigation
-    '("b" .  org-previous-block)
-    '("f" .  org-next-block)
-    ;; Narrowing/widening
-    '("N" .  org-narrow-to-subtree)
-    '("W" .  widen))
-
-  ;; unfolding every header when using `meow-visit'
-  (advice-add 'meow-visit :before
-              (lambda (&rest _)
-                (if (eq major-mode 'org-mode)
-                    (unless (eq org-cycle-global-status 'all)
-                      (org-fold-show-all)))))
-  )
-
 (with-eval-after-load 'org
   (require 'org-tempo)
   (add-to-list 'org-structure-template-alist '("sh" . "src sh"))
@@ -1895,7 +1860,7 @@ It's value needs to be number/anything.
     (save-window-excursion
       (if (org-entry-get (point) "progress")
           (org-increment-progress-property)
-        (consult-org-heading)
+        (consult-org-heading "progress={[^^$]}")
         (org-increment-progress-property))
       (save-buffer)
       (message "Updated %s progress to %s"
@@ -1935,54 +1900,56 @@ It's value needs to be number/anything.
                (page (alist-get 'Page data))
                (activities (alist-get 'activities page)))
 
-          (unless (string-empty-p (buffer-string))
-            (erase-buffer))
-
           (unless activities
-            (insert "There was no activity past week."))
+            (kill-buffer buffer)
+            (message "There was no activity past week."))
 
-          (mapc
-           (lambda (item)
-             (let* ((media (alist-get 'media item))
-                    (raw-format (alist-get 'format media))
-                    (format (downcase (or raw-format "")))
-                    (titles (alist-get 'title media))
-                    (title (or (alist-get 'english titles)
-                               (alist-get 'romaji titles)
-                               (alist-get 'native titles)
-                               "Unknown"))
-                    (id (alist-get 'id media))
-                    (created (seconds-to-time
-                              (alist-get 'createdAt item)))
-                    (date (format-time-string "%Y-%m-%d" created))
-                    (progress (alist-get 'progress item))
-                    (status (alist-get 'status item)))
+          (when activities
+            (unless (string-empty-p (buffer-string))
+              (erase-buffer))
 
-               (insert (capitalize format) " ")
+            (mapc
+             (lambda (item)
+               (let* ((media (alist-get 'media item))
+                      (raw-format (alist-get 'format media))
+                      (format (downcase (or raw-format "")))
+                      (titles (alist-get 'title media))
+                      (title (or (alist-get 'english titles)
+                                 (alist-get 'romaji titles)
+                                 (alist-get 'native titles)
+                                 "Unknown"))
+                      (id (alist-get 'id media))
+                      (created (seconds-to-time
+                                (alist-get 'createdAt item)))
+                      (date (format-time-string "%Y-%m-%d" created))
+                      (progress (alist-get 'progress item))
+                      (status (alist-get 'status item)))
 
-               (insert-text-button
-                title
-                'anilist-type format
-                'anilist-id id
-                'follow-link t
-                'action
-                (lambda (button)
-                  (org-roam-open-animanga-node
-                   (button-get button 'anilist-type)
-                   (button-get button 'anilist-id)
-                   t)))
+                 (insert (capitalize format) " ")
 
-               (let ((progress-string
-                      (when progress
-                        (format "at progress %s" progress))))
-                 (insert
-                  (concat (format " has status \"%s\"" status)
-                          (when progress-string
-                            (format " %s" progress-string))
-                          (format " at date %s\n" date))))))
-           activities)))
+                 (insert-text-button
+                  title
+                  'anilist-type format
+                  'anilist-id id
+                  'follow-link t
+                  'action
+                  (lambda (button)
+                    (org-roam-open-animanga-node
+                     (button-get button 'anilist-type)
+                     (button-get button 'anilist-id)
+                     t)))
 
-      (switch-to-buffer-other-window buffer)))
+                 (let ((progress-string
+                        (when progress
+                          (format "at progress %s" progress))))
+                   (insert
+                    (concat (format " has status \"%s\"" status)
+                            (when progress-string
+                              (format " %s" progress-string))
+                            (format " at date %s\n" date))))))
+             activities)
+
+            (switch-to-buffer-other-window buffer))))))
 
   (defun org-roam-anilist-root-format (type)
     (let* ((hierarchy
