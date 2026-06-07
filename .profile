@@ -23,3 +23,4 @@ export CALIBRE_USE_SYSTEM_THEME=1
 export ANDROID_USER_HOME="${XDG_DATA_HOME}/android"
 export MARIADB_HISTFILE="${XDG_DATA_HOME}/mariadb_history"
 export SSH_ASKPASS=/usr/lib/seahorse/ssh-askpass
+export GOPATH="${XDG_DATA_HOME}/go"

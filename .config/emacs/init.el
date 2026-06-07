@@ -132,8 +132,12 @@ Most of the stuff will get redirected here.")
 
 ;; Some file extensions set for certain modes
 (add-to-list 'auto-mode-alist '("\\.rasi\\'" . js-json-mode))
-(add-to-list 'auto-mode-alist '("\\`\\(README\\|CHANGELOG\\|COPYING\\|LICENSE\\)\\'" . text-mode))
+(add-to-list 'auto-mode-alist
+             '("\\`\\(README\\|CHANGELOG\\|COPYING\\|LICENSE\\)\\'"
+               . text-mode))
 (add-to-list 'auto-mode-alist '("PKGBUILD" . sh-mode))
+(add-to-list 'auto-mode-alist '(".PKGINFO" . conf-mode))
+(add-to-list 'auto-mode-alist '(".BUILDINFO" . conf-mode))
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*"
@@ -259,8 +263,7 @@ Most of the stuff will get redirected here.")
   :init
   (package-initialize)
   (unless package-archive-contents
-    (package-refresh-contents))
-  )
+    (package-refresh-contents)))
 
 (setq-default require-final-newline 'visit-save)
 
@@ -305,6 +308,14 @@ newlines at their end."
     (unless (or (region-active-p)
                 (= (point) (line-end-position)))
       (forward-char)))
+  ;; When I do `meow-append' and immediately then switch back to normal
+  ;; mode and do `meow-append' again, the cursor is moving forward. This
+  ;; code fixes that.
+  (add-hook 'meow-normal-mode-hook
+            (lambda () (when (and (eq last-command 'meow-append)
+                                  (not (= (point)
+                                          (line-beginning-position))))
+                         (backward-char))))
 
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -603,7 +614,7 @@ it."
 
 (use-package abbrev
   :ensure nil
-  :hook (text-mode . abbrev-mode) ;; `text-mode' is a parent of `org-mode'
+  :hook (text-mode . abbrev-mode) ; `text-mode' is a parent of `org-mode'
   :bind ("C-x \"" . unexpand-abbrev)
   :config
   (if on-termux-p
@@ -653,7 +664,8 @@ it."
   ;;             (lambda (&rest _) (when (yes-or-no-p "Rename tab? ")
   ;;                                 (call-interactively #'tab-rename))))
   :custom-face
-  (tab-bar-tab ((nil (:inherit 'highlight :background unspecified :foreground unspecified))))
+  (tab-bar-tab ((nil (:inherit 'highlight :background unspecified
+                      :foreground unspecified))))
   :bind ("C-x t k" . other-tab-prefix)
   :custom
   (tab-bar-show 1)                     ;; hide bar if <= 1 tabs open
@@ -887,6 +899,7 @@ default, the whole line in the file is highlighted."
 (setq modus-ewal-theme-install-dir
       (when (file-exists-p "~/Projects/modus-ewal-theme/")
         "~/Projects/modus-ewal-theme/"))
+
 (if on-termux-p
     (use-package doom-themes
       :demand
@@ -895,28 +908,22 @@ default, the whole line in the file is highlighted."
     :demand
     :load-path modus-ewal-theme-install-dir
     :config
+    (unless (daemonp)
+      (load-theme 'modus-ewal t))
+    (defun custom-modus-ewal-theme-load-once ()
+      (and (not (member 'modus-ewal custom-enabled-themes))
+           (load-theme 'modus-ewal t))
+      ;; it only needs to be run once, so I remove it
+      (remove-hook 'server-after-make-frame-hook
+                   #'custom-modus-ewal-theme-load-once))
+    (add-hook 'server-after-make-frame-hook
+              #'custom-modus-ewal-theme-load-once)
+
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
                 (set-face-attribute
                  'modus-themes-button nil
-                 :inherit nil)))
-    (unless (daemonp)
-      (load-theme 'modus-ewal t))
-    (add-hook 'server-after-make-frame-hook
-              (lambda ()
-                (when (and (not (member 'modus-ewal
-                                        custom-enabled-themes)))
-                  (load-theme 'modus-ewal t))))
-    ;; it only needs to be run once, so I remove it
-    (add-hook 'server-after-make-frame-hook
-              (lambda ()
-                (remove-hook
-                 'server-after-make-frame-hook
-                 (lambda ()
-                   (when (and (not (member 'modus-ewal
-                                           custom-enabled-themes)))
-                     (load-theme 'modus-ewal t)))))
-              100)))
+                 :inherit nil)))))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -1347,7 +1354,8 @@ If FILE is a directory, inserts the path to the directory."
             (kill-local-variable project-current-directory-override))))))
   (keymap-set project-prefix-map "m" #'magit-project-status)
   (with-eval-after-load 'project
-    (add-to-list 'project-switch-commands '(magit-project-status "Magit") t)))
+    (add-to-list 'project-switch-commands
+                 '(magit-project-status "Magit") t)))
 
 (use-package transient
   :custom
@@ -1662,8 +1670,7 @@ as you zoom text. It's fast, since no image regeneration is required."
     (setq-local electric-pair-inhibit-predicate
                 `(lambda (c)
                    (if (char-equal c ?<) t
-                     (,electric-pair-inhibit-predicate c)))))
-  )
+                     (,electric-pair-inhibit-predicate c))))))
 
 (use-package org-appear
   :after org
@@ -2400,39 +2407,36 @@ It doesn't close empty tags."
 (use-package eat
   :hook (eshell-load . eat-eshell-mode))
 
-(use-package vterm
+(use-package ghostel
   :unless on-termux-p
   :init
   ;; embark setup
   (with-eval-after-load 'embark
-    (defun vterm-dir (directory)
-      "Spawn vterm in specified DIRECTORY."
+    (defun ghostel-dir (directory)
+      "Spawn ghostel in specified DIRECTORY."
       (interactive "D")
       (let ((default-directory directory))
-        (vterm)))
-    (keymap-set embark-file-map "t" 'vterm-dir))
-  :hook (vterm-mode . (lambda () (setq mode-line-format nil)))
-  (vterm-mode . vterm-meow-setup)
-  (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
-  :bind (("C-c s v" . vterm))
-  :custom
-  (vterm-max-scrollback 5000)
-  (vterm-always-compile-module t)
+        (ghostel)))
+    (keymap-set embark-file-map "t" 'ghostel-dir))
+  :hook (ghostel-mode . (lambda () (setq mode-line-format nil)))
+  (ghostel-mode . ghostel-meow-setup)
+  (ghostel-mode . (lambda () (setq-local global-hl-line-mode nil)))
+  :bind (("C-c s v" . ghostel))
   :config
-  (add-to-list 'meow-mode-state-list '(vterm-mode . insert))
-  (defun vterm-meow-setup ()
+  (add-to-list 'meow-mode-state-list '(ghostel-mode . insert))
+  (defun ghostel-meow-setup ()
     (add-hook 'meow-normal-mode-hook
               (lambda ()
-                (when (eq major-mode 'vterm-mode)
-                  (unless vterm-copy-mode
-                    (vterm-copy-mode 1)
+                (when (eq major-mode 'ghostel-mode)
+                  (unless (equal ghostel--input-mode 'emacs)
+                    (ghostel-emacs-mode)
                     (hl-line-mode 1))))
               nil t)
     (add-hook 'meow-insert-mode-hook
               (lambda ()
-                (when (eq major-mode 'vterm-mode)
-                  (when vterm-copy-mode
-                    (vterm-copy-mode 0)
+                (when (eq major-mode 'ghostel-mode)
+                  (when (equal ghostel--input-mode 'emacs)
+                    (ghostel-semi-char-mode)
                     (hl-line-mode -1))))
               nil t)))
 

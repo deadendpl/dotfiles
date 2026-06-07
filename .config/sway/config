@@ -25,6 +25,7 @@ exec {
   $scripts/emacs.sh
   /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
   wl-clip-persist -c primary
+  neru launch
 }
 
 # disabling window name in the window's border
@@ -55,7 +56,8 @@ input type:keyboard {
 #
 bindsym {
   $mod+t              exec $term
-  # I'm constantly changing web browser, so I made this little solution for launching default web browser
+  # I'm constantly changing web browser, so I made this little solution
+  # for launching default web browser
   $mod+w              exec xdg-settings get default-web-browser | xargs gtk-launch
   $mod+e              exec $editor
   $mod+Alt+e          exec $editor -e "(scratch-buffer)"
@@ -64,6 +66,7 @@ bindsym {
   $mod+Return         exec $menu
   $mod+Shift+Return   exec $scripts/hub.sh
   $mod+n              exec swaync-client -t
+  $mod+c              exec neru recursive_grid
 
   $mod+m              exec $term -e htop
   $mod+Shift+m        exec $term -e sudo htop
@@ -248,6 +251,7 @@ for_window {
   [title="^Compress$|^Extract$" app_id="org.gnome.FileRoller"] floating enable
   [title="Share" app_id="valent"] floating enable
   [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
+  [app_id="gimp" title="^Search Actions$|^Layer Select$|^GIMP user manual is missing$"] floating enable
 }
 
 include {

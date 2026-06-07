@@ -4,7 +4,7 @@
 
 I decided to put all installation shell scripts in this file because it's cool.
 The script generated from this is called [[./install.sh][install.sh]].
-Note that *it's not automated and may require manual intervention*.
+Note that *it's not fully automated and may require manual intervention*.
 There are a lots of ~sudo -v~ as that can keep you from typing your root password.
 
 * WARNING
@@ -17,6 +17,7 @@ The script assumes that you:
 - have *GRUB* as a bootloader
 - have no display (login) manager
 - execute the script with your user, not root
+- execute the script inside the directory this file resides in
 * Setup
 #+begin_src sh :shebang "#!/usr/bin/env bash"
 DOTFILES_INSTALL_DIR=$(pwd)
@@ -198,7 +199,7 @@ if pacman -Q yay >> /dev/null; then
 else
   git clone https://aur.archlinux.org/yay-bin
   cd yay-bin
-  makepkg -si --noconfirm --needed
+  makepkg -csi --noconfirm --needed
   cd ..
   rm -rf yay-bin/
 fi
@@ -429,7 +430,7 @@ make copy
 * Installing rofi-bookmarks
 #+begin_src sh
 cd $DOTFILES_INSTALL_DIR/rofi-bookmarks
-makepkg -si --noconfirm --needed
+makepkg -csi --noconfirm --needed
 #+end_src
 * Installing gradience
 #+begin_src sh
@@ -440,7 +441,12 @@ yay -S --noconfirm --needed python-anyascii \
                             python-material-color-utilities \
                             python-zombie-imp
 
-makepkg -si --noconfirm --needed
+makepkg -csi --noconfirm --needed
+#+end_src
+* Installing neru
+#+begin_src sh
+cd $DOTFILES_INSTALL_DIR/neru
+makepkg -csi --noconfirm --needed
 #+end_src
 * Example wallpaper download
 #+begin_src sh

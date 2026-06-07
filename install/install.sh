@@ -144,7 +144,7 @@ if pacman -Q yay >> /dev/null; then
 else
   git clone https://aur.archlinux.org/yay-bin
   cd yay-bin
-  makepkg -si --noconfirm --needed
+  makepkg -csi --noconfirm --needed
   cd ..
   rm -rf yay-bin/
 fi
@@ -183,7 +183,7 @@ else
                               python-zombie-imp \
                               wpgtk \
                               # gtk-theme-flat-color-git
-                              # python-inotify-simple \
+                              # python-inotify-csimple \
                               # python-psutil \
                               # python-prctl \
                               # python-daemon \
@@ -336,7 +336,7 @@ sbcl --load ~/quicklisp.lisp \
 make copy
 
 cd $DOTFILES_INSTALL_DIR/rofi-bookmarks
-makepkg -si --noconfirm --needed
+makepkg -csi --noconfirm --needed
 
 cd $DOTFILES_INSTALL_DIR/gradience
 
@@ -345,7 +345,10 @@ yay -S --noconfirm --needed python-anyascii \
                             python-material-color-utilities \
                             python-zombie-imp
 
-makepkg -si --noconfirm --needed
+makepkg -csi --noconfirm --needed
+
+cd $DOTFILES_INSTALL_DIR/neru
+makepkg -csi --noconfirm --needed
 
 read -p "Want to have an example wallpaper downloaded to make pyrice work? [y/n]: " -n 1 -r
 echo

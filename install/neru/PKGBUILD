@@ -1,0 +1,32 @@
+pkgname=neru
+pkgver=1.42.0
+pkgrel=1
+pkgdesc="Keyboard-driven navigation - Navigate and click without touching your mouse."
+arch=("x86_64")
+url="https://github.com/y3owk1n/neru"
+license=("MIT")
+makedepends=("go" "just" "cairo" "wayland" "libx11" "libxtst" \
+                  "libxrandr" "libxinerama" "libxfixes" "libxkbcommon" \
+                  "wayland-protocols")
+source=("https://github.com/y3owk1n/neru/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=("0212644f71d93b825a40b6c9be15ff1ba33562ce17a4a5f8d3c1306d63859ade")
+
+build() {
+  cd "neru-${pkgver}"
+  just build
+}
+
+package() {
+  install -Dm755 "${srcdir}/neru-${pkgver}/bin/neru" \
+          "${pkgdir}/usr/bin/neru"
+  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+          -Dm644 "${srcdir}/neru-${pkgver}/docs/CLI.md"
+  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+          -Dm644 "${srcdir}/neru-${pkgver}/docs/CONFIGURATION.md"
+  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+          -Dm644 "${srcdir}/neru-${pkgver}/docs/LINUX_SETUP.md"
+  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+          -Dm644 "${srcdir}/neru-${pkgver}/docs/TIPS_TRICKS.md"
+  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+          -Dm644 "${srcdir}/neru-${pkgver}/docs/TROUBLESHOOTING.md"
+}
