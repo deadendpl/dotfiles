@@ -194,7 +194,7 @@ It changes 2 variables depending on value of LIGHT."
   "Handles Emacs theme based on modus."
   (when (command-running-p "emacs")
     (uiop:run-program
-     "emacsclient -e \"(modus-ewal-theme-regenerate-theme)\"")
+     "emacsclient -e \"(load-theme 'modus-ewal t)\"")
     (format t "Reloaded Emacs theme.~%")))
 
 (defun rofi-setup ()

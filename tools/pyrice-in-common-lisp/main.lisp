@@ -115,25 +115,25 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
   (list
    (clingon:make-option
     :string
-    :description "Backend to use"
+    :description "backend to use"
     :long-name "backend"
     :initial-value "haishoku"
     :key :backend)
    (clingon:make-option
     :flag
-    :description "Disable time based theme checking"
+    :description "disable time based theme checking"
     :long-name "time"
     :short-name #\t
     :key :time)
    (clingon:make-option
     :flag
-    :description "Use light theme"
+    :description "use light theme"
     :long-name "light"
     :short-name #\l
     :key :light)
    (clingon:make-option
     :flag
-    :description "Use the current/old wallpaper"
+    :description "use the current/old wallpaper"
     :long-name "old"
     :key :old)))
 

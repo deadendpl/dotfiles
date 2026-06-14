@@ -104,11 +104,14 @@ glide.keymaps.set("insert", "<C-b>", "caret_move left",);
 glide.keymaps.set("insert", "<C-j>", "caret_move down");
 glide.keymaps.set("insert", "<C-k>", "caret_move up");
 glide.keymaps.set("insert", "<C-/>", "undo");
+glide.keymaps.set("insert", "<C-d>", () =>
+  glide.keys.send("<Delete>", { skip_mappings: true }),
+);
 
 glide.keymaps.set("insert", "<C-l>", () =>
   glide.keys.send("<Enter>", { skip_mappings: true }),
 );
-glide.keymaps.set("insert", "<C-x>h", () =>
+glide.keymaps.set("insert", "<C-x>", () =>
   glide.keys.send("<C-a>", { skip_mappings: true }),
 );
 
@@ -169,3 +172,37 @@ glide.excmds.create({
 });
 
 glide.keymaps.set("normal", "<leader>u", "tab_unload");
+
+glide.autocmds.create("UrlEnter", { hostname: "megatenwiki.com" },
+  async () => {
+    const HINT_INCLUDE = "li.pi-tab-link, span.g-tab";
+
+    const show_hints = glide.hints.show;
+    glide.hints.show = (opts) => {
+      show_hints({
+        ...opts,
+        include: opts?.selector
+          ? opts.include
+          : opts?.include
+          ? `${HINT_INCLUDE}, ${opts.include}`
+          : HINT_INCLUDE,
+      });
+    };
+  });
+
+glide.autocmds.create("UrlEnter", { hostname: "musicbrainz.org" },
+  async () => {
+    const HINT_INCLUDE = "span.menu-header";
+
+    const show_hints = glide.hints.show;
+    glide.hints.show = (opts) => {
+      show_hints({
+        ...opts,
+        include: opts?.selector
+          ? opts.include
+          : opts?.include
+          ? `${HINT_INCLUDE}, ${opts.include}`
+          : HINT_INCLUDE,
+      });
+    };
+  });

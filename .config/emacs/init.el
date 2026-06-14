@@ -66,8 +66,7 @@ Most of the stuff will get redirected here.")
   ;; (setq-default native-comp-async-report-warnings-errors nil)
   )
 
-(setq-default global-auto-revert-non-file-buffers t ; refreshing buffers without file associated with them
-              use-dialog-box nil ; turns off graphical dialog boxes
+(setq-default use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
               initial-buffer-choice t ; scratch buffer as a startup buffer
               initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
@@ -77,7 +76,6 @@ Most of the stuff will get redirected here.")
               indent-tabs-mode nil ; use spaces instead of tabs for indenting
               tab-width 4 ; it's set by default to 8
               standard-indent 2 ; indenting set to 2
-              auto-revert-interval 1
               use-short-answers t ; replace yes-no prompts with y-n
               fast-but-imprecise-scrolling t ; fast scrolling
               inhibit-compacting-font-caches t
@@ -115,7 +113,19 @@ Most of the stuff will get redirected here.")
               window-combination-resize t
               help-window-select t
               font-use-system-font t
-              completions-detailed t)
+              completions-detailed t
+              read-process-output-max
+              (or (when (file-exists-p "/proc/sys/fs/pipe-max-size")
+                    (with-temp-buffer
+                      (insert-file-contents-literally
+                       "/proc/sys/fs/pipe-max-size")
+                      (string-to-number
+                       (buffer-substring-no-properties
+                        (point-min) (point-max)))))
+                  read-process-output-max)
+              history-delete-duplicates t
+              kill-do-not-save-duplicates t
+              grep-use-headings t)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -138,6 +148,7 @@ Most of the stuff will get redirected here.")
 (add-to-list 'auto-mode-alist '("PKGBUILD" . sh-mode))
 (add-to-list 'auto-mode-alist '(".PKGINFO" . conf-mode))
 (add-to-list 'auto-mode-alist '(".BUILDINFO" . conf-mode))
+(add-to-list 'auto-mode-alist '("gtkrc" . conf-mode))
 
 ;; locking buffers from killing
 (with-current-buffer "*scratch*"
@@ -243,6 +254,15 @@ Most of the stuff will get redirected here.")
   :custom (show-paren-delay 0)
   :config
   (show-paren-mode 1))
+
+(minibuffer-depth-indicate-mode 1)
+
+(with-eval-after-load 'tramp
+  (defun tramp-cleanup-everything ()
+    "Flush all connections and kill all remote buffers."
+    (interactive)
+    (tramp-cleanup-all-connections)
+    (tramp-cleanup-all-buffers)))
 
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
@@ -631,7 +651,8 @@ it."
   (recentf-max-saved-items nil)) ; infinite amount of entries in recentf file
 
 (use-package saveplace
-  :hook (after-init . save-place-mode))
+  :hook (after-init . save-place-mode)
+  :custom (save-place-limit nil))
 
 (use-package eww
   :custom
@@ -734,8 +755,10 @@ default, the whole line in the file is highlighted."
   (comint-prompt-read-only t)
   (comint-buffer-maximum-size nil)
   (ansi-color-for-comint-mode t)
+  (comint-pager "cat")
   :config
-  (setq-default comint-scroll-to-bottom-on-input 'this))
+  (setq-default comint-scroll-to-bottom-on-input 'this)
+  (setenv "MANPAGER" "cat"))
 
 (use-package isearch
   :ensure nil
@@ -752,6 +775,15 @@ default, the whole line in the file is highlighted."
   (ediff-keep-variants nil)
   (ediff-make-buffers-readonly-at-startup nil)
   (ediff-show-clashes-only t))
+
+(use-package autorevert
+  :init (global-auto-revert-mode 1)
+  :custom
+  (auto-revert-avoid-polling t)
+  (global-auto-revert-non-file-buffers t) ; refreshing buffers without
+                                          ; file associated with them
+  (auto-revert-check-vc-info t)
+  (auto-revert-interval 1))
 
 (use-package enlight
   :hook (enlight-mode . (lambda () (with-current-buffer "*enlight*"
@@ -930,12 +962,13 @@ default, the whole line in the file is highlighted."
 (use-package corfu
   :init (global-corfu-mode t)
   :hook ((corfu-mode . corfu-popupinfo-mode)
+         (corfu-mode . corfu-echo-mode)
          ((prog-mode ielm-mode org-mode) .
           (lambda () (setq-local corfu-auto t))))
   :custom-face
   (corfu-current ((nil (:inherit 'highlight
-                                 :background unspecified
-                                 :foreground unspecified))))
+                        :background unspecified
+                        :foreground unspecified))))
   :custom
   ;; (corfu-auto t)
   ;; (corfu-auto-prefix 1)
@@ -947,7 +980,8 @@ default, the whole line in the file is highlighted."
               ("C-j" . corfu-next)
               ("C-k" . corfu-previous)
               ("C-l" . corfu-insert)
-              ("<escape>" . corfu-quit)))
+              ("<escape>" . corfu-quit)
+              ("SPC" . corfu-insert-separator)))
 
 (use-package nerd-icons-corfu
   :hook (corfu-mode . nerd-icons-corfu-setup)
@@ -973,11 +1007,15 @@ default, the whole line in the file is highlighted."
                '(not prog-mode conf-mode)))
 
 (use-package vertico
+  :init
+  (setq minibuffer-prompt-properties
+        '(read-only t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
   :hook (after-init . vertico-mode)
   :bind (:map vertico-map
-              ("C-j" . vertico-next)
-              ("C-k" . vertico-previous)
-              ("C-l" . vertico-exit))
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("C-l" . vertico-exit))
   :custom
   (enable-recursive-minibuffers t)
   ;; `recentf-open' will not have sorted entries
@@ -1120,7 +1158,7 @@ default, the whole line in the file is highlighted."
   (dired-switches-in-mode-line 0)
   (dired-kill-when-opening-new-dired-buffer t)
   (image-dired-dir (expand-file-name-user-share "image-dired"))
-  (dired-auto-revert-buffer t)
+  (dired-auto-revert-buffer #'dired-directory-changed-p)
   (dired-hide-details-hide-symlink-targets nil)
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)
@@ -1407,14 +1445,6 @@ If FILE is a directory, inserts the path to the directory."
   (org-verse ((nil :slant italic)))
   :custom
   (org-M-RET-may-split-line nil)
-  (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
-  (org-babel-default-header-args '((:session . "none")
-                                   (:results . "replace")
-                                   (:exports . "both")
-                                   (:cache . "no")
-                                   (:noweb . "no")
-                                   (:hlines . "no")
-                                   (:tangle . "no")))
   (org-blank-before-new-entry nil) ;; no blank lines when doing M-return
   (org-capture-templates
    '(("t" "Todo" entry (file "agenda/inbox.org")
@@ -1424,7 +1454,6 @@ If FILE is a directory, inserts the path to the directory."
   (org-confirm-babel-evaluate nil)
   (org-cycle-separator-lines 0)
   (org-display-remote-inline-images 'download)
-  (org-edit-src-content-indentation 0)
   (org-fontify-quote-and-verse-blocks t)
   (org-hide-emphasis-markers t)
   (org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
@@ -1440,8 +1469,6 @@ If FILE is a directory, inserts the path to the directory."
   (org-log-into-drawer t)
   (org-pretty-entities t)
   (org-return-follows-link t)
-  (org-src-preserve-indentation t)
-  (org-src-window-setup 'current-window)
   (org-startup-folded t)
   (org-startup-indented t) ; use `org-indent-mode' at startup
   (org-startup-with-inline-images t)
@@ -1475,11 +1502,31 @@ If FILE is a directory, inserts the path to the directory."
   ;; opening video files from links in mpv
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
-  (advice-add 'consult-org-heading :after #'org-fold-show-entry)
-  (advice-add 'org-edit-src-save :before #'whitespace-cleanup))
+  (advice-add 'consult-org-heading :after #'org-fold-show-entry))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
+
+(use-package org
+  :custom
+  (org-babel-load-languages '((emacs-lisp . t) (shell . t) (C . t)))
+  (org-babel-default-header-args '((:session . "none")
+                                   (:results . "replace")
+                                   (:exports . "both")
+                                   (:cache . "no")
+                                   (:noweb . "no")
+                                   (:hlines . "no")
+                                   (:tangle . "no")))
+  (org-edit-src-content-indentation 0)
+  (org-src-preserve-indentation t)
+  (org-src-window-setup 'current-window)
+  :config
+  (advice-add 'org-edit-src-save :before #'whitespace-cleanup)
+  (define-advice org-src-get-lang-mode (:filter-return (mode))
+    "Use tree-sitter mode if available."
+    (pcase (assoc mode major-mode-remap-alist)
+      (`(,mode . ,ts-mode) ts-mode)
+      (_ mode))))
 
 (use-package org
   :bind ([remap org-return] . custom/org-good-return)
@@ -1495,7 +1542,7 @@ If FILE is a directory, inserts the path to the directory."
   :config
   (define-advice org-meta-return
       (:around (orig-fun &rest args))
-    "Depending on the context, it insert things differently."
+    "Depending on the context, insert things differently."
     (cond
      ((org-at-item-checkbox-p)
       (org-insert-todo-heading t))
@@ -1613,7 +1660,7 @@ If FILE is a directory, inserts the path to the directory."
 (use-package org
   :custom
   (org-export-allow-bind-keywords t)
-  (org-export-backends '(ascii html icalendar latex odt md))
+  (org-export-backends '(ascii html latex odt md))
   (org-export-preserve-breaks t)
   (org-export-with-date nil)
   (org-export-with-smart-quotes t)
@@ -1863,8 +1910,8 @@ It's value needs to be number/anything.
                      (member "animan"
                              (org-roam-node-tags node)))
                    nil t)))
-    (org-roam-node-open node)
     (save-window-excursion
+      (org-roam-node-open node)
       (if (org-entry-get (point) "progress")
           (org-increment-progress-property)
         (consult-org-heading "progress={[^^$]}")
@@ -2083,6 +2130,7 @@ OPEN-IN-WEB is non-nil."
 
 (use-package compile
   :init (setq-default compile-command nil)
+  :hook (compilation-filter . ansi-color-compilation-filter)
   :bind (("C-c c c" . compile)
          ("C-c c r" . recompile)
          ("C-c c k" . kill-compilation))
@@ -2367,11 +2415,12 @@ It doesn't close empty tags."
   :custom (fish-indent-offset 2))
 
 (use-package eshell
-  ;; :hook
-  ;; (eshell-mode . (lambda () (setq mode-line-format nil)))
+  :hook (eshell-mode . (lambda () (setq-local outline-regexp
+                                              eshell-prompt-regexp)))
   :bind (("C-c s e" . eshell)
          :map eshell-mode-map
-         ("C-d" . eshell-quit-or-delete-char))
+         ("C-d" . eshell-quit-or-delete-char)
+         ("M-g i" . consult-outline))
   :custom
   (eshell-directory-name
    (expand-file-name "eshell" user-emacs-directory))
@@ -2392,13 +2441,11 @@ It doesn't close empty tags."
   (eshell-destroy-buffer-when-process-dies t)
   (eshell-banner-message "")
   :config
-  ;; (keymap-set eshell-mode-map "C-d" #'eshell-life-is-too-much)
   (add-to-list 'meow-mode-state-list '(eshell-mode . insert))
   (defun eshell-quit-or-delete-char (arg)
     (interactive "p")
     (if (and (eolp) (looking-back eshell-prompt-regexp))
-        (progn
-          (eshell-life-is-too-much))
+        (eshell-life-is-too-much)
       (delete-forward-char arg))))
 
 (use-package eshell-syntax-highlighting
@@ -2421,7 +2468,10 @@ It doesn't close empty tags."
   :hook (ghostel-mode . (lambda () (setq mode-line-format nil)))
   (ghostel-mode . ghostel-meow-setup)
   (ghostel-mode . (lambda () (setq-local global-hl-line-mode nil)))
-  :bind (("C-c s v" . ghostel))
+  :bind (("C-c s v" . ghostel)
+         :map ghostel-mode-map
+         ("C-c C-p" . ghostel-previous-prompt)
+         ("C-c C-n" . ghostel-next-prompt))
   :config
   (add-to-list 'meow-mode-state-list '(ghostel-mode . insert))
   (defun ghostel-meow-setup ()
