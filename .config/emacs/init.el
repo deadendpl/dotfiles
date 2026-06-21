@@ -879,7 +879,7 @@ default, the whole line in the file is highlighted."
                '("rc$" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-dir-icon-alist
-               '("projects" nerd-icons-octicon
+               '("[Pp]rojects" nerd-icons-octicon
                  "nf-oct-project_roadmap")))
 
 (use-package nerd-icons-multimodal
@@ -966,7 +966,7 @@ default, the whole line in the file is highlighted."
          ((prog-mode ielm-mode org-mode) .
           (lambda () (setq-local corfu-auto t))))
   :custom-face
-  (corfu-current ((nil (:inherit 'highlight
+  (corfu-current ((nil (:inherit modus-themes-completion-selected
                         :background unspecified
                         :foreground unspecified))))
   :custom
@@ -2332,6 +2332,7 @@ It doesn't close empty tags."
 
 (setq major-mode-remap-alist
       '((c-or-c++-mode . c-or-c++-ts-mode)
+        (c-mode . c-ts-mode)
         (c++-mode . c++-ts-mode)
         (css-mode . css-ts-mode)
         (python-mode . python-ts-mode)

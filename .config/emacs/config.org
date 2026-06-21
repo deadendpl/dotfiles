@@ -1205,7 +1205,7 @@ Adding highlights to TODO and related words.
                '("rc$" nerd-icons-codicon "nf-cod-settings"
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-dir-icon-alist
-               '("projects" nerd-icons-octicon
+               '("[Pp]rojects" nerd-icons-octicon
                  "nf-oct-project_roadmap")))
 
 (use-package nerd-icons-multimodal
@@ -1314,7 +1314,7 @@ With Emacs 29, true transparency has been added.
          ((prog-mode ielm-mode org-mode) .
           (lambda () (setq-local corfu-auto t))))
   :custom-face
-  (corfu-current ((nil (:inherit 'highlight
+  (corfu-current ((nil (:inherit modus-themes-completion-selected
                         :background unspecified
                         :foreground unspecified))))
   :custom
@@ -1466,7 +1466,7 @@ Those commands ususally have a preview functionality and some have narrowing fun
 **** Annotations (marginalia)
 [[https://github.com/minad/marginalia][Marginalia]] shows annotations for minibuffer candidates.
 Emacs has some annotations by default but Marginalia adds annotations to the default completion categories.
-Marginalia also has its own functions for showing an annotation which can pad the annotation text to the longest annotation in the list.
+Marginalia also has its own functions for showing an annotation which can pad the annotation text to the longest candidate in the list.
 #+begin_src emacs-lisp
 (use-package marginalia
   :after vertico
@@ -2998,6 +2998,7 @@ This remaps specified major modes to its tree-sitter counterparts and adds modes
 #+begin_src emacs-lisp
 (setq major-mode-remap-alist
       '((c-or-c++-mode . c-or-c++-ts-mode)
+        (c-mode . c-ts-mode)
         (c++-mode . c++-ts-mode)
         (css-mode . css-ts-mode)
         (python-mode . python-ts-mode)
