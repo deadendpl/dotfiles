@@ -415,7 +415,7 @@ sudo usermod -aG video,audio,input $(whoami)
 * Compiling pyrice
 It's a pywal wrapper I wrote in Common Lisp.
 #+begin_src sh
-cd ../tools/pyrice-in-common-lisp/
+cd $DOTFILES_INSTALL_DIR/../tools/pyrice-in-common-lisp/
 if ! pacman -Q sbcl >> /dev/null; then
   sudo pacman --noconfirm --needed -S sbcl
 fi

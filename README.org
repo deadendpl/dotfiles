@@ -1,8 +1,8 @@
 #+TITLE: dotfiles
 #+STARTUP: noinlineimages
 
-* WARNING:
-This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP NixOS config. Dependencies might not be available for other distros.
+* WARNING
+This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have WIP NixOS config (which is probably broken at this point). Dependencies might not be available for other distros.
 * pywal with sway
 [[file:screenshots/sway/2024-06-16_14-06-22.png]]
 [[file:screenshots/sway/2024-06-16_14-07-23.png]]
@@ -18,24 +18,12 @@ This is meant for [[https://archlinux.org/][Arch]] based distros. Though I have 
 | Launcher                  | [[https://github.com/davatorium/rofi][rofi]]                      |
 | Window Manager            | [[https://github.com/swaywm/sway/][sway]]                      |
 
-At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed. It will use a image file as a argument, or a directory and choose random file from there.
+At sway's startup the script [[file:.local/bin/pyrice][~/.local/bin/pyrice]] will be executed.
+By default it's not there but the installation script compiles it and puts it there.
+It will use a image file as a argument, or a directory and choose random file from there.
 You can execute the script from terminal or by pressing =Super+ALT+R= or from script hub by pressing =Super+Shift+Enter=.
-
-Software riced with pywal [11/11]:
-- [X] foot
-- [X] rofi
-- [X] gtk3
-- [X] gtk4 (libadwaita)
-- [X] qt
-- [X] emacs
-- [X] qutebrowser
-- [X] waybar
-- [X] hyprland
-- [X] zathura
-- [X] sway
 * INSTALLING
-** DEPENDENCIES
-Go to [[file:install/README.org][install/README.org]] to look at the dependencies and other tweaks.
+Go to [[file:install/README.org][install/README.org]] to look at the dependencies and other necessary steps to set up the rice.
 ** CONFIG FILES
 Copy/move all files to your =$HOME= directory.
 

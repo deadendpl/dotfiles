@@ -115,7 +115,9 @@ Most of the stuff will get redirected here.")
               font-use-system-font t
               completions-detailed t
               read-process-output-max
-              (or (when (file-exists-p "/proc/sys/fs/pipe-max-size")
+              (or (when (and
+                         (file-exists-p "/proc/sys/fs/pipe-max-size")
+                         (file-readable-p "/proc/sys/fs/pipe-max-size"))
                     (with-temp-buffer
                       (insert-file-contents-literally
                        "/proc/sys/fs/pipe-max-size")
@@ -632,6 +634,25 @@ it."
                           (lambda () (interactive)
                             (surround-insert right))))))))
 
+(defvar non-breaking-space-insertion-amount 0
+  "The amount of times a non-breaking-space was accidentally inserted.")
+
+(defun non-breaking-space-insertion-notifier (&optional arg)
+  "Notify how many times the non-breaking space was accidentally inserted.
+With ARG being non-nil, insert the non-breaking space."
+  (interactive "P")
+  (if arg
+      (insert " ")
+    (setq non-breaking-space-insertion-amount
+          (1+ non-breaking-space-insertion-amount))
+    (message "You accidentally hit the non-breaking space %s %s."
+             non-breaking-space-insertion-amount
+             (if (> non-breaking-space-insertion-amount 1)
+                 "times"
+               "time"))))
+
+(keymap-global-set " " #'non-breaking-space-insertion-notifier)
+
 (use-package abbrev
   :ensure nil
   :hook (text-mode . abbrev-mode) ; `text-mode' is a parent of `org-mode'
@@ -965,10 +986,6 @@ default, the whole line in the file is highlighted."
          (corfu-mode . corfu-echo-mode)
          ((prog-mode ielm-mode org-mode) .
           (lambda () (setq-local corfu-auto t))))
-  :custom-face
-  (corfu-current ((nil (:inherit modus-themes-completion-selected
-                        :background unspecified
-                        :foreground unspecified))))
   :custom
   ;; (corfu-auto t)
   ;; (corfu-auto-prefix 1)
@@ -1427,6 +1444,7 @@ If FILE is a directory, inserts the path to the directory."
    ("C-x n t" . org-toggle-narrow-to-subtree)
    ("C-x n r" . custom/org-reverso-grammar-subtree)
    ([remap imenu] . consult-org-heading))
+  ;; recalculating the calculations when pressing C-c C-c in a table
   :hook (org-ctrl-c-ctrl-c . (lambda ()
                                (when (org-at-table-p)
                                  (org-table-recalculate))))
@@ -1522,6 +1540,10 @@ If FILE is a directory, inserts the path to the directory."
   (org-src-window-setup 'current-window)
   :config
   (advice-add 'org-edit-src-save :before #'whitespace-cleanup)
+  ;; This changes the major mode to the tree-sitter one if it's
+  ;; available. Probably the more intended way to achieve this would be
+  ;; to customize `org-src-lang-modes' but that would require remapping
+  ;; every major mode there to tree-sitter mode
   (define-advice org-src-get-lang-mode (:filter-return (mode))
     "Use tree-sitter mode if available."
     (pcase (assoc mode major-mode-remap-alist)

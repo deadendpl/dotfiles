@@ -183,7 +183,7 @@ else
                               python-zombie-imp \
                               wpgtk \
                               # gtk-theme-flat-color-git
-                              # python-inotify-csimple \
+                              # python-inotify-simple \
                               # python-psutil \
                               # python-prctl \
                               # python-daemon \
@@ -323,7 +323,7 @@ sudo -v
 
 sudo usermod -aG video,audio,input $(whoami)
 
-cd ../tools/pyrice-in-common-lisp/
+cd $DOTFILES_INSTALL_DIR/../tools/pyrice-in-common-lisp/
 if ! pacman -Q sbcl >> /dev/null; then
   sudo pacman --noconfirm --needed -S sbcl
 fi
