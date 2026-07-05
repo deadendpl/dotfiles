@@ -233,24 +233,12 @@ Most of the stuff will get redirected here.")
 ;; `conf-mode' and other configuration modes are not derived from
 ;; `prog-mode', so I add its hook manually
 (dolist (mode '(yaml-mode
+                yaml-ts-mode
                 conf-mode))
   (add-hook (intern (format "%s-hook" mode))
             (lambda () (run-hooks 'prog-mode-hook))))
 
 (setq calendar-week-start-day 1)
-
-(with-eval-after-load 'savehist
-  (setq savehist-additional-variables
-        (append savehist-additional-variables
-                '(search-ring regexp-search-ring kill-ring)))
-
-  ;; kill-ring has text properties which can make the savehist file big
-  ;; this code will clean the kill-ring of text properties
-  (add-hook 'savehist-save-hook
-            (lambda ()
-              (setq kill-ring
-                    (mapcar #'substring-no-properties
-                            (cl-remove-if-not #'stringp kill-ring))))))
 
 (use-package paren
   :custom (show-paren-delay 0)
@@ -429,7 +417,8 @@ newlines at their end."
      '("<escape>" . ignore))
 
     (meow-define-keys 'insert
-      '("C-." . meow-keypad))
+      '("C-." . meow-keypad)
+      '("C-g" . meow-escape-or-normal-modal))
     (add-to-list 'meow-mode-state-list '(helpful-mode . normal)))
 
   (meow-setup)
@@ -450,18 +439,19 @@ newlines at their end."
 
 (use-package meow
   :config
+  ;; selects nil as the parent keymap so no keys are bound
+  (set-keymap-parent messages-buffer-mode-map nil)
   (with-current-buffer "*Messages*"
-    ;; selects nil as the local keymap so no keys are bound
-    (use-local-map nil)
-    (meow-normal-mode 1))
-  (add-hook 'special-mode-hook
-            (lambda ()
-              (when (cl-find "*Warnings*" (buffer-list)
-                             :test (lambda (x y)
-                                     (equal x (buffer-name y))))
-                (with-current-buffer "*Warnings*"
-                  (use-local-map nil)
-                  (meow-normal-mode 1))))))
+    (meow--switch-state 'normal))
+
+  (define-advice display-warning (:after (&rest _) meow-setup)
+    "Switch the major mode to fundamental and enable meow's normal state."
+    (when (cl-find-if (lambda (buffer)
+                        (equal (buffer-name buffer) "*Warnings**"))
+                      (buffer-list))
+      (with-current-buffer "*Warnings*"
+      (fundamental-mode)
+      (meow--switch-state 'normal)))))
 
 ;; (use-package pulse
 ;;   :config
@@ -554,18 +544,16 @@ newlines at their end."
 (keymap-global-set "C-x t B" 'scratch-buffer-other-tab)
 
 (use-package expreg
-  :defer nil
-  :after meow
+  :bind (:map meow-normal-state-keymap
+         ("o" . expreg-expand)
+         ("z" . custom-meow-expreg-contract))
   :config
-  (meow-normal-define-key '("o" . expreg-expand)
-                          '("z" . custom-meow-expreg-contract))
   (remove-hook 'expreg-functions #'expreg--word)
   (remove-hook 'expreg-functions #'expreg--subword)
-  (advice-add 'expreg-expand :after
-              (lambda ()
-                ;; don't exchange point and mark if it can't expand more
-                (unless (= (expreg--current-depth) 0)
-                  (exchange-point-and-mark))))
+  (define-advice expreg-expand (:after nil dont-exchange-dwim)
+    "Don't exchange point and mark if it can't expand more"
+    (unless (= (expreg--current-depth) 0)
+      (exchange-point-and-mark)))
 
   (defvar custom-meow-expreg-action nil
     "What was the last action done by `custom-meow-expreg-contract'.
@@ -615,10 +603,11 @@ it."
   :defer nil
   :after meow
   :config
+  (keymap-set meow-normal-state-keymap "S" surround-keymap)
   (keymap-set surround-keymap "i" #'surround-insert)
   (keymap-set surround-keymap "m" #'surround-mark)
+  (keymap-set surround-keymap "R" #'raise-sexp)
   (keymap-unset surround-keymap "s" t)
-  (keymap-set meow-normal-state-keymap "S" surround-keymap)
   ;; with this, I don't need to press i to be able to insert pairs
   ;; lexical binding needs to be turned on for this to work
   (dolist (pair surround-pairs)
@@ -675,17 +664,32 @@ With ARG being non-nil, insert the non-breaking space."
   :hook (after-init . save-place-mode)
   :custom (save-place-limit nil))
 
-(use-package eww
-  :custom
-  (eww-auto-rename-buffer 'title)
-  (url-privacy-level '(email lastloc cookies))
-  (eww-use-external-browser-for-content-type
-   "\\`\\(video/\\|audio\\)"))
-
 (use-package shr
   :custom
   (shr-fill-text nil)
-  (shr-max-width nil))
+  (shr-max-width nil)
+  (shr-bullet "• "))
+
+(use-package eww
+  :hook (eww-mode . (lambda ()
+                      (setq-local imenu-create-index-function
+                                  #'custom/eww-imenu-create-index)))
+  :config
+  (defun custom/eww-imenu-create-index ()
+    "Create a index of headings for imenu."
+    (beginning-of-buffer)
+    (let (index-list)
+      (while-let ((match (text-property-search-forward 'outline-level)))
+        (push (cons (buffer-substring (prop-match-beginning match)
+                                      (prop-match-end match))
+                    (prop-match-beginning match))
+              index-list))
+      (reverse index-list)))
+  :custom
+  (eww-auto-rename-buffer 'title)
+  (url-privacy-level '(email lastloc))
+  (eww-use-external-browser-for-content-type
+   "\\`\\(video/\\|audio\\)"))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -731,7 +735,8 @@ With ARG being non-nil, insert the non-breaking space."
 (use-package hl-line
   :hook (after-init . global-hl-line-mode)
   :config
-  (define-advice face-at-point (:around (orig-fun &rest args))
+  (define-advice face-at-point (:around (orig-fun &rest args)
+                                disable-hl-line-mode)
     "Disable `hl-line-mode' temporarily if it's non-nil."
     (cond
      (global-hl-line-mode
@@ -840,7 +845,7 @@ default, the whole line in the file is highlighted."
          ("Use k in dired to remove a line")
          ("Use C-c c k to kill current compilation"))))))
   (setq enlight-content (custom-enlight-content))
-  (define-advice enlight (:before (&rest args))
+  (define-advice enlight (:before (&rest args) update-englight-content)
     "Update `enlight-content'"
     (enlight--update 'enlight-content (custom-enlight-content))))
 
@@ -907,11 +912,11 @@ default, the whole line in the file is highlighted."
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
   :init
   (global-nerd-icons-multimodal-mode 1)
-  (advice-add #'wdired-change-to-wdired-mode :before
-              (lambda ()
-                (if nerd-icons-multimodal-mode
-                    (nerd-icons-multimodal-mode -1))
-                (revert-buffer)))
+  (define-advice wdired-change-to-wdired-mode
+      (:before nil nerd-icons-multimodal-disable)
+    (if nerd-icons-multimodal-mode
+        (nerd-icons-multimodal-mode -1))
+    (revert-buffer))
   (dolist (func '(wdired-finish-edit
                   wdired-exit
                   wdired-abort-changes))
@@ -963,20 +968,33 @@ default, the whole line in the file is highlighted."
     :config
     (unless (daemonp)
       (load-theme 'modus-ewal t))
-    (defun custom-modus-ewal-theme-load-once ()
-      (and (not (member 'modus-ewal custom-enabled-themes))
-           (load-theme 'modus-ewal t))
-      ;; it only needs to be run once, so I remove it
-      (remove-hook 'server-after-make-frame-hook
-                   #'custom-modus-ewal-theme-load-once))
+    ;; defun will return the function, hence I have the defun in add-hook
     (add-hook 'server-after-make-frame-hook
-              #'custom-modus-ewal-theme-load-once)
+              (defun custom-modus-ewal-theme-load-once ()
+                (and (not (member 'modus-ewal custom-enabled-themes))
+                     (load-theme 'modus-ewal t))
+                ;; it only needs to be run once, so I remove it
+                (remove-hook 'server-after-make-frame-hook
+                             #'custom-modus-ewal-theme-load-once)))
 
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
                 (set-face-attribute
                  'modus-themes-button nil
-                 :inherit nil)))))
+                 :inherit nil)
+                ;; A bunch of heading faces will inherit these faces.
+                ;; Increasing the size of these will affect other
+                ;; heading faces
+                (dolist (face '(modus-themes-heading-0
+                                modus-themes-heading-1
+                                modus-themes-heading-2
+                                modus-themes-heading-3
+                                modus-themes-heading-4
+                                modus-themes-heading-5
+                                modus-themes-heading-6
+                                modus-themes-heading-7
+                                modus-themes-heading-8))
+                  (set-face-attribute face nil :height 1.2))))))
 
 (add-to-list 'default-frame-alist '(alpha-background . 95))
 
@@ -1078,41 +1096,75 @@ default, the whole line in the file is highlighted."
    ([remap previous-matching-history-element] . consult-history)
    ([remap eshell-previous-matching-input] . consult-history)
    ([remap yank-pop] . consult-yank-pop))
-   ;; ([remap project-find-regexp] . consult-project-grep))
-   :custom
-   (consult-async-min-input 0)
-   :config
-   ;; no live preview as loading org mode takes few seconds
-   (consult-customize consult-buffer consult-project-buffer
-                      consult-buffer-other-tab consult-buffer-other-window
-                      consult-buffer-other-frame
-                      :preview-key nil)
-   ;; adding project source
-   (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
-   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
-   (setq consult-source-project-root
-         `(:name     "Project Root"
-           :narrow   ?r
-           :category file
-           :face     consult-file
-           :history  file-name-history
-           :action   ,(lambda (root)
-                        (let ((default-directory root))
-                         (project-find-file)))
-           :items    ,#'consult--project-known-roots))
+  ;; ([remap project-find-regexp] . consult-project-grep))
+  :custom
+  (consult-async-min-input 0)
+  :config
+  ;; no live preview as loading org mode takes few seconds
+  (consult-customize consult-buffer consult-project-buffer
+                     consult-buffer-other-tab consult-buffer-other-window
+                     consult-buffer-other-frame
+                     :preview-key nil)
+  ;; adding project source
+  (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
+  ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
+  (setq consult-source-project-root
+        `(:name     "Project Root"
+          :narrow   ?r
+          :category file
+          :face     consult-file
+          :history  file-name-history
+          :action   ,(lambda (root)
+                       (let ((default-directory root))
+                        (project-find-file)))
+          :items    ,#'consult--project-known-roots))
 
-   (defun consult-project-grep ()
-     "Run `consult-grep' in current project or prompted one."
-     (interactive)
-     (if-let ((current-project (project-current)))
-         (consult-grep (project-root current-project))
-       (setq-local project-current-directory-override
-                   (funcall project-prompter))
-       (consult-grep (project-root (project-current)))
-       (kill-local-variable project-current-directory-override)))
+  (defun consult-project-grep ()
+    "Run `consult-grep' in current project or prompted one."
+    (interactive)
+    (if-let ((current-project (project-current)))
+        (consult-grep (project-root current-project))
+      (let ((project-current-directory-override
+             (funcall project-prompter)))
+        (consult-grep project-current-directory-override))))
 
-   (keymap-set project-prefix-map "f" #'consult-project-buffer)
-   (keymap-set project-prefix-map "g" #'consult-project-grep))
+  (keymap-set project-prefix-map "f" #'consult-project-buffer)
+  (keymap-set project-prefix-map "g" #'consult-project-grep)
+
+  ;; Making project file strings to be relative to the project root. It
+  ;; lets me match against directory names without typing the
+  ;; annotation dispatcher.
+  (setf (plist-get consult-source-project-buffer :items)
+        (lambda ()
+          (when-let* ((root (consult--project-root)))
+            (consult--buffer-query :sort 'visibility
+                                   :directory root
+                                   :as
+                                   (lambda (buffer)
+                                     (cons (if (buffer-file-name buffer)
+                                               (file-relative-name
+                                                (buffer-file-name buffer)
+                                                root)
+                                             (buffer-name buffer))
+                                           buffer)))))))
+
+(use-package consult-imenu
+  :ensure nil
+  :after consult
+  :config
+  ;; adding narrowing that `emacs-lisp-mode' has in imenu to other
+  ;; progamming modes
+  (add-to-list 'consult-imenu-config
+               '(prog-mode
+                 :toplevel "Functions"
+                 :types
+                 ((?f "Functions" font-lock-function-name-face)
+                  (?m "Macros" font-lock-function-name-face)
+                  (?p "Packages" font-lock-constant-face)
+                  (?t "Types" font-lock-type-face)
+                  (?v "Variables" font-lock-variable-name-face))))
+  ;; that may cause some colliding like in json mode
+  (add-to-list 'consult-imenu-config '(json-ts-mode :types nil)))
 
 (use-package marginalia
   :after vertico
@@ -1155,7 +1207,16 @@ default, the whole line in the file is highlighted."
   (savehist-file (expand-file-name-user-share "history"))
   :config
   (setq savehist-additional-variables
-        (append savehist-additional-variables '(comint-input-ring))))
+        (append savehist-additional-variables
+                '(comint-input-ring search-ring regexp-search-ring
+                  kill-ring)))
+  ;; kill-ring has text properties which can make the savehist file big,
+  ;; this code will clean the kill-ring of text properties
+  (add-hook 'savehist-save-hook
+            (lambda ()
+              (setq kill-ring
+                    (mapcar #'substring-no-properties
+                            (cl-remove-if-not #'stringp kill-ring))))))
 
 (setq completion-ignore-case t)
 (setq read-buffer-completion-ignore-case t)
@@ -1201,7 +1262,8 @@ default, the whole line in the file is highlighted."
       (dired-post-do-command)))
 
   (when on-termux-p
-    (define-advice dired-do-open (:around (old-fun &rest args))
+    (define-advice dired-do-open (:around (old-fun &rest args)
+                                  termux-setup)
       "Open the files when running in Termux (by default it doesn't work)."
       (if (getenv "TERMUX_VERSION")
           (let ((files (if (mouse-event-p last-nonmenu-event)
@@ -1233,7 +1295,11 @@ default, the whole line in the file is highlighted."
   ([remap describe-key] . helpful-key) ; it doesn't work with meow
   ("C-h C-." . helpful-at-point-better)
   ("C-h '" . describe-face)
-  :custom (helpful-max-buffers nil)
+  :custom
+  (helpful-max-buffers nil)
+  ;; keep `show-paren-mode' working
+  (show-paren-predicate '(or (derived-mode . helpful-mode)
+                          (not (derived-mode . special-mode))))
   :config
   (defun helpful-at-point-better ()
     "Improved version of `helpful-at-point'.
@@ -1258,12 +1324,6 @@ Handles symbols that start or end with a single quote (') correctly."
                     (t sym)))) ; No changes needed
           (helpful-symbol (intern sym)))
       (message "No symbol found at point!"))))
-
-(use-package helpful
-  :init
-  (advice-add #'describe-key :override #'meow-helpful-key)
-  (defun meow-helpful-key (&rest args)
-    (funcall #'helpful-key (cdaar args))))
 
 (use-package which-key
   :unless on-termux-p
@@ -1396,17 +1456,14 @@ If FILE is a directory, inserts the path to the directory."
   ;; `magit-bind-magit-project-status' is non-nil but it happens after
   ;; both project and magit are loaded which is not instant
   ;; also, if I'm not in a project, a project prompt will show up
-  (define-advice magit-project-status (:around (orig-fun &rest args))
+  ;; It doesn't work when you're already in a project.
+  (define-advice magit-project-status (:around (orig-fun &rest args)
+                                       project-prompt)
     "Choose a project if there's no current project."
     (unless (project-current)
-      (let ((buffer (current-buffer)))
-        (unwind-protect
-            (progn
-              (setq-local project-current-directory-override
-                          (funcall project-prompter))
-              (apply orig-fun args))
-          (with-current-buffer buffer
-            (kill-local-variable project-current-directory-override))))))
+      (let ((project-current-directory-override
+             (funcall project-prompter)))
+        (apply orig-fun args))))
   (keymap-set project-prefix-map "m" #'magit-project-status)
   (with-eval-after-load 'project
     (add-to-list 'project-switch-commands
@@ -1451,13 +1508,13 @@ If FILE is a directory, inserts the path to the directory."
   :custom-face
   ;; setting size of headers
   (org-document-title ((nil (:inherit outline-1 :height 1.7))))
-  (org-level-1 ((nil (:inherit outline-1 :height 1.2))))
-  (org-level-2 ((nil (:inherit outline-2 :height 1.2))))
-  (org-level-3 ((nil (:inherit outline-3 :height 1.2))))
-  (org-level-4 ((nil (:inherit outline-4 :height 1.2))))
-  (org-level-5 ((nil (:inherit outline-5 :height 1.2))))
-  (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
-  (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
+  ;; (org-level-1 ((nil (:inherit outline-1 :height 1.2))))
+  ;; (org-level-2 ((nil (:inherit outline-2 :height 1.2))))
+  ;; (org-level-3 ((nil (:inherit outline-3 :height 1.2))))
+  ;; (org-level-4 ((nil (:inherit outline-4 :height 1.2))))
+  ;; (org-level-5 ((nil (:inherit outline-5 :height 1.2))))
+  ;; (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
+  ;; (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
   (org-list-dt ((nil (:weight bold))))
   (org-quote ((nil :slant italic)))
   (org-verse ((nil :slant italic)))
@@ -1544,7 +1601,8 @@ If FILE is a directory, inserts the path to the directory."
   ;; available. Probably the more intended way to achieve this would be
   ;; to customize `org-src-lang-modes' but that would require remapping
   ;; every major mode there to tree-sitter mode
-  (define-advice org-src-get-lang-mode (:filter-return (mode))
+  (define-advice org-src-get-lang-mode (:filter-return (mode)
+                                        use-ts-mode)
     "Use tree-sitter mode if available."
     (pcase (assoc mode major-mode-remap-alist)
       (`(,mode . ,ts-mode) ts-mode)
@@ -1563,7 +1621,7 @@ If FILE is a directory, inserts the path to the directory."
 (use-package org
   :config
   (define-advice org-meta-return
-      (:around (orig-fun &rest args))
+      (:around (orig-fun &rest args) insert-dwim)
     "Depending on the context, insert things differently."
     (cond
      ((org-at-item-checkbox-p)
@@ -1579,7 +1637,7 @@ If FILE is a directory, inserts the path to the directory."
                             (prevs (org-list-prevs-alist struct))
                             (desc (eq (org-list-get-list-type
                                        itemp struct prevs)
-		                              'descriptive)))
+                                      'descriptive)))
                        desc))
       ;; if current item has ::, use default function,
       ;; otherwise insert an item without ::
@@ -1866,7 +1924,16 @@ as you zoom text. It's fast, since no image regeneration is required."
            (subtree (org-cut-subtree))
            (new-node (org-roam-node-create :title node-name)))
       (org-roam-capture- :node new-node)
-      (yank))))
+      (yank)))
+
+  (define-advice org-roam-node-open (:after (&rest args)
+                                     unfold-heading-node)
+    "Unfold the heading if it's a node and recenter the window."
+    (let ((node (car args)))
+      (when (> (org-roam-node-level node) 0)
+        (org-fold-show-entry t)
+        (org-fold-show-children)
+        (recenter-top-bottom (/ (window-height) 2))))))
 
 (use-package consult-org-roam
   :bind ("C-c n g" . consult-org-roam-search)
@@ -1884,10 +1951,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 
   (org-link-set-parameters "roam" :complete 'org-roam-complete-link)
 
-  (define-advice org-insert-link
-      (:after (&rest _))
-    "Replace all :roam links with ID links."
-    (org-roam-link-replace-all)))
+  (advice-add 'org-insert-link :after #'org-roam-link-replace-all))
 
 (use-package org-roam
   :after hl-line
@@ -2197,8 +2261,8 @@ OPEN-IN-WEB is non-nil."
 - The compiled file gets executed"
     (if buffer-file-name
         (setq-local compile-command
-                    (concat "g++ "(shell-quote-argument
-                                   (buffer-file-name)) " && ./a.out"))))
+                    (concat "g++ " (shell-quote-argument
+                                    (buffer-file-name)) " && ./a.out"))))
   :config
   ;; this is for indenting
   (c-set-offset 'comment-intro 0)
@@ -2210,6 +2274,13 @@ OPEN-IN-WEB is non-nil."
 
 (use-package subword
   :hook (after-init . global-subword-mode))
+
+(use-package glasses
+  :hook ((typescript-ts-mode c-ts-mode c++-ts-mode) . glasses-mode)
+  :custom
+  (glasses-separator "-")
+  (glasses-original-separator nil)
+  (glasses-separate-parentheses-p nil))
 
 (use-package inf-lisp
   :custom (inferior-lisp-program "sbcl --noinform"))
@@ -2230,7 +2301,10 @@ OPEN-IN-WEB is non-nil."
   (with-eval-after-load 'sly-mrepl
     (keymap-unset sly-prefix-map "C-p" t)
     (keymap-set sly-mrepl-mode-map "C-c C-p" #'sly-mrepl-previous-prompt)
-    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt)))
+    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt))
+  (with-eval-after-load 'corfu
+    (add-hook 'sly-mode-hook
+              (lambda () (setq-local corfu-separator ?-)))))
 
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
@@ -2340,11 +2414,12 @@ It doesn't close empty tags."
           ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
           (python "https://github.com/tree-sitter/tree-sitter-python")
           ;; (php "https://github.com/tree-sitter/tree-sitter-php")
+          (toml "https://github.com/tree-sitter-grammars/tree-sitter-toml")
           (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
           (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")))
-  ;; (toml "https://github.com/tree-sitter/tree-sitter-toml")
-  ;; (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+  ;; ))
 
 (dolist (lang treesit-language-source-alist)
   (unless (treesit-language-available-p (car lang))
@@ -2362,7 +2437,9 @@ It doesn't close empty tags."
         (js-json-mode . json-ts-mode)
         ;; I change javascript modes to use typescript tree-sitter mode
         (js-mode . typescript-ts-mode)
-        (javascript-mode . typescript-ts-mode))))
+        (javascript-mode . typescript-ts-mode)
+        (conf-toml-mode . toml-ts-mode)
+        (yaml-mode . yaml-ts-mode)))
 
 (add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
@@ -2370,7 +2447,7 @@ It doesn't close empty tags."
 
 (when (< emacs-major-version 31)
   (load (expand-file-name "treesit-predicate-rewrite"
-                          user-emacs-directory) nil nil nil t))
+                          user-emacs-directory) nil nil nil t)))
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -2424,7 +2501,8 @@ It doesn't close empty tags."
 (setq explicit-shell-file-name "/bin/bash"
       async-shell-command-buffer 'new-buffer)
 
-(define-advice shell-command (:around (orig-fun &rest args))
+(define-advice shell-command (:around (orig-fun &rest args)
+                              apply-ansi-colors)
   "Apply ANSI colors to the output buffer."
   (let ((buffer-name (or (nth 1 args)
                          shell-command-buffer-name)))
@@ -2495,6 +2573,8 @@ It doesn't close empty tags."
          :map ghostel-mode-map
          ("C-c C-p" . ghostel-previous-prompt)
          ("C-c C-n" . ghostel-next-prompt))
+  :custom
+  (ghostel-module-auto-install 'download)
   :config
   (add-to-list 'meow-mode-state-list '(ghostel-mode . insert))
   (defun ghostel-meow-setup ()
@@ -2517,6 +2597,7 @@ It doesn't close empty tags."
   :bind ("C-x C-S-f" . sudo-edit-find-file))
 
 (use-package reverso
+  :vc (:url "https://github.com/overideal/reverso.el")
   :bind
   ("C-c r" . reverso)
   :preface
@@ -2527,7 +2608,8 @@ It doesn't close empty tags."
     (org-fold-show-all)
     (reverso-grammar-buffer))
   :config
-  (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal)))
+  (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal))
+  (set-keymap-parent reverso-result-mode-map nil))
 
 (use-package writeroom-mode
   :unless on-termux-p)
@@ -2582,7 +2664,7 @@ It doesn't close empty tags."
         ("\\*which-key\\*"
          (window-parameters . ((mode-line-format . none))))
 
-        ("\\*\\(Messages\\|Backtrace\\|Warnings\\)\\*"
+        ("\\*\\(Messages\\|Backtrace\\|Warnings\\|Package-Lint\\)\\*"
          (display-buffer--maybe-at-bottom)
          (window-height . 0.25)
          (dedicated . t)
@@ -2648,9 +2730,10 @@ Also see `window-delete-popup-frame'." command)
   (use-package mb-transient
     :init
     (window-define-with-popup-frame mb-transient)
-    (advice-add 'window-popup-mb-transient :after
-                (lambda () (modify-frame-parameters nil '((width . 54)))
-                  (set-window-parameter nil 'mode-line-format 'none)))
+    (define-advice window-popup-mb-transient
+        (:after nil remove-mode-line)
+      (modify-frame-parameters nil '((width . 54)))
+      (set-window-parameter nil 'mode-line-format 'none))
     :load-path mb-transient-install-dir
     :hook (mb-transient-exit . window-delete-popup-frame)
     :commands (mb-transient)

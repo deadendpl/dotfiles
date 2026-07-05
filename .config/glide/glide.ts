@@ -56,6 +56,9 @@ for(const[key, value] of Object.entries(prefs))
   glide.prefs.set(key, value);
 
 glide.keymaps.set("normal", "<leader>r", "config_reload");
+glide.keymaps.set("normal", "<leader>t", () =>
+  glide.keys.send("<A-f><Esc>", { skip_mappings: true }),
+  { description: "toolbar" });
 // doesn't work
 glide.keymaps.set("normal", "<A-gt>", "scroll_bottom");
 glide.keymaps.set("normal", "<A-lt>", "scroll_top");
@@ -98,6 +101,8 @@ glide.keymaps.del("normal", "<A-l>");
 glide.keymaps.set("insert", "<C-a>", () =>
   glide.keys.send("<Home>", { skip_mappings: true }),
 );
+glide.keymaps.set("insert", "<C-v>", "scroll_page_down");
+glide.keymaps.set("insert", "<A-v>", "scroll_page_up");
 glide.keymaps.set("insert", "<C-e>", "motion $");
 glide.keymaps.set("insert", "<C-f>", "caret_move right");
 glide.keymaps.set("insert", "<C-b>", "caret_move left");
@@ -107,7 +112,15 @@ glide.keymaps.set("insert", "<C-/>", "undo");
 glide.keymaps.set("insert", "<C-d>", () =>
   glide.keys.send("<Delete>", { skip_mappings: true }),
 );
-
+glide.keymaps.set("insert", "<A-f>", () =>
+  glide.keys.send("<C-Right>", { skip_mappings: true }),
+);
+glide.keymaps.set("insert", "<A-b>", () =>
+  glide.keys.send("<C-Left>", { skip_mappings: true }),
+);
+glide.keymaps.set("insert", "<A-Backspace>", () =>
+  glide.keys.send("<C-Backspace>", { skip_mappings: true })
+);
 glide.keymaps.set("insert", "<C-l>", () =>
   glide.keys.send("<Enter>", { skip_mappings: true }),
 );
