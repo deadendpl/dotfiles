@@ -64,7 +64,7 @@ case $selected_engine in
     URL="https://gamefaqs.gamespot.com/search?game="
     ;;
   "Anna's Archive")
-    URL="https://annas-archive.org/search?q="
+    URL="https://annas-archive.gl/search?q="
     ;;
   "Ecosia")
     URL="https://www.ecosia.org/search?method=index&q="

@@ -14,7 +14,6 @@
       (set-fringe-mode 10)))         ; Give some breathing room
 (tooltip-mode -1)                    ; Disable tooltips
 (menu-bar-mode -1)                   ; Disable the menu bar
-(global-auto-revert-mode t)          ; Automatically show changes if the file has changed
 (global-visual-line-mode t)          ; Enable truncated lines (line wrapping)
 (delete-selection-mode 1)            ; You can select text and delete it by typing (in emacs keybindings).
 
@@ -69,7 +68,7 @@ Most of the stuff will get redirected here.")
 (setq-default use-dialog-box nil ; turns off graphical dialog boxes
               use-file-dialog nil
               initial-buffer-choice t ; scratch buffer as a startup buffer
-              initial-major-mode 'fundamental-mode ; setting scratch buffer major mode
+              initial-major-mode 'text-mode ; setting scratch buffer major mode
               initial-scratch-message nil ; scratch buffer message
               inhibit-startup-message nil ; default emacs startup message
               vc-follow-symlinks t ; follow symlinks
@@ -127,7 +126,8 @@ Most of the stuff will get redirected here.")
                   read-process-output-max)
               history-delete-duplicates t
               kill-do-not-save-duplicates t
-              grep-use-headings t)
+              grep-use-headings t
+              imenu-max-item-length nil)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -301,6 +301,36 @@ newlines at their end."
 
 (add-hook 'find-file-hook #'not-modified-when-newline)
 
+(defvar custom-set-date-last-date nil
+  "The last timestamp date chosen by `custom-set-date'.")
+
+(defun custom-set-date (date)
+  "Set the DATE to be the system date.
+Also can run pyrice if the user wants to do so."
+  (interactive (list
+                ;; it's weird that only org has a good calendar prompt
+                ;; function
+                (progn
+                  (require 'org)
+                  (org-read-date t t nil nil
+                                 custom-set-date-last-date))))
+  (let ((date (format-time-string "%Y-%m-%d %H:%M:%S" date))
+        (display-buffer-alist (append
+                               `((,(regexp-quote
+                                    shell-command-buffer-name-async)
+                                  (display-buffer-no-window)))
+                               display-buffer-alist)))
+    (async-shell-command (format "sudo date -s \"%s\"" date)))
+  (setq custom-set-date-last-date date)
+  (when (yes-or-no-p "Run pyrice?")
+    (let ((command (read-string "What pyrice command to run?: "
+                                "pyrice")))
+      (start-process-shell-command "pyrice" nil command))))
+
+(with-eval-after-load 'savehist
+  (add-to-list 'savehist-additional-variables
+               'custom-set-date-last-date))
+
 (use-package gcmh
   :demand
   :config
@@ -419,7 +449,8 @@ newlines at their end."
     (meow-define-keys 'insert
       '("C-." . meow-keypad)
       '("C-g" . meow-escape-or-normal-modal))
-    (add-to-list 'meow-mode-state-list '(helpful-mode . normal)))
+    (add-to-list 'meow-mode-state-list '(helpful-mode . normal))
+    (add-to-list 'meow-mode-state-list '(diff-mode . motion)))
 
   (meow-setup)
   (meow-global-mode 1))
@@ -550,6 +581,9 @@ newlines at their end."
   :config
   (remove-hook 'expreg-functions #'expreg--word)
   (remove-hook 'expreg-functions #'expreg--subword)
+  (add-hook 'text-mode-hook
+            (lambda () (add-hook 'expreg-functions
+                                 #'expreg--sentence -100 t)))
   (define-advice expreg-expand (:after nil dont-exchange-dwim)
     "Don't exchange point and mark if it can't expand more"
     (unless (= (expreg--current-depth) 0)
@@ -676,20 +710,42 @@ With ARG being non-nil, insert the non-breaking space."
                                   #'custom/eww-imenu-create-index)))
   :config
   (defun custom/eww-imenu-create-index ()
-    "Create a index of headings for imenu."
-    (beginning-of-buffer)
-    (let (index-list)
-      (while-let ((match (text-property-search-forward 'outline-level)))
-        (push (cons (buffer-substring (prop-match-beginning match)
-                                      (prop-match-end match))
-                    (prop-match-beginning match))
-              index-list))
-      (reverse index-list)))
+    "Create an imenu index of headings for EWW buffers.
+The index is built by looking at the `outline-level' text property
+on headings. Headings are structured hierarchically with their
+parents joined by \"/\" while preserving their text properties."
+    (save-excursion
+      (goto-char (point-min))
+      (let (index-list active-path)
+        (while-let ((match (text-property-search-forward 'outline-level)))
+          (let* ((level (prop-match-value match))
+                 (beg (prop-match-beginning match))
+                 (end (prop-match-end match))
+                 (heading-text (buffer-substring beg end))
+                 ;; Keep only parent headings from active-path (whose
+                 ;; level < current level)
+                 (parents (let (acc)
+                            (dolist (cell active-path)
+                              (when (< (car cell) level)
+                                (push cell acc)))
+                            (nreverse acc))))
+            ;; Construct the full hierarchical path string, keeping text
+            ;; properties
+            (let ((full-name
+                   (mapconcat #'cdr (append parents (list (cons
+                                                           level
+                                                           heading-text)))
+                              "/")))
+              (push (cons full-name beg) index-list)
+              ;; Update active-path to include current heading
+              (setq active-path (append parents (list
+                                                 (cons level
+                                                       heading-text)))))))
+        (nreverse index-list))))
   :custom
   (eww-auto-rename-buffer 'title)
   (url-privacy-level '(email lastloc))
-  (eww-use-external-browser-for-content-type
-   "\\`\\(video/\\|audio\\)"))
+  (eww-use-external-browser-for-content-type "\\`\\(video/\\|audio\\)"))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -836,7 +892,12 @@ default, the whole line in the file is highlighted."
         ("Recent files"
          ,@(cl-loop for i from 0 to 4
             with file = (recentf-elements 5)
-            collect `(,(nth i file) (find-file ,(nth i file))
+            collect `(,(let ((string (nth i file)))
+                        (if (>= (length string) fill-column)
+                            (truncate-string-to-width string fill-column
+                             0 nil "...")
+                          string))
+                      (find-file ,(nth i file))
                       ,(number-to-string (1+ i)))))
         ("Things to remember"
          ("Instead of holding h/l, use letter finding keybindings")
@@ -1087,7 +1148,7 @@ default, the whole line in the file is highlighted."
   (([remap goto-line] . consult-goto-line)
    ([remap imenu] . consult-imenu)
    ([remap switch-to-buffer] . consult-buffer)
-   ;; ([remap project-find-file] . consult-project-buffer)
+   ([remap project-find-file] . consult-project-buffer)
    ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
    ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
    ([remap switch-to-buffer-other-tab] . consult-buffer-other-tab)
@@ -1100,11 +1161,8 @@ default, the whole line in the file is highlighted."
   :custom
   (consult-async-min-input 0)
   :config
-  ;; no live preview as loading org mode takes few seconds
-  (consult-customize consult-buffer consult-project-buffer
-                     consult-buffer-other-tab consult-buffer-other-window
-                     consult-buffer-other-frame
-                     :preview-key nil)
+  ;; no org file preview as loading org mode takes few seconds
+  (add-to-list 'consult-preview-excluded-files "\\.org\\'")
   ;; adding project source
   (add-to-list 'consult-buffer-sources 'consult-source-project-buffer)
   ;; (meow-normal-define-key '("P" . consult-yank-from-kill-ring))
@@ -1499,7 +1557,6 @@ If FILE is a directory, inserts the path to the directory."
   ("C-c n c" . org-capture)
   (:map org-mode-map
    ("C-x n t" . org-toggle-narrow-to-subtree)
-   ("C-x n r" . custom/org-reverso-grammar-subtree)
    ([remap imenu] . consult-org-heading))
   ;; recalculating the calculations when pressing C-c C-c in a table
   :hook (org-ctrl-c-ctrl-c . (lambda ()
@@ -1858,7 +1915,7 @@ as you zoom text. It's fast, since no image regeneration is required."
   :bind (("C-c n A a" . org-roam-alias-add)
          ("C-c n A r" . org-roam-alias-remove)
          ("C-c n d c" . org-roam-dailies-capture-today)
-         ("C-c n d f" . org-roam-dailies-find-date)
+         ("C-c n d f" . org-roam-dailies-goto-date)
          ("C-c n d t" . org-roam-dailies-goto-today)
          ("C-c n d j" . org-roam-dailies-goto-next-note)
          ("C-c n d k" . org-roam-dailies-goto-previous-note)
@@ -2234,6 +2291,23 @@ OPEN-IN-WEB is non-nil."
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
     (apply orig-fun args)))
 
+(use-package eglot
+  :ensure nil
+  :custom (eglot-autoshutdown t)
+  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1))))
+
+;; (use-package flycheck-eglot
+;;   :after eglot
+;;   :hook (eglot-managed-mode . flycheck-eglot-mode))
+
+(dolist (mode '(css-ts-mode-hook
+                python-ts-mode-hook
+                bash-ts-mode-hook
+                c++-ts-mode-hook
+                c-ts-mode-hook
+                mhtml-mode-hook))
+  (add-hook mode 'eglot-ensure))
+
 ;; (use-package lua-mode)
 (use-package nix-mode)
 (use-package lua-ts-mode
@@ -2600,16 +2674,26 @@ It doesn't close empty tags."
   :vc (:url "https://github.com/overideal/reverso.el")
   :bind
   ("C-c r" . reverso)
+  :config
+  (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal))
+  (set-keymap-parent reverso-result-mode-map nil))
+
+(use-package savehist
+  :config
+  (add-to-list 'savehist-additional-variables 'reverso--source-value)
+  (add-to-list 'savehist-additional-variables 'reverso--target-value))
+
+(use-package org
+  :bind
+  (:map org-mode-map
+   ("C-x n r" . custom/org-reverso-grammar-subtree))
   :preface
   (defun custom/org-reverso-grammar-subtree ()
     "Check grammar in a narrowed subtree."
     (interactive)
     (org-narrow-to-subtree)
     (org-fold-show-all)
-    (reverso-grammar-buffer))
-  :config
-  (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal))
-  (set-keymap-parent reverso-result-mode-map nil))
+    (reverso-grammar-buffer)))
 
 (use-package writeroom-mode
   :unless on-termux-p)
@@ -2621,7 +2705,8 @@ It doesn't close empty tags."
 
 (setq display-buffer-alist
       '(("*Calendar*"
-         (display-buffer--maybe-at-bottom))
+         (display-buffer--maybe-at-bottom)
+         (dedicated . t))
         ("^CAPTURE"
          (display-buffer--maybe-at-bottom)
          (window-height . 12))
@@ -2718,6 +2803,149 @@ Also see `window-delete-popup-frame'." command)
                '(m3u-mode nerd-icons-mdicon
                           "nf-md-playlist_music_outline"
                           :face nerd-icons-dred)))
+
+(use-package gptel
+  :bind (("C-c a a" . gptel-agent)
+         ("C-c a m" . gptel-menu)
+         ("C-c a o" . gptel)
+         ("C-c a p" . gptel-preset)
+         ("C-c a r" . gptel-rewrite))
+  :custom
+  (gptel-default-mode #'org-mode)
+  (gptel-model 'gemini-3.1-flash-lite)
+  :config
+  (setq gptel-backend
+        (gptel-make-gemini "gemini"
+          :key (nth 1 (auth-source-user-and-password
+                       "generativelanguage.googleapis.com"))
+          :models '(gemini-3.5-flash
+                    gemini-3.1-flash-lite
+                    gemini-pro-latest
+                    gemini-flash-latest)))
+
+  (gptel-make-openai "mistral"
+    :host "api.mistral.ai"
+    :endpoint "/v1/chat/completions"
+    :protocol "https"
+    :key (nth 1 (auth-source-user-and-password "api.mistral.ai"))
+    :models '("mistral-small"))
+
+  (setf (alist-get 'default gptel-directives)
+        (concat (alist-get 'default gptel-directives)
+                " Note that if you will use headings for your answer, they need to be at least at the 4th level."))
+
+  (defun gptel-send-dwim ()
+    "Send the prompt if the point is possibly at the end of the buffer."
+    (interactive)
+    (unless (string-match "[aA-zZ]"
+                          (buffer-substring-no-properties
+                           (point) (point-max)))
+      (gptel-send)
+      t))
+  (keymap-set gptel-mode-map "C-c RET" #'gptel-send-dwim)
+
+  (defvar custom/gptel-enable-hook nil
+    "The hook that runs when entering `gptel-mode'.")
+  (add-hook 'gptel-mode-hook (lambda ()
+                               (when gptel-mode
+                                 (run-hooks 'custom/gptel-enable-hook))))
+  (add-hook 'custom/gptel-enable-hook
+            (lambda ()
+              (add-hook 'org-ctrl-c-ctrl-c-hook
+                        #'gptel-send-dwim -100 t)))
+  (add-hook 'custom/gptel-enable-hook
+            (lambda ()
+              (unless (buffer-file-name)
+                (emacs-lock-mode)
+                (add-hook 'after-save-hook
+                          (lambda ()
+                            (emacs-lock-mode -1))
+                          nil t))))
+
+
+  ;; aligning tables in the responses
+  (defun custom/gptel-align-org-tables (beginning end)
+    "Align tables from beginning to end.
+Meat to be used in `gptel-post-response-functions'."
+    (save-excursion
+      (narrow-to-region beginning end)
+      (goto-char beginning)
+      (while (re-search-forward org-table-line-regexp nil t)
+        (org-table-align)
+        (goto-char (org-table-end)))
+      (widen)))
+
+  (add-hook 'gptel-post-response-functions
+            #'custom/gptel-align-org-tables))
+
+;; loading gptel and turning it on if an org buffer has the gptel
+;; properties
+(use-package org
+  :hook (org-mode . (lambda ()
+                      (when (save-excursion
+                              (beginning-of-buffer)
+                              (or (org-entry-get
+                                    (point) "GPTEL_MODEL")
+                                   (org-entry-get
+                                    (point) "GPTEL_BACKEND")
+                                   (org-entry-get
+                                    (point) "GPTEL_SYSTEM")
+                                   (org-entry-get
+                                    (point) "GPTEL_TOOLS")
+                                   (org-entry-get
+                                    (point) "GPTEL_BOUNDS")))
+                        (unless (featurep 'gptel)
+                          (require 'gptel)
+                        (gptel-mode 1))))))
+
+(use-package gptel-agent
+  :after gptel
+  :demand
+  :config (gptel-agent-update))
+
+(use-package consult-gh
+  :init
+  (setq consult-gh-preview-major-mode 'org-mode)
+  :custom
+  (consult-gh-default-clone-directory "~/Projects/")
+  :config
+  (keymap-set consult-gh-topics-edit-mode-map "C-c C-c"
+              #'consult-gh-ctrl-c-ctrl-c)
+  (dolist (map '(consult-gh-pr-view-mode-map
+                 consult-gh-run-view-mode-map
+                 consult-gh-misc-view-mode-map
+                 consult-gh-repo-view-mode-map
+                 consult-gh-issue-view-mode-map
+                 consult-gh-commit-view-mode-map))
+    (keymap-set (eval map) "C-c C-&"
+                #'consult-gh-topics-open-in-browser))
+  (dolist (hook '(consult-gh-pr-view-mode-hook
+                  consult-gh-run-view-mode-hook
+                  consult-gh-misc-view-mode-hook
+                  consult-gh-repo-view-mode-hook
+                  consult-gh-issue-view-mode-hook
+                  consult-gh-commit-view-mode-hook))
+    (add-hook hook (lambda ()
+                     (setq-local revert-buffer-function
+                                 (lambda (&optional ignore-auto noconfirm)
+                                   (ignore ignore-auto)
+                                   (if noconfirm
+                                       (consult-gh-refresh-view)
+                                     (when (yes-or-no-p "Refresh the current topic?")
+                                       (consult-gh-refresh-view)))))))))
+
+(use-package consult-gh-transient
+  :ensure nil
+  :after consult-gh
+  :demand
+  :custom
+  (consult-gh-default-interactive-command #'consult-gh-transient))
+
+(use-package consult-gh-embark
+  :after consult-gh
+  :demand
+  :config
+  (consult-gh-embark-mode 1))
 
 (setq mb-transient-install-dir
       (when (file-exists-p "~/Projects/emacs-mb-transient/")

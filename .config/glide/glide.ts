@@ -98,9 +98,6 @@ glide.keymaps.del("normal", "<A-h>");
 glide.keymaps.del("normal", "<A-l>");
 
 // insert mode bindings like the ones from emacs
-glide.keymaps.set("insert", "<C-a>", () =>
-  glide.keys.send("<Home>", { skip_mappings: true }),
-);
 glide.keymaps.set("insert", "<C-v>", "scroll_page_down");
 glide.keymaps.set("insert", "<A-v>", "scroll_page_up");
 glide.keymaps.set("insert", "<C-e>", "motion $");
@@ -109,39 +106,36 @@ glide.keymaps.set("insert", "<C-b>", "caret_move left");
 glide.keymaps.set("insert", "<C-j>", "caret_move down");
 glide.keymaps.set("insert", "<C-k>", "caret_move up");
 glide.keymaps.set("insert", "<C-/>", "undo");
-glide.keymaps.set("insert", "<C-d>", () =>
-  glide.keys.send("<Delete>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<A-f>", () =>
-  glide.keys.send("<C-Right>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<A-b>", () =>
-  glide.keys.send("<C-Left>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<A-Backspace>", () =>
-  glide.keys.send("<C-Backspace>", { skip_mappings: true })
-);
-glide.keymaps.set("insert", "<C-l>", () =>
-  glide.keys.send("<Enter>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-x>", () =>
-  glide.keys.send("<C-a>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<A-w>", () =>
-  glide.keys.send("<C-c>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-w>", () =>
-  glide.keys.send("<C-x>", { skip_mappings: true }),
-);
-glide.keymaps.set("insert", "<C-y>", () =>
-  glide.keys.send("<C-v>", { skip_mappings: true }),
-);
+glide.keymaps.set("insert", "<A-f>", "motion e");
+glide.keymaps.set("insert", "<A-b>", "motion b");
+
+const insert_bindings: Record<string, string> = {
+  "<C-d>": "<Delete>",
+  "<A-w>": "<C-c>",
+  "<C-y>": "<C-v>",
+  // C-x h doesn't work, so I bind C-x to select everything
+  "<C-x>": "<C-a>",
+  "<C-w>": "<C-x>",
+  "<C-l>": "<Enter>",
+  "<C-a>": "<Home>",
+  "<C-S-e>": "<S-End>",
+  "<C-S-a>": "<S-Home>",
+  "<A-Backspace>": "<C-Backspace>",
+  "<A-d>": "<C-Right><C-Backspace>",
+};
+
+for(const[key, value] of Object.entries(insert_bindings))
+  glide.keymaps.set("insert", key, () =>
+    glide.keys.send(value, { skip_mappings: true }),
+  );
 
 // setting bindings for command line
 glide.keymaps.set("command", "<C-j>", "commandline_focus_next");
 glide.keymaps.set("command", "<C-k>", "commandline_focus_back");
 glide.keymaps.set("command", "<C-l>", "commandline_accept");
-glide.keymaps.set("command", "<C-g>", () => glide.commandline.close());
+glide.keymaps.set("command", "<C-y>", () =>
+  glide.keys.send("<C-v>", { skip_mappings: true }));
+glide.keymaps.set("command", "<C-g>", glide.commandline.close);
 
 // findbar bindings that make it work like isearch
 glide.keymaps.set("insert", "<C-s>", () => {

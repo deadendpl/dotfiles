@@ -12,6 +12,7 @@ chsh -s fish
 
 # linking directories
 rm -rf ~/.config/
+mkdir ~/.config
 cd ~/.dotfiles
 stow .
 
