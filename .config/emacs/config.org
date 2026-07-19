@@ -94,6 +94,7 @@
     - [[#org-auto-tangle][Org auto tangle]]
     - [[#org-roam][Org Roam]]
       - [[#node-annotation][Node annotation]]
+      - [[#a-super-completion-at-point-function][A super completion at point function]]
       - [[#anilist-incrementing-progress][AniList incrementing progress]]
       - [[#anilist-lookup][AniList lookup]]
       - [[#game-completion-showcase][Game completion showcase]]
@@ -101,7 +102,6 @@
   - [[#parenthesis][Parenthesis]]
   - [[#programming][Programming]]
     - [[#compiling][Compiling]]
-    - [[#flycheck][Flycheck]]
     - [[#eglot][Eglot]]
     - [[#language-support][Language support]]
     - [[#languages][Languages]]
@@ -136,6 +136,7 @@
   - [[#m3u-mode][M3U mode]]
   - [[#gptel][gptel]]
   - [[#consult-gh][Consult GH]]
+  - [[#grep][grep]]
   - [[#local-packages][Local packages]]
 
 * INFO and CREDITS
@@ -327,7 +328,6 @@ From [[https://www.rahuljuliato.com/posts/multiple-eln-cache][this blog post]].
                   read-process-output-max)
               history-delete-duplicates t
               kill-do-not-save-duplicates t
-              grep-use-headings t
               imenu-max-item-length nil)
 
 ;; showing init time in scratch buffer
@@ -929,13 +929,13 @@ With ARG being non-nil, insert the non-breaking space."
   (interactive "P")
   (if arg
       (insert " ")
-    (setq non-breaking-space-insertion-amount
-          (1+ non-breaking-space-insertion-amount))
+    (cl-incf non-breaking-space-insertion-amount)
     (message "You accidentally hit the non-breaking space %s %s."
              non-breaking-space-insertion-amount
              (if (> non-breaking-space-insertion-amount 1)
                  "times"
-               "time"))))
+               "time"))
+    (insert " ")))
 
 (keymap-global-set " " #'non-breaking-space-insertion-notifier)
 #+end_src
@@ -988,13 +988,14 @@ Usually blogs and other similar sites read nicely.
 (use-package eww
   :hook (eww-mode . (lambda ()
                       (setq-local imenu-create-index-function
-                                  #'custom/eww-imenu-create-index)))
-  :config
-  (defun custom/eww-imenu-create-index ()
-    "Create an imenu index of headings for EWW buffers.
+                                  #'custom/shr-imenu-create-index)))
+  :preface
+  (defun custom/shr-imenu-create-index ()
+    "Create an imenu index of headings for shr related buffers.
 The index is built by looking at the `outline-level' text property
 on headings. Headings are structured hierarchically with their
-parents joined by \"/\" while preserving their text properties."
+parents joined by \"/\" while preserving their text properties.
+This function should work in EWW and Elfeed entry buffers."
     (save-excursion
       (goto-char (point-min))
       (let (index-list active-path)
@@ -1233,7 +1234,9 @@ It's tangled to =early-init.el=, because it improves startup time a bit.
                     :weight 'medium)
 (set-face-attribute 'variable-pitch nil
                     :family "Ubuntu Nerd Font"
-                    :weight 'medium)
+                    :height 1.1
+                    :weight 'regular)
+(set-face-attribute 'variable-pitch-text nil :height 'unspecified)
 ;; (set-face-attribute 'fixed-pitch nil
 ;;                     :family "JetBrainsMono NFM Mono")
 (set-face-attribute 'fixed-pitch-serif nil
@@ -1308,10 +1311,7 @@ Adding highlights to TODO and related words.
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-regexp-icon-alist
                '("rc$" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-dir-icon-alist
-               '("[Pp]rojects" nerd-icons-octicon
-                 "nf-oct-project_roadmap")))
+                 :face nerd-icons-dorange)))
 
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
@@ -1371,19 +1371,23 @@ Adding [[https://github.com/Fanael/rainbow-delimiters][coloring to parentheses]]
 *** Theme (modus-ewal)
 I use my own theme that works with pywal - [[https://github.com/deadendpl/modus-ewal-theme][modus-ewal-theme]].
 The =:load-path= setup is because I prefer to use my local install of the package instead of the MELPA one, but if it's not available then I'll use the MELPA one.
-I don't have pywal on termux though so I use =doom-dracula= there.
+I don't have pywal on termux though so I use =modus-vivendi= there.
 #+begin_src emacs-lisp
 (setq modus-ewal-theme-install-dir
       (when (file-exists-p "~/Projects/modus-ewal-theme/")
         "~/Projects/modus-ewal-theme/"))
 
 (if on-termux-p
-    (use-package doom-themes
-      :demand
-      :config (load-theme 'doom-dracula t))
+    (load-theme 'modus-vivendi t)
   (use-package modus-ewal-theme
     :demand
     :load-path modus-ewal-theme-install-dir
+    :init
+    (when modus-ewal-theme-install-dir
+      (unless (package-installed-p 'modus-themes)
+        (package-install 'modus-themes))
+      (unless (package-installed-p 'ewal)
+        (package-install 'ewal)))
     :config
     (unless (daemonp)
       (load-theme 'modus-ewal t))
@@ -1510,7 +1514,8 @@ I switched from [[https://github.com/abo-abo/swiper#ivy][Ivy]] to [[https://gith
               ("RET" . vertico-directory-enter)
               ("C-l" . vertico-directory-enter)
               ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+              ("M-DEL" . vertico-directory-delete-word)
+              ("C-M-<backspace>" . vertico-directory-up))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 #+end_src
@@ -1540,7 +1545,9 @@ Those commands ususally have a preview functionality and some have narrowing fun
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
    ([remap eshell-previous-matching-input] . consult-history)
-   ([remap yank-pop] . consult-yank-pop))
+   ([remap yank-pop] . consult-yank-pop)
+   ("M-s l" . consult-line)
+   ("M-s g" . consult-ripgrep))
   ;; ([remap project-find-regexp] . consult-project-grep))
   :custom
   (consult-async-min-input 0)
@@ -1607,6 +1614,18 @@ Those commands ususally have a preview functionality and some have narrowing fun
                   (?v "Variables" font-lock-variable-name-face))))
   ;; that may cause some colliding like in json mode
   (add-to-list 'consult-imenu-config '(json-ts-mode :types nil)))
+
+;; once org loads, org files will be previewable
+(use-package org
+  :after consult
+  :config
+  (setq consult-preview-excluded-files
+        (remove "\\.org\\'" consult-preview-excluded-files)))
+
+(use-package outline
+  :bind
+  (:map outline-mode-map
+   ([remap imenu] . consult-outline)))
 #+end_src
 **** Annotations (marginalia)
 [[https://github.com/minad/marginalia][Marginalia]] shows annotations for minibuffer candidates.
@@ -1855,10 +1874,15 @@ This function looks for all available commands, lists them through =completing-r
 #+end_src
 ** Elfeed
 [[https://github.com/skeeto/elfeed][Elfeed]] is a RSS feed reader.
+The imenu function I made for EWW works here as well since both packages render the content with SHR.
 #+begin_src emacs-lisp
 (use-package elfeed
   :unless on-termux-p
-  :hook (elfeed-mode . hl-line-mode)
+  :hook ((elfeed-mode . hl-line-mode)
+         (elfeed-show-mode .
+                           (lambda ()
+                             (setq-local imenu-create-index-function
+                                         #'custom/shr-imenu-create-index))))
   :custom
   ;; cache? directory
   (elfeed-db-directory
@@ -1867,7 +1891,7 @@ This function looks for all available commands, lists them through =completing-r
                   "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
   :bind (:map elfeed-search-mode-map
-              ("f" . elfeed-search-show-entry)))
+         ("f" . elfeed-search-show-entry)))
 #+end_src
 ** Embark
 #+begin_src emacs-lisp
@@ -2585,6 +2609,16 @@ This makes it easier to see the calendar days that have org roam dailie notes.
   :custom-face
   (org-roam-dailies-calendar-note ((nil (:inherit 'hl-line)))))
 #+end_src
+
+Org roam buffer will have the backlinks folded.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :custom
+  (org-roam-buffer-postrender-functions
+   (list (lambda ()
+           (goto-char (point-min))
+           (magit-section-toggle-children (magit-current-section))))))
+#+end_src
 **** Node annotation
 Org roam supports giving your own annotation function.
 I make an annotation using marginalia.
@@ -2604,6 +2638,22 @@ I make an annotation using marginalia.
                '(org-roam-node
                  custom-org-roam-node-read--annotation
                  none)))
+#+end_src
+**** A super completion at point function
+Org roam can provide links to the nodes at point when org-roam-completion-everywhere variable is set to t.
+I also want to have dabbrevs as I tend to repeat the words I'm typing.
+Cape allows us to merge multiple capfs into one, and that's what I'm doing here.
+#+begin_src emacs-lisp
+(use-package org-roam
+  :custom (org-roam-completion-everywhere t)
+  :hook
+  (org-roam-find-file .
+                      (lambda ()
+                        (add-hook 'completion-at-point-functions
+                                  (cape-capf-super
+                                   'cape-dabbrev
+                                   :with 'org-roam-complete-everywhere)
+                                  -100 t))))
 #+end_src
 **** AniList incrementing progress
 My anime and manga notes have =progress= property which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
@@ -2892,24 +2942,24 @@ The great introductions to =M-x compile= are [[https://youtu.be/6oeE52bIFyE][Gav
       (setq args (cons (nth 0 args) (cons t (nthcdr 2 args)))))
     (apply orig-fun args)))
 #+end_src
-*** Flycheck :ARCHIVE:
-[[https://www.flycheck.org][Flycheck]] is on the fly syntax checker.
-For more information on language support, [[https://www.flycheck.org/en/latest/languages.html][read this]].
-#+begin_src emacs-lisp
-(use-package flycheck
-  :hook (prog-mode . flycheck-mode))
-#+end_src
 *** Eglot
 [[https://github.com/joaotavora/eglot][Eglot]] is from Emacs 29 built-in LSP client.
 #+begin_src emacs-lisp
 (use-package eglot
   :ensure nil
+  :bind (("C-c p f" . eglot-code-action-quickfix)
+         ("C-c p a" . eglot-code-actions)
+         ("C-c p r" . eglot-rename)
+         ("C-c p F" . custom-eglot-format-dwim))
   :custom (eglot-autoshutdown t)
-  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1))))
-
-;; (use-package flycheck-eglot
-;;   :after eglot
-;;   :hook (eglot-managed-mode . flycheck-eglot-mode))
+  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
+  :config
+  (defun custom-eglot-format-dwim ()
+    "Format region or the buffer."
+    (interactive)
+    (if (use-region-p)
+        (eglot-format (region-beginning) (region-end))
+      (eglot-format-buffer))))
 #+end_src
 
 With this major modes automatically turn on eglot.
@@ -2919,7 +2969,8 @@ With this major modes automatically turn on eglot.
                 bash-ts-mode-hook
                 c++-ts-mode-hook
                 c-ts-mode-hook
-                mhtml-mode-hook))
+                mhtml-mode-hook
+                python-ts-mode-hook))
   (add-hook mode 'eglot-ensure))
 #+end_src
 *** Language support
@@ -3000,10 +3051,7 @@ sh-script is the package that declares redirecting shell mode to treesitter mode
   (with-eval-after-load 'sly-mrepl
     (keymap-unset sly-prefix-map "C-p" t)
     (keymap-set sly-mrepl-mode-map "C-c C-p" #'sly-mrepl-previous-prompt)
-    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt))
-  (with-eval-after-load 'corfu
-    (add-hook 'sly-mode-hook
-              (lambda () (setq-local corfu-separator ?-)))))
+    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt)))
 
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
@@ -3383,6 +3431,7 @@ It is faster than vterm.
 (use-package ghostel
   :unless on-termux-p
   :init
+  (setq ghostel-module-auto-install 'download)
   ;; embark setup
   (with-eval-after-load 'embark
     (defun ghostel-dir (directory)
@@ -3398,8 +3447,6 @@ It is faster than vterm.
          :map ghostel-mode-map
          ("C-c C-p" . ghostel-previous-prompt)
          ("C-c C-n" . ghostel-next-prompt))
-  :custom
-  (ghostel-module-auto-install 'download)
   :config
   (add-to-list 'meow-mode-state-list '(ghostel-mode . insert))
   (defun ghostel-meow-setup ()
@@ -3429,17 +3476,15 @@ I like [[https://github.com/SqrtMinusOne/reverso.el][reverso]] since it's using 
 Since the package broke due to some transient change, I'm using a fork that has fixes.
 #+begin_src emacs-lisp
 (use-package reverso
+  :init
+  (add-to-list 'savehist-additional-variables 'reverso--source-value)
+  (add-to-list 'savehist-additional-variables 'reverso--target-value)
   :vc (:url "https://github.com/overideal/reverso.el")
   :bind
   ("C-c r" . reverso)
   :config
   (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal))
   (set-keymap-parent reverso-result-mode-map nil))
-
-(use-package savehist
-  :config
-  (add-to-list 'savehist-additional-variables 'reverso--source-value)
-  (add-to-list 'savehist-additional-variables 'reverso--target-value))
 
 (use-package org
   :bind
@@ -3727,6 +3772,16 @@ Meat to be used in `gptel-post-response-functions'."
   :demand
   :config
   (consult-gh-embark-mode 1))
+#+end_src
+** grep
+#+begin_src emacs-lisp
+(use-package grep
+  :custom (grep-use-headings t))
+
+(use-package wgrep
+  :bind (:map grep-mode-map
+         ("C-x C-q" . wgrep-change-to-wgrep-mode))
+  :custom (wgrep-auto-save-buffer t))
 #+end_src
 ** Local packages
 #+begin_src emacs-lisp

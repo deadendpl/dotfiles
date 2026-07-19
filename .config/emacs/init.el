@@ -126,7 +126,6 @@ Most of the stuff will get redirected here.")
                   read-process-output-max)
               history-delete-duplicates t
               kill-do-not-save-duplicates t
-              grep-use-headings t
               imenu-max-item-length nil)
 
 ;; showing init time in scratch buffer
@@ -666,13 +665,13 @@ With ARG being non-nil, insert the non-breaking space."
   (interactive "P")
   (if arg
       (insert " ")
-    (setq non-breaking-space-insertion-amount
-          (1+ non-breaking-space-insertion-amount))
+    (cl-incf non-breaking-space-insertion-amount)
     (message "You accidentally hit the non-breaking space %s %s."
              non-breaking-space-insertion-amount
              (if (> non-breaking-space-insertion-amount 1)
                  "times"
-               "time"))))
+               "time"))
+    (insert " ")))
 
 (keymap-global-set " " #'non-breaking-space-insertion-notifier)
 
@@ -707,13 +706,14 @@ With ARG being non-nil, insert the non-breaking space."
 (use-package eww
   :hook (eww-mode . (lambda ()
                       (setq-local imenu-create-index-function
-                                  #'custom/eww-imenu-create-index)))
-  :config
-  (defun custom/eww-imenu-create-index ()
-    "Create an imenu index of headings for EWW buffers.
+                                  #'custom/shr-imenu-create-index)))
+  :preface
+  (defun custom/shr-imenu-create-index ()
+    "Create an imenu index of headings for shr related buffers.
 The index is built by looking at the `outline-level' text property
 on headings. Headings are structured hierarchically with their
-parents joined by \"/\" while preserving their text properties."
+parents joined by \"/\" while preserving their text properties.
+This function should work in EWW and Elfeed entry buffers."
     (save-excursion
       (goto-char (point-min))
       (let (index-list active-path)
@@ -964,10 +964,7 @@ default, the whole line in the file is highlighted."
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-regexp-icon-alist
                '("rc$" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange))
-  (add-to-list 'nerd-icons-dir-icon-alist
-               '("[Pp]rojects" nerd-icons-octicon
-                 "nf-oct-project_roadmap")))
+                 :face nerd-icons-dorange)))
 
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
@@ -1020,12 +1017,16 @@ default, the whole line in the file is highlighted."
         "~/Projects/modus-ewal-theme/"))
 
 (if on-termux-p
-    (use-package doom-themes
-      :demand
-      :config (load-theme 'doom-dracula t))
+    (load-theme 'modus-vivendi t)
   (use-package modus-ewal-theme
     :demand
     :load-path modus-ewal-theme-install-dir
+    :init
+    (when modus-ewal-theme-install-dir
+      (unless (package-installed-p 'modus-themes)
+        (package-install 'modus-themes))
+      (unless (package-installed-p 'ewal)
+        (package-install 'ewal)))
     :config
     (unless (daemonp)
       (load-theme 'modus-ewal t))
@@ -1130,7 +1131,8 @@ default, the whole line in the file is highlighted."
               ("RET" . vertico-directory-enter)
               ("C-l" . vertico-directory-enter)
               ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+              ("M-DEL" . vertico-directory-delete-word)
+              ("C-M-<backspace>" . vertico-directory-up))
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 
@@ -1156,7 +1158,9 @@ default, the whole line in the file is highlighted."
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
    ([remap eshell-previous-matching-input] . consult-history)
-   ([remap yank-pop] . consult-yank-pop))
+   ([remap yank-pop] . consult-yank-pop)
+   ("M-s l" . consult-line)
+   ("M-s g" . consult-ripgrep))
   ;; ([remap project-find-regexp] . consult-project-grep))
   :custom
   (consult-async-min-input 0)
@@ -1223,6 +1227,18 @@ default, the whole line in the file is highlighted."
                   (?v "Variables" font-lock-variable-name-face))))
   ;; that may cause some colliding like in json mode
   (add-to-list 'consult-imenu-config '(json-ts-mode :types nil)))
+
+;; once org loads, org files will be previewable
+(use-package org
+  :after consult
+  :config
+  (setq consult-preview-excluded-files
+        (remove "\\.org\\'" consult-preview-excluded-files)))
+
+(use-package outline
+  :bind
+  (:map outline-mode-map
+   ([remap imenu] . consult-outline)))
 
 (use-package marginalia
   :after vertico
@@ -1419,7 +1435,11 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package elfeed
   :unless on-termux-p
-  :hook (elfeed-mode . hl-line-mode)
+  :hook ((elfeed-mode . hl-line-mode)
+         (elfeed-show-mode .
+                           (lambda ()
+                             (setq-local imenu-create-index-function
+                                         #'custom/shr-imenu-create-index))))
   :custom
   ;; cache? directory
   (elfeed-db-directory
@@ -1428,7 +1448,7 @@ Handles symbols that start or end with a single quote (') correctly."
                   "https://planet.emacslife.com/atom.xml"))
   (elfeed-search-filter "@6-months-ago")
   :bind (:map elfeed-search-mode-map
-              ("f" . elfeed-search-show-entry)))
+         ("f" . elfeed-search-show-entry)))
 
 (use-package embark
   :bind (("C-." . embark-act)
@@ -2016,6 +2036,13 @@ as you zoom text. It's fast, since no image regeneration is required."
   (org-roam-dailies-calendar-note ((nil (:inherit 'hl-line)))))
 
 (use-package org-roam
+  :custom
+  (org-roam-buffer-postrender-functions
+   (list (lambda ()
+           (goto-char (point-min))
+           (magit-section-toggle-children (magit-current-section))))))
+
+(use-package org-roam
   :config
   (defun custom-org-roam-node-read--annotation (node)
     (if-let* ((node (get-text-property 0 'node node))
@@ -2030,6 +2057,17 @@ as you zoom text. It's fast, since no image regeneration is required."
                '(org-roam-node
                  custom-org-roam-node-read--annotation
                  none)))
+
+(use-package org-roam
+  :custom (org-roam-completion-everywhere t)
+  :hook
+  (org-roam-find-file .
+                      (lambda ()
+                        (add-hook 'completion-at-point-functions
+                                  (cape-capf-super
+                                   'cape-dabbrev
+                                   :with 'org-roam-complete-everywhere)
+                                  -100 t))))
 
 (use-package org-roam
   :config
@@ -2293,19 +2331,27 @@ OPEN-IN-WEB is non-nil."
 
 (use-package eglot
   :ensure nil
+  :bind (("C-c p f" . eglot-code-action-quickfix)
+         ("C-c p a" . eglot-code-actions)
+         ("C-c p r" . eglot-rename)
+         ("C-c p F" . custom-eglot-format-dwim))
   :custom (eglot-autoshutdown t)
-  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1))))
-
-;; (use-package flycheck-eglot
-;;   :after eglot
-;;   :hook (eglot-managed-mode . flycheck-eglot-mode))
+  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
+  :config
+  (defun custom-eglot-format-dwim ()
+    "Format region or the buffer."
+    (interactive)
+    (if (use-region-p)
+        (eglot-format (region-beginning) (region-end))
+      (eglot-format-buffer))))
 
 (dolist (mode '(css-ts-mode-hook
                 python-ts-mode-hook
                 bash-ts-mode-hook
                 c++-ts-mode-hook
                 c-ts-mode-hook
-                mhtml-mode-hook))
+                mhtml-mode-hook
+                python-ts-mode-hook))
   (add-hook mode 'eglot-ensure))
 
 ;; (use-package lua-mode)
@@ -2375,10 +2421,7 @@ OPEN-IN-WEB is non-nil."
   (with-eval-after-load 'sly-mrepl
     (keymap-unset sly-prefix-map "C-p" t)
     (keymap-set sly-mrepl-mode-map "C-c C-p" #'sly-mrepl-previous-prompt)
-    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt))
-  (with-eval-after-load 'corfu
-    (add-hook 'sly-mode-hook
-              (lambda () (setq-local corfu-separator ?-)))))
+    (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt)))
 
 (use-package lisp-semantic-hl
   :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
@@ -2632,6 +2675,7 @@ It doesn't close empty tags."
 (use-package ghostel
   :unless on-termux-p
   :init
+  (setq ghostel-module-auto-install 'download)
   ;; embark setup
   (with-eval-after-load 'embark
     (defun ghostel-dir (directory)
@@ -2647,8 +2691,6 @@ It doesn't close empty tags."
          :map ghostel-mode-map
          ("C-c C-p" . ghostel-previous-prompt)
          ("C-c C-n" . ghostel-next-prompt))
-  :custom
-  (ghostel-module-auto-install 'download)
   :config
   (add-to-list 'meow-mode-state-list '(ghostel-mode . insert))
   (defun ghostel-meow-setup ()
@@ -2671,17 +2713,15 @@ It doesn't close empty tags."
   :bind ("C-x C-S-f" . sudo-edit-find-file))
 
 (use-package reverso
+  :init
+  (add-to-list 'savehist-additional-variables 'reverso--source-value)
+  (add-to-list 'savehist-additional-variables 'reverso--target-value)
   :vc (:url "https://github.com/overideal/reverso.el")
   :bind
   ("C-c r" . reverso)
   :config
   (add-to-list 'meow-mode-state-list '(reverso-result-mode . normal))
   (set-keymap-parent reverso-result-mode-map nil))
-
-(use-package savehist
-  :config
-  (add-to-list 'savehist-additional-variables 'reverso--source-value)
-  (add-to-list 'savehist-additional-variables 'reverso--target-value))
 
 (use-package org
   :bind
@@ -2946,6 +2986,14 @@ Meat to be used in `gptel-post-response-functions'."
   :demand
   :config
   (consult-gh-embark-mode 1))
+
+(use-package grep
+  :custom (grep-use-headings t))
+
+(use-package wgrep
+  :bind (:map grep-mode-map
+         ("C-x C-q" . wgrep-change-to-wgrep-mode))
+  :custom (wgrep-auto-save-buffer t))
 
 (setq mb-transient-install-dir
       (when (file-exists-p "~/Projects/emacs-mb-transient/")

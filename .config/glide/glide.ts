@@ -55,6 +55,11 @@ const prefs: Record<string, any> = {
 for(const[key, value] of Object.entries(prefs))
   glide.prefs.set(key, value);
 
+glide.search_engines.add({
+  name: "Brave",
+  search_url: "https://search.brave.com/search?q={searchTerms}",
+});
+
 glide.keymaps.set("normal", "<leader>r", "config_reload");
 glide.keymaps.set("normal", "<leader>t", () =>
   glide.keys.send("<A-f><Esc>", { skip_mappings: true }),
@@ -107,21 +112,31 @@ glide.keymaps.set("insert", "<C-j>", "caret_move down");
 glide.keymaps.set("insert", "<C-k>", "caret_move up");
 glide.keymaps.set("insert", "<C-/>", "undo");
 glide.keymaps.set("insert", "<A-f>", "motion e");
-glide.keymaps.set("insert", "<A-b>", "motion b");
 
 const insert_bindings: Record<string, string> = {
   "<C-d>": "<Delete>",
   "<A-w>": "<C-c>",
+  "<A-b>": "<C-Left>",
   "<C-y>": "<C-v>",
+  "<C-f>": "<Right>",
+  "<C-b>": "<Left>",
+  "<C-n>": "<Down>",
+  "<C-p>": "<Up>",
   // C-x h doesn't work, so I bind C-x to select everything
   "<C-x>": "<C-a>",
   "<C-w>": "<C-x>",
   "<C-l>": "<Enter>",
   "<C-a>": "<Home>",
+  "<C-S-n>": "<S-Down>",
+  "<C-S-p>": "<S-Up>",
+  "<C-S-f>": "<S-Right>",
+  "<C-S-b>": "<S-Left>",
   "<C-S-e>": "<S-End>",
   "<C-S-a>": "<S-Home>",
   "<A-Backspace>": "<C-Backspace>",
   "<A-d>": "<C-Right><C-Backspace>",
+  "<A-S-f>": "<C-S-Right>",
+  "<A-S-b>": "<C-S-Left>",
 };
 
 for(const[key, value] of Object.entries(insert_bindings))
