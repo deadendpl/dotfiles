@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 termux-change-repo
 termux-setup-storage
-pkg install --yes emacs sqlite fish eza git openssh iproute2 wget stow curl which
+
+packages=(
+  "emacs" "sqlite" "fish" "eza" "git" "openssh" "iproute2" "wget" "stow"
+  "curl" "which"
+)
+
+for pkg in "${packages[@]}"; do
+  if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+    echo "Installing $pkg..."
+    pkg install -y "$pkg"
+  else
+    echo "$pkg is already installed."
+  fi
+done
+
 chsh -s fish
 
 # linking directories

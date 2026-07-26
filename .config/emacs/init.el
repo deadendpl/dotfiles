@@ -330,6 +330,12 @@ Also can run pyrice if the user wants to do so."
   (add-to-list 'savehist-additional-variables
                'custom-set-date-last-date))
 
+;; when exiting, emacs will save the current hour to the variable
+(add-hook 'kill-emacs-hook (lambda ()
+                             (setq custom-set-date-last-date
+                                   (take 2 (current-time))))
+          -100)
+
 (use-package gcmh
   :demand
   :config
@@ -1064,8 +1070,9 @@ default, the whole line in the file is highlighted."
   :init (global-corfu-mode t)
   :hook ((corfu-mode . corfu-popupinfo-mode)
          (corfu-mode . corfu-echo-mode)
-         ((prog-mode ielm-mode org-mode) .
-          (lambda () (setq-local corfu-auto t))))
+         ;; ((prog-mode ielm-mode org-mode) .
+         ;;  (lambda () (setq-local corfu-auto t)))
+         )
   :custom
   ;; (corfu-auto t)
   ;; (corfu-auto-prefix 1)
@@ -1091,17 +1098,20 @@ default, the whole line in the file is highlighted."
   ;; The order of the functions matters, the
   ;; first function returning a result wins.  Note that the list of buffer-local
   ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  (add-hook 'completion-at-point-functions #'cape-dabbrev))
 
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
               ("<tab>" . completion-preview-insert))
-  :config
-  (add-to-list 'global-completion-preview-modes
-               '(not prog-mode conf-mode)))
+  :custom
+  (completion-preview-sort-function #'identity)
+  ;; :config
+  ;; (add-to-list 'global-completion-preview-modes
+  ;;              '(not prog-mode conf-mode))
+  )
 
 (use-package vertico
   :init
@@ -1472,7 +1482,7 @@ Handles symbols that start or end with a single quote (') correctly."
 If FILE is a directory, saves the path to the directory."
     (interactive "fFile: ")
     (kill-new (if (file-directory-p file)
-                  (directory-file-name file)
+                  (file-name-nondirectory (directory-file-name file))
                 (file-name-nondirectory file))))
 
   (defun embark-save-absolute-path (file)
@@ -1493,11 +1503,12 @@ If FILE is a directory, saves the path to the directory."
 
   (defun embark-insert-filename (file)
     "Insert the filename of FILE.
-If FILE is a directory, inserts the path to the directory."
+If FILE is a directory, inserts the last directory name."
     (interactive "fFile: ")
-    (embark-insert (list (if (file-directory-p file)
-                             (directory-file-name file)
-                           (file-name-nondirectory file)))))
+    (embark-insert
+     (list (if (file-directory-p file)
+               (file-name-nondirectory (directory-file-name file))
+             (file-name-nondirectory file)))))
 
   (defun embark-insert-absolute-path (file)
     "Insert the absolute path to FILE."
@@ -1904,8 +1915,6 @@ as you zoom text. It's fast, since no image regeneration is required."
                          "org-roam.db"
                          (concat org-roam-directory "/attachments")))
   (org-roam-dailies-directory "journals/")
-  ;; (org-roam-node-display-template
-  ;;  (concat "${title} " (propertize "${tags}" 'face 'org-tag)))
   (org-roam-file-exclude-regexp '("attachments/"))
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
@@ -2039,8 +2048,15 @@ as you zoom text. It's fast, since no image regeneration is required."
   :custom
   (org-roam-buffer-postrender-functions
    (list (lambda ()
+           (while-let ((property
+                        (text-property-search-forward
+                         'keymap 'scroll-up-command
+                         (lambda (val prop)
+                           (eq val (keymap-lookup prop "SPC"))))))
+             (keymap-unset (prop-match-value property) "SPC")))
+         (lambda ()
            (goto-char (point-min))
-           (magit-section-toggle-children (magit-current-section))))))
+           (magit-section-hide-children (magit-current-section))))))
 
 (use-package org-roam
   :config
@@ -2067,7 +2083,21 @@ as you zoom text. It's fast, since no image regeneration is required."
                                   (cape-capf-super
                                    'cape-dabbrev
                                    :with 'org-roam-complete-everywhere)
-                                  -100 t))))
+                                  -100 t)))
+  :config
+  (with-eval-after-load 'nerd-icons-corfu
+    (define-advice org-roam-complete-everywhere
+        (:filter-return (completions) add-company-kind)
+      "Add `:company-kind' to the results so that `nerd-icons-corfu' can work
+with them."
+      (when completions
+        (append completions '(:company-kind
+                              (lambda (&rest _args)
+                                'org-roam-node)))))
+
+    (add-to-list 'nerd-icons-corfu-mapping
+                 '(org-roam-node :style "cod" :icon "note"
+                   :face nerd-icons-silver))))
 
 (use-package org-roam
   :config

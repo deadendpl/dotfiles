@@ -105,7 +105,6 @@ glide.keymaps.del("normal", "<A-l>");
 // insert mode bindings like the ones from emacs
 glide.keymaps.set("insert", "<C-v>", "scroll_page_down");
 glide.keymaps.set("insert", "<A-v>", "scroll_page_up");
-glide.keymaps.set("insert", "<C-e>", "motion $");
 glide.keymaps.set("insert", "<C-f>", "caret_move right");
 glide.keymaps.set("insert", "<C-b>", "caret_move left");
 glide.keymaps.set("insert", "<C-j>", "caret_move down");
@@ -127,6 +126,7 @@ const insert_bindings: Record<string, string> = {
   "<C-w>": "<C-x>",
   "<C-l>": "<Enter>",
   "<C-a>": "<Home>",
+  "<C-e>": "<End>",
   "<C-S-n>": "<S-Down>",
   "<C-S-p>": "<S-Up>",
   "<C-S-f>": "<S-Right>",

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Harmony button on MusicButler
-// @version      2025.10.29
+// @version      2026.07.20
 // @description  Add Harmony button under Spotify and Apple Music links on MusicButler
 // @author       deadendpl
 // @match        https://www.musicbutler.io/
@@ -40,7 +40,7 @@
             var full_url = "https://harmony.pulsewidth.org.uk/release" +
                 "?url=" + url +
                 "&gtin=&region=&musicbrainz=&deezer=&itunes=" +
-                "&spotify=&tidal=&beatport=";
+                "&spotify=&tidal=&beatport=&qobuz=";
             var div = document.createElement("div");
             var a = document.createElement("a");
             a.href = full_url;
