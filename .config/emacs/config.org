@@ -130,7 +130,7 @@
     - [[#ghostel][Ghostel]]
   - [[#sudo-edit][Sudo edit]]
   - [[#translation-reverso][Translation (reverso)]]
-  - [[#writeroom][Writeroom]]
+  - [[#olivetti][Olivetti]]
   - [[#display-buffer-alist][display-buffer-alist]]
   - [[#pop-up-windows][Pop up windows]]
   - [[#m3u-mode][M3U mode]]
@@ -1439,6 +1439,7 @@ With Emacs 29, true transparency has been added.
   :init (global-corfu-mode t)
   :hook ((corfu-mode . corfu-popupinfo-mode)
          (corfu-mode . corfu-echo-mode)
+         (org-mode . (lambda () (setq-local corfu-auto t)))
          ;; ((prog-mode ielm-mode org-mode) .
          ;;  (lambda () (setq-local corfu-auto t)))
          )
@@ -2214,7 +2215,9 @@ In tables pressing RET doesn't follow links. I fix that.
 #+begin_src emacs-lisp
 (use-package org
   :bind ("C-c n a" . org-agenda)
-  :custom-face (org-agenda-date-today ((nil (:height 1.3))))
+  :custom-face
+  (org-agenda-date-today ((nil (:height 1.3))))
+  (org-agenda-date-weekend-today ((nil (:height 1.3))))
   :custom
   (org-agenda-block-separator 8411)
   ;; (org-agenda-category-icon-alist
@@ -2248,7 +2251,8 @@ In tables pressing RET doesn't follow links. I fix that.
   (org-agenda-skip-scheduled-if-done t)
   (org-agenda-skip-timestamp-if-done t)
   (org-agenda-skip-unavailable-files t)
-  (org-agenda-start-day "+0d")
+  (org-agenda-span 7)
+  (org-agenda-start-on-weekday nil)
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
   (org-agenda-restore-windows-after-quit t)
@@ -2656,37 +2660,63 @@ I make an annotation using marginalia.
                  none)))
 #+end_src
 **** Completion at point function setup
-Org roam can provide links to the nodes at point when =org-roam-completion-everywhere= variable is set to t.
+Org roam has a capf that provides links to the nodes at point when =org-roam-completion-everywhere= variable is set to t.
+It includes all nodes, even the one I'm writing in so I write my own capf that removes current node and its aliases from the candidate list.
 I also want to have dabbrevs as I tend to repeat the words I'm typing.
 Cape allows us to merge multiple capfs into one, and that's what I'm doing here.
 
-The issue with node candidates is that they don't have an icon while dabbrevs have.
+By default, node candidates don't have an icon while dabbrevs have.
 I fix that.
 #+begin_src emacs-lisp
 (use-package org-roam
-  :custom (org-roam-completion-everywhere t)
   :hook
   (org-roam-find-file .
                       (lambda ()
                         (add-hook 'completion-at-point-functions
                                   (cape-capf-super
                                    'cape-dabbrev
-                                   :with 'org-roam-complete-everywhere)
+                                   :with 'custom-org-roam-capf)
                                   -100 t)))
   :config
   (with-eval-after-load 'nerd-icons-corfu
-    (define-advice org-roam-complete-everywhere
-        (:filter-return (completions) add-company-kind)
-      "Add `:company-kind' to the results so that `nerd-icons-corfu' can work
-with them."
-      (when completions
-        (append completions '(:company-kind
-                              (lambda (&rest _args)
-                                'org-roam-node)))))
-
     (add-to-list 'nerd-icons-corfu-mapping
                  '(org-roam-node :style "cod" :icon "note"
-                   :face nerd-icons-silver))))
+                   :face nerd-icons-silver)))
+
+  (defun custom-org-roam-capf ()
+    "Complete nodes that are not already linked at point."
+    (when (and (thing-at-point 'word)
+               (not (org-in-src-block-p))
+               (not (save-match-data (org-in-regexp org-link-any-re))))
+      (let* ((bounds (bounds-of-thing-at-point 'word))
+             (current-node (org-roam-node-at-point))
+             (current-id (and current-node
+                              (org-roam-node-id current-node)))
+             (id-links nil))
+        ;; Gather all ID links in current buffer
+        (org-element-map (org-element-parse-buffer) 'link
+          (lambda (link)
+            (when (string= (org-element-property :type link) "id")
+              (push (org-element-property :path link) id-links))))
+        ;; Filter candidates using node IDs
+        (let ((exclude-ids (cons current-id id-links))
+              (candidates nil))
+          (dolist (node (org-roam-node-list))
+            (unless (member (org-roam-node-id node) exclude-ids)
+              (push (org-roam-node-title node) candidates)))
+          (list (car bounds) (cdr bounds)
+                candidates
+                :exit-function
+                (lambda (str _status)
+                  (delete-char (- (length str)))
+                  (insert "[[id:"
+                          (org-roam-node-id
+                           (org-roam-node-from-title-or-alias
+                            (substring-no-properties str)))
+                          "][" str "]]"))
+                :exclusive 'no
+                :company-kind (lambda (&rest _args)
+                                'org-roam-node)))))))
 #+end_src
 **** AniList incrementing progress
 My anime and manga notes have =progress= property which is =number-of-chapter-i-read/total-amount-of-chapters= with the total amount being =?= if the work didn't end.
@@ -3274,6 +3304,7 @@ This remaps specified major modes to its tree-sitter counterparts and adds modes
 (add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
 #+end_src
 **** Fix
 On Emacs 30.2 with the latest version of tree-sitter (0.26.8-1 on Arch Linux as of writing), some tree-sitter modes break.
@@ -3531,11 +3562,14 @@ Since the package broke due to some transient change, I'm using a fork that has 
     (org-fold-show-all)
     (reverso-grammar-buffer)))
 #+end_src
-** Writeroom
-[[https://github.com/joostkremers/writeroom-mode][Writeroom-mode]] makes a nice writing experience by making big margins and hiding almost everything.
+** Olivetti
+[[https://github.com/rnkn/olivetti][Olivetti]] makes a nice writing experience by making big margins.
 #+begin_src emacs-lisp
-(use-package writeroom-mode
-  :unless on-termux-p)
+(use-package olivetti
+  :unless on-termux-p
+  :hook
+  (olivetti-mode-on . (lambda () (text-scale-increase 2)))
+  (olivetti-mode-off . (lambda () (text-scale-increase 0))))
 #+end_src
 ** display-buffer-alist
 This variable desribes the way chosen buffers are displaying and behaving.
@@ -3676,7 +3710,6 @@ That reduces the hallucinations as an LLM can just look up information.
                        "generativelanguage.googleapis.com"))
           :models '(gemini-3.5-flash
                     gemini-3.1-flash-lite
-                    gemini-pro-latest
                     gemini-flash-latest)))
 
   (gptel-make-openai "mistral"
@@ -3685,10 +3718,6 @@ That reduces the hallucinations as an LLM can just look up information.
     :protocol "https"
     :key (nth 1 (auth-source-user-and-password "api.mistral.ai"))
     :models '("mistral-small"))
-
-  (setf (alist-get 'default gptel-directives)
-        (concat (alist-get 'default gptel-directives)
-                " Note that if you will use headings for your answer, they need to be at least at the 4th level."))
 
   (defun gptel-send-dwim ()
     "Send the prompt if the point is possibly at the end of the buffer."
@@ -3741,18 +3770,18 @@ Meat to be used in `gptel-post-response-functions'."
                       (when (save-excursion
                               (beginning-of-buffer)
                               (or (org-entry-get
-                                    (point) "GPTEL_MODEL")
-                                   (org-entry-get
-                                    (point) "GPTEL_BACKEND")
-                                   (org-entry-get
-                                    (point) "GPTEL_SYSTEM")
-                                   (org-entry-get
-                                    (point) "GPTEL_TOOLS")
-                                   (org-entry-get
-                                    (point) "GPTEL_BOUNDS")))
+                                   (point) "GPTEL_MODEL")
+                                  (org-entry-get
+                                   (point) "GPTEL_BACKEND")
+                                  (org-entry-get
+                                   (point) "GPTEL_SYSTEM")
+                                  (org-entry-get
+                                   (point) "GPTEL_TOOLS")
+                                  (org-entry-get
+                                   (point) "GPTEL_BOUNDS")))
                         (unless (featurep 'gptel)
                           (require 'gptel)
-                        (gptel-mode 1))))))
+                          (gptel-mode 1))))))
 
 (use-package gptel-agent
   :after gptel

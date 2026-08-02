@@ -28,8 +28,7 @@ const prefs: Record<string, any> = {
   "sidebar.verticalTabs": true,
   "sidebar.verticalTabs.dragToPinPromo.dismissed": true,
   "browser.theme.toolbar-theme": 2,
-  // "browser.startup.homepage":
-  // "file:///home/oliwier/.config/qutebrowser/start/start.html",
+  "browser.startup.homepage": "about:blank",
   "browser.display.use_system_colors": true,
   "signon.generation.enabled": false,
   "browser.ml.enable": false,
@@ -74,7 +73,7 @@ glide.keymaps.set("normal", "L", "forward");
 glide.keymaps.set("normal", "d", "tab_close");
 glide.keymaps.set("normal", "r", "reload");
 glide.keymaps.set("normal", "O", "tab_new");
-glide.keymaps.set(["normal"], "o", () =>
+glide.keymaps.set("normal", "o", () =>
   glide.keys.send("<C-l>", { skip_mappings: true }),
   { description: "Invoke URL bar in current tab" }
 );
@@ -83,11 +82,11 @@ glide.keymaps.set("normal", "<C-d>", "scroll_page_down");
 glide.keymaps.set("normal", "<C-v>", "scroll_page_down");
 glide.keymaps.set("normal", "<C-u>", "scroll_page_up");
 glide.keymaps.set("normal", "<A-v>", "scroll_page_up");
-glide.keymaps.set(["normal"], "gj", () =>
+glide.keymaps.set("normal", "gj", () =>
   glide.keys.send("<C-S-PageDown>", { skip_mappings: true }),
   { description: "Move the tab down" }
 );
-glide.keymaps.set(["normal"], "gk", () =>
+glide.keymaps.set("normal", "gk", () =>
   glide.keys.send("<C-S-PageUp>", { skip_mappings: true }),
   { description: "Move the tab up" }
 );

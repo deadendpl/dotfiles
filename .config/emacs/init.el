@@ -1070,6 +1070,7 @@ default, the whole line in the file is highlighted."
   :init (global-corfu-mode t)
   :hook ((corfu-mode . corfu-popupinfo-mode)
          (corfu-mode . corfu-echo-mode)
+         (org-mode . (lambda () (setq-local corfu-auto t)))
          ;; ((prog-mode ielm-mode org-mode) .
          ;;  (lambda () (setq-local corfu-auto t)))
          )
@@ -1748,7 +1749,9 @@ If FILE is a directory, inserts the last directory name."
 
 (use-package org
   :bind ("C-c n a" . org-agenda)
-  :custom-face (org-agenda-date-today ((nil (:height 1.3))))
+  :custom-face
+  (org-agenda-date-today ((nil (:height 1.3))))
+  (org-agenda-date-weekend-today ((nil (:height 1.3))))
   :custom
   (org-agenda-block-separator 8411)
   ;; (org-agenda-category-icon-alist
@@ -1782,7 +1785,8 @@ If FILE is a directory, inserts the last directory name."
   (org-agenda-skip-scheduled-if-done t)
   (org-agenda-skip-timestamp-if-done t)
   (org-agenda-skip-unavailable-files t)
-  (org-agenda-start-day "+0d")
+  (org-agenda-span 7)
+  (org-agenda-start-on-weekday nil)
   (org-agenda-use-time-grid nil)
   (org-agenda-window-setup 'current-window)
   (org-agenda-restore-windows-after-quit t)
@@ -2075,29 +2079,54 @@ as you zoom text. It's fast, since no image regeneration is required."
                  none)))
 
 (use-package org-roam
-  :custom (org-roam-completion-everywhere t)
   :hook
   (org-roam-find-file .
                       (lambda ()
                         (add-hook 'completion-at-point-functions
                                   (cape-capf-super
                                    'cape-dabbrev
-                                   :with 'org-roam-complete-everywhere)
+                                   :with 'custom-org-roam-capf)
                                   -100 t)))
   :config
   (with-eval-after-load 'nerd-icons-corfu
-    (define-advice org-roam-complete-everywhere
-        (:filter-return (completions) add-company-kind)
-      "Add `:company-kind' to the results so that `nerd-icons-corfu' can work
-with them."
-      (when completions
-        (append completions '(:company-kind
-                              (lambda (&rest _args)
-                                'org-roam-node)))))
-
     (add-to-list 'nerd-icons-corfu-mapping
                  '(org-roam-node :style "cod" :icon "note"
-                   :face nerd-icons-silver))))
+                   :face nerd-icons-silver)))
+
+  (defun custom-org-roam-capf ()
+    "Complete nodes that are not already linked at point."
+    (when (and (thing-at-point 'word)
+               (not (org-in-src-block-p))
+               (not (save-match-data (org-in-regexp org-link-any-re))))
+      (let* ((bounds (bounds-of-thing-at-point 'word))
+             (current-node (org-roam-node-at-point))
+             (current-id (and current-node
+                              (org-roam-node-id current-node)))
+             (id-links nil))
+        ;; Gather all ID links in current buffer
+        (org-element-map (org-element-parse-buffer) 'link
+          (lambda (link)
+            (when (string= (org-element-property :type link) "id")
+              (push (org-element-property :path link) id-links))))
+        ;; Filter candidates using node IDs
+        (let ((exclude-ids (cons current-id id-links))
+              (candidates nil))
+          (dolist (node (org-roam-node-list))
+            (unless (member (org-roam-node-id node) exclude-ids)
+              (push (org-roam-node-title node) candidates)))
+          (list (car bounds) (cdr bounds)
+                candidates
+                :exit-function
+                (lambda (str _status)
+                  (delete-char (- (length str)))
+                  (insert "[[id:"
+                          (org-roam-node-id
+                           (org-roam-node-from-title-or-alias
+                            (substring-no-properties str)))
+                          "][" str "]]"))
+                :exclusive 'no
+                :company-kind (lambda (&rest _args)
+                                'org-roam-node)))))))
 
 (use-package org-roam
   :config
@@ -2591,6 +2620,7 @@ It doesn't close empty tags."
 (add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
 
 (when (< emacs-major-version 31)
   (load (expand-file-name "treesit-predicate-rewrite"
@@ -2765,8 +2795,11 @@ It doesn't close empty tags."
     (org-fold-show-all)
     (reverso-grammar-buffer)))
 
-(use-package writeroom-mode
-  :unless on-termux-p)
+(use-package olivetti
+  :unless on-termux-p
+  :hook
+  (olivetti-mode-on . (lambda () (text-scale-increase 2)))
+  (olivetti-mode-off . (lambda () (text-scale-increase 0))))
 
 ;; (defun custom/switch-to-buffer-other-window-for-alist (window)
 ;;   "Kind of `switch-to-buffer-other-window' but can be used in
@@ -2890,7 +2923,6 @@ Also see `window-delete-popup-frame'." command)
                        "generativelanguage.googleapis.com"))
           :models '(gemini-3.5-flash
                     gemini-3.1-flash-lite
-                    gemini-pro-latest
                     gemini-flash-latest)))
 
   (gptel-make-openai "mistral"
@@ -2899,10 +2931,6 @@ Also see `window-delete-popup-frame'." command)
     :protocol "https"
     :key (nth 1 (auth-source-user-and-password "api.mistral.ai"))
     :models '("mistral-small"))
-
-  (setf (alist-get 'default gptel-directives)
-        (concat (alist-get 'default gptel-directives)
-                " Note that if you will use headings for your answer, they need to be at least at the 4th level."))
 
   (defun gptel-send-dwim ()
     "Send the prompt if the point is possibly at the end of the buffer."
@@ -2955,18 +2983,18 @@ Meat to be used in `gptel-post-response-functions'."
                       (when (save-excursion
                               (beginning-of-buffer)
                               (or (org-entry-get
-                                    (point) "GPTEL_MODEL")
-                                   (org-entry-get
-                                    (point) "GPTEL_BACKEND")
-                                   (org-entry-get
-                                    (point) "GPTEL_SYSTEM")
-                                   (org-entry-get
-                                    (point) "GPTEL_TOOLS")
-                                   (org-entry-get
-                                    (point) "GPTEL_BOUNDS")))
+                                   (point) "GPTEL_MODEL")
+                                  (org-entry-get
+                                   (point) "GPTEL_BACKEND")
+                                  (org-entry-get
+                                   (point) "GPTEL_SYSTEM")
+                                  (org-entry-get
+                                   (point) "GPTEL_TOOLS")
+                                  (org-entry-get
+                                   (point) "GPTEL_BOUNDS")))
                         (unless (featurep 'gptel)
                           (require 'gptel)
-                        (gptel-mode 1))))))
+                          (gptel-mode 1))))))
 
 (use-package gptel-agent
   :after gptel
