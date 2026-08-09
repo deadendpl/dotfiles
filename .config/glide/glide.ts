@@ -221,6 +221,7 @@ glide.autocmds.create("UrlEnter", { hostname: "megatenwiki.com" },
   });
 
 glide.autocmds.create("UrlEnter", { hostname: "musicbrainz.org" },
+  // making the top elements like about us, products, etc. hintable
   async () => {
     const HINT_INCLUDE = "span.menu-header";
 
@@ -235,4 +236,72 @@ glide.autocmds.create("UrlEnter", { hostname: "musicbrainz.org" },
           : HINT_INCLUDE,
       });
     };
-  });
+
+    async function musicbrainz_edit_entity() {
+      const url = glide.ctx.url;
+
+      // Ensure we are on a MusicBrainz entity page
+      if (!url.hostname.includes("musicbrainz.org")) {
+        console.log("Not on a MusicBrainz page");
+        return;
+      }
+
+      // Redirect to the edit version of the current page
+      // MusicBrainz edit URLs are generally formatted as
+      // /entity_type/mbid/edit
+      if (!url.pathname.endsWith("/edit")) {
+        url.pathname += "/edit";
+      }
+
+      await browser.tabs.update({ url: url.toString() });
+    }
+
+    async function musicbrainz_go_to_cover_art() {
+      const url = glide.ctx.url;
+
+      if (!url.pathname.startsWith("/release/")) {
+        console.log("Not on a MusicBrainz release page");
+        return;
+      }
+
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts.length < 2) return;
+
+      // Execute in content process to find the number
+      var cover_art_amount = await glide.content.execute(() => {
+        // Select all tab labels
+        const tabs = document.querySelectorAll(
+          "div.tabs > ul > li > a > bdi");
+
+        // Find the specific tab containing "Cover art"
+        const coverArtTab = Array.from(tabs).find(node =>
+          node.innerText.trim().startsWith("Cover art")
+        );
+
+        if (!coverArtTab) return 0;
+
+        // Match the number (e.g., "Cover art (12)")
+        const match = coverArtTab.innerText.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0;
+      }, { tab_id: (await glide.tabs.active()).id });
+
+      // Navigation logic
+      if (cover_art_amount > 0) {
+        url.pathname = `/release/${parts[1]}/cover-art`;
+      } else {
+        url.pathname = `/release/${parts[1]}/add-cover-art`;
+      }
+
+      await browser.tabs.update({ url: url.toString() });
+    }
+
+
+    // adding a local keymap
+    glide.buf.keymaps.set("normal", ",e",
+      musicbrainz_edit_entity,
+      { description: "Edit the entity" });
+    glide.buf.keymaps.set("normal", ",c",
+      musicbrainz_go_to_cover_art,
+      { description: "Go to cover art" });
+  }
+);

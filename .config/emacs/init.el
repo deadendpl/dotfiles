@@ -2964,7 +2964,7 @@ Also see `window-delete-popup-frame'." command)
   ;; aligning tables in the responses
   (defun custom/gptel-align-org-tables (beginning end)
     "Align tables from beginning to end.
-Meat to be used in `gptel-post-response-functions'."
+Meant to be used in `gptel-post-response-functions'."
     (save-excursion
       (narrow-to-region beginning end)
       (goto-char beginning)
