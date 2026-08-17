@@ -274,6 +274,15 @@ Most of the stuff will get redirected here.")
   (unless package-archive-contents
     (package-refresh-contents)))
 
+(use-package package-vc
+  :init
+  (declare-function 'package-vc--archives-initialize "package-vc")
+  (define-advice package-vc--archives-initialize
+      (:around (orig-func &rest args) skip-archive-refresh)
+    "Do not refresh the package archives if their contents are non-nil."
+    (unless package-archive-contents
+      (apply orig-fun args))))
+
 (setq-default require-final-newline 'visit-save)
 
 (defvar not-modified-temporary-file-path (make-temp-file nil)
@@ -1070,7 +1079,7 @@ default, the whole line in the file is highlighted."
   :init (global-corfu-mode t)
   :hook ((corfu-mode . corfu-popupinfo-mode)
          (corfu-mode . corfu-echo-mode)
-         (org-mode . (lambda () (setq-local corfu-auto t)))
+         ;; (org-mode . (lambda () (setq-local corfu-auto t)))
          ;; ((prog-mode ielm-mode org-mode) .
          ;;  (lambda () (setq-local corfu-auto t)))
          )
@@ -1106,13 +1115,10 @@ default, the whole line in the file is highlighted."
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
   :bind (:map completion-preview-active-mode-map
-              ("<tab>" . completion-preview-insert))
-  :custom
-  (completion-preview-sort-function #'identity)
-  ;; :config
-  ;; (add-to-list 'global-completion-preview-modes
-  ;;              '(not prog-mode conf-mode))
-  )
+         ("<tab>" . completion-preview-insert))
+  :config
+  (add-to-list 'completion-preview-commands 'org-self-insert-command)
+  (add-to-list 'completion-preview-commands 'org-delete-backward-char))
 
 (use-package vertico
   :init
@@ -1274,7 +1280,18 @@ default, the whole line in the file is highlighted."
                         "prescient-save.el"))
   (prescient-history-length most-positive-fixnum)
   :config
-  (prescient-persist-mode 1))
+  (prescient-persist-mode 1)
+  (with-eval-after-load 'completion-preview
+    (setq-default completion-preview-sort-function #'prescient-sort)
+    (define-advice completion-preview-insert
+        (:before (&rest _) add-to-prescient-history)
+      "Add the about to be inserted candidate to `prescient--history'."
+      (let* ((pre (completion-preview--get 'completion-preview-base))
+             (com (completion-preview--get 'completion-preview-common))
+             (ind (completion-preview--get 'completion-preview-index))
+             (all (completion-preview--get 'completion-preview-suffixes))
+             (str (concat pre com (nth ind all))))
+        (prescient-remember (substring-no-properties str))))))
 
 (use-package vertico-prescient
   :hook (vertico-mode . vertico-prescient-mode)
@@ -2467,6 +2484,7 @@ OPEN-IN-WEB is non-nil."
 (use-package sly
   :custom (sly-mrepl-history-file-name
            (expand-file-name-user-share "sly-mrepl-history"))
+  (sly-symbol-completion-mode nil)
   :config
   (defun sly-eval-region-or-buffer ()
     "Evaluate the forms in the active region or the whole current buffer."
@@ -2917,6 +2935,10 @@ Also see `window-delete-popup-frame'." command)
   (gptel-default-mode #'org-mode)
   (gptel-model 'gemini-3.1-flash-lite)
   :config
+  (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
+  (setf (alist-get 'org-mode gptel-response-prefix-alist)
+        "* Assistant response \n")
+
   (setq gptel-backend
         (gptel-make-gemini "gemini"
           :key (nth 1 (auth-source-user-and-password
@@ -2959,7 +2981,6 @@ Also see `window-delete-popup-frame'." command)
                           (lambda ()
                             (emacs-lock-mode -1))
                           nil t))))
-
 
   ;; aligning tables in the responses
   (defun custom/gptel-align-org-tables (beginning end)
@@ -3009,6 +3030,8 @@ Meant to be used in `gptel-post-response-functions'."
   :config
   (keymap-set consult-gh-topics-edit-mode-map "C-c C-c"
               #'consult-gh-ctrl-c-ctrl-c)
+  (keymap-set consult-gh-topics-edit-mode-map "C-c C-k"
+              #'consult-gh-topics-cancel)
   (dolist (map '(consult-gh-pr-view-mode-map
                  consult-gh-run-view-mode-map
                  consult-gh-misc-view-mode-map
@@ -3017,6 +3040,14 @@ Meant to be used in `gptel-post-response-functions'."
                  consult-gh-commit-view-mode-map))
     (keymap-set (eval map) "C-c C-&"
                 #'consult-gh-topics-open-in-browser))
+
+  (defun custom-consult-gh-revert (&optional ignore-auto noconfirm)
+    "The `revert-buffer-function' for consult-gh topics."
+    (ignore ignore-auto)
+    (if noconfirm
+        (consult-gh-refresh-view)
+      (when (yes-or-no-p "Refresh the current topic?")
+        (consult-gh-refresh-view))))
   (dolist (hook '(consult-gh-pr-view-mode-hook
                   consult-gh-run-view-mode-hook
                   consult-gh-misc-view-mode-hook
@@ -3025,12 +3056,7 @@ Meant to be used in `gptel-post-response-functions'."
                   consult-gh-commit-view-mode-hook))
     (add-hook hook (lambda ()
                      (setq-local revert-buffer-function
-                                 (lambda (&optional ignore-auto noconfirm)
-                                   (ignore ignore-auto)
-                                   (if noconfirm
-                                       (consult-gh-refresh-view)
-                                     (when (yes-or-no-p "Refresh the current topic?")
-                                       (consult-gh-refresh-view)))))))))
+                                 #'custom-consult-gh-revert)))))
 
 (use-package consult-gh-transient
   :ensure nil
