@@ -14,8 +14,9 @@ declare -a search_engines=(
   "MusicBrainz (MB)"
   "Nix Packages"
   "NixOS Wiki"
-  "YouTube (Invidious)"
-  "YouTube (Piped)"
+  # "YouTube (Invidious)"
+  # "YouTube (Piped)
+  "YouTube"
   "SearXNG"
   "VGMdb"
   "Wikipedia"
@@ -48,11 +49,14 @@ case $selected_engine in
   "GitHub")
     URL="https://github.com/search?q="
     ;;
-  "YouTube (Invidious)")
-    URL="https://farside.link/invidious/search?q="
-    ;;
-  "YouTube (Piped)")
-    URL="https://farside.link/piped/results?search_query="
+  # "YouTube (Invidious)")
+  #   URL="https://farside.link/invidious/search?q="
+  #   ;;
+  # "YouTube (Piped)")
+  #   URL="https://farside.link/piped/results?search_query="
+  #   ;;
+  "YouTube")
+    URL="https://youtube.com/search?q="
     ;;
   "Nix Packages")
     URL="https://search.nixos.org/packages?query="

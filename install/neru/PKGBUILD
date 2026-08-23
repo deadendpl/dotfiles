@@ -1,32 +1,43 @@
-pkgname=neru
-pkgver=1.42.0
+pkgname=neru-bin
+pkgver=1.51.0
+provides=("neru")
+conflicts=("neru")
 pkgrel=1
 pkgdesc="Keyboard-driven navigation - Navigate and click without touching your mouse."
 arch=("x86_64")
 url="https://github.com/y3owk1n/neru"
 license=("MIT")
-makedepends=("go" "just" "cairo" "wayland" "libx11" "libxtst" \
-                  "libxrandr" "libxinerama" "libxfixes" "libxkbcommon" \
-                  "wayland-protocols")
-source=("https://github.com/y3owk1n/neru/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=("0212644f71d93b825a40b6c9be15ff1ba33562ce17a4a5f8d3c1306d63859ade")
+# makedepends=("go" "just" "cairo" "wayland" "libx11" "libxtst" \
+#                   "libxrandr" "libxinerama" "libxfixes" "libxkbcommon" \
+#                   "libei" "fontconfig" "tesseract" "tesseract-data-eng" \
+#                   "libpipewire" "wayland-protocols" "ttf-dejavu")
+source=("https://github.com/y3owk1n/neru/releases/download/v${pkgver}/neru-linux-amd64.zip")
+sha256sums=("87c77f17358871ccc99e7da67e57dd8d5a458b8b5f3b7e5df10085db3f19a7d4")
 
-build() {
-  cd "neru-${pkgver}"
-  just build
-}
+# build() {
+#   cd "neru-${pkgver}"
+#   just build
+# }
 
 package() {
-  install -Dm755 "${srcdir}/neru-${pkgver}/bin/neru" \
+  # install -Dm755 "${srcdir}/neru-${pkgver}/bin/neru" \
+  #         "${pkgdir}/usr/bin/neru"
+  # install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+  #         -Dm644 "${srcdir}/neru-${pkgver}/docs/CLI.md"
+  # install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+  #         -Dm644 "${srcdir}/neru-${pkgver}/docs/CONFIGURATION.md"
+  # install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+  #         -Dm644 "${srcdir}/neru-${pkgver}/docs/LINUX_SETUP.md"
+  # install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+  #         -Dm644 "${srcdir}/neru-${pkgver}/docs/TIPS_TRICKS.md"
+  # install --target-directory "${pkgdir}/usr/share/doc/neru/" \
+  #         -Dm644 "${srcdir}/neru-${pkgver}/docs/TROUBLESHOOTING.md"
+  install -Dm755 "${srcdir}/bin/neru" \
           "${pkgdir}/usr/bin/neru"
-  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
-          -Dm644 "${srcdir}/neru-${pkgver}/docs/CLI.md"
-  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
-          -Dm644 "${srcdir}/neru-${pkgver}/docs/CONFIGURATION.md"
-  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
-          -Dm644 "${srcdir}/neru-${pkgver}/docs/LINUX_SETUP.md"
-  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
-          -Dm644 "${srcdir}/neru-${pkgver}/docs/TIPS_TRICKS.md"
-  install --target-directory "${pkgdir}/usr/share/doc/neru/" \
-          -Dm644 "${srcdir}/neru-${pkgver}/docs/TROUBLESHOOTING.md"
+  mkdir -p "${pkgdir}/usr/share/man/man1/"
+  for file in "${srcdir}/share/man/man1/"*; do
+    if [ -f "$file" ]; then
+      gzip -c "$file" > "${pkgdir}/usr/share/man/man1/$(basename $file).gz"
+    fi
+  done
 }

@@ -718,6 +718,13 @@ With ARG being non-nil, insert the non-breaking space."
   (shr-max-width nil)
   (shr-bullet "• "))
 
+(use-package shr-tag-pre-highlight
+  :after shr
+  :demand
+  :config
+  (add-to-list 'shr-external-rendering-functions
+               '(pre . shr-tag-pre-highlight)))
+
 (use-package eww
   :hook (eww-mode . (lambda ()
                       (setq-local imenu-create-index-function
@@ -2110,6 +2117,25 @@ as you zoom text. It's fast, since no image regeneration is required."
                  '(org-roam-node :style "cod" :icon "note"
                    :face nerd-icons-silver)))
 
+  (defvar custom-org-roam-node-title-cache
+    (make-hash-table :test 'equal)
+    "A hash table containing all of Org Roam nodes.
+It's used by `custom-org-roam-capf'.")
+
+  (defun custom-org-roam-refresh-node-cache (&rest _)
+    "Refresh the hash tables that are used by `custom-org-roam-capf'."
+    (clrhash custom-org-roam-node-title-cache)
+    (dolist (node (org-roam-node-list))
+      (puthash (org-roam-node-title node) node
+               custom-org-roam-node-title-cache)))
+
+  (dolist (function '(org-roam-db-autosync--setup-file-h
+                      org-roam-db-autosync--rename-file-a
+                      org-roam-db-autosync--delete-file-a
+                      org-roam-db-autosync--vc-delete-file-a
+                      org-roam-db-sync))
+    (advice-add function :after #'custom-org-roam-refresh-node-cache))
+
   (defun custom-org-roam-capf ()
     "Complete nodes that are not already linked at point."
     (when (and (thing-at-point 'word)
@@ -2121,14 +2147,22 @@ as you zoom text. It's fast, since no image regeneration is required."
                               (org-roam-node-id current-node)))
              (id-links nil))
         ;; Gather all ID links in current buffer
-        (org-element-map (org-element-parse-buffer) 'link
-          (lambda (link)
-            (when (string= (org-element-property :type link) "id")
-              (push (org-element-property :path link) id-links))))
+        ;; It's faster to do a regexp search than buffer parsing
+        ;; especially with big files
+        (save-match-data
+          (save-excursion
+            (goto-char (point-min))
+            (while (re-search-forward org-link-any-re nil t)
+              (when-let* ((link (org-element-context))
+                          (id-link-p
+                           (equal (org-element-property :type link)
+                                  "id")))
+                (push (org-element-property :path link) id-links)))))
         ;; Filter candidates using node IDs
         (let ((exclude-ids (cons current-id id-links))
               (candidates nil))
-          (dolist (node (org-roam-node-list))
+          (dolist (node (hash-table-values
+                         custom-org-roam-node-title-cache))
             (unless (member (org-roam-node-id node) exclude-ids)
               (push (org-roam-node-title node) candidates)))
           (list (car bounds) (cdr bounds)
@@ -2934,10 +2968,11 @@ Also see `window-delete-popup-frame'." command)
   :custom
   (gptel-default-mode #'org-mode)
   (gptel-model 'gemini-3.1-flash-lite)
+  (gptel-track-media t)
   :config
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
   (setf (alist-get 'org-mode gptel-response-prefix-alist)
-        "* Assistant response \n")
+        "* Assistant response\n")
 
   (setq gptel-backend
         (gptel-make-gemini "gemini"
@@ -3027,6 +3062,7 @@ Meant to be used in `gptel-post-response-functions'."
   (setq consult-gh-preview-major-mode 'org-mode)
   :custom
   (consult-gh-default-clone-directory "~/Projects/")
+  (consult-gh-maxnum 100)
   :config
   (keymap-set consult-gh-topics-edit-mode-map "C-c C-c"
               #'consult-gh-ctrl-c-ctrl-c)
