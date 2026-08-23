@@ -18,11 +18,11 @@ hide_overlay_in_screen_share = false         # Hide overlay from screen sharing 
 # Theme palette
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#theme-palette
 [theme.light]
-surface = "#ff0000"
+surface = "#ffffff"
 accent = "#ffffff"
 accent_alt = "#000000"
 on_accent_alt = "#F8FAFF"
-text = "#17327A"
+text = "#000000"
 
 [theme.dark]
 surface = "#000000"
