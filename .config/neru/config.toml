@@ -52,7 +52,7 @@ min_size_height = 20                        # Stop subdividing below this height
 max_depth = 15                              # Maximum recursion levels (1–20)
 
 [recursive_grid.animation]
-enabled = true                            # Opt in to native depth transition animation on supported platforms
+enabled = false                            # Opt in to native depth transition animation on supported platforms
 duration_ms = 180                          # Recursive-grid animation duration in milliseconds
 
 [recursive_grid.hotkeys]
