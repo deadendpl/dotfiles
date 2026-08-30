@@ -126,7 +126,9 @@ Most of the stuff will get redirected here.")
                   read-process-output-max)
               history-delete-duplicates t
               kill-do-not-save-duplicates t
-              imenu-max-item-length nil)
+              imenu-max-item-length nil
+              window-state-normalize-buffer-name t
+              ielm-dynamic-return 'point)
 
 ;; showing init time in scratch buffer
 ;; (if on-termux-p
@@ -233,6 +235,7 @@ Most of the stuff will get redirected here.")
 ;; `prog-mode', so I add its hook manually
 (dolist (mode '(yaml-mode
                 yaml-ts-mode
+                toml-ts-mode
                 conf-mode))
   (add-hook (intern (format "%s-hook" mode))
             (lambda () (run-hooks 'prog-mode-hook))))
@@ -240,7 +243,9 @@ Most of the stuff will get redirected here.")
 (setq calendar-week-start-day 1)
 
 (use-package paren
-  :custom (show-paren-delay 0)
+  :custom
+  (show-paren-delay 0)
+  (show-paren-not-in-comments-or-strings 'on-mismatch)
   :config
   (show-paren-mode 1))
 
@@ -253,12 +258,27 @@ Most of the stuff will get redirected here.")
     (tramp-cleanup-all-connections)
     (tramp-cleanup-all-buffers)))
 
+(prettify-special-glyphs-mode)
+
+(repeat-mode 1)
+
 (use-package use-package
   ;; :init (setq use-package-enable-imenu-support t)
   :custom
   (use-package-verbose t)
   (use-package-always-ensure t)
-  (use-package-always-defer t)) ; packages by default will be lazy loaded, like they will have defer: t
+  (use-package-always-defer t) ; packages by default will be lazy loaded, like they will have defer: t
+  :config
+  ;; Emacs 31.1 broke :custom-face keyword, so I fix it
+  (define-advice use-package-handler/:custom-face
+      (:override (name _keyword args rest state)
+       emacs-pre-31-behavior)
+    "Revert the custom-face keyword regression that Emacs 31.1 introduced."
+    (use-package-concat
+     (mapcar (lambda (def)
+               (apply #'face-spec-set def))
+             args)
+     (use-package-process-keywords name rest state))))
 
 (use-package package
   :custom
@@ -285,11 +305,11 @@ Most of the stuff will get redirected here.")
 
 (setq-default require-final-newline 'visit-save)
 
-(defvar not-modified-temporary-file-path (make-temp-file nil)
-  "The dumpster file used by `not-modified-when-newline'.
+(defvar custom/not-modified-temporary-file-path (make-temp-file nil)
+  "The dumpster file used by `custom/not-modified-when-newline'.
 Instead of many temporary files being created, it's just this one.")
 
-(defun not-modified-when-newline ()
+(defun custom/not-modified-when-newline ()
   "Mark current buffer as unmodified if the file has a new line difference.
 This is meant to not distract the user if `require-final-newline' is set
 to `visit' or `visit-save' and working on files that don't have empty
@@ -298,21 +318,21 @@ newlines at their end."
              (memq require-final-newline '(visit visit-save)))
     (let ((inhibit-message t))
       (write-region (point-min) (point-max)
-                    not-modified-temporary-file-path))
+                    custom/not-modified-temporary-file-path))
     (when (string-search
            "No newline at end of file"
            (shell-command-to-string
             (format "diff %s %s"
                     buffer-file-name
-                    not-modified-temporary-file-path)))
+                    custom/not-modified-temporary-file-path)))
       (set-buffer-modified-p nil))))
 
-(add-hook 'find-file-hook #'not-modified-when-newline)
+(add-hook 'find-file-hook #'custom/not-modified-when-newline)
 
-(defvar custom-set-date-last-date nil
-  "The last timestamp date chosen by `custom-set-date'.")
+(defvar custom/set-date-last-date nil
+  "The last timestamp date chosen by `custom/set-date'.")
 
-(defun custom-set-date (date)
+(defun custom/set-date (date)
   "Set the DATE to be the system date.
 Also can run pyrice if the user wants to do so."
   (interactive (list
@@ -321,7 +341,7 @@ Also can run pyrice if the user wants to do so."
                 (progn
                   (require 'org)
                   (org-read-date t t nil nil
-                                 custom-set-date-last-date))))
+                                 custom/set-date-last-date))))
   (let ((date (format-time-string "%Y-%m-%d %H:%M:%S" date))
         (display-buffer-alist (append
                                `((,(regexp-quote
@@ -329,7 +349,7 @@ Also can run pyrice if the user wants to do so."
                                   (display-buffer-no-window)))
                                display-buffer-alist)))
     (async-shell-command (format "sudo date -s \"%s\"" date)))
-  (setq custom-set-date-last-date date)
+  (setq custom/set-date-last-date date)
   (when (yes-or-no-p "Run pyrice?")
     (let ((command (read-string "What pyrice command to run?: "
                                 "pyrice")))
@@ -337,11 +357,11 @@ Also can run pyrice if the user wants to do so."
 
 (with-eval-after-load 'savehist
   (add-to-list 'savehist-additional-variables
-               'custom-set-date-last-date))
+               'custom/set-date-last-date))
 
 ;; when exiting, emacs will save the current hour to the variable
 (add-hook 'kill-emacs-hook (lambda ()
-                             (setq custom-set-date-last-date
+                             (setq custom/set-date-last-date
                                    (take 2 (current-time))))
           -100)
 
@@ -357,8 +377,12 @@ Also can run pyrice if the user wants to do so."
   ;; when set to 0, it disables numbers popup
   (meow-expand-hint-remove-delay 0)
   :config
+  (defvar custom/meow-position-before-append nil
+    "The last position before `meow-append' was invoked.")
   (define-advice meow-append (:before (&rest args) forward-char-dwim)
-    "Move point 1 character forward if it makes sense to do so."
+    "Move point 1 character forward if it makes sense to do so.
+Also, store the current position in `custom/meow-position-before-append'."
+    (setq custom/meow-position-before-append (point))
     (unless (or (region-active-p)
                 (= (point) (line-end-position)))
       (forward-char)))
@@ -366,10 +390,12 @@ Also can run pyrice if the user wants to do so."
   ;; mode and do `meow-append' again, the cursor is moving forward. This
   ;; code fixes that.
   (add-hook 'meow-normal-mode-hook
-            (lambda () (when (and (eq last-command 'meow-append)
-                                  (not (= (point)
-                                          (line-beginning-position))))
-                         (backward-char))))
+            (lambda ()
+              (and (eq last-command 'meow-append)
+                   (not (memq (point)
+                              (list (line-beginning-position)
+                                    custom/meow-position-before-append)))
+                   (backward-char))))
 
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -591,7 +617,7 @@ Also can run pyrice if the user wants to do so."
 (use-package expreg
   :bind (:map meow-normal-state-keymap
          ("o" . expreg-expand)
-         ("z" . custom-meow-expreg-contract))
+         ("z" . custom/meow-expreg-contract))
   :config
   (remove-hook 'expreg-functions #'expreg--word)
   (remove-hook 'expreg-functions #'expreg--subword)
@@ -603,12 +629,12 @@ Also can run pyrice if the user wants to do so."
     (unless (= (expreg--current-depth) 0)
       (exchange-point-and-mark)))
 
-  (defvar custom-meow-expreg-action nil
-    "What was the last action done by `custom-meow-expreg-contract'.
+  (defvar custom/meow-expreg-action nil
+    "What was the last action done by `custom/meow-expreg-contract'.
 If the value is `meow' then it did `meow-pop-selection'.
 If the value is `expreg' then it did `expreg-contract'.")
 
-  (defun custom-meow-expreg-contract ()
+  (defun custom/meow-expreg-contract ()
     "Pop meow's selection if the last action was related to it or
 contract the expasion done by expreg if the last action was related to
 it."
@@ -635,17 +661,17 @@ it."
                                 meow-expand-8
                                 meow-expand-9))
            (meow-pop-selection)
-           (setq custom-meow-expreg-action 'meow))
+           (setq custom/meow-expreg-action 'meow))
 
           ((or (memq last-command '(expreg-expand expreg-contract)))
            (expreg-contract)
-           (setq custom-meow-expreg-action 'expreg))
+           (setq custom/meow-expreg-action 'expreg))
 
-          (t (if (eq custom-meow-expreg-action 'meow)
+          (t (if (eq custom/meow-expreg-action 'meow)
                  (progn (meow-pop-selection)
-                        (setq custom-meow-expreg-action 'meow))
+                        (setq custom/meow-expreg-action 'meow))
                (expreg-contract)
-               (setq custom-meow-expreg-action 'expreg))))))
+               (setq custom/meow-expreg-action 'expreg))))))
 
 (use-package surround
   :defer nil
@@ -674,13 +700,13 @@ it."
 (defvar non-breaking-space-insertion-amount 0
   "The amount of times a non-breaking-space was accidentally inserted.")
 
-(defun non-breaking-space-insertion-notifier (&optional arg)
+(defun custom/non-breaking-space-insertion-notifier (&optional arg)
   "Notify how many times the non-breaking space was accidentally inserted.
 With ARG being non-nil, insert the non-breaking space."
   (interactive "P")
   (if arg
       (insert " ")
-    (cl-incf non-breaking-space-insertion-amount)
+    (incf non-breaking-space-insertion-amount)
     (message "You accidentally hit the non-breaking space %s %s."
              non-breaking-space-insertion-amount
              (if (> non-breaking-space-insertion-amount 1)
@@ -688,7 +714,7 @@ With ARG being non-nil, insert the non-breaking space."
                "time"))
     (insert " ")))
 
-(keymap-global-set " " #'non-breaking-space-insertion-notifier)
+(keymap-global-set " " #'custom/non-breaking-space-insertion-notifier)
 
 (use-package abbrev
   :ensure nil
@@ -716,7 +742,8 @@ With ARG being non-nil, insert the non-breaking space."
   :custom
   (shr-fill-text nil)
   (shr-max-width nil)
-  (shr-bullet "• "))
+  (shr-bullet "• ")
+  (shr-sliced-image-height 0.5))
 
 (use-package shr-tag-pre-highlight
   :after shr
@@ -800,7 +827,9 @@ This function should work in EWW and Elfeed entry buffers."
 
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
-  :custom (ibuffer-default-sorting-mode 'filename/process))
+  :custom
+  (ibuffer-default-sorting-mode 'filename/process)
+  (ibuffer-human-readable-size t))
 
 (use-package ibuffer-project
   :hook (ibuffer-mode . (lambda ()
@@ -830,7 +859,7 @@ This function should work in EWW and Elfeed entry buffers."
      (t (apply orig-fun args))))
 
   ;; https://fediscience.org/@ericsfraga/116279043710841253
-  (defun get-visual-line-range ()
+  (defun custom/get-visual-line-range ()
     "Identify current visual line (for highlighting mostly).
 
 Use the visual line functions to define the range in the buffer
@@ -843,10 +872,13 @@ default, the whole line in the file is highlighted."
         (end-of-visual-line)
         (setq e (point)))
       (cons b e)))
-  (setq-default hl-line-range-function #'get-visual-line-range))
+  (setq-default hl-line-range-function #'custom/get-visual-line-range))
 
 (use-package electric
-  :hook (prog-mode-hook . electric-indent-local-mode)
+  :hook (prog-mode . electric-indent-local-mode)
+  :custom
+  (electric-indent-actions '(yank)) ; pasted text will be immediately
+                                    ; indented
   :config
   ;; electric-indent-mode is on by default which may be funky in
   ;; non-programming buffers
@@ -896,7 +928,7 @@ default, the whole line in the file is highlighted."
   (initial-buffer-choice #'enlight)
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
   :config
-  (defun custom-enlight-content ()
+  (defun custom/enlight-content ()
     (concat
      (propertize "Welcome to the Church of Emacs" 'face
                  'enlight-menu-section)
@@ -927,10 +959,10 @@ default, the whole line in the file is highlighted."
          ("Use registers for keyboard macros")
          ("Use k in dired to remove a line")
          ("Use C-c c k to kill current compilation"))))))
-  (setq enlight-content (custom-enlight-content))
+  (setq enlight-content (custom/enlight-content))
   (define-advice enlight (:before (&rest args) update-englight-content)
     "Update `enlight-content'"
-    (enlight--update 'enlight-content (custom-enlight-content))))
+    (enlight--update 'enlight-content (custom/enlight-content))))
 
 (use-package ligature
   :unless on-termux-p
@@ -1026,10 +1058,13 @@ default, the whole line in the file is highlighted."
   :custom (rainbow-delimiters-max-face-count 5))
 
 (use-package colorful-mode
-  :hook (after-init . global-colorful-mode)
+  :hook ((after-init . global-colorful-mode)
+         (prog-mode . colorful-mode))
   :custom (global-colorful-modes
-           '(prog-mode conf-mode help-mode fundamental-mode
-                       (not special-mode)))
+           ;; I don't include `prog-mode' here as I add the mode to the
+           ;; `prog-mode-hook' and there are config modes that also run
+           ;; this hook but are not derived from `prog-mode'
+           '(help-mode fundamental-mode (not special-mode)))
   ;; the default box around the colors causes line to be slightly
   ;; misaligned
   :custom-face (colorful-base ((nil (:box nil)))))
@@ -1054,12 +1089,12 @@ default, the whole line in the file is highlighted."
       (load-theme 'modus-ewal t))
     ;; defun will return the function, hence I have the defun in add-hook
     (add-hook 'server-after-make-frame-hook
-              (defun custom-modus-ewal-theme-load-once ()
+              (defun custom/modus-ewal-theme-load-once ()
                 (and (not (member 'modus-ewal custom-enabled-themes))
                      (load-theme 'modus-ewal t))
                 ;; it only needs to be run once, so I remove it
                 (remove-hook 'server-after-make-frame-hook
-                             #'custom-modus-ewal-theme-load-once)))
+                             #'custom/modus-ewal-theme-load-once)))
 
     (add-hook 'enable-theme-functions
               (lambda (&rest _)
@@ -1181,7 +1216,7 @@ default, the whole line in the file is highlighted."
    ("M-P" . consult-history)
    ([remap comint-history-isearch-backward-regexp] . consult-history)
    ([remap previous-matching-history-element] . consult-history)
-   ([remap eshell-previous-matching-input] . consult-history)
+   ([remap eshell-isearch-backward-regexp] . consult-history)
    ([remap yank-pop] . consult-yank-pop)
    ("M-s l" . consult-line)
    ("M-s g" . consult-ripgrep))
@@ -1208,7 +1243,7 @@ default, the whole line in the file is highlighted."
   (defun consult-project-grep ()
     "Run `consult-grep' in current project or prompted one."
     (interactive)
-    (if-let ((current-project (project-current)))
+    (if-let* ((current-project (project-current)))
         (consult-grep (project-root current-project))
       (let ((project-current-directory-override
              (funcall project-prompter)))
@@ -1518,7 +1553,7 @@ If FILE is a directory, saves the path to the directory."
   (defvar-keymap embark-file-save-map
     :doc "Keymap for different ways of saving files to the kill ring."
     :parent nil
-    :prefix 'embark-file-save-map
+    :prefix t
     "n" #'embark-save-filename
     "r" #'embark-save-relative-path
     "a" #'embark-save-absolute-path)
@@ -1543,7 +1578,7 @@ If FILE is a directory, inserts the last directory name."
   (defvar-keymap embark-file-insert-map
     :doc "Keymap for different ways of inserting files."
     :parent nil
-    :prefix 'embark-file-insert-map
+    :prefix t
     "n" #'embark-insert-filename
     "r" #'embark-insert-relative-path
     "a" #'embark-insert-absolute-path)
@@ -1619,15 +1654,7 @@ If FILE is a directory, inserts the last directory name."
                                (when (org-at-table-p)
                                  (org-table-recalculate))))
   :custom-face
-  ;; setting size of headers
-  (org-document-title ((nil (:inherit outline-1 :height 1.7))))
-  ;; (org-level-1 ((nil (:inherit outline-1 :height 1.2))))
-  ;; (org-level-2 ((nil (:inherit outline-2 :height 1.2))))
-  ;; (org-level-3 ((nil (:inherit outline-3 :height 1.2))))
-  ;; (org-level-4 ((nil (:inherit outline-4 :height 1.2))))
-  ;; (org-level-5 ((nil (:inherit outline-5 :height 1.2))))
-  ;; (org-level-6 ((nil (:inherit outline-6 :height 1.2))))
-  ;; (org-level-7 ((nil (:inherit outline-7 :height 1.2))))
+  (org-document-title ((nil (:height 1.7))))
   (org-list-dt ((nil (:weight bold))))
   (org-quote ((nil :slant italic)))
   (org-verse ((nil :slant italic)))
@@ -1705,7 +1732,7 @@ If FILE is a directory, inserts the last directory name."
                                    (:noweb . "no")
                                    (:hlines . "no")
                                    (:tangle . "no")))
-  (org-edit-src-content-indentation 0)
+  (org-src-content-indentation 0)
   (org-src-preserve-indentation t)
   (org-src-window-setup 'current-window)
   :config
@@ -1822,7 +1849,7 @@ If FILE is a directory, inserts the last directory name."
 
 (use-package org
   :config
-  (defun org-agenda-save-buffers ()
+  (defun custom/org-agenda-save-buffers ()
     "Saves opened agenda files."
     (interactive)
     (save-some-buffers t #'org-agenda-file-p)
@@ -1845,7 +1872,7 @@ If FILE is a directory, inserts the last directory name."
     (advice-add func :after
                 (lambda (&rest _)
                   (when (called-interactively-p 'any)
-                    (org-agenda-save-buffers))))))
+                    (custom/org-agenda-save-buffers))))))
 
 (use-package org
   :config
@@ -2059,7 +2086,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 
 (use-package org-roam
   :config
-  (defun org-roam-complete-link ()
+  (defun custom/org-roam-complete-link ()
     "Create a org roam link using completion."
     (concat "roam:" (org-roam-node-title (org-roam-node-read))))
 
@@ -2088,7 +2115,7 @@ as you zoom text. It's fast, since no image regeneration is required."
 
 (use-package org-roam
   :config
-  (defun custom-org-roam-node-read--annotation (node)
+  (defun custom/org-roam-node-read--annotation (node)
     (if-let* ((node (get-text-property 0 'node node))
               (tags (org-roam-node-tags node)))
         (marginalia--fields
@@ -2099,7 +2126,7 @@ as you zoom text. It's fast, since no image regeneration is required."
           :format " %s"))))
   (add-to-list 'marginalia-annotators
                '(org-roam-node
-                 custom-org-roam-node-read--annotation
+                 custom/org-roam-node-read--annotation
                  none)))
 
 (use-package org-roam
@@ -2109,7 +2136,7 @@ as you zoom text. It's fast, since no image regeneration is required."
                         (add-hook 'completion-at-point-functions
                                   (cape-capf-super
                                    'cape-dabbrev
-                                   :with 'custom-org-roam-capf)
+                                   :with 'custom/org-roam-capf)
                                   -100 t)))
   :config
   (with-eval-after-load 'nerd-icons-corfu
@@ -2117,26 +2144,26 @@ as you zoom text. It's fast, since no image regeneration is required."
                  '(org-roam-node :style "cod" :icon "note"
                    :face nerd-icons-silver)))
 
-  (defvar custom-org-roam-node-title-cache
+  (defvar custom/org-roam-node-title-cache
     (make-hash-table :test 'equal)
     "A hash table containing all of Org Roam nodes.
-It's used by `custom-org-roam-capf'.")
+It's used by `custom/org-roam-capf'.")
 
-  (defun custom-org-roam-refresh-node-cache (&rest _)
-    "Refresh the hash tables that are used by `custom-org-roam-capf'."
-    (clrhash custom-org-roam-node-title-cache)
+  (defun custom/org-roam-refresh-node-cache (&rest _)
+    "Refresh the hash tables that are used by `custom/org-roam-capf'."
+    (clrhash custom/org-roam-node-title-cache)
     (dolist (node (org-roam-node-list))
       (puthash (org-roam-node-title node) node
-               custom-org-roam-node-title-cache)))
+               custom/org-roam-node-title-cache)))
 
   (dolist (function '(org-roam-db-autosync--setup-file-h
                       org-roam-db-autosync--rename-file-a
                       org-roam-db-autosync--delete-file-a
                       org-roam-db-autosync--vc-delete-file-a
                       org-roam-db-sync))
-    (advice-add function :after #'custom-org-roam-refresh-node-cache))
+    (advice-add function :after #'custom/org-roam-refresh-node-cache))
 
-  (defun custom-org-roam-capf ()
+  (defun custom/org-roam-capf ()
     "Complete nodes that are not already linked at point."
     (when (and (thing-at-point 'word)
                (not (org-in-src-block-p))
@@ -2162,7 +2189,7 @@ It's used by `custom-org-roam-capf'.")
         (let ((exclude-ids (cons current-id id-links))
               (candidates nil))
           (dolist (node (hash-table-values
-                         custom-org-roam-node-title-cache))
+                         custom/org-roam-node-title-cache))
             (unless (member (org-roam-node-id node) exclude-ids)
               (push (org-roam-node-title node) candidates)))
           (list (car bounds) (cdr bounds)
@@ -2213,9 +2240,9 @@ It's value needs to be number/anything.
                (org-entry-get (point) "progress")))))
 
 (use-package org-roam
-  :commands (anilist-get-weekly-progress)
+  :commands (custom/anilist-get-weekly-progress)
   :config
-  (defun anilist-get-weekly-progress ()
+  (defun custom/anilist-get-weekly-progress ()
     "Create a buffer with last month activity on AniList."
     (interactive)
     (let* ((timestamp
@@ -2321,11 +2348,11 @@ OPEN-IN-WEB is non-nil."
               (results
                (org-roam-db-query
                 [:select [id properties]
-                         :from nodes
-                         :join tags
-                         :on (= tags:node-id nodes:id)
-                         :where (= tags:tag "animan")
-                         :group-by nodes:id]))
+                 :from nodes
+                 :join tags
+                 :on (= tags:node-id nodes:id)
+                 :where (= tags:tag "animan")
+                 :group-by nodes:id]))
               (matched-result
                (seq-find
                 (lambda (item)
@@ -2344,12 +2371,12 @@ OPEN-IN-WEB is non-nil."
                      "No matching org-roam node found"
                      "Opening the AniList entry in the browser")
             (browse-url (format "https://anilist.co/%s/%s" type id)))
-          (message "No matching org-roam node found.")))))
+        (message "No matching org-roam node found.")))))
 
 (use-package org-roam
-  :commands (org-roam-show-games-closed-with-year)
+  :commands (custom/org-roam-show-games-closed-with-year)
   :config
-  (defun org-roam-get-games-closed-with-year (year)
+  (defun custom/org-roam-get-games-closed-with-year (year)
     "Return the games nodes beaten in the YEAR."
     (let ((games-list))
       (dolist (item (org-roam-db-query
@@ -2363,22 +2390,22 @@ OPEN-IN-WEB is non-nil."
                (title    (nth 1 item))
                (file     (nth 2 item))
                (position (nth 3 item)))
-          (when-let ((date (with-temp-buffer
-                             (insert-file-contents file)
-                             (org-mode)
-                             (goto-char position)
-                             (when (re-search-forward
-                                    (format "CLOSED: \\[%s.*+\\]" year)
-                                    nil t)
-                               (search-backward "CLOSED")
-                               (search-forward "[")
-                               (when (equal id (org-roam-node-id
-                                                (org-roam-node-at-point)))
-                                 (thing-at-point 'symbol t))))))
+          (when-let* ((date (with-temp-buffer
+                              (insert-file-contents file)
+                              (org-mode)
+                              (goto-char position)
+                              (when (re-search-forward
+                                     (format "CLOSED: \\[%s.*+\\]" year)
+                                     nil t)
+                                (search-backward "CLOSED")
+                                (search-forward "[")
+                                (when (equal id (org-roam-node-id
+                                                 (org-roam-node-at-point)))
+                                  (thing-at-point 'symbol t))))))
             (add-to-list 'games-list (list id title date)))))
       games-list))
 
-  (defun org-roam-show-games-closed-with-year (year)
+  (defun custom/org-roam-show-games-closed-with-year (year)
     "Show the games nodes beaten in the YEAR in a separate buffer."
     (interactive "nEnter a year: ")
     (message "Looking for beaten games...")
@@ -2387,7 +2414,7 @@ OPEN-IN-WEB is non-nil."
                      (when (get-buffer buffer-name)
                        (kill-buffer buffer-name))
                      (get-buffer-create buffer-name)))
-           (data (org-roam-get-games-closed-with-year year))
+           (data (custom/org-roam-get-games-closed-with-year year))
            (longest-title-length
             (apply #'max (seq-map (lambda (item)
                                     (length (nth 1 item)))
@@ -2444,11 +2471,11 @@ OPEN-IN-WEB is non-nil."
   :bind (("C-c p f" . eglot-code-action-quickfix)
          ("C-c p a" . eglot-code-actions)
          ("C-c p r" . eglot-rename)
-         ("C-c p F" . custom-eglot-format-dwim))
+         ("C-c p F" . custom/eglot-format-dwim))
   :custom (eglot-autoshutdown t)
   :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
   :config
-  (defun custom-eglot-format-dwim ()
+  (defun custom/eglot-format-dwim ()
     "Format region or the buffer."
     (interactive)
     (if (use-region-p)
@@ -2535,7 +2562,7 @@ OPEN-IN-WEB is non-nil."
     (keymap-set sly-mrepl-mode-map "C-c C-n" #'sly-mrepl-next-prompt)))
 
 (use-package lisp-semantic-hl
-  :hook ((emacs-lisp-mode lisp-mode) . lisp-semantic-hl-mode))
+  :hook (lisp-mode . lisp-semantic-hl-mode))
 
 (use-package better-calculate-lisp-indent
   :vc (:url "https://codeberg.org/rossabaker/better-calculate-lisp-indent.el")
@@ -2546,14 +2573,19 @@ OPEN-IN-WEB is non-nil."
               :override #'better-calculate-lisp-indent))
 
 (defalias 'elisp-mode 'emacs-lisp-mode)
-(with-eval-after-load 'elisp-mode
-  (defun elisp-eval-dwim ()
+(use-package elisp-mode
+  :ensure nil
+  :custom (elisp-fontify-semantically t)
+  :bind
+  (:map emacs-lisp-mode-map
+   ("C-c C-c" . custom/elisp-eval-dwim))
+  :config
+  (defun custom/elisp-eval-dwim ()
     "Evaluate current defun or region if it's active."
     (interactive)
     (if (region-active-p)
         (eval-region (region-beginning) (region-end))
-      (eval-defun nil)))
-  (keymap-set emacs-lisp-mode-map "C-c C-c" #'elisp-eval-dwim))
+      (eval-defun nil))))
 
 (use-package bug-hunter)
 
@@ -2598,16 +2630,16 @@ It doesn't close empty tags."
     (when (and (eql last-command-event ?>)
                (not (eql (char-before (1- (point))) ?>)))
       (save-excursion
-        (if-let (;; `sgml-close-tag' does some indenting
-                 ;; so I disable indenting
-                 (indent-line-function 'ignore)
-                 (indent-region-function 'ignore)
-                 (tag (save-excursion
-                        (when (search-backward "<" nil t)
-                          (forward-char)
-                          ;; when we have </foo, return nil
-                          (and (not (= (following-char) ?/))
-                               (current-word))))))
+        (if-let* (;; `sgml-close-tag' does some indenting
+                  ;; so I disable indenting
+                  (indent-line-function 'ignore)
+                  (indent-region-function 'ignore)
+                  (tag (save-excursion
+                         (when (search-backward "<" nil t)
+                           (forward-char)
+                           ;; when we have </foo, return nil
+                           (and (not (= (following-char) ?/))
+                                (current-word))))))
             (unless (member tag html-empty-tag-list)
               (sgml-close-tag))))))
   (add-hook 'html-mode-hook (lambda ()
@@ -2621,10 +2653,6 @@ It doesn't close empty tags."
 
 (use-package css-mode
   :custom (css-indent-offset 2))
-
-(use-package js
-  :custom (js-indent-level 2)
-  :hook (js-mode . (lambda () (setq indent-tabs-mode nil))))
 
 (unless on-termux-p
   (setq treesit-language-source-alist
@@ -2647,7 +2675,9 @@ It doesn't close empty tags."
           (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
           (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
           (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-  ;; ))
+  (setopt treesit-enabled-modes t)
+  (add-to-list 'treesit-extra-load-path
+               (expand-file-name-user-share "tree-sitter-grammars/"))
 
 (dolist (lang treesit-language-source-alist)
   (unless (treesit-language-available-p (car lang))
@@ -2655,28 +2685,10 @@ It doesn't close empty tags."
       (message "Installing %s tree-sitter grammar" (car lang))
       (treesit-install-language-grammar (car lang)))))
 
-(setq major-mode-remap-alist
-      '((c-or-c++-mode . c-or-c++-ts-mode)
-        (c-mode . c-ts-mode)
-        (c++-mode . c++-ts-mode)
-        (css-mode . css-ts-mode)
-        (python-mode . python-ts-mode)
-        (sh-mode . bash-ts-mode)
-        (js-json-mode . json-ts-mode)
-        ;; I change javascript modes to use typescript tree-sitter mode
-        (js-mode . typescript-ts-mode)
-        (javascript-mode . typescript-ts-mode)
-        (conf-toml-mode . toml-ts-mode)
-        (yaml-mode . yaml-ts-mode)))
-
-(add-to-list 'auto-mode-alist '("\\.lua\\'" . lua-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
-(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
-
-(when (< emacs-major-version 31)
-  (load (expand-file-name "treesit-predicate-rewrite"
-                          user-emacs-directory) nil nil nil t)))
+(dolist (list '((js-mode . typescript-ts-mode)
+                (javascript-mode . typescript-ts-mode)))
+  (add-to-list 'major-mode-remap-alist list))
+)
 
 (use-package autoinsert
   :hook (prog-mode . auto-insert-mode)
@@ -2796,7 +2808,7 @@ It doesn't close empty tags."
       (let ((default-directory directory))
         (ghostel)))
     (keymap-set embark-file-map "t" 'ghostel-dir))
-  :hook (ghostel-mode . (lambda () (setq mode-line-format nil)))
+  :hook (ghostel-mode . mode-line-invisible-mode)
   (ghostel-mode . ghostel-meow-setup)
   (ghostel-mode . (lambda () (setq-local global-hl-line-mode nil)))
   :bind (("C-c s v" . ghostel)
@@ -2976,8 +2988,8 @@ Also see `window-delete-popup-frame'." command)
 
   (setq gptel-backend
         (gptel-make-gemini "gemini"
-          :key (nth 1 (auth-source-user-and-password
-                       "generativelanguage.googleapis.com"))
+          :key (gptel-api-key-from-auth-source
+                "generativelanguage.googleapis.com")
           :models '(gemini-3.5-flash
                     gemini-3.1-flash-lite
                     gemini-flash-latest)))
@@ -2986,10 +2998,10 @@ Also see `window-delete-popup-frame'." command)
     :host "api.mistral.ai"
     :endpoint "/v1/chat/completions"
     :protocol "https"
-    :key (nth 1 (auth-source-user-and-password "api.mistral.ai"))
+    :key (gptel-api-key-from-auth-source "api.mistral.ai")
     :models '("mistral-small"))
 
-  (defun gptel-send-dwim ()
+  (defun custom/gptel-send-dwim ()
     "Send the prompt if the point is possibly at the end of the buffer."
     (interactive)
     (unless (string-match "[aA-zZ]"
@@ -2997,7 +3009,7 @@ Also see `window-delete-popup-frame'." command)
                            (point) (point-max)))
       (gptel-send)
       t))
-  (keymap-set gptel-mode-map "C-c RET" #'gptel-send-dwim)
+  (keymap-set gptel-mode-map "C-c RET" #'custom/gptel-send-dwim)
 
   (defvar custom/gptel-enable-hook nil
     "The hook that runs when entering `gptel-mode'.")
@@ -3007,7 +3019,7 @@ Also see `window-delete-popup-frame'." command)
   (add-hook 'custom/gptel-enable-hook
             (lambda ()
               (add-hook 'org-ctrl-c-ctrl-c-hook
-                        #'gptel-send-dwim -100 t)))
+                        #'custom/gptel-send-dwim -100 t)))
   (add-hook 'custom/gptel-enable-hook
             (lambda ()
               (unless (buffer-file-name)
@@ -3030,7 +3042,40 @@ Meant to be used in `gptel-post-response-functions'."
       (widen)))
 
   (add-hook 'gptel-post-response-functions
-            #'custom/gptel-align-org-tables))
+            #'custom/gptel-align-org-tables)
+
+  ;; this is experimental code that uses pandoc for converting the
+  ;; markdown to org as the default conversion is wonky at times
+  (defun custom/gptel--convert-markdown->org (str)
+    "Convert STR from Markdown to Org using pandoc."
+    (with-temp-buffer
+      (insert str)
+      (call-process-region
+       (point-min) (point-max) "pandoc" t
+       (current-buffer) nil
+       "-f" "markdown" "-t" "org" "--lua-filter"
+       (expand-file-name "pandoc-org-filter-no-custom-ids.lua"
+                         user-emacs-directory) "--wrap"
+       "preserve")
+      (buffer-substring-no-properties
+       (point-min)
+       (let ((end (point-max)))
+         (if (eq 10 (progn (goto-char end) (char-before)))
+             (1- end)
+           end)))))
+
+  (defun custom/gptel-converter (start-marker)
+    "Custom converter to replace gptel--stream-convert-markdown->org.
+START-MARKER is the buffer marker where the stream begins."
+    ;; Return the closure that gptel expects
+    (lambda (str)
+      (gptel--convert-markdown->org str)))
+
+  (when (executable-find "pandoc")
+    (advice-add 'gptel--convert-markdown->org :override
+                #'custom/gptel--convert-markdown->org)
+    (advice-add 'gptel--stream-convert-markdown->org :override
+                #'custom/gptel-converter)))
 
 ;; loading gptel and turning it on if an org buffer has the gptel
 ;; properties
@@ -3077,7 +3122,7 @@ Meant to be used in `gptel-post-response-functions'."
     (keymap-set (eval map) "C-c C-&"
                 #'consult-gh-topics-open-in-browser))
 
-  (defun custom-consult-gh-revert (&optional ignore-auto noconfirm)
+  (defun custom/consult-gh-revert (&optional ignore-auto noconfirm)
     "The `revert-buffer-function' for consult-gh topics."
     (ignore ignore-auto)
     (if noconfirm
@@ -3092,7 +3137,7 @@ Meant to be used in `gptel-post-response-functions'."
                   consult-gh-commit-view-mode-hook))
     (add-hook hook (lambda ()
                      (setq-local revert-buffer-function
-                                 #'custom-consult-gh-revert)))))
+                                 #'custom/consult-gh-revert)))))
 
 (use-package consult-gh-transient
   :ensure nil

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (setq frame-inhibit-implied-resize t ;; that makes startup slightly faster
       auto-mode-case-fold nil
       package-native-compile t
