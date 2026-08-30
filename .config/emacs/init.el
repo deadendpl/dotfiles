@@ -270,15 +270,16 @@ Most of the stuff will get redirected here.")
   (use-package-always-defer t) ; packages by default will be lazy loaded, like they will have defer: t
   :config
   ;; Emacs 31.1 broke :custom-face keyword, so I fix it
-  (define-advice use-package-handler/:custom-face
-      (:override (name _keyword args rest state)
-       emacs-pre-31-behavior)
-    "Revert the custom-face keyword regression that Emacs 31.1 introduced."
-    (use-package-concat
-     (mapcar (lambda (def)
-               (apply #'face-spec-set def))
-             args)
-     (use-package-process-keywords name rest state))))
+  (when (equal emacs-version "31.1")
+    (define-advice use-package-handler/:custom-face
+        (:override (name _keyword args rest state)
+         emacs-pre-31-behavior)
+      "Revert the custom-face keyword regression that Emacs 31.1 introduced."
+      (use-package-concat
+       (mapcar (lambda (def)
+                 (apply #'face-spec-set def))
+               args)
+       (use-package-process-keywords name rest state)))))
 
 (use-package package
   :custom
