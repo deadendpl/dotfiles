@@ -252,7 +252,7 @@ Most of the stuff will get redirected here.")
 (minibuffer-depth-indicate-mode 1)
 
 (with-eval-after-load 'tramp
-  (defun tramp-cleanup-everything ()
+  (defun custom/tramp-cleanup-everything ()
     "Flush all connections and kill all remote buffers."
     (interactive)
     (tramp-cleanup-all-connections)
@@ -959,7 +959,8 @@ default, the whole line in the file is highlighted."
          ("Use t in embark to open directory in vterm")
          ("Use registers for keyboard macros")
          ("Use k in dired to remove a line")
-         ("Use C-c c k to kill current compilation"))))))
+         ("Use C-c c k to kill current compilation")
+         ("Use align-regexp for aligning things"))))))
   (setq enlight-content (custom/enlight-content))
   (define-advice enlight (:before (&rest args) update-englight-content)
     "Update `enlight-content'"
@@ -1019,7 +1020,9 @@ default, the whole line in the file is highlighted."
                  :face nerd-icons-dorange))
   (add-to-list 'nerd-icons-regexp-icon-alist
                '("rc$" nerd-icons-codicon "nf-cod-settings"
-                 :face nerd-icons-dorange)))
+                 :face nerd-icons-dorange))
+  (setf (alist-get 'eww-mode nerd-icons-mode-icon-alist)
+        '(nerd-icons-mdicon "nf-md-web" :face nerd-icons-red)))
 
 (use-package nerd-icons-multimodal
   :vc (:url "https://github.com/abougouffa/nerd-icons-multimodal")
@@ -2450,9 +2453,9 @@ OPEN-IN-WEB is non-nil."
 (use-package compile
   :init (setq-default compile-command nil)
   :hook (compilation-filter . ansi-color-compilation-filter)
-  :bind (("C-c c c" . compile)
-         ("C-c c r" . recompile)
-         ("C-c c k" . kill-compilation))
+  :bind (("C-c s c" . compile)
+         ("C-c s r" . recompile)
+         ("C-c s k" . kill-compilation))
   :custom
   (compilation-scroll-output 'first-error)
   (compilation-ask-about-save nil)
@@ -2474,7 +2477,9 @@ OPEN-IN-WEB is non-nil."
          ("C-c p r" . eglot-rename)
          ("C-c p F" . custom/eglot-format-dwim))
   :custom (eglot-autoshutdown t)
-  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)))
+  :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)
+                                (completion-preview-mode -1)
+                                (setq-local corfu-auto t)))
   :config
   (defun custom/eglot-format-dwim ()
     "Format region or the buffer."
@@ -2656,26 +2661,29 @@ It doesn't close empty tags."
   :custom (css-indent-offset 2))
 
 (unless on-termux-p
-  (setq treesit-language-source-alist
-        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-          ;; (cmake "https://github.com/uyha/tree-sitter-cmake")
-          (c "https://github.com/tree-sitter/tree-sitter-c")
-          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-          (css "https://github.com/tree-sitter/tree-sitter-css")
-          ;; (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-          ;; (go "https://github.com/tree-sitter/tree-sitter-go")
-          (html "https://github.com/tree-sitter/tree-sitter-html")
-          (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
-          (json "https://github.com/tree-sitter/tree-sitter-json")
-          ;; (make "https://github.com/alemuller/tree-sitter-make")
-          ;; (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-          (python "https://github.com/tree-sitter/tree-sitter-python")
-          ;; (php "https://github.com/tree-sitter/tree-sitter-php")
-          (toml "https://github.com/tree-sitter-grammars/tree-sitter-toml")
-          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-          (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+  ;; With Emacs 31.1, built-in tree-sitter modes add their language
+  ;; grammars, and third-party modes will probably follow suit, so
+  ;; there's not much use for setting `treesit-language-source-alist'
+  ;; (setq treesit-language-source-alist
+  ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+  ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
+  ;;         (c "https://github.com/tree-sitter/tree-sitter-c")
+  ;;         (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+  ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
+  ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+  ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
+  ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
+  ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+  ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
+  ;;         (make "https://github.com/alemuller/tree-sitter-make")
+  ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+  ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
+  ;;         (php "https://github.com/tree-sitter/tree-sitter-php")
+  ;;         (toml "https://github.com/tree-sitter-grammars/tree-sitter-toml")
+  ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+  ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+  ;;         (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+  ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
   (setopt treesit-enabled-modes t)
   (add-to-list 'treesit-extra-load-path
                (expand-file-name-user-share "tree-sitter-grammars/"))

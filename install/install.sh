@@ -155,6 +155,7 @@ else
   yay -S --noconfirm --needed networkmanager-dmenu-git \
                               rofi-bluetooth-git \
                               cp-p-git \
+                              neru-bin \
                               # ctpv-git \
                               # clipboard \
                               # pokemonsay-newgenerations-git \
@@ -345,9 +346,6 @@ yay -S --noconfirm --needed python-anyascii \
                             python-material-color-utilities \
                             python-zombie-imp
 
-makepkg -csi --noconfirm --needed
-
-cd $DOTFILES_INSTALL_DIR/neru
 makepkg -csi --noconfirm --needed
 
 read -p "Want to have an example wallpaper downloaded to make pyrice work? [y/n]: " -n 1 -r

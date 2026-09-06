@@ -213,6 +213,7 @@ else
   yay -S --noconfirm --needed networkmanager-dmenu-git \
                               rofi-bluetooth-git \
                               cp-p-git \
+                              neru-bin \
                               # ctpv-git \
                               # clipboard \
                               # pokemonsay-newgenerations-git \
@@ -443,7 +444,7 @@ yay -S --noconfirm --needed python-anyascii \
 
 makepkg -csi --noconfirm --needed
 #+end_src
-* Installing neru
+* Installing neru :ARCHIVE:
 #+begin_src sh
 cd $DOTFILES_INSTALL_DIR/neru
 makepkg -csi --noconfirm --needed
