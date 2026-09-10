@@ -216,6 +216,28 @@ It changes 2 variables depending on value of LIGHT."
   (when (command-running-p "Hyprland")
     (uiop:run-program "hyprctl reload")))
 
+(defun kvantum-setup ()
+  "Copy over some kvantum files."
+  (let ((kvconfig-file (merge-pathnames "pywal.kvconfig"
+                                        *wal-directory*))
+        (svg-file (merge-pathnames "pywal.svg" *wal-directory*)))
+    (when (probe-file kvconfig-file)
+      (uiop:copy-file
+       kvconfig-file
+       (merge-pathnames
+        "Kvantum/pywal/pywal.kvconfig"
+        (uiop:ensure-directory-pathname
+         (uiop:getenv "XDG_CONFIG_HOME"))))
+      (format t "Copied over the kvantum config file.~%"))
+    (when (probe-file svg-file)
+      (uiop:copy-file
+       svg-file
+       (merge-pathnames
+        "Kvantum/pywal/pywal.svg"
+        (uiop:ensure-directory-pathname
+         (uiop:getenv "XDG_CONFIG_HOME"))))
+      (format t "Copied over the kvantum SVG file.~%"))))
+
 (gsettings-run *light-theme-p*)
 ;; (reload-gtk-theme)
 (swaybg-setup *wallpaper-path* *old-wallpaper-p*)
@@ -224,6 +246,7 @@ It changes 2 variables depending on value of LIGHT."
 (waybar-setup)
 (gradience-wrap)
 (gtk-icon-setup *light-theme-p*)
+(kvantum-setup)
 ;; (emacs-setup *light-theme-p*)
 (emacs-modus-setup)
 (qutebrowser-setup)

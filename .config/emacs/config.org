@@ -1533,7 +1533,9 @@ With Emacs 29, true transparency has been added.
   ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-dabbrev))
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  :custom
+  (cape-dabbrev-buffer-function #'cape-text-buffers))
 #+end_src
 **** completion-preview-mode
 =completion-preview-mode= is a built-in mode that shows a preview of the most likely matching candidate from a =completion-at-point= function without showing any completion UI.
@@ -1859,7 +1861,7 @@ Dired is bult-in file manager for Emacs. It uses =ls= for displaying directories
   (wdired-allow-to-change-permissions t))
 #+end_src
 ** Docs
-*** Helpful
+*** Helpful :ARCHIVE:
 [[https://github.com/Wilfred/helpful][This]] makes Emacs documentation look pretty.
 #+begin_src emacs-lisp
 (use-package helpful
@@ -1910,6 +1912,37 @@ I override it.
   (advice-add #'describe-key :override #'meow-helpful-key)
   (defun meow-helpful-key (&rest args)
     (funcall #'helpful-key (cdaar args))))
+#+end_src
+*** Describe bindings
+#+begin_src emacs-lisp
+(use-package emacs
+  :bind
+  ("C-h C-." . describe-at-point-better)
+  ("C-h '" . describe-face)
+  :config
+  (defun describe-at-point-better ()
+    "Improved version of `describe-at-point'.
+Handles symbols that start or end with a single quote (') correctly."
+    (interactive)
+    (if-let* ((sym (thing-at-point 'symbol t)))
+        (let ((sym (cond
+                    ((char-equal ?' (aref sym 0)) ; Starts with '
+                     (substring sym 1)) ; Remove leading '
+                    ((char-equal ?' (aref sym (1- (length sym)))) ; Ends with '
+                     (substring sym 0 -1)) ; Remove trailing '
+                    ;; is in org mode and is surrounded by = or ~
+                    ((and (or (eq major-mode 'org-mode)
+                              (eq major-mode 'org-agenda-mode))
+                          (or (and (char-equal ?= (aref sym 0))
+                                   (char-equal
+                                    ?= (aref sym (1- (length sym)))))
+                              (and (char-equal ?~ (aref sym 0))
+                                   (char-equal
+                                    ?~ (aref sym (1- (length sym)))))))
+                     (substring sym 1 -1))
+                    (t sym)))) ; No changes needed
+          (describe-symbol (intern sym)))
+      (message "No symbol found at point!"))))
 #+end_src
 *** Which-key
 [[https://github.com/justbur/emacs-which-key][It]] shows you available keybindings, the default ones and the ones you create.
@@ -3448,14 +3481,35 @@ This section is not intended for Termux usage. That's why I include =unless= sta
 #+end_src
 Now after ~M-x treesit-install-language-grammar~ you can choose language and its tree-sitter grammar will be installed.
 
-Any unavailable grammars get installed.
-Since now, I don't have any grammars set manually, this won't do anything.
+Not all grammars are immediately available, so I made a function that loads all tree-sitter modes so that the grammars get added to =treesit-language-source-alist= and installed.
 #+begin_src emacs-lisp
-(dolist (lang treesit-language-source-alist)
-  (unless (treesit-language-available-p (car lang))
-    (unless (eq (car lang) 'php) ; php doesn't install
-      (message "Installing %s tree-sitter grammar" (car lang))
-      (treesit-install-language-grammar (car lang)))))
+(defun custom/treesit-install-all-grammars ()
+  "Ensure all tree-sitter grammars are installed.
+It loads all available tree-sitter modes libraries it finds to fill
+`treesit-language-source-alist' with all available grammars."
+  (interactive)
+  (let (tree-sitter-modes
+        (treesit-auto-install-grammar 'always))
+    (mapatoms (lambda (atom)
+                (and (symbolp atom)
+                     (functionp atom)
+                     (string-match "-ts-mode$" (symbol-name atom))
+                     (push (find-function-library atom)
+                           tree-sitter-modes))))
+    (dolist (library (mapcar #'cdr tree-sitter-modes))
+      (let ((library (ignore-errors
+                       (if (file-regular-p library)
+                           (intern (file-name-base library))
+                         (intern library)))))
+        (when library
+          (unless (featurep library)
+            (require library))))))
+  (mapc (lambda (grammar-entry)
+          (message "Checking if %s grammar is instealled."
+                   (car grammar-entry))
+          (treesit-ensure-installed (car grammar-entry)))
+        treesit-language-source-alist)
+  (message "Done checking all of the grammars."))
 #+end_src
 
 This remaps javascript major modes to the tree-sitter typescript mode.

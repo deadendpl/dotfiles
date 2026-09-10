@@ -1162,7 +1162,9 @@ default, the whole line in the file is highlighted."
   ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
   (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-dabbrev))
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  :custom
+  (cape-dabbrev-buffer-function #'cape-text-buffers))
 
 (use-package completion-preview
   :hook (after-init . global-completion-preview-mode)
@@ -1442,26 +1444,16 @@ default, the whole line in the file is highlighted."
   :custom
   (wdired-allow-to-change-permissions t))
 
-(use-package helpful
+(use-package emacs
   :bind
-  ([remap describe-function] . helpful-callable)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-symbol] . helpful-symbol)
-  ([remap describe-variable] . helpful-variable)
-  ([remap describe-key] . helpful-key) ; it doesn't work with meow
-  ("C-h C-." . helpful-at-point-better)
+  ("C-h C-." . describe-at-point-better)
   ("C-h '" . describe-face)
-  :custom
-  (helpful-max-buffers nil)
-  ;; keep `show-paren-mode' working
-  (show-paren-predicate '(or (derived-mode . helpful-mode)
-                          (not (derived-mode . special-mode))))
   :config
-  (defun helpful-at-point-better ()
-    "Improved version of `helpful-at-point'.
+  (defun describe-at-point-better ()
+    "Improved version of `describe-at-point'.
 Handles symbols that start or end with a single quote (') correctly."
     (interactive)
-    (if-let ((sym (thing-at-point 'symbol t)))
+    (if-let* ((sym (thing-at-point 'symbol t)))
         (let ((sym (cond
                     ((char-equal ?' (aref sym 0)) ; Starts with '
                      (substring sym 1)) ; Remove leading '
@@ -1478,7 +1470,7 @@ Handles symbols that start or end with a single quote (') correctly."
                                     ?~ (aref sym (1- (length sym)))))))
                      (substring sym 1 -1))
                     (t sym)))) ; No changes needed
-          (helpful-symbol (intern sym)))
+          (describe-symbol (intern sym)))
       (message "No symbol found at point!"))))
 
 (use-package which-key
@@ -2759,11 +2751,33 @@ It doesn't close empty tags."
   (add-to-list 'treesit-extra-load-path
                (expand-file-name-user-share "tree-sitter-grammars/"))
 
-(dolist (lang treesit-language-source-alist)
-  (unless (treesit-language-available-p (car lang))
-    (unless (eq (car lang) 'php) ; php doesn't install
-      (message "Installing %s tree-sitter grammar" (car lang))
-      (treesit-install-language-grammar (car lang)))))
+(defun custom/treesit-install-all-grammars ()
+  "Ensure all tree-sitter grammars are installed.
+It loads all available tree-sitter modes libraries it finds to fill
+`treesit-language-source-alist' with all available grammars."
+  (interactive)
+  (let (tree-sitter-modes
+        (treesit-auto-install-grammar 'always))
+    (mapatoms (lambda (atom)
+                (and (symbolp atom)
+                     (functionp atom)
+                     (string-match "-ts-mode$" (symbol-name atom))
+                     (push (find-function-library atom)
+                           tree-sitter-modes))))
+    (dolist (library (mapcar #'cdr tree-sitter-modes))
+      (let ((library (ignore-errors
+                       (if (file-regular-p library)
+                           (intern (file-name-base library))
+                         (intern library)))))
+        (when library
+          (unless (featurep library)
+            (require library))))))
+  (mapc (lambda (grammar-entry)
+          (message "Checking if %s grammar is instealled."
+                   (car grammar-entry))
+          (treesit-ensure-installed (car grammar-entry)))
+        treesit-language-source-alist)
+  (message "Done checking all of the grammars."))
 
 (dolist (list '((js-mode . typescript-ts-mode)
                 (javascript-mode . typescript-ts-mode)))
