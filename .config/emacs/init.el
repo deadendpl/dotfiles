@@ -258,6 +258,8 @@ Most of the stuff will get redirected here.")
     (tramp-cleanup-all-connections)
     (tramp-cleanup-all-buffers)))
 
+(setq epg-pinentry-mode 'loopback)
+
 (prettify-special-glyphs-mode)
 
 (repeat-mode 1)
@@ -744,7 +746,7 @@ With ARG being non-nil, insert the non-breaking space."
   (shr-fill-text nil)
   (shr-max-width nil)
   (shr-bullet "• ")
-  (shr-sliced-image-height 0.5))
+  (shr-sliced-image-height 0.33))
 
 (use-package shr-tag-pre-highlight
   :after shr
@@ -929,12 +931,16 @@ default, the whole line in the file is highlighted."
   (initial-buffer-choice #'enlight)
   (tab-bar-new-tab-choice #'enlight) ;; buffer to show in new tabs
   :config
+  (require 'enlight-menu)
   (defun custom/enlight-content ()
     (concat
-     (propertize "Welcome to the Church of Emacs" 'face
-                 'enlight-menu-section)
+     (propertize (enlight-center-string
+                  enlight-width "Welcome to the Church of Emacs")
+                 'face 'enlight-menu-section)
      "\n"
-     (concat "Startup time: " (emacs-init-time))
+     (enlight-center-string
+      enlight-width
+      (concat "Startup time: " (emacs-init-time)))
      "\n"
      (enlight-menu
       `(("Org Mode"
@@ -1227,6 +1233,8 @@ default, the whole line in the file is highlighted."
   ;; ([remap project-find-regexp] . consult-project-grep))
   :custom
   (consult-async-min-input 0)
+  (xref-show-xrefs-function #'consult-xref)
+  (xref-show-definitions-function #'consult-xref)
   :config
   ;; no org file preview as loading org mode takes few seconds
   (add-to-list 'consult-preview-excluded-files "\\.org\\'")
@@ -2450,6 +2458,69 @@ OPEN-IN-WEB is non-nil."
   (toc-org-max-depth org-indent--deepest-level)
   (toc-org-enable-links-opening t))
 
+(use-package markdown-ts-mode
+  ;; it doesn't have any autoload cookies
+  :commands (markdown-ts-mode
+             markdown-ts-view-mode)
+  :init
+  ;; The usual markdown-mode will be installed as its a dependency of
+  ;; consult-gh, consult-gh will keep using it though as I don't want to
+  ;; break it. The tree-sitter mode will be used for the markdown files
+  ;; on disk.
+  (when (rassoc 'markdown-mode auto-mode-alist)
+    (setf (cdr (rassoc 'markdown-mode auto-mode-alist))
+          'markdown-ts-mode))
+  :custom-face
+  (markdown-ts-block-quote ((nil :slant italic)))
+  :bind (:map markdown-ts-mode-map
+         ("M-RET" . custom/markdown-ts-meta-return)
+         :map markdown-ts-code-block-in-context-mode-map
+         ("M-RET" . custom/markdown-ts-meta-return)
+         :map markdown-ts-in-table-mode-map
+         ("M-RET" . custom/markdown-ts-meta-return))
+  :config
+  (defvar-keymap custom/markdown-ts-navigation-repeat-map
+    :doc "Repeat keymap for navigation commands."
+    :repeat t
+    "n" 'outline-next-heading
+    "p" 'outline-previous-heading
+    "u" 'outline-up-heading
+    "f" 'outline-forward-same-level
+    "b" 'outline-backward-same-level)
+  (defun custom/markdown-ts-meta-return ()
+    "Insert different things depending on context."
+    (interactive)
+    (cond
+     ((markdown-ts--heading-at-point)
+      ;; insert a new heading, markdown-ts-mode doesn't have it
+      ;; implemented yet.
+      (let* ((heading (markdown-ts--heading-at-point))
+             (level (markdown-ts--heading-level heading)))
+        (goto-char (1- (treesit-node-end (treesit-node-parent heading))))
+        (insert "\n")
+        (dotimes (i level)
+          (insert "#"))
+        (insert " ")))
+     ((markdown-ts--list-item-at-point)
+      (let ((end-pos (treesit-node-end (markdown-ts--list-item-at-point))))
+        (goto-char end-pos)
+        (markdown-ts-insert-list-item)))
+     ((markdown-ts-at-table-p)
+      (markdown-ts-table-insert-row))
+     (t
+      ;; insert a new heading after the section at point
+      (let* ((section (markdown-ts--section-at-point))
+             (heading (cl-find-if
+                       (lambda (child)
+                         (equal (treesit-node-type child) "atx_heading"))
+                       (treesit-node-children section)))
+             (level (markdown-ts--heading-level heading)))
+        (goto-char (1- (treesit-node-end section)))
+        (insert "\n")
+        (dotimes (i level)
+          (insert "#"))
+        (insert " "))))))
+
 (use-package compile
   :init (setq-default compile-command nil)
   :hook (compilation-filter . ansi-color-compilation-filter)
@@ -2476,7 +2547,9 @@ OPEN-IN-WEB is non-nil."
          ("C-c p a" . eglot-code-actions)
          ("C-c p r" . eglot-rename)
          ("C-c p F" . custom/eglot-format-dwim))
-  :custom (eglot-autoshutdown t)
+  :custom
+  (eglot-autoshutdown t)
+  (eglot-documentation-renderer #'markdown-ts-view-mode)
   :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)
                                 (completion-preview-mode -1)
                                 (setq-local corfu-auto t)))
@@ -2515,17 +2588,7 @@ OPEN-IN-WEB is non-nil."
   :custom (sh-basic-offset 2))
 
 (use-package cc-mode
-  :hook ((c++-mode .  custom/c++-set-compile-command)
-         (c++-ts-mode . (lambda () (run-hooks 'c++-mode-hook))))
-  :preface
-  (defun custom/c++-set-compile-command ()
-    "The curent buffer gets `compile-command' changed to the following:
-- The current file gets compiled using g++
-- The compiled file gets executed"
-    (if buffer-file-name
-        (setq-local compile-command
-                    (concat "g++ " (shell-quote-argument
-                                    (buffer-file-name)) " && ./a.out"))))
+  :hook (c++-ts-mode . (lambda () (run-hooks 'c++-mode-hook)))
   :config
   ;; this is for indenting
   (c-set-offset 'comment-intro 0)
@@ -2657,6 +2720,13 @@ It doesn't close empty tags."
       "link" "meta" "param" "php" "source" "track" "wbr")
     "List of empty HTML tags."))
 
+(use-package mhtml-mode
+  :ensure nil
+  :hook (mhtml-ts-mode . (lambda ()
+                           (add-hook 'completion-at-point-functions
+                                     #'css-completion-at-point
+                                     0 t))))
+
 (use-package css-mode
   :custom (css-indent-offset 2))
 
@@ -2684,7 +2754,8 @@ It doesn't close empty tags."
   ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
   ;;         (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
   ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-  (setopt treesit-enabled-modes t)
+  (setopt treesit-enabled-modes t
+          treesit-auto-install-grammar 'always)
   (add-to-list 'treesit-extra-load-path
                (expand-file-name-user-share "tree-sitter-grammars/"))
 
@@ -3130,6 +3201,11 @@ START-MARKER is the buffer marker where the stream begins."
                  consult-gh-commit-view-mode-map))
     (keymap-set (eval map) "C-c C-&"
                 #'consult-gh-topics-open-in-browser))
+
+  (dolist (map '(consult-gh-pr-view-mode-map
+                 consult-gh-issue-view-mode-map))
+    (keymap-set (eval map) "C-c C-+"
+                #'consult-gh-topics-comment-create))
 
   (defun custom/consult-gh-revert (&optional ignore-auto noconfirm)
     "The `revert-buffer-function' for consult-gh topics."

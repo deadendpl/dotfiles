@@ -61,22 +61,24 @@ swayimg.viewer.loop = true                 -- enable image list loop mode
 swayimg.viewer.preload = 1                  -- number of images to preload
 swayimg.viewer.history = 1                  -- number of the history cache
 swayimg.viewer.mark_color = 0xff808080        -- mark icon color
-swayimg.viewer.set_text("topleft", {             -- top left text block scheme
-  "File: {name}",
-  "Format: {format}",
-  "File size: {sizehr}",
-  "File time: {time}",
-  "EXIF date: {meta.Exif.Photo.DateTimeOriginal}",
-  "EXIF camera: {meta.Exif.Image.Model}"
-})
-swayimg.viewer.set_text("topright", {            -- top right text block scheme
-  "Image: {list.index} of {list.total}",
-  "Frame: {frame.index} of {frame.total}",
-  "Dimensions: {frame.width}x{frame.height}"
-})
-swayimg.viewer.set_text("bottomleft", {          -- bottom left text block scheme
-  "Scale: {scale}"
-})
+swayimg.viewer.text = {
+  topleft = {             -- top left text block scheme
+    "File: {name}",
+    "Format: {format}",
+    "File size: {sizehr}",
+    "File time: {time}",
+    "EXIF date: {meta.Exif.Photo.DateTimeOriginal}",
+    "EXIF camera: {meta.Exif.Image.Model}"
+  },
+  topright = {            -- top right text block scheme
+    "Image: {list.index} of {list.total}",
+    "Frame: {frame.index} of {frame.total}",
+    "Dimensions: {frame.width}x{frame.height}"
+  },
+  bottomleft = {          -- bottom left text block scheme
+    "Scale: {scale}"
+  }
+}
 
 -- Key and mouse bindings in viewer mode (example only, not all):
 
@@ -140,7 +142,7 @@ swayimg.slideshow.timeout = 5                    -- timeout to switch image
 swayimg.slideshow.default_scale = "fit"          -- default image scale
 swayimg.slideshow.set_window_background("auto")     -- window background mode
 swayimg.slideshow.history = 0                  -- number of the history cache
-swayimg.slideshow.set_text("topleft", { "{name}" }) -- top left text block scheme
+swayimg.slideshow.text = {topleft = { "{name}" }} -- top left text block scheme
 
 
 -- Gallery mode
@@ -156,12 +158,14 @@ swayimg.gallery.window_color = 0xff000000        -- window background color
 swayimg.gallery.cache = 100                    -- number of thumbnails stored in memory
 swayimg.gallery.preload = false               -- preloading invisible thumbnails
 swayimg.gallery.pstore = false                -- enable persistent storage for thumbnails
-swayimg.gallery.set_text("topleft", {               -- top left text block scheme
-  "File: {name}"
-})
-swayimg.gallery.set_text("topright", {              -- top right text block scheme
-  "{list.index} of {list.total}"
-})
+swayimg.gallery.text = {
+  topleft = {               -- top left text block scheme
+    "File: {name}"
+  },
+  topright = {              -- top right text block scheme
+    "{list.index} of {list.total}"
+  }
+}
 
 -- Key and mouse bindings in gallery mode (example only, not all):
 
