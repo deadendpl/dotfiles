@@ -797,7 +797,10 @@ This function should work in EWW and Elfeed entry buffers."
   :custom
   (eww-auto-rename-buffer 'title)
   (url-privacy-level '(email lastloc))
-  (eww-use-external-browser-for-content-type "\\`\\(video/\\|audio\\)"))
+  (eww-use-external-browser-for-content-type "\\`\\(video/\\|audio\\)")
+  :bind (:map eww-mode-map
+         ("C-c C-n" . outline-next-heading)
+         ("C-c C-p" . outline-previous-heading)))
 
 (use-package display-line-numbers
   :hook (prog-mode . display-line-numbers-mode)
@@ -1266,7 +1269,7 @@ default, the whole line in the file is highlighted."
   (keymap-set project-prefix-map "f" #'consult-project-buffer)
   (keymap-set project-prefix-map "g" #'consult-project-grep)
 
-  ;; Making project file strings to be relative to the project root. It
+  ;; Making project buffer strings to be relative to the project root. It
   ;; lets me match against directory names without typing the
   ;; annotation dispatcher.
   (setf (plist-get consult-source-project-buffer :items)
@@ -1281,7 +1284,37 @@ default, the whole line in the file is highlighted."
                                                 (buffer-file-name buffer)
                                                 root)
                                              (buffer-name buffer))
-                                           buffer)))))))
+                                           buffer))))))
+
+  ;; Making a new project file source actually gets all the files as the
+  ;; default source only looks for the files present in `recentf-list'.
+  (defvar custom/consult-source-project-file
+    `(:name     "Project File"
+      :narrow   ?f
+      :category file
+      :face     consult-file
+      :history  file-name-history
+      :state    ,#'consult--file-state
+      :new
+      ,(lambda (file)
+         (consult--file-action
+          (expand-file-name file (consult--project-root))))
+      :enabled
+      ,(lambda ()
+         (and consult-project-function))
+      :items
+      ,(lambda ()
+         (when-let* ((root (consult--project-root))
+                     (project (project-current nil root)))
+          (mapcar (lambda (file)
+                    (cons (file-relative-name file root) file))
+           (project-files project)))))
+    "Project file source for consult that shows all the files.")
+
+  (setq consult-project-buffer-sources
+        '(consult-source-project-buffer
+          custom/consult-source-project-file
+          consult-source-project-root)))
 
 (use-package consult-imenu
   :ensure nil
@@ -2462,6 +2495,11 @@ OPEN-IN-WEB is non-nil."
   (when (rassoc 'markdown-mode auto-mode-alist)
     (setf (cdr (rassoc 'markdown-mode auto-mode-alist))
           'markdown-ts-mode))
+  (with-eval-after-load 'markdown-mode
+    (when (rassoc 'markdown-mode auto-mode-alist)
+      (setf (cdr (rassoc 'markdown-mode auto-mode-alist))
+            'markdown-ts-mode)))
+  :custom (markdown-ts-image-max-width 300)
   :custom-face
   (markdown-ts-block-quote ((nil :slant italic)))
   :bind (:map markdown-ts-mode-map
@@ -2494,9 +2532,13 @@ OPEN-IN-WEB is non-nil."
           (insert "#"))
         (insert " ")))
      ((markdown-ts--list-item-at-point)
-      (let ((end-pos (treesit-node-end (markdown-ts--list-item-at-point))))
-        (goto-char end-pos)
-        (markdown-ts-insert-list-item)))
+      ;; This doesn't work the way I want it to. The paragraph right
+      ;; after the list item is inside of the item node so the point
+      ;; goes to the end of that paragraph.
+      ;; (let ((end-pos (treesit-node-end (markdown-ts--list-item-at-point))))
+      ;;   (goto-char end-pos)
+      ;;   (markdown-ts-insert-list-item))
+      (markdown-ts-insert-list-item))
      ((markdown-ts-at-table-p)
       (markdown-ts-table-insert-row))
      (t
@@ -2512,6 +2554,20 @@ OPEN-IN-WEB is non-nil."
         (dotimes (i level)
           (insert "#"))
         (insert " "))))))
+
+(use-package markdown-ts-mode-x
+  :after markdown-ts-mode
+  :demand
+  :commands (markdown-ts-browse-commonmark-spec
+             markdown-ts-browse-gfm-spec
+             markdown-ts-convert-file
+             markdown-ts-convert
+             markdown-ts-toc-clear-and-remove
+             markdown-ts-toc-clear
+             markdown-ts-toc-insert-template
+             markdown-ts-toc-generate)
+  :bind (:map markdown-ts-mode-map
+         ("C-c C-e" . markdown-ts-convert)))
 
 (use-package compile
   :init (setq-default compile-command nil)
@@ -2581,6 +2637,7 @@ OPEN-IN-WEB is non-nil."
 
 (use-package cc-mode
   :hook (c++-ts-mode . (lambda () (run-hooks 'c++-mode-hook)))
+  :custom (c-ts-mode-enable-doxygen t)
   :config
   ;; this is for indenting
   (c-set-offset 'comment-intro 0)
@@ -3070,10 +3127,11 @@ Also see `window-delete-popup-frame'." command)
          ("C-c a m" . gptel-menu)
          ("C-c a o" . gptel)
          ("C-c a p" . gptel-preset)
-         ("C-c a r" . gptel-rewrite))
+         ("C-c a r" . gptel-rewrite)
+         ("C-c a s" . gptel-send))
   :custom
   (gptel-default-mode #'org-mode)
-  (gptel-model 'gemini-3.1-flash-lite)
+  (gptel-model 'gemini-3.5-flash-lite)
   (gptel-track-media t)
   :config
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
@@ -3085,7 +3143,7 @@ Also see `window-delete-popup-frame'." command)
           :key (gptel-api-key-from-auth-source
                 "generativelanguage.googleapis.com")
           :models '(gemini-3.5-flash
-                    gemini-3.1-flash-lite
+                    gemini-3.5-flash-lite
                     gemini-flash-latest)))
 
   (gptel-make-openai "mistral"
@@ -3094,6 +3152,13 @@ Also see `window-delete-popup-frame'." command)
     :protocol "https"
     :key (gptel-api-key-from-auth-source "api.mistral.ai")
     :models '("mistral-small"))
+
+  (gptel-make-openai "openrouter"
+    :host "openrouter.ai"
+    :endpoint "/api/v1/chat/completions"
+    :protocol "https"
+    :key (gptel-api-key-from-auth-source "openrouter.ai")
+    :models '("openrouter/free"))
 
   (defun custom/gptel-send-dwim ()
     "Send the prompt if the point is possibly at the end of the buffer."

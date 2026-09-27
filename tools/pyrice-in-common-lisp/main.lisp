@@ -60,7 +60,10 @@
                  (push item wallpaper-list))
                (uiop:directory-files dir))))
     (loop :with file := (uiop:native-namestring
-                         (nth (random (1- (length wallpaper-list)))
+                         (nth (random
+                               (if (> (length wallpaper-list) 1)
+                                   (1- (length wallpaper-list))
+                                   (length wallpaper-list)))
                               wallpaper-list))
           :until (is-file-an-image-p file)
           :do (setf file (uiop:native-namestring

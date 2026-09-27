@@ -34,9 +34,6 @@ if test -n "$TERMUX_VERSION"
   # termux config
   source "$SHELLS_CONFIG_DIR/termux.sh"
 else
-  # if command -q starship
-  #   starship init fish | source
-  # end
   source "$SHELLS_CONFIG_DIR/desktop.sh"
   # going to last directory from lf
   function lfcd

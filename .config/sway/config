@@ -252,7 +252,7 @@ for_window {
   [title="^Compress$|^Extract$" app_id="org.gnome.FileRoller"] floating enable
   [title="Share" app_id="valent"] floating enable
   [app_id="org.keepassxc.KeePassXC"] move to scratchpad, scratchpad show
-  [app_id="gimp" title="^Search Actions$|^Layer Select$|^GIMP user manual is missing$"] floating enable
+  [app_id="gimp" title="^Search Actions$|^Layer Select$|^GIMP user manual is missing$|^Preferences$"] floating enable
 }
 
 include {
