@@ -2,8 +2,13 @@
 * {
   /* with font-family set, japanese characters don't display */
   /* font-family: Ubuntu Nerd Font; */
-  all: unset;
   font-size: 11pt;
+}
+
+/* unsetting everything so that GTK theme does not mess with things
+   except for the tray menus */
+*:not(menu):not(menuitem) {
+  all: unset;
 }
 
 label.module {

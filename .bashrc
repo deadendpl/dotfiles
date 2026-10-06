@@ -67,7 +67,3 @@ generate_prompt() {
 }
 
 PROMPT_COMMAND=generate_prompt
-
-# if [ -n "$PS1" ] && command -v starship > /dev/null; then
-#   eval "$(starship init bash)"
-# fi

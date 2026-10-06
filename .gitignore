@@ -10,3 +10,4 @@ home/.config/nvim/plugin/packer_compiled.lua
 /.config/emacs/tree-sitter/
 /.config/emacs/eln-cache/
 /.config/fish/fish_variables
+.config/glide/glide/

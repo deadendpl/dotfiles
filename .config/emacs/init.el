@@ -1311,9 +1311,35 @@ default, the whole line in the file is highlighted."
            (project-files project)))))
     "Project file source for consult that shows all the files.")
 
+  (defvar custom/consult-source-project-directory
+    `(:name     "Project Directory"
+      :narrow   ?d
+      :category file
+      :face     consult-file
+      :history  file-name-history
+      :state    ,#'consult--file-state
+      :new
+      ,(lambda (file)
+         (consult--file-action
+          (expand-file-name file (consult--project-root))))
+      :enabled
+      ,(lambda ()
+         (and consult-project-function))
+      :items
+      ,(lambda ()
+         (when-let* ((root (consult--project-root))
+                     (project (project-current nil root))
+                     (directories (delete-dups
+                                   (mapcar #'file-name-directory
+                                    (project-files project)))))
+          (mapcar (lambda (file)
+                    (cons (file-relative-name file root) file))
+           directories)))))
+
   (setq consult-project-buffer-sources
         '(consult-source-project-buffer
           custom/consult-source-project-file
+          custom/consult-source-project-directory
           consult-source-project-root)))
 
 (use-package consult-imenu
