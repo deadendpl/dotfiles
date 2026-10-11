@@ -666,7 +666,7 @@ it."
            (meow-pop-selection)
            (setq custom/meow-expreg-action 'meow))
 
-          ((or (memq last-command '(expreg-expand expreg-contract)))
+          ((memq last-command '(expreg-expand expreg-contract))
            (expreg-contract)
            (setq custom/meow-expreg-action 'expreg))
 
@@ -1272,19 +1272,20 @@ default, the whole line in the file is highlighted."
   ;; Making project buffer strings to be relative to the project root. It
   ;; lets me match against directory names without typing the
   ;; annotation dispatcher.
-  (setf (plist-get consult-source-project-buffer :items)
-        (lambda ()
-          (when-let* ((root (consult--project-root)))
-            (consult--buffer-query :sort 'visibility
-                                   :directory root
-                                   :as
-                                   (lambda (buffer)
-                                     (cons (if (buffer-file-name buffer)
-                                               (file-relative-name
-                                                (buffer-file-name buffer)
-                                                root)
-                                             (buffer-name buffer))
-                                           buffer))))))
+  (consult-customize
+   consult-source-project-buffer
+   :items (lambda ()
+            (when-let* ((root (consult--project-root)))
+              (consult--buffer-query :sort 'visibility
+                                     :directory root
+                                     :as
+                                     (lambda (buffer)
+                                       (cons (if (buffer-file-name buffer)
+                                                 (file-relative-name
+                                                  (buffer-file-name buffer)
+                                                  root)
+                                               (buffer-name buffer))
+                                             buffer))))))
 
   ;; Making a new project file source actually gets all the files as the
   ;; default source only looks for the files present in `recentf-list'.
@@ -1335,6 +1336,15 @@ default, the whole line in the file is highlighted."
           (mapcar (lambda (file)
                     (cons (file-relative-name file root) file))
            directories)))))
+
+  ;; making the project roots source invoke `consult-project-buffer'
+  (consult-customize
+   consult-source-project-root
+   :action
+   (lambda (root)
+     (let ((default-directory root))
+       (let ((consult-project-function (lambda (_prompt) root)))
+         (consult-buffer consult-project-buffer-sources)))))
 
   (setq consult-project-buffer-sources
         '(consult-source-project-buffer
@@ -1711,7 +1721,8 @@ If FILE is a directory, inserts the last directory name."
   ("C-c n c" . org-capture)
   (:map org-mode-map
    ("C-x n t" . org-toggle-narrow-to-subtree)
-   ([remap imenu] . consult-org-heading))
+   ([remap imenu] . consult-org-heading)
+   ([remap org-emphasize] . custom/org-emphasize))
   ;; recalculating the calculations when pressing C-c C-c in a table
   :hook (org-ctrl-c-ctrl-c . (lambda ()
                                (when (org-at-table-p)
@@ -1780,7 +1791,83 @@ If FILE is a directory, inserts the last directory name."
   ;; opening video files from links in mpv
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
-  (advice-add 'consult-org-heading :after #'org-fold-show-entry))
+  (advice-add 'consult-org-heading :after #'org-fold-show-entry)
+  (defvar custom/org-emphasis-alist
+    '((?b . "*")
+      (?i . "/")
+      (?u . "_")
+      (?c . "~")
+      (?v . "=")
+      (?s . "+"))
+    "Alist mapping keys to Org mode emphasis markers.
+  b: bold, i: italic, u: underline, c: code, v: verbatim, s: strike-through.")
+
+  (defun custom/org-emphasize (&optional char)
+    "Insert or change an Org mode emphasis using mnemonic characters.
+  If there is an active region, wrap or change its emphasis.
+  If there is no region, wrap the word at point or insert marker pairs.
+  CHAR selects the emphasis type:
+
+    b   *bold*
+    i   /italic/
+    u   _underline_
+    c   ~code~
+    v   =verbatim=
+    s   +strike-through+
+    SPC remove emphasis"
+    (interactive
+     "cEmphasis [b]old [i]talic [u]nderline [c]ode [v]erbatim [s]trike SPC remove:")
+    (let ((erc org-emphasis-regexp-components))
+      (if (eq char ?\s)
+          (let ((beg nil) (end nil))
+            (if (org-region-active-p)
+                (setq beg (region-beginning) end (region-end))
+              (save-excursion
+                (skip-chars-backward "[:alnum:]_")
+                (setq beg (point))
+                (skip-chars-forward "[:alnum:]_")
+                (setq end (point))))
+            (when (and beg end (> end beg))
+              (let ((txt (buffer-substring-no-properties beg end)))
+                (when (string-match "\\`([*/_~=+])\\(.+?\\)\\1\\'" txt)
+                  (delete-region beg end)
+                  (insert (match-string 2 txt))))))
+        (if-let* ((marker (cdr (assq char custom/org-emphasis-alist))))
+            (if (org-region-active-p)
+                (let ((beg (region-beginning))
+                      (end (copy-marker (region-end)))
+                      (string (buffer-substring (region-beginning) (region-end))))
+                  (while (and (> (length string) 1)
+                              (equal (substring string 0 1) (substring string -1))
+                              (assoc (substring string 0 1) org-emphasis-alist))
+                    (setq string (substring string 1 -1)))
+                  (delete-region beg end)
+                  (unless (or (bolp)
+                              (string-match (concat "[" (nth 0 erc) "\n]")
+                                            (char-to-string (char-before (point)))))
+                    (insert " "))
+                  (insert marker string marker)
+                  (unless (or (eobp)
+                              (string-match (concat "[" (nth 1 erc) "\n]")
+                                            (char-to-string (char-after (point)))))
+                    (save-excursion (backward-char 1) (insert " "))))
+              (if-let* ((bounds (bounds-of-thing-at-point 'word)))
+                  (save-excursion
+                    (goto-char (cdr bounds))
+                    (unless (or (eobp)
+                                (string-match (concat "[" (nth 1 erc) "\n]")
+                                              (char-to-string (char-after (point)))))
+                      (insert " "))
+                    (insert marker)
+                    (goto-char (car bounds))
+                    (unless (or (bolp)
+                                (string-match (concat "[" (nth 0 erc) "\n]")
+                                              (char-to-string (char-before (point)))))
+                      (insert " "))
+                    (insert marker))
+                (insert marker marker)
+                (backward-char 1)))
+          (user-error "No such emphasis type for character: %c" char))))))
 
 ;; it's for html source block syntax highlighting
 (use-package htmlize)
@@ -2884,6 +2971,7 @@ It loads all available tree-sitter modes libraries it finds to fill
                '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
+  (add-to-list 'auto-insert-alist '(c-ts-mode . "int main() {\n\n}"))
   (add-to-list 'auto-insert-alist
                '(perl-mode nil "#!/usr/bin/env perl\n\n"))
   (add-to-list 'auto-insert-alist
@@ -3159,6 +3247,7 @@ Also see `window-delete-popup-frame'." command)
   (gptel-default-mode #'org-mode)
   (gptel-model 'gemini-3.5-flash-lite)
   (gptel-track-media t)
+  (gptel-expert-commands t)
   :config
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
   (setf (alist-get 'org-mode gptel-response-prefix-alist)
@@ -3218,13 +3307,14 @@ Also see `window-delete-popup-frame'." command)
   (defun custom/gptel-align-org-tables (beginning end)
     "Align tables from beginning to end.
 Meant to be used in `gptel-post-response-functions'."
-    (save-excursion
-      (narrow-to-region beginning end)
-      (goto-char beginning)
-      (while (re-search-forward org-table-line-regexp nil t)
-        (org-table-align)
-        (goto-char (org-table-end)))
-      (widen)))
+    (when (eq major-mode 'org-mode)
+      (save-excursion
+        (narrow-to-region beginning end)
+        (goto-char beginning)
+        (while (re-search-forward org-table-line-regexp nil t)
+          (org-table-align)
+          (goto-char (org-table-end)))
+        (widen))))
 
   (add-hook 'gptel-post-response-functions
             #'custom/gptel-align-org-tables)
@@ -3262,22 +3352,22 @@ START-MARKER is the buffer marker where the stream begins."
     (advice-add 'gptel--stream-convert-markdown->org :override
                 #'custom/gptel-converter)))
 
+  ;; tool and reasoning blocks won't be processed as org syntax
+  (with-eval-after-load 'org
+    (add-to-list 'org-protecting-blocks "tool")
+    (add-to-list 'org-protecting-blocks "reasoning")))
+
 ;; loading gptel and turning it on if an org buffer has the gptel
 ;; properties
 (use-package org
   :hook (org-mode . (lambda ()
                       (when (save-excursion
                               (beginning-of-buffer)
-                              (or (org-entry-get
-                                   (point) "GPTEL_MODEL")
-                                  (org-entry-get
-                                   (point) "GPTEL_BACKEND")
-                                  (org-entry-get
-                                   (point) "GPTEL_SYSTEM")
-                                  (org-entry-get
-                                   (point) "GPTEL_TOOLS")
-                                  (org-entry-get
-                                   (point) "GPTEL_BOUNDS")))
+                              (any (lambda (property)
+                                     (org-entry-get (point) property))
+                                   '("GPTEL_MODEL" "GPTEL_BACKEND"
+                                     "GPTEL_SYSTEM" "GPTEL_TOOLS"
+                                     "GPTEL_BOUNDS")))
                         (unless (featurep 'gptel)
                           (require 'gptel)
                           (gptel-mode 1))))))

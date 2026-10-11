@@ -4,11 +4,14 @@ directory="$HOME/Pictures"
 filename=$(date +"$directory/%Y-%m-%d_%H-%M-%S".png)
 
 notification() {
-  choice=$(notify-send --action 'action1=Open screenshot' "Screenshot of screen" "$filename")
+  choice=$(notify-send --action 'action1=Open screenshot' --action 'action2=Copy path to clipboard' "Screenshot of screen" "$filename")
 
   case $choice in
     "action1")
       xdg-open "$filename"
+      ;;
+    "action2")
+      wl-copy "$filename"
       ;;
     *)
       ;;
