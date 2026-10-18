@@ -1792,6 +1792,7 @@ If FILE is a directory, inserts the last directory name."
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
+
   (defvar custom/org-emphasis-alist
     '((?b . "*")
       (?i . "/")
@@ -2971,7 +2972,7 @@ It loads all available tree-sitter modes libraries it finds to fill
                '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(c-ts-mode . "int main() {\n\n}"))
+  (add-to-list 'auto-insert-alist '(c-ts-mode nil "int main() {\n\n}"))
   (add-to-list 'auto-insert-alist
                '(perl-mode nil "#!/usr/bin/env perl\n\n"))
   (add-to-list 'auto-insert-alist
@@ -3105,7 +3106,6 @@ It loads all available tree-sitter modes libraries it finds to fill
   :init
   (add-to-list 'savehist-additional-variables 'reverso--source-value)
   (add-to-list 'savehist-additional-variables 'reverso--target-value)
-  :vc (:url "https://github.com/overideal/reverso.el")
   :bind
   ("C-c r" . reverso)
   :config
@@ -3247,8 +3247,8 @@ Also see `window-delete-popup-frame'." command)
   (gptel-default-mode #'org-mode)
   (gptel-model 'gemini-3.5-flash-lite)
   (gptel-track-media t)
-  (gptel-expert-commands t)
   :config
+  (setq-default gptel-expert-commands t)
   (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "* ")
   (setf (alist-get 'org-mode gptel-response-prefix-alist)
         "* Assistant response\n")
@@ -3257,7 +3257,7 @@ Also see `window-delete-popup-frame'." command)
         (gptel-make-gemini "gemini"
           :key (gptel-api-key-from-auth-source
                 "generativelanguage.googleapis.com")
-          :models '(gemini-3.5-flash
+          :models '(gemini-3.6-flash
                     gemini-3.5-flash-lite
                     gemini-flash-latest)))
 
