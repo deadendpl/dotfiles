@@ -56,7 +56,7 @@ swayimg.viewer.default_position = "center"    -- default image position
 swayimg.viewer.drag_button = "MouseLeft"      -- mouse button to drag image
 swayimg.viewer.set_window_background(0xff000000) -- window background color
 swayimg.viewer.set_image_chessboard(20, 0xff333333, 0xff4c4c4c) -- chessboard
-swayimg.viewer.autocenter = true            -- enable automatic centering
+swayimg.viewer.autopos = "center"              -- enable automatic centering
 swayimg.viewer.loop = true                 -- enable image list loop mode
 swayimg.viewer.preload = 1                  -- number of images to preload
 swayimg.viewer.history = 1                  -- number of the history cache
@@ -121,20 +121,18 @@ end)
 
 swayimg.viewer.on_key("i", text_toggle)
 
--- bind mouse vertical scroll button with pressed Ctrl to zoom in the
+-- bind mouse vertical scroll with pressed Ctrl to zoom in/out the
 -- image at mouse pointer coordinates
-swayimg.viewer.on_mouse("Ctrl-ScrollUp", function()
-  local pos = swayimg.get_mouse_pos()
-  local scale = swayimg.viewer.get_scale()
-  scale = scale + scale / 10
-  swayimg.viewer.set_abs_scale(scale, pos.x, pos.y);
-end)
-
-swayimg.viewer.on_mouse("Ctrl-ScrollDown", function()
-  local pos = swayimg.get_mouse_pos()
-  local scale = swayimg.viewer.get_scale()
-  scale = scale - scale / 10
-  swayimg.viewer.set_abs_scale(scale, pos.x, pos.y);
+swayimg.viewer.on_scroll(function(keymod, horiz, vert)
+  if keymod == "Ctrl" and vert ~= 0 then
+    local scale = swayimg.viewer.scale
+    if vert > 0 then
+      scale = scale + scale / 10
+    else
+      scale = scale - scale / 10
+    end
+    swayimg.viewer.set_abs_scale(scale)
+  end
 end)
 
 -- Slide show mode, same config as for viewer mode with the following defaults:

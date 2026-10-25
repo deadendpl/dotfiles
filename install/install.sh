@@ -64,6 +64,12 @@ if ! grep chaotic-aur /etc/pacman.conf &> /dev/null; then
   sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
 fi
 
+if ! grep saneaspect /etc/pacman.conf &> /dev/null; then
+  sudo bash -c "echo -e \"\n[saneaspect]\" >> \"/etc/pacman.conf\""
+  sudo bash -c "echo -e \"\nSigLevel = Optional TrustAll\" >> \"/etc/pacman.conf\""
+  sudo bash -c "echo -e \"Server = https://github.com/saneaspect/gtk4-live-css/releases/download/repo\" >> \"/etc/pacman.conf\""
+fi
+
 sudo -v
 
 echo "Installing dependencies"
@@ -125,6 +131,8 @@ sudo pacman -S --noconfirm --needed sway \
                                     seahorse \
                                     sbcl \
                                     github-cli \
+                                    gtk4-live-css \
+                                    eyedropper \
                                     webp-pixbuf-loader # for swaybg to work with webp
                                     # zathura \
                                     # zathura-pdf-mupdf \
@@ -336,10 +344,6 @@ sbcl --load ~/quicklisp.lisp \
 make copy
 
 cd $DOTFILES_INSTALL_DIR/rofi-bookmarks
-makepkg -csi --noconfirm --needed
-
-cd $DOTFILES_INSTALL_DIR/gradience
-
 makepkg -csi --noconfirm --needed
 
 read -p "Want to have an example wallpaper downloaded to make pyrice work? [y/n]: " -n 1 -r

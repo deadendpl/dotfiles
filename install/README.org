@@ -113,6 +113,14 @@ if ! grep chaotic-aur /etc/pacman.conf &> /dev/null; then
   sudo bash -c "echo -e \"Include = /etc/pacman.d/chaotic-mirrorlist\" >> \"/etc/pacman.conf\""
 fi
 #+end_src
+** saneaspect gtk4 live css repo
+#+begin_src sh
+if ! grep saneaspect /etc/pacman.conf &> /dev/null; then
+  sudo bash -c "echo -e \"\n[saneaspect]\" >> \"/etc/pacman.conf\""
+  sudo bash -c "echo -e \"\nSigLevel = Optional TrustAll\" >> \"/etc/pacman.conf\""
+  sudo bash -c "echo -e \"Server = https://github.com/saneaspect/gtk4-live-css/releases/download/repo\" >> \"/etc/pacman.conf\""
+fi
+#+end_src
 ** Dependencies
 *** Normal dependencies
 #+BEGIN_SRC sh
@@ -177,6 +185,8 @@ sudo pacman -S --noconfirm --needed sway \
                                     seahorse \
                                     sbcl \
                                     github-cli \
+                                    gtk4-live-css \
+                                    eyedropper \
                                     webp-pixbuf-loader # for swaybg to work with webp
                                     # zathura \
                                     # zathura-pdf-mupdf \
@@ -432,7 +442,7 @@ make copy
 cd $DOTFILES_INSTALL_DIR/rofi-bookmarks
 makepkg -csi --noconfirm --needed
 #+end_src
-* Installing gradience
+* Installing gradience :ARCHIVE:
 #+begin_src sh
 cd $DOTFILES_INSTALL_DIR/gradience
 

@@ -23,3 +23,5 @@ export CALIBRE_USE_SYSTEM_THEME=1
 export ANDROID_USER_HOME="${XDG_DATA_HOME}/android"
 export MARIADB_HISTFILE="${XDG_DATA_HOME}/mariadb_history"
 export GOPATH="${XDG_DATA_HOME}/go"
+export _JAVA_OPTIONS=-Djava.util.prefs.userRoot="$XDG_CONFIG_HOME"/java
+export ANDROID_USER_HOME="$XDG_DATA_HOME"/android

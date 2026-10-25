@@ -1296,6 +1296,7 @@ default, the whole line in the file is highlighted."
       :face     consult-file
       :history  file-name-history
       :state    ,#'consult--file-state
+      :sort nil
       :new
       ,(lambda (file)
          (consult--file-action
@@ -1319,6 +1320,7 @@ default, the whole line in the file is highlighted."
       :face     consult-file
       :history  file-name-history
       :state    ,#'consult--file-state
+      :sort nil
       :new
       ,(lambda (file)
          (consult--file-action
@@ -3258,6 +3260,7 @@ Also see `window-delete-popup-frame'." command)
           :key (gptel-api-key-from-auth-source
                 "generativelanguage.googleapis.com")
           :models '(gemini-3.6-flash
+                    gemini-3.8-flash
                     gemini-3.5-flash-lite
                     gemini-flash-latest)))
 

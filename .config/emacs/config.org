@@ -1682,6 +1682,7 @@ Those commands ususally have a preview functionality and some have narrowing fun
       :face     consult-file
       :history  file-name-history
       :state    ,#'consult--file-state
+      :sort nil
       :new
       ,(lambda (file)
          (consult--file-action
@@ -1705,6 +1706,7 @@ Those commands ususally have a preview functionality and some have narrowing fun
       :face     consult-file
       :history  file-name-history
       :state    ,#'consult--file-state
+      :sort nil
       :new
       ,(lambda (file)
          (consult--file-action
@@ -4089,6 +4091,7 @@ That reduces the hallucinations as an LLM can just look up information.
           :key (gptel-api-key-from-auth-source
                 "generativelanguage.googleapis.com")
           :models '(gemini-3.6-flash
+                    gemini-3.8-flash
                     gemini-3.5-flash-lite
                     gemini-flash-latest)))
 

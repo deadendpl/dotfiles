@@ -32,6 +32,6 @@ case $choice in
     notification
     ;;
   "Color Picker")
-    sleep 0.4 && grimpicker --copy
+    eyedropper
     ;;
 esac
