@@ -4203,8 +4203,8 @@ START-MARKER is the buffer marker where the stream begins."
                                      "GPTEL_SYSTEM" "GPTEL_TOOLS"
                                      "GPTEL_BOUNDS")))
                         (unless (featurep 'gptel)
-                          (require 'gptel)
-                          (gptel-mode 1))))))
+                          (require 'gptel))
+                        (gptel-mode 1)))))
 
 (use-package gptel-agent
   :after gptel

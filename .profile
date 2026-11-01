@@ -25,3 +25,9 @@ export MARIADB_HISTFILE="${XDG_DATA_HOME}/mariadb_history"
 export GOPATH="${XDG_DATA_HOME}/go"
 export _JAVA_OPTIONS=-Djava.util.prefs.userRoot="$XDG_CONFIG_HOME"/java
 export ANDROID_USER_HOME="$XDG_DATA_HOME"/android
+
+# when running in sway, set the DE variable to generic as that prevents
+# the dGPU from waking up when running xdg-open on dual-GPU laptops
+if [ -n "$SWAYSOCK" ] || [ "$DESKTOP_SESSION" = "sway" ] || pgrep -u "$USER" -x sway >/dev/null 2>&1; then
+  export DE=generic
+fi
