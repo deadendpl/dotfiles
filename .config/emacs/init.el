@@ -1625,13 +1625,20 @@ If FILE is a directory, saves the path to the directory."
     (interactive "fFile: ")
     (kill-new (expand-file-name file)))
 
+  (defun embark-save-contents (file)
+    "Save the contents of the FILE to the kill ring."
+    (with-temp-buffer
+      (insert-file-contents-literally file)
+      (copy-region-as-kill (point-min) (point-max))))
+
   (defvar-keymap embark-file-save-map
     :doc "Keymap for different ways of saving files to the kill ring."
     :parent nil
     :prefix t
     "n" #'embark-save-filename
     "r" #'embark-save-relative-path
-    "a" #'embark-save-absolute-path)
+    "a" #'embark-save-absolute-path
+    "c" #'embark-save-contents)
 
   (keymap-unset embark-file-map "W")
   (keymap-set embark-file-map "w" #'embark-file-save-map)
@@ -2716,6 +2723,7 @@ OPEN-IN-WEB is non-nil."
   (eglot-documentation-renderer #'markdown-ts-view-mode)
   :hook (eglot-managed-mode . (lambda () (eglot-inlay-hints-mode -1)
                                 (completion-preview-mode -1)
+                                (require 'corfu-auto)
                                 (setq-local corfu-auto t)))
   :config
   (defun custom/eglot-format-dwim ()
@@ -2974,7 +2982,7 @@ It loads all available tree-sitter modes libraries it finds to fill
                '(python-ts-mode nil "#!/usr/bin/env python\n\n"))
   (add-to-list 'auto-insert-alist '(c++-ts-mode . "cpp.cpp"))
   (add-to-list 'auto-insert-alist '(c++-mode . "cpp.cpp"))
-  (add-to-list 'auto-insert-alist '(c-ts-mode nil "int main() {\n\n}"))
+  (add-to-list 'auto-insert-alist '(c-ts-mode nil "int main() {\nreturn 0;\n}"))
   (add-to-list 'auto-insert-alist
                '(perl-mode nil "#!/usr/bin/env perl\n\n"))
   (add-to-list 'auto-insert-alist
@@ -3358,7 +3366,7 @@ START-MARKER is the buffer marker where the stream begins."
   ;; tool and reasoning blocks won't be processed as org syntax
   (with-eval-after-load 'org
     (add-to-list 'org-protecting-blocks "tool")
-    (add-to-list 'org-protecting-blocks "reasoning")))
+    (add-to-list 'org-protecting-blocks "reasoning"))
 
 ;; loading gptel and turning it on if an org buffer has the gptel
 ;; properties

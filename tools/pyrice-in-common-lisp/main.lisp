@@ -158,7 +158,7 @@ Light theme is generated if LIGHT is non-nil (nil is default)."
       (unless time
         (let ((current-hour (nth-value 2 (get-decoded-time))))
           (if (and (>= current-hour 6)
-                   (< current-hour 17))
+                   (< current-hour 16))
               (setf light t)))))
     (setf *light-theme-p* light)
     (setf *old-wallpaper-p* old)
