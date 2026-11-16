@@ -272,6 +272,7 @@ Most of the stuff will get redirected here.")
   (use-package-always-defer t) ; packages by default will be lazy loaded, like they will have defer: t
   :config
   ;; Emacs 31.1 broke :custom-face keyword, so I fix it
+  ;; https://lists.nongnu.org/archive/html/bug-gnu-emacs/2026-07/msg00498.html
   (when (equal emacs-version "31.1")
     (define-advice use-package-handler/:custom-face
         (:override (name _keyword args rest state)
@@ -747,6 +748,14 @@ With ARG being non-nil, insert the non-breaking space."
   (shr-max-width nil)
   (shr-bullet "• ")
   (shr-sliced-image-height 0.33))
+  :config
+  (defun custom/shr-italicize-blockqoute (dom)
+    (let ((start (point)))
+      (shr-tag-blockquote dom)
+      (add-face-text-property start (point) '(:slant italic))))
+
+  (add-to-list 'shr-external-rendering-functions
+               '(blockquote . custom/shr-italicize-blockqoute)))
 
 (use-package shr-tag-pre-highlight
   :after shr
@@ -1580,20 +1589,26 @@ Handles symbols that start or end with a single quote (') correctly."
 
 (use-package elfeed
   :unless on-termux-p
-  :hook ((elfeed-mode . hl-line-mode)
+  :hook ((elfeed-search-mode . hl-line-mode)
          (elfeed-show-mode .
                            (lambda ()
                              (setq-local imenu-create-index-function
-                                         #'custom/shr-imenu-create-index))))
+                                         #'custom/shr-imenu-create-index)
+                             (text-scale-set 3))))
   :custom
+  (elfeed-use-curl t)
   ;; cache? directory
   (elfeed-db-directory
    (expand-file-name-user-share "elfeed"))
-  (elfeed-feeds '("https://sachachua.com/blog/feed/"
-                  "https://planet.emacslife.com/atom.xml"))
-  (elfeed-search-filter "@6-months-ago")
+  (elfeed-search-filter "+unread")
+  (elfeed-tree-filter "+unread")
   :bind (:map elfeed-search-mode-map
-         ("f" . elfeed-search-show-entry)))
+         ("f" . elfeed-search-show-entry)
+         :map elfeed-tree-mode-map
+         ("u" . outline-up-heading)
+         ("f" . outline-forward-same-level)
+         ("b" . outline-backward-same-level)))
+
 
 (use-package embark
   :bind (("C-." . embark-act)
@@ -2775,7 +2790,9 @@ OPEN-IN-WEB is non-nil."
   :hook (after-init . global-subword-mode))
 
 (use-package glasses
-  :hook ((typescript-ts-mode c-ts-mode c++-ts-mode) . glasses-mode)
+  :hook ((typescript-ts-mode
+          c-ts-mode c++-ts-mode python-base-mode
+          json-ts-mode) . glasses-mode)
   :custom
   (glasses-separator "-")
   (glasses-original-separator nil)

@@ -484,6 +484,7 @@ I have =use-package-always-ensure= because otherwise packages didn't want to dow
   (use-package-always-defer t) ; packages by default will be lazy loaded, like they will have defer: t
   :config
   ;; Emacs 31.1 broke :custom-face keyword, so I fix it
+  ;; https://lists.nongnu.org/archive/html/bug-gnu-emacs/2026-07/msg00498.html
   (when (equal emacs-version "31.1")
     (define-advice use-package-handler/:custom-face
         (:override (name _keyword args rest state)
@@ -1028,6 +1029,14 @@ Usually blogs and other similar sites read nicely.
   (shr-max-width nil)
   (shr-bullet "• ")
   (shr-sliced-image-height 0.33))
+  :config
+  (defun custom/shr-italicize-blockqoute (dom)
+    (let ((start (point)))
+      (shr-tag-blockquote dom)
+      (add-face-text-property start (point) '(:slant italic))))
+
+  (add-to-list 'shr-external-rendering-functions
+               '(blockquote . custom/shr-italicize-blockqoute)))
 
 (use-package shr-tag-pre-highlight
   :after shr
@@ -1296,10 +1305,10 @@ It's tangled to =early-init.el=, because it improves startup time a bit.
                     ;; :font "JetBrainsMono NFM"
                     :height 90
                     :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-                    :family "Ubuntu Nerd Font"
-                    :height 1.1
-                    :weight 'regular)
+;; (set-face-attribute 'variable-pitch nil
+;;                     :family "Ubuntu Nerd Font"
+;;                     :height 1.1
+;;                     :weight 'regular)
 (set-face-attribute 'variable-pitch-text nil :height 'unspecified)
 ;; (set-face-attribute 'fixed-pitch nil
 ;;                     :family "JetBrainsMono NFM Mono")
@@ -2063,20 +2072,26 @@ The imenu function I made for EWW works here as well since both packages render 
 #+begin_src emacs-lisp
 (use-package elfeed
   :unless on-termux-p
-  :hook ((elfeed-mode . hl-line-mode)
+  :hook ((elfeed-search-mode . hl-line-mode)
          (elfeed-show-mode .
                            (lambda ()
                              (setq-local imenu-create-index-function
-                                         #'custom/shr-imenu-create-index))))
+                                         #'custom/shr-imenu-create-index)
+                             (text-scale-set 3))))
   :custom
+  (elfeed-use-curl t)
   ;; cache? directory
   (elfeed-db-directory
    (expand-file-name-user-share "elfeed"))
-  (elfeed-feeds '("https://sachachua.com/blog/feed/"
-                  "https://planet.emacslife.com/atom.xml"))
-  (elfeed-search-filter "@6-months-ago")
+  (elfeed-search-filter "+unread")
+  (elfeed-tree-filter "+unread")
   :bind (:map elfeed-search-mode-map
-         ("f" . elfeed-search-show-entry)))
+         ("f" . elfeed-search-show-entry)
+         :map elfeed-tree-mode-map
+         ("u" . outline-up-heading)
+         ("f" . outline-forward-same-level)
+         ("b" . outline-backward-same-level)))
+
 #+end_src
 ** Embark
 #+begin_src emacs-lisp
@@ -2298,6 +2313,7 @@ Here I'm improving it as much as I can.
   (add-to-list 'org-file-apps '("\\.\\(mp4\\|mkv\\)$" . "mpv %s"))
   ;; unfolding header after `consult-org-heading'
   (advice-add 'consult-org-heading :after #'org-fold-show-entry)
+
   (defvar custom/org-emphasis-alist
     '((?b . "*")
       (?i . "/")
@@ -3453,7 +3469,9 @@ sh-script is the package that declares redirecting shell mode to treesitter mode
   :hook (after-init . global-subword-mode))
 
 (use-package glasses
-  :hook ((typescript-ts-mode c-ts-mode c++-ts-mode) . glasses-mode)
+  :hook ((typescript-ts-mode
+          c-ts-mode c++-ts-mode python-base-mode
+          json-ts-mode) . glasses-mode)
   :custom
   (glasses-separator "-")
   (glasses-original-separator nil)

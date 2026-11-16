@@ -49,6 +49,10 @@ const prefs: Record<string, any> = {
   "signon.rememberSignons": false,
   "toolkit.scrollbox.smoothScroll": false,
   "ui.tooltip.delay_ms": 300,
+  // use the system default fonts
+  "font.name.sans-serif.x-western": "",
+  "font.name.serif.x-western": "",
+  "font.name.monospace.x-western": ""
 };
 
 for(const[key, value] of Object.entries(prefs))
@@ -305,3 +309,9 @@ glide.autocmds.create("UrlEnter", { hostname: "musicbrainz.org" },
       { description: "Go to cover art" });
   }
 );
+
+glide.styles.add(css`
+toolbarbutton.titlebar-close, #back-button, #forward-button {
+display: none;
+}
+`);

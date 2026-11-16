@@ -36,10 +36,10 @@
                     ;; :font "JetBrainsMono NFM"
                     :height 90
                     :weight 'medium)
-(set-face-attribute 'variable-pitch nil
-                    :family "Ubuntu Nerd Font"
-                    :height 1.1
-                    :weight 'regular)
+;; (set-face-attribute 'variable-pitch nil
+;;                     :family "Ubuntu Nerd Font"
+;;                     :height 1.1
+;;                     :weight 'regular)
 (set-face-attribute 'variable-pitch-text nil :height 'unspecified)
 ;; (set-face-attribute 'fixed-pitch nil
 ;;                     :family "JetBrainsMono NFM Mono")
