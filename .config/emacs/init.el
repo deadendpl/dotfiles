@@ -1601,7 +1601,7 @@ Handles symbols that start or end with a single quote (') correctly."
   (elfeed-db-directory
    (expand-file-name-user-share "elfeed"))
   (elfeed-search-filter "+unread")
-  (elfeed-tree-filter "+unread")
+  (elfeed-tree-filter "")
   :bind (:map elfeed-search-mode-map
          ("f" . elfeed-search-show-entry)
          :map elfeed-tree-mode-map

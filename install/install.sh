@@ -296,9 +296,9 @@ fi
 gsettings set org.gnome.desktop.interface gtk-theme "FlatColor"
 gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 gsettings set org.gnome.desktop.interface cursor-theme "Dracula-cursors"
-gsettings set org.gnome.desktop.interface font-name "Ubuntu Nerd Font 10"
-gsettings set org.gnome.desktop.interface document-font-name "Ubuntu Nerd Font 10"
-gsettings set org.gnome.desktop.interface monospace-font-name "JetBrainsMono NFM 10"
+# gsettings set org.gnome.desktop.interface font-name "Ubuntu Nerd Font 10"
+# gsettings set org.gnome.desktop.interface document-font-name "Ubuntu Nerd Font 10"
+# gsettings set org.gnome.desktop.interface monospace-font-name "JetBrainsMono NFM 10"
 gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
 
 if [ -d ~/.local/share/applications/ ]; then
